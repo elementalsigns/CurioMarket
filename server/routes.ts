@@ -168,8 +168,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/listings/featured', async (req, res) => {
     try {
-      const listings = await storage.getFeaturedListings(8);
-      res.json(listings);
+      // For development, return sample listings with authentic specimen images
+      const sampleListings = [
+        {
+          id: "1",
+          slug: "victorian-bird-skeleton-display",
+          title: "Victorian Bird Skeleton Display",
+          description: "Authentic 19th century songbird skeleton mounted in glass dome. Perfect condition with original Victorian presentation.",
+          price: "285.00",
+          category: "taxidermy",
+          status: "active",
+          sellerId: "seller1",
+          images: [{
+            id: "img1",
+            listingId: "1",
+            url: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Victorian bird skeleton in glass dome",
+            sortOrder: 0
+          }],
+          seller: { 
+            id: "seller1", 
+            shopName: "Victorian Specimens Co."
+          },
+          reviews: [{ rating: 5 }, { rating: 5 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "2",
+          slug: "antique-medical-amputation-kit",
+          title: "Antique Medical Amputation Kit", 
+          description: "Complete Civil War era surgical amputation set with original leather case. Historical medical curiosity.",
+          price: "1250.00",
+          category: "vintage-medical",
+          status: "active",
+          sellerId: "seller2",
+          images: [{
+            id: "img2",
+            listingId: "2",
+            url: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Vintage medical surgical tools",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller2",
+            shopName: "Historic Medical"
+          },
+          reviews: [{ rating: 5 }, { rating: 4 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "3",
+          slug: "human-skull-replica",
+          title: "Human Skull Replica",
+          description: "Museum quality anatomical skull replica. Perfect for collectors of medical oddities and educational purposes.",
+          price: "165.00",
+          category: "bones-skulls",
+          status: "active",
+          sellerId: "seller3",
+          images: [{
+            id: "img3",
+            listingId: "3", 
+            url: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Anatomical skull specimen",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller3",
+            shopName: "Anatomical Arts"
+          },
+          reviews: [{ rating: 5 }, { rating: 5 }, { rating: 4 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "4",
+          slug: "preserved-wet-specimen-jar",
+          title: "Preserved Wet Specimen Jar",
+          description: "Vintage laboratory specimen preserved in original formaldehyde solution. Authentic scientific curiosity from the 1940s.",
+          price: "95.00",
+          category: "wet-specimens",
+          status: "active",
+          sellerId: "seller4",
+          images: [{
+            id: "img4",
+            listingId: "4",
+            url: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Preserved specimen in laboratory jar",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller4",
+            shopName: "Lab Specimens Ltd"
+          },
+          reviews: [{ rating: 4 }, { rating: 5 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "5",
+          slug: "gothic-raven-taxidermy",
+          title: "Gothic Raven Taxidermy",
+          description: "Professionally mounted raven in natural pose. Ethically sourced and expertly preserved for gothic home decor.",
+          price: "350.00",
+          category: "taxidermy",
+          status: "active",
+          sellerId: "seller5",
+          images: [{
+            id: "img5",
+            listingId: "5",
+            url: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Gothic raven taxidermy display",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller5",
+            shopName: "Gothic Taxidermy Studio"
+          },
+          reviews: [{ rating: 5 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "6",
+          slug: "vintage-apothecary-bottles",
+          title: "Vintage Apothecary Bottles Set",
+          description: "Complete set of 12 vintage apothecary bottles with original labels. Perfect for gothic home decor or collectors.",
+          price: "175.00",
+          category: "vintage-medical",
+          status: "active",
+          sellerId: "seller6",
+          images: [{
+            id: "img6",
+            listingId: "6",
+            url: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            alt: "Vintage apothecary bottle collection",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller6",
+            shopName: "Apothecary Antiquities"
+          },
+          reviews: [{ rating: 5 }, { rating: 4 }, { rating: 5 }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+
+      res.json(sampleListings.slice(0, 8));
     } catch (error) {
       console.error("Error fetching featured listings:", error);
       res.status(500).json({ message: "Failed to fetch featured listings" });

@@ -25,8 +25,8 @@ export default function Landing() {
           Free shipping on orders over $75 • Support independent collectors and artists
         </p>
       </div>
-      {/* Hero Section - Black & Red Theme */}
-      <section className="relative bg-background py-12 sm:py-16 lg:py-20 border-b-2 border-primary/20" data-testid="hero-section">
+      {/* Hero Section - Foxblood Noir Style */}
+      <section className="relative bg-background py-12 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Hero Content */}
@@ -99,14 +99,14 @@ export default function Landing() {
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
                     src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
-                    alt="Vintage medical instruments"
+                    alt="Vintage medical instruments and curiosities"
                     className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
-                    alt="Vintage occult books and artifacts"
+                    src="https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    alt="Authentic bird skeleton taxidermy specimen"
                     className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>

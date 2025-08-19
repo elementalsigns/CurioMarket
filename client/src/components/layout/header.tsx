@@ -35,7 +35,7 @@ export default function Header() {
     enabled: isAuthenticated,
   });
 
-  const cartItemCount = Array.isArray(cartData?.items) ? cartData.items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
+  const cartItemCount = (cartData && Array.isArray((cartData as any).items)) ? (cartData as any).items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +49,7 @@ export default function Header() {
   };
 
   return (
-    <nav className="bg-background border-b-2 border-primary/20 sticky top-0 z-50 shadow-sm" data-testid="nav-header">
+    <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
           {/* Logo */}

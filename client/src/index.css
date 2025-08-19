@@ -13,34 +13,34 @@
 @tailwind utilities;
 
 :root {
-  /* Light Theme with Black & Dark Red Accents */
-  --curio-white: hsl(0, 0%, 100%); /* Pure white background */
-  --curio-black: hsl(0, 0%, 0%); /* Pure black text */
-  --curio-dark-red: hsl(0, 75%, 25%); /* Dark red accent */
-  --curio-light-gray: hsl(0, 0%, 95%); /* Light gray for cards */
-  --curio-medium-gray: hsl(0, 0%, 85%); /* Medium gray for borders */
-  --curio-dark-gray: hsl(0, 0%, 15%); /* Dark gray for secondary elements */
+  /* Foxblood-Inspired Modern Noir Gothic Theme */
+  --curio-pure-black: hsl(0, 0%, 4%); /* Deep true black background */
+  --curio-charcoal: hsl(0, 0%, 8%); /* Charcoal for cards */
+  --curio-pure-white: hsl(0, 0%, 98%); /* High contrast white text */
+  --curio-blood-red: hsl(0, 85%, 55%); /* Vibrant red accent */
+  --curio-dark-grey: hsl(0, 0%, 12%); /* Dark grey borders */
+  --curio-muted-grey: hsl(0, 0%, 16%); /* Muted background sections */
 
-  /* UI Colors */
-  --background: var(--curio-white);
-  --foreground: var(--curio-black);
-  --card: var(--curio-white);
-  --card-foreground: var(--curio-black);
-  --popover: var(--curio-white);
-  --popover-foreground: var(--curio-black);
-  --primary: var(--curio-dark-red);
-  --primary-foreground: var(--curio-white);
-  --secondary: var(--curio-light-gray);
-  --secondary-foreground: var(--curio-black);
-  --muted: var(--curio-light-gray);
-  --muted-foreground: var(--curio-dark-gray);
-  --accent: var(--curio-dark-red);
-  --accent-foreground: var(--curio-white);
-  --destructive: hsl(0, 84%, 50%);
-  --destructive-foreground: var(--curio-white);
-  --border: var(--curio-medium-gray);
-  --input: var(--curio-light-gray);
-  --ring: var(--curio-dark-red);
+  /* UI Colors - Foxblood Modern Noir Style */
+  --background: var(--curio-pure-black);
+  --foreground: var(--curio-pure-white);
+  --card: var(--curio-charcoal);
+  --card-foreground: var(--curio-pure-white);
+  --popover: var(--curio-charcoal);
+  --popover-foreground: var(--curio-pure-white);
+  --primary: var(--curio-blood-red);
+  --primary-foreground: var(--curio-pure-white);
+  --secondary: var(--curio-muted-grey);
+  --secondary-foreground: var(--curio-pure-white);
+  --muted: var(--curio-muted-grey);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: var(--curio-blood-red);
+  --accent-foreground: var(--curio-pure-white);
+  --destructive: hsl(0, 85%, 60%);
+  --destructive-foreground: var(--curio-pure-white);
+  --border: var(--curio-dark-grey);
+  --input: var(--curio-charcoal);
+  --ring: var(--curio-blood-red);
 
   /* Typography */
   --font-sans: 'Inter', sans-serif;
@@ -58,26 +58,26 @@
 }
 
 .dark {
-  /* Keep same light theme for consistency */
-  --background: var(--curio-white);
-  --foreground: var(--curio-black);
-  --card: var(--curio-white);
-  --card-foreground: var(--curio-black);
-  --popover: var(--curio-white);
-  --popover-foreground: var(--curio-black);
-  --primary: var(--curio-dark-red);
-  --primary-foreground: var(--curio-white);
-  --secondary: var(--curio-light-gray);
-  --secondary-foreground: var(--curio-black);
-  --muted: var(--curio-light-gray);
-  --muted-foreground: var(--curio-dark-gray);
-  --accent: var(--curio-dark-red);
-  --accent-foreground: var(--curio-white);
-  --destructive: hsl(0, 84%, 50%);
-  --destructive-foreground: var(--curio-white);
-  --border: var(--curio-medium-gray);
-  --input: var(--curio-light-gray);
-  --ring: var(--curio-dark-red);
+  /* Consistent Foxblood noir theme */
+  --background: var(--curio-pure-black);
+  --foreground: var(--curio-pure-white);
+  --card: var(--curio-charcoal);
+  --card-foreground: var(--curio-pure-white);
+  --popover: var(--curio-charcoal);
+  --popover-foreground: var(--curio-pure-white);
+  --primary: var(--curio-blood-red);
+  --primary-foreground: var(--curio-pure-white);
+  --secondary: var(--curio-muted-grey);
+  --secondary-foreground: var(--curio-pure-white);
+  --muted: var(--curio-muted-grey);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: var(--curio-blood-red);
+  --accent-foreground: var(--curio-pure-white);
+  --destructive: hsl(0, 85%, 60%);
+  --destructive-foreground: var(--curio-pure-white);
+  --border: var(--curio-dark-grey);
+  --input: var(--curio-charcoal);
+  --ring: var(--curio-blood-red);
 }
 
 @layer base {
@@ -91,7 +91,8 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground min-h-screen;
-    background: var(--curio-white);
+    /* Clean modern noir - no texture, pure minimalism like Foxblood */
+    background: var(--curio-pure-black);
   }
 
   h1, h2, h3, h4, h5, h6 {
