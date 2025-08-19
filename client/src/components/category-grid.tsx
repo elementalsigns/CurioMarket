@@ -7,7 +7,7 @@ const categories = [
     name: "Wet Specimens",
     slug: "wet-specimens",
     icon: "🫙",
-    image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800",
+    image: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
     count: 142
   },
   {
@@ -15,7 +15,7 @@ const categories = [
     name: "Bones & Skulls",
     slug: "bones-skulls", 
     icon: "🦴",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
     count: 89
   },
   {
@@ -23,15 +23,15 @@ const categories = [
     name: "Taxidermy",
     slug: "taxidermy",
     icon: "🦅", 
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800",
+    image: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
     count: 67
   },
   {
-    id: "occult-art",
-    name: "Occult Art", 
-    slug: "occult-art",
-    icon: "🔮",
-    image: "https://pixabay.com/get/g6afc8f5c5a8bb9d4a7f07545581eb8ba1ce5cffeb571fad28013457c331555195ada4dffbc4d49393d84961f9aafb530dc575b8d48b7c4bbf29efb7573c9adec_1280.jpg",
+    id: "vintage-medical",
+    name: "Vintage Medical", 
+    slug: "vintage-medical",
+    icon: "⚗️",
+    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
     count: 203
   }
 ];
