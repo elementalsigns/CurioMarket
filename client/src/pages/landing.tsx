@@ -63,7 +63,7 @@ export default function Landing() {
               </div>
 
               {/* Popular Tags */}
-              <div className="flex flex-wrap gap-2 mb-8">
+              <div className="flex flex-wrap items-center gap-2 mb-8">
                 <span className="text-sm text-foreground/60">Popular:</span>
                 {['Taxidermy', 'Vintage Medical', 'Oddities', 'Specimens', 'Gothic Art'].map((tag) => (
                   <Button 
