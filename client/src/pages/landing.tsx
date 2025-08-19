@@ -9,6 +9,8 @@ import ProductCard from "@/components/product-card";
 import { ChevronDown, Star, Shield, Scale, CreditCard, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
+import ydvp2ozsrtg31 from "@assets/ydvp2ozsrtg31.webp";
+
 export default function Landing() {
   const { data: featuredListings } = useQuery({
     queryKey: ["/api/listings/featured"],
@@ -80,7 +82,7 @@ export default function Landing() {
               <div className="space-y-4">
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1578061278097-936c0f6cd8c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    src={ydvp2ozsrtg31}
                     alt="Bird skeleton taxidermy specimen"
                     className="w-full h-60 object-contain hover:scale-105 transition-transform duration-300"
                   />
