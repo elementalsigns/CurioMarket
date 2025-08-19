@@ -27,9 +27,9 @@ export default function Landing() {
 
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
 
-          <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight" data-testid="hero-title">
-            <span className="text-primary">Curio Market</span><br/>
-            Buy and sell unique oddities
+          <h1 className="text-5xl md:text-7xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
+            <span className="text-primary">CURIO MARKET</span><br/>
+            <span className="text-3xl md:text-4xl font-serif font-light tracking-normal">Buy and sell unique oddities</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto font-light" data-testid="hero-subtitle">
