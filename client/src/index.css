@@ -13,16 +13,20 @@
 @tailwind utilities;
 
 :root {
-  /* Foxblood-Inspired Modern Noir Gothic Theme */
-  --curio-pure-black: hsl(0, 0%, 4%); /* Deep true black background */
-  --curio-charcoal: hsl(0, 0%, 8%); /* Charcoal for cards */
-  --curio-pure-white: hsl(0, 0%, 98%); /* High contrast white text */
-  --curio-blood-red: hsl(0, 85%, 55%); /* Vibrant red accent */
-  --curio-dark-grey: hsl(0, 0%, 12%); /* Dark grey borders */
-  --curio-muted-grey: hsl(0, 0%, 16%); /* Muted background sections */
+  /* Foxblood Modern Noir Gothic Color Scheme */
+  --curio-noir-black: hsl(212, 5%, 5%); /* Deep noir black #0D0D0D */
+  --curio-charcoal: hsl(0, 0%, 11%); /* Charcoal gray #1C1C1C */
+  --curio-charcoal-light: hsl(0, 0%, 16%); /* Lighter charcoal #2A2A2A */
+  --curio-pure-white: hsl(0, 0%, 100%); /* Pure white text #FFFFFF */
+  --curio-off-white: hsl(0, 0%, 97%); /* Soft white #F8F8F8*/
+  --curio-blood-red: hsl(0, 77%, 26%); /* Deep blood red #6A1B1B */
+  --curio-burgundy: hsl(345, 100%, 16%); /* Deep burgundy #3B0A0A */
+  --curio-midnight-purple: hsl(258, 30%, 12%); /* Midnight purple #1F1A2A */
+  --curio-light-grey: hsl(0, 0%, 80%); /* Light gray text #CCCCCC */
+  --curio-muted-grey: hsl(0, 0%, 53%); /* Muted gray #888888 */
 
   /* UI Colors - Foxblood Modern Noir Style */
-  --background: var(--curio-pure-black);
+  --background: var(--curio-noir-black);
   --foreground: var(--curio-pure-white);
   --card: var(--curio-charcoal);
   --card-foreground: var(--curio-pure-white);
@@ -30,15 +34,15 @@
   --popover-foreground: var(--curio-pure-white);
   --primary: var(--curio-blood-red);
   --primary-foreground: var(--curio-pure-white);
-  --secondary: var(--curio-muted-grey);
+  --secondary: var(--curio-charcoal-light);
   --secondary-foreground: var(--curio-pure-white);
-  --muted: var(--curio-muted-grey);
-  --muted-foreground: hsl(0, 0%, 60%);
-  --accent: var(--curio-blood-red);
+  --muted: var(--curio-charcoal-light);
+  --muted-foreground: var(--curio-light-grey);
+  --accent: var(--curio-burgundy);
   --accent-foreground: var(--curio-pure-white);
   --destructive: hsl(0, 85%, 60%);
   --destructive-foreground: var(--curio-pure-white);
-  --border: var(--curio-dark-grey);
+  --border: var(--curio-charcoal-light);
   --input: var(--curio-charcoal);
   --ring: var(--curio-blood-red);
 
@@ -59,7 +63,7 @@
 
 .dark {
   /* Consistent Foxblood noir theme */
-  --background: var(--curio-pure-black);
+  --background: var(--curio-noir-black);
   --foreground: var(--curio-pure-white);
   --card: var(--curio-charcoal);
   --card-foreground: var(--curio-pure-white);
@@ -67,11 +71,11 @@
   --popover-foreground: var(--curio-pure-white);
   --primary: var(--curio-blood-red);
   --primary-foreground: var(--curio-pure-white);
-  --secondary: var(--curio-muted-grey);
+  --secondary: var(--curio-charcoal-light);
   --secondary-foreground: var(--curio-pure-white);
-  --muted: var(--curio-muted-grey);
-  --muted-foreground: hsl(0, 0%, 60%);
-  --accent: var(--curio-blood-red);
+  --muted: var(--curio-charcoal-light);
+  --muted-foreground: var(--curio-light-grey);
+  --accent: var(--curio-burgundy);
   --accent-foreground: var(--curio-pure-white);
   --destructive: hsl(0, 85%, 60%);
   --destructive-foreground: var(--curio-pure-white);

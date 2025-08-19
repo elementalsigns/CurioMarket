@@ -31,12 +31,14 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero Content */}
             <div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
-                <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold mb-8 leading-[0.9] tracking-tight" data-testid="hero-title">
+                <span className="text-foreground">CURIO</span>{" "}
+                <span className="text-primary font-black">MARKET</span>
               </h1>
               
-              <h2 className="sm:text-3xl font-serif font-light mb-6 text-foreground/90 text-[28px]">
-                Discover extraordinary finds, made especially for you.
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-light mb-8 text-muted-foreground leading-relaxed">
+                Extraordinary oddities, curios & specimens.<br />
+                <span className="text-foreground/70">For collectors with discerning taste.</span>
               </h2>
 
               <p className="text-foreground/80 mb-8 text-[17px]">Find rare specimens, curiosities, and artifacts from collectors who share your passion </p>
