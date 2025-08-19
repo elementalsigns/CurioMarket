@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import CategoryGrid from "@/components/category-grid";
@@ -17,101 +18,170 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-             style={{backgroundImage: "url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')"}}>
-          <div className="absolute inset-0 bg-background/75"></div>
-        </div>
+      {/* Announcement Bar - Etsy Style */}
+      <div className="bg-accent text-accent-foreground text-center py-2 px-4">
+        <p className="text-sm font-medium">
+          Free shipping on orders over $75 • Support independent collectors and artists
+        </p>
+      </div>
+      
+      {/* Hero Section - Etsy Style */}
+      <section className="relative bg-gradient-to-b from-background to-muted/20 py-12 sm:py-16 lg:py-20" data-testid="hero-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Hero Content */}
+            <div className="text-left">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
+                <span className="text-primary">CURIO MARKET</span>
+              </h1>
+              
+              <h2 className="text-2xl sm:text-3xl font-serif font-light mb-6 text-foreground/90">
+                Discover extraordinary finds, made especially for you.
+              </h2>
 
-        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-
-          <h1 className="text-5xl md:text-7xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
-            <span className="text-primary">CURIO MARKET</span><br/>
-            <span className="text-3xl md:text-4xl font-serif font-light tracking-normal">Buy and sell unique oddities</span>
-          </h1>
-
-          <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto font-light" data-testid="hero-subtitle">
-            Find rare specimens, vintage curiosities, and unique artifacts from collectors who share your passion for the unusual.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12" data-testid="hero-cta">
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg font-medium text-lg transition-all hover:shadow-lg"
-              data-testid="button-start-selling"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              Start Selling
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground px-8 py-4 rounded-lg font-medium text-lg transition-all"
-              data-testid="button-explore"
-              onClick={() => window.location.href = '/browse'}
-            >
-              Browse Items
-            </Button>
-          </div>
-
-          {/* Callout Box */}
-          <Card className="glass-effect max-w-2xl mx-auto border-0 shadow-lg" data-testid="hero-callout">
-            <CardContent className="p-6">
-              <p className="text-foreground/90 text-lg">
-                A marketplace where collectors and artists come together to buy and sell unique oddities and curiosities.
+              <p className="text-lg text-foreground/80 mb-8 leading-relaxed">
+                Find rare specimens, vintage curiosities, and unique artifacts from collectors who share your passion for the unusual.
               </p>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-accent animate-bounce-gentle" data-testid="scroll-indicator">
-          <ChevronDown className="text-2xl" />
+              {/* Search Bar */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="flex-1">
+                  <Input 
+                    type="text" 
+                    placeholder="Search for oddities and curiosities..."
+                    className="h-12 text-base bg-input border-border rounded-full px-6"
+                    data-testid="hero-search"
+                  />
+                </div>
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-full font-medium"
+                  data-testid="button-search"
+                >
+                  Search
+                </Button>
+              </div>
+
+              {/* Popular Tags */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                <span className="text-sm text-foreground/60">Popular:</span>
+                {['Taxidermy', 'Vintage Medical', 'Oddities', 'Specimens', 'Gothic Art'].map((tag) => (
+                  <Button 
+                    key={tag}
+                    variant="outline" 
+                    size="sm"
+                    className="rounded-full text-xs px-3 py-1 border-border hover:bg-muted"
+                    data-testid={`tag-${tag.toLowerCase().replace(' ', '-')}`}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Hero Image Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="rounded-lg overflow-hidden shadow-lg">
+                  <img 
+                    src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80"
+                    alt="Vintage curiosities"
+                    className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-lg">
+                  <img 
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80"
+                    alt="Antique specimens"
+                    className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+              <div className="pt-8 space-y-4">
+                <div className="rounded-lg overflow-hidden shadow-lg">
+                  <img 
+                    src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80"
+                    alt="Gothic oddities"
+                    className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-lg">
+                  <img 
+                    src="https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80"
+                    alt="Unique artifacts"
+                    className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Featured Categories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" data-testid="section-categories">
+      {/* Shop by Category - Etsy Style */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4" data-testid="categories-title">
-              Popular Categories
+          <div className="mb-12">
+            <h2 className="text-3xl font-serif font-bold mb-2" data-testid="categories-title">
+              Shop our popular categories
             </h2>
-            <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="categories-subtitle">
-              From anatomical specimens to vintage oddities, find unique items that celebrate the unusual and extraordinary.
+            <p className="text-foreground/70" data-testid="categories-subtitle">
+              Browse thousands of unique items in every category imaginable
             </p>
           </div>
 
           <CategoryGrid />
+          
+          {/* Quick Categories Bar */}
+          <div className="mt-12">
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[
+                'Taxidermy & Bones', 
+                'Vintage Medical', 
+                'Gothic Home Decor', 
+                'Oddities & Curiosities',
+                'Antique Specimens',
+                'Victorian Era',
+                'Macabre Art',
+                'Scientific Instruments'
+              ].map((category) => (
+                <Button 
+                  key={category}
+                  variant="outline" 
+                  className="rounded-full px-4 py-2 border-border hover:bg-primary hover:text-primary-foreground transition-colors"
+                  data-testid={`category-${category.toLowerCase().replace(/[^\w]/g, '-')}`}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20" data-testid="section-featured">
+      {/* Featured Products - Etsy Style */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8" data-testid="section-featured">
         <div className="container mx-auto max-w-7xl">
-          <div className="flex justify-between items-center mb-12">
+          <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                Featured Items
+              <h2 className="text-3xl font-serif font-bold mb-2" data-testid="featured-title">
+                Recently viewed & more like this
               </h2>
               <p className="text-foreground/70" data-testid="featured-subtitle">
-                Unique specimens and artifacts, carefully selected from our best sellers.
+                Handpicked oddities & curiosities
               </p>
             </div>
             <Button 
-              variant="ghost" 
-              className="text-primary hover:text-accent transition-colors font-medium"
+              variant="ghost"
+              className="text-primary hover:text-primary/80 hover:bg-transparent p-0"
               data-testid="button-view-all"
               onClick={() => window.location.href = '/browse'}
             >
-              View All Items <ArrowRight className="ml-2" size={16} />
+              See more <ArrowRight className="ml-1" size={16} />
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="featured-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" data-testid="featured-grid">
             {featuredListings?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}
@@ -119,16 +189,59 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* What makes Curio Market special - Etsy Style */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-special">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-bold mb-4">What makes Curio Market special</h2>
+            <p className="text-foreground/70 max-w-2xl mx-auto">
+              A global marketplace for unique and creative goods, connecting collectors with passionate sellers
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Shield className="text-primary" size={32} />
+              </div>
+              <h3 className="text-xl font-serif font-bold mb-2">Secure payments</h3>
+              <p className="text-foreground/70">
+                Shop with confidence knowing your payment information is always protected
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Star className="text-primary" size={32} />
+              </div>
+              <h3 className="text-xl font-serif font-bold mb-2">Quality guarantee</h3>
+              <p className="text-foreground/70">
+                Every item is carefully vetted to ensure authenticity and quality
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Scale className="text-primary" size={32} />
+              </div>
+              <h3 className="text-xl font-serif font-bold mb-2">Fair marketplace</h3>
+              <p className="text-foreground/70">
+                Supporting independent collectors with transparent, fair selling terms
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* For Sellers Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" data-testid="section-sellers">
+      <section className="py-16 px-4 sm:px-6 lg:px-8" data-testid="section-sellers">
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 leading-tight" data-testid="sellers-title">
-                Start Your <span className="text-primary">Online</span><br/>
-                Curio Shop
+              <h2 className="text-3xl font-serif font-bold mb-6 leading-tight" data-testid="sellers-title">
+                Turn your passion into a business
               </h2>
-              <p className="text-xl text-foreground/80 mb-8 leading-relaxed" data-testid="sellers-subtitle">
+              <p className="text-lg text-foreground/80 mb-8 leading-relaxed" data-testid="sellers-subtitle">
                 Join thousands of collectors and artists who sell their unique pieces to customers who share your passion for oddities.
               </p>
 

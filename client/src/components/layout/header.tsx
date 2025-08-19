@@ -49,25 +49,25 @@ export default function Header() {
   };
 
   return (
-    <nav className="bg-gothic-gray/80 backdrop-blur-lg border-b border-gothic-purple/20 sticky top-0 z-50" data-testid="nav-header">
+    <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3" data-testid="logo">
-            <h1 className="text-2xl font-brand font-bold text-gothic-white tracking-wider">CURIO MARKET</h1>
+          <Link to="/" className="flex items-center" data-testid="logo">
+            <h1 className="text-xl font-brand font-bold text-primary tracking-wider">CURIO MARKET</h1>
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <div className="hidden md:flex flex-1 max-w-lg mx-8">
             <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
                 <Input
                   type="text"
-                  placeholder="Search oddities..."
+                  placeholder="Search for anything"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-input border-border rounded-2xl"
+                  className="pl-12 pr-4 py-3 bg-input border-border rounded-full text-sm"
                   data-testid="input-search"
                 />
               </div>
@@ -75,18 +75,34 @@ export default function Header() {
           </div>
 
           {/* Navigation Links - Desktop */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/browse">
-              <Button variant="ghost" className="text-gothic-white hover:text-gothic-purple" data-testid="link-browse">
-                Browse
-              </Button>
+          <div className="hidden lg:flex items-center space-x-8">
+            <Link to="/browse" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="link-browse">
+              Categories
             </Link>
+            
+            {isAuthenticated ? (
+              <Link to="/seller-dashboard" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="link-sell">
+                Sell on Curio Market
+              </Link>
+            ) : (
+              <Button 
+                variant="ghost" 
+                onClick={() => window.location.href = '/api/login'}
+                className="text-foreground hover:text-primary transition-colors font-medium p-0"
+                data-testid="button-sell"
+              >
+                Sell on Curio Market
+              </Button>
+            )}
+          </div>
 
+          {/* Right Side Icons & User Menu */}
+          <div className="flex items-center space-x-4">
             {isAuthenticated && (
               <>
                 <Button 
                   variant="ghost" 
-                  className="text-gothic-white hover:text-gothic-purple relative"
+                  className="text-foreground hover:text-primary p-2"
                   data-testid="button-favorites"
                 >
                   <Heart size={20} />
@@ -95,14 +111,14 @@ export default function Header() {
                 <Link to="/cart">
                   <Button 
                     variant="ghost" 
-                    className="text-gothic-white hover:text-gothic-purple relative"
+                    className="text-foreground hover:text-primary p-2 relative"
                     data-testid="button-cart"
                   >
                     <ShoppingCart size={20} />
                     {cartItemCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 bg-gothic-red text-xs rounded-full h-5 w-5 flex items-center justify-center p-0" data-testid="cart-count">
+                      <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
                         {cartItemCount}
-                      </Badge>
+                      </span>
                     )}
                   </Button>
                 </Link>
@@ -113,7 +129,7 @@ export default function Header() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2" data-testid="user-menu-trigger">
+                  <Button variant="ghost" className="flex items-center space-x-2 p-2" data-testid="user-menu-trigger">
                     {user?.profileImageUrl ? (
                       <img 
                         src={user.profileImageUrl} 
@@ -122,54 +138,46 @@ export default function Header() {
                         data-testid="user-avatar"
                       />
                     ) : (
-                      <User size={20} className="text-gothic-white" />
+                      <User size={24} className="text-foreground" />
                     )}
-                    <span className="text-gothic-white">{user?.firstName || 'Account'}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
                     <Link to="/seller/dashboard" className="flex items-center">
                       <Store className="mr-2" size={16} />
-                      Seller Dashboard
+                      Your shop
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/seller/listings/create" className="flex items-center">
                       <Plus className="mr-2" size={16} />
-                      Create Listing
+                      Sell on Curio Market
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/orders" className="flex items-center">
                       <Settings className="mr-2" size={16} />
-                      Orders & Settings
+                      Your account
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="mr-2" size={16} />
-                    Sign Out
+                    Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
                 <Button 
                   variant="ghost" 
                   onClick={() => window.location.href = '/api/login'}
-                  className="text-gothic-white hover:text-gothic-purple"
+                  className="text-foreground hover:text-primary font-medium"
                   data-testid="button-sign-in"
                 >
-                  Sign In
-                </Button>
-                <Button 
-                  onClick={() => window.location.href = '/api/login'}
-                  className="bg-gothic-purple hover:bg-gothic-purple/80 text-white px-6 py-2 rounded-2xl"
-                  data-testid="button-join"
-                >
-                  Join
+                  Sign in
                 </Button>
               </div>
             )}
