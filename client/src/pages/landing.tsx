@@ -84,7 +84,7 @@ export default function Landing() {
               <div className="space-y-4">
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1662454514354-4d5ceb75a5b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    src="https://images.unsplash.com/photo-1578061278097-936c0f6cd8c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
                     alt="Bird skeleton taxidermy specimen"
                     className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
