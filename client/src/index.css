@@ -14,7 +14,7 @@
 
 :root {
   /* Victorian Gothic Color Palette - Elegant & Refined */
-  --victorian-charcoal: hsl(25, 8%, 15%); /* Much lighter charcoal with warm undertones */
+  --victorian-charcoal: hsl(25, 8%, 6%); /* Deep charcoal with warm undertones */
   --victorian-ivory: hsl(30, 15%, 95%); /* Warm ivory white */
   --victorian-burgundy: hsl(0, 65%, 25%); /* Rich wine burgundy */
   --victorian-brass: hsl(43, 85%, 45%); /* Antique brass gold */
@@ -24,9 +24,9 @@
   /* UI Colors */
   --background: var(--victorian-charcoal);
   --foreground: var(--victorian-ivory);
-  --card: hsl(25, 8%, 18%);
+  --card: hsl(25, 8%, 8%);
   --card-foreground: var(--victorian-ivory);
-  --popover: hsl(25, 8%, 18%);
+  --popover: hsl(25, 8%, 8%);
   --popover-foreground: var(--victorian-ivory);
   --primary: var(--victorian-burgundy);
   --primary-foreground: var(--victorian-ivory);
@@ -38,8 +38,8 @@
   --accent-foreground: hsl(25, 20%, 10%);
   --destructive: hsl(0, 65%, 50%);
   --destructive-foreground: var(--victorian-ivory);
-  --border: hsl(25, 10%, 22%);
-  --input: hsl(25, 10%, 16%);
+  --border: hsl(25, 10%, 12%);
+  --input: hsl(25, 10%, 8%);
   --ring: var(--victorian-burgundy);
 
   /* Typography */
@@ -87,10 +87,10 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     background-image: 
-      radial-gradient(circle at 25% 25%, hsl(25, 8%, 17%) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, hsl(25, 8%, 13%) 0%, transparent 50%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-    background-size: 800px 800px, 600px 600px, 200px 200px;
+      repeating-linear-gradient(45deg, transparent, transparent 2px, hsl(0, 0%, 8%) 2px, hsl(0, 0%, 8%) 4px),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grain' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noiseFilter)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grain)'/%3E%3C/svg%3E");
+    background-size: 100px 100px, 150px 150px;
+    background-blend-mode: overlay;
   }
 
   h1, h2, h3, h4, h5, h6 {
