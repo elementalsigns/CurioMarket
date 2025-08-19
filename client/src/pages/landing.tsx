@@ -17,14 +17,12 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       {/* Announcement Bar - Etsy Style */}
       <div className="bg-accent text-accent-foreground text-center py-2 px-4">
         <p className="text-sm font-medium">
           Free shipping on orders over $75 • Support independent collectors and artists
         </p>
       </div>
-      
       {/* Hero Section - Etsy Style */}
       <section className="relative bg-gradient-to-b from-background to-muted/20 py-12 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,7 +33,7 @@ export default function Landing() {
                 <span className="text-primary">CURIO MARKET</span>
               </h1>
               
-              <h2 className="text-2xl sm:text-3xl font-serif font-light mb-6 text-foreground/90">
+              <h2 className="sm:text-3xl font-serif font-light mb-6 text-foreground/90 text-[29px]">
                 Discover extraordinary finds, made especially for you.
               </h2>
 
@@ -117,7 +115,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Shop by Category - Etsy Style */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">
@@ -158,7 +155,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Featured Products - Etsy Style */}
       <section className="py-16 px-4 sm:px-6 lg:px-8" data-testid="section-featured">
         <div className="container mx-auto max-w-7xl">
@@ -188,7 +184,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* What makes Curio Market special - Etsy Style */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-special">
         <div className="container mx-auto max-w-7xl">
@@ -232,7 +227,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* For Sellers Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8" data-testid="section-sellers">
         <div className="container mx-auto max-w-7xl">
@@ -323,7 +317,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Trust & Safety Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20" data-testid="section-trust">
         <div className="container mx-auto max-w-7xl text-center">
@@ -381,7 +374,6 @@ export default function Landing() {
           </Card>
         </div>
       </section>
-
       <Footer />
     </div>
   );
