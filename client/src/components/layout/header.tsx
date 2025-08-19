@@ -54,7 +54,6 @@ export default function Header() {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3" data-testid="logo">
-            <div className="text-2xl">🌙</div>
             <h1 className="text-2xl font-serif font-bold text-gothic-white">Curio Market</h1>
           </Link>
 
