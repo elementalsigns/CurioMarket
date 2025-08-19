@@ -84,7 +84,7 @@ export default function Landing() {
                   <img 
                     src={ydvp2ozsrtg31}
                     alt="Bird skeleton taxidermy specimen"
-                    className="w-full h-60 object-contain hover:scale-105 transition-transform duration-300"
+                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden shadow-lg">
