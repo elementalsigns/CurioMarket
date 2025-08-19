@@ -85,15 +85,6 @@
 }
 
 @layer utilities {
-  .victorian-ornament::before {
-    content: "❦";
-    @apply opacity-40 mr-2 text-accent;
-  }
-  
-  .victorian-ornament::after {
-    content: "❦";
-    @apply opacity-40 ml-2 text-accent;
-  }
 
   .gradient-victorian {
     background: linear-gradient(135deg, var(--victorian-burgundy), var(--victorian-plum));

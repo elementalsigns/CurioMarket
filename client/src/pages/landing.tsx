@@ -26,23 +26,14 @@ export default function Landing() {
         </div>
 
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-          {/* Ornamental Header */}
-          <div className="flex justify-center items-center mb-8" data-testid="hero-ornament">
-            <div className="text-4xl text-accent">❦</div>
-            <div className="mx-4 h-px bg-accent/30 flex-1 max-w-32"></div>
-            <div className="text-2xl text-accent">❦</div>
-            <div className="mx-4 h-px bg-accent/30 flex-1 max-w-32"></div>
-            <div className="text-4xl text-accent">❦</div>
-          </div>
 
           <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight" data-testid="hero-title">
-            A Distinguished<br/>
-            <span className="text-primary">Marketplace</span><br/>
-            for Curious Antiquities
+            <span className="text-primary">Curio Market</span><br/>
+            Buy and sell unique oddities
           </h1>
 
           <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto font-light" data-testid="hero-subtitle">
-            Discover and purvey exquisite curiosities, specimens, and fine oddities in a refined collectors' emporium.
+            Find rare specimens, vintage curiosities, and unique artifacts from collectors who share your passion for the unusual.
           </p>
 
           {/* CTA Buttons */}
@@ -53,7 +44,7 @@ export default function Landing() {
               data-testid="button-start-selling"
               onClick={() => window.location.href = '/api/login'}
             >
-              Establish Your Atelier
+              Start Selling
             </Button>
             <Button 
               variant="outline" 
@@ -62,15 +53,15 @@ export default function Landing() {
               data-testid="button-explore"
               onClick={() => window.location.href = '/browse'}
             >
-              Peruse Collections
+              Browse Items
             </Button>
           </div>
 
           {/* Callout Box */}
-          <Card className="glass-effect max-w-2xl mx-auto" data-testid="hero-callout">
+          <Card className="glass-effect max-w-2xl mx-auto border-0 shadow-lg" data-testid="hero-callout">
             <CardContent className="p-6">
-              <p className="text-foreground/90 text-lg victorian-ornament">
-                An exclusive emporium where discerning collectors and artisans gather to trade in the extraordinary.
+              <p className="text-foreground/90 text-lg">
+                A marketplace where collectors and artists come together to buy and sell unique oddities and curiosities.
               </p>
             </CardContent>
           </Card>
@@ -87,10 +78,10 @@ export default function Landing() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4" data-testid="categories-title">
-              Curated Collections of Distinction
+              Popular Categories
             </h2>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="categories-subtitle">
-              From anatomical specimens to antique curiosities, discover treasures that celebrate the peculiar and extraordinary.
+              From anatomical specimens to vintage oddities, find unique items that celebrate the unusual and extraordinary.
             </p>
           </div>
 
@@ -104,10 +95,10 @@ export default function Landing() {
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                Distinguished Acquisitions
+                Featured Items
               </h2>
               <p className="text-foreground/70" data-testid="featured-subtitle">
-                Exquisite specimens and artifacts, meticulously selected from our finest purveyors.
+                Unique specimens and artifacts, carefully selected from our best sellers.
               </p>
             </div>
             <Button 
@@ -116,7 +107,7 @@ export default function Landing() {
               data-testid="button-view-all"
               onClick={() => window.location.href = '/browse'}
             >
-              View Complete Collection <ArrowRight className="ml-2" size={16} />
+              View All Items <ArrowRight className="ml-2" size={16} />
             </Button>
           </div>
 
@@ -134,41 +125,41 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 leading-tight" data-testid="sellers-title">
-                Establish Your <span className="text-primary">Distinguished</span><br/>
-                Curiosity Atelier
+                Start Your <span className="text-primary">Online</span><br/>
+                Curio Shop
               </h2>
               <p className="text-xl text-foreground/80 mb-8 leading-relaxed" data-testid="sellers-subtitle">
-                Join our esteemed community of collectors and artisans who showcase their finest specimens and artifacts with discerning clientele.
+                Join thousands of collectors and artists who sell their unique pieces to customers who share your passion for oddities.
               </p>
 
               {/* Pricing Card */}
               <Card className="glass-effect border border-primary/30 mb-8" data-testid="pricing-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-serif font-bold">Atelier Membership</h3>
+                    <h3 className="text-2xl font-serif font-bold">Seller Plan</h3>
                     <div className="text-3xl font-bold text-primary">
                       $10<span className="text-base text-foreground/60 font-normal">/month</span>
                     </div>
                   </div>
                   <p className="text-foreground/80 mb-4">
-                    Retain more of your profits with our refined 3% commission structure, plus standard transaction processing.
+                    Keep more of your earnings with our low 3% fee on sales, plus standard payment processing.
                   </p>
                   <ul className="space-y-2 mb-6">
                     <li className="flex items-center text-foreground/80">
                       <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
-                      Unlimited specimen cataloguing
+                      Unlimited listings
                     </li>
                     <li className="flex items-center text-foreground/80">
                       <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
-                      Bespoke atelier presentation
+                      Custom shop design
                     </li>
                     <li className="flex items-center text-foreground/80">
                       <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
-                      Private correspondence system
+                      Direct messaging with buyers
                     </li>
                     <li className="flex items-center text-foreground/80">
                       <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
-                      Comprehensive analytics suite
+                      Sales analytics dashboard
                     </li>
                   </ul>
                   <Button 
@@ -176,15 +167,15 @@ export default function Landing() {
                     data-testid="button-start-shop"
                     onClick={() => window.location.href = '/api/login'}
                   >
-                    Establish Your Atelier
+                    Start Your Shop
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="bg-primary/10 border border-primary/30 rounded-lg" data-testid="etsy-callout">
+              <Card className="bg-primary/10 border border-primary/30 rounded-lg shadow-md" data-testid="etsy-callout">
                 <CardContent className="p-4">
-                  <p className="text-foreground/90 text-center victorian-ornament">
-                    Where other venues restrict the extraordinary, our refined marketplace celebrates the curious and unconventional within proper bounds.
+                  <p className="text-foreground/90 text-center">
+                    Where other platforms restrict the extraordinary, our marketplace celebrates the curious and unconventional within proper bounds.
                   </p>
                 </CardContent>
               </Card>
@@ -202,17 +193,17 @@ export default function Landing() {
               </div>
               
               {/* Floating Stats */}
-              <Card className="absolute -top-6 -right-6 glass-effect border border-primary/30" data-testid="stat-sellers">
+              <Card className="absolute -top-6 -right-6 glass-effect border border-primary/30 shadow-lg" data-testid="stat-sellers">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-primary">2.3K+</div>
-                  <div className="text-sm text-foreground/80">Distinguished Purveyors</div>
+                  <div className="text-sm text-foreground/80">Active Sellers</div>
                 </CardContent>
               </Card>
               
-              <Card className="absolute bottom-6 -left-6 glass-effect border border-accent/30" data-testid="stat-revenue">
+              <Card className="absolute bottom-6 -left-6 glass-effect border border-accent/30 shadow-lg" data-testid="stat-revenue">
                 <CardContent className="p-4 text-center">
                   <div className="text-2xl font-bold text-accent">$150K+</div>
-                  <div className="text-sm text-foreground/80">Monthly Commerce</div>
+                  <div className="text-sm text-foreground/80">Monthly Sales</div>
                 </CardContent>
               </Card>
             </div>
@@ -224,10 +215,10 @@ export default function Landing() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20" data-testid="section-trust">
         <div className="container mx-auto max-w-7xl text-center">
           <h2 className="text-4xl font-serif font-bold mb-4" data-testid="trust-title">
-            Founded Upon Integrity & Propriety
+            Built on Trust & Safety
           </h2>
           <p className="text-xl text-foreground/70 mb-12 max-w-3xl mx-auto" data-testid="trust-subtitle">
-            Our distinguished emporium upholds the highest principles while celebrating extraordinary artifacts and specimens within lawful boundaries.
+            Our marketplace upholds the highest standards while celebrating extraordinary artifacts and specimens within legal boundaries.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 mb-12" data-testid="trust-features">
@@ -236,9 +227,9 @@ export default function Landing() {
                 <div className="text-4xl mb-4">
                   <Shield size={48} className="mx-auto text-primary" />
                 </div>
-                <h3 className="text-xl font-serif font-bold mb-2">Authenticated Purveyors</h3>
+                <h3 className="text-xl font-serif font-bold mb-2">Verified Sellers</h3>
                 <p className="text-foreground/80">
-                  All merchants undergo thorough verification and adhere to our refined ethical procurement standards.
+                  All sellers undergo thorough verification and agree to our ethical sourcing guidelines.
                 </p>
               </CardContent>
             </Card>
@@ -248,9 +239,9 @@ export default function Landing() {
                 <div className="text-4xl mb-4">
                   <Scale size={48} className="mx-auto text-primary" />
                 </div>
-                <h3 className="text-xl font-serif font-bold mb-2">Lawful Commerce</h3>
+                <h3 className="text-xl font-serif font-bold mb-2">Legal Compliance</h3>
                 <p className="text-foreground/80">
-                  We maintain strict adherence to regulations, excluding protected species and hazardous materials as prescribed by law.
+                  We maintain strict adherence to regulations, excluding protected species and hazardous materials as required by law.
                 </p>
               </CardContent>
             </Card>
@@ -260,9 +251,9 @@ export default function Landing() {
                 <div className="text-4xl mb-4">
                   <CreditCard size={48} className="mx-auto text-primary" />
                 </div>
-                <h3 className="text-xl font-serif font-bold mb-2">Protected Transactions</h3>
+                <h3 className="text-xl font-serif font-bold mb-2">Secure Payments</h3>
                 <p className="text-foreground/80">
-                  All financial exchanges are safeguarded through our trusted Stripe partnership with comprehensive buyer protection.
+                  All payments are protected through our trusted Stripe partnership with comprehensive buyer protection.
                 </p>
               </CardContent>
             </Card>
@@ -271,7 +262,7 @@ export default function Landing() {
           <Card className="bg-primary/10 border border-primary/30 rounded-lg max-w-4xl mx-auto" data-testid="compliance-notice">
             <CardContent className="p-6">
               <p className="text-foreground/90">
-                <strong>Notice:</strong> Our emporium maintains rigorous merchant verification, mandates adherence to jurisdictional statutes, and prohibits unlawful articles. All purveyors bear responsibility for compliance with applicable ordinances.
+                <strong>Notice:</strong> Our marketplace maintains rigorous seller verification, requires adherence to local laws, and prohibits illegal items. All sellers are responsible for compliance with applicable regulations.
               </p>
             </CardContent>
           </Card>
