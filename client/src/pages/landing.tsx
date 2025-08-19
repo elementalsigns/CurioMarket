@@ -33,7 +33,7 @@ export default function Landing() {
                 <span className="text-primary">CURIO MARKET</span>
               </h1>
               
-              <h2 className="sm:text-3xl font-serif font-light mb-6 text-foreground/90 text-[29px]">
+              <h2 className="sm:text-3xl font-serif font-light mb-6 text-foreground/90 text-[28px]">
                 Discover extraordinary finds, made especially for you.
               </h2>
 
