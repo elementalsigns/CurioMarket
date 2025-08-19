@@ -9,7 +9,7 @@ import ProductCard from "@/components/product-card";
 import { ChevronDown, Star, Shield, Scale, CreditCard, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-import ydvp2ozsrtg31 from "@assets/ydvp2ozsrtg31.webp";
+
 
 export default function Landing() {
   const { data: featuredListings = [] } = useQuery({
@@ -28,9 +28,9 @@ export default function Landing() {
       {/* Hero Section - Foxblood Noir Style */}
       <section className="relative bg-background py-12 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Hero Content */}
-            <div className="text-left">
+            <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
                 <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
               </h1>
@@ -74,42 +74,6 @@ export default function Landing() {
                     {tag}
                   </Button>
                 ))}
-              </div>
-            </div>
-
-            {/* Hero Image Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-lg overflow-hidden shadow-lg">
-                  <img 
-                    src={ydvp2ozsrtg31}
-                    alt="Bird skeleton taxidermy specimen"
-                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="rounded-lg overflow-hidden shadow-lg">
-                  <img 
-                    src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
-                    alt="Gothic skull collection"
-                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="rounded-lg overflow-hidden shadow-lg">
-                  <img 
-                    src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
-                    alt="Vintage medical instruments and curiosities"
-                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="rounded-lg overflow-hidden shadow-lg">
-                  <img 
-                    src="https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
-                    alt="Authentic bird skeleton taxidermy specimen"
-                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
               </div>
             </div>
           </div>
