@@ -68,7 +68,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
   if (viewMode === "list") {
     return (
       <Link to={`/product/${listing.slug}`}>
-        <Card className="glass-effect hover:shadow-xl hover:shadow-gothic-purple/10 transition-all duration-300 group cursor-pointer" data-testid={`product-card-${listing.id}`}>
+        <Card className="glass-effect hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group cursor-pointer" data-testid={`product-card-${listing.id}`}>
           <CardContent className="p-0">
             <div className="flex">
               <div className="w-48 h-32 relative bg-card rounded-l-2xl overflow-hidden">
@@ -88,7 +88,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
                   variant="ghost"
                   size="sm"
                   onClick={handleToggleFavorite}
-                  className="absolute top-2 right-2 bg-gothic-black/60 text-white p-2 rounded-full hover:bg-gothic-red transition-colors"
+                  className="absolute top-2 right-2 bg-background/60 text-white p-2 rounded-full hover:bg-primary transition-colors"
                   data-testid={`button-favorite-${listing.id}`}
                 >
                   <Heart size={16} />
@@ -98,7 +98,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
               <div className="flex-1 p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <h3 className="font-serif font-bold text-lg mb-1 group-hover:text-gothic-purple transition-colors line-clamp-1" data-testid={`title-${listing.id}`}>
+                    <h3 className="font-serif font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1" data-testid={`title-${listing.id}`}>
                       {listing.title}
                     </h3>
                     <p className="text-foreground/70 text-sm mb-2 line-clamp-2" data-testid={`description-${listing.id}`}>
@@ -106,7 +106,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
                     </p>
                   </div>
                   <div className="text-right ml-4">
-                    <span className="text-gothic-red font-bold text-xl" data-testid={`price-${listing.id}`}>
+                    <span className="text-primary font-bold text-xl" data-testid={`price-${listing.id}`}>
                       ${listing.price}
                     </span>
                   </div>
@@ -146,7 +146,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
 
   return (
     <Link to={`/product/${listing.slug}`}>
-      <Card className="glass-effect rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-gothic-purple/10 transition-all duration-300 group cursor-pointer" data-testid={`product-card-${listing.id}`}>
+      <Card className="glass-effect rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 group cursor-pointer" data-testid={`product-card-${listing.id}`}>
         <div className="aspect-square bg-card relative">
           {primaryImage ? (
             <img
@@ -165,21 +165,21 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
             variant="ghost"
             size="sm"
             onClick={handleToggleFavorite}
-            className="absolute top-3 right-3 bg-gothic-black/60 text-white p-2 rounded-full hover:bg-gothic-red transition-colors"
+            className="absolute top-3 right-3 bg-background/60 text-white p-2 rounded-full hover:bg-primary transition-colors"
             data-testid={`button-favorite-${listing.id}`}
           >
             <Heart size={16} />
           </Button>
           
           {listing.featured && (
-            <Badge className="absolute top-3 left-3 bg-gothic-purple text-white" data-testid={`badge-featured-${listing.id}`}>
+            <Badge className="absolute top-3 left-3 bg-primary text-white" data-testid={`badge-featured-${listing.id}`}>
               Featured
             </Badge>
           )}
         </div>
         
         <CardContent className="p-4">
-          <h3 className="font-serif font-bold text-lg mb-1 group-hover:text-gothic-purple transition-colors line-clamp-2" data-testid={`title-${listing.id}`}>
+          <h3 className="font-serif font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-2" data-testid={`title-${listing.id}`}>
             {listing.title}
           </h3>
           <p className="text-foreground/70 text-sm mb-2 line-clamp-2" data-testid={`description-${listing.id}`}>
@@ -187,7 +187,7 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
           </p>
           
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gothic-red font-bold text-xl" data-testid={`price-${listing.id}`}>
+            <span className="text-primary font-bold text-xl" data-testid={`price-${listing.id}`}>
               ${listing.price}
             </span>
             

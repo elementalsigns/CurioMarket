@@ -43,7 +43,7 @@ export default function CategoryGrid() {
         <Link key={category.id} to={`/browse?category=${category.slug}`}>
           <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
             <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
-              <div className="absolute inset-0 bg-gothic-black/40 group-hover:bg-gothic-purple/40 transition-colors"></div>
+              <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white">
                   <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>

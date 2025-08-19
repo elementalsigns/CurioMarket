@@ -101,7 +101,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Footer */}
-        <div className="border-t border-gothic-purple/20 pt-8 flex flex-col md:flex-row justify-between items-center" data-testid="footer-bottom">
+        <div className="border-t border-primary/20 pt-8 flex flex-col md:flex-row justify-between items-center" data-testid="footer-bottom">
           <p className="text-foreground/60 text-sm mb-4 md:mb-0">
             © 2024 Curio Market. All rights reserved.
           </p>

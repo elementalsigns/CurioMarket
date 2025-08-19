@@ -186,7 +186,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
-            className="md:hidden text-gothic-white"
+            className="md:hidden text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="button-mobile-menu"
           >
@@ -196,7 +196,7 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gothic-purple/20" data-testid="mobile-menu">
+          <div className="md:hidden py-4 border-t border-primary/20" data-testid="mobile-menu">
             <div className="space-y-4">
               {/* Mobile Search */}
               <form onSubmit={handleSearch}>
@@ -216,7 +216,7 @@ export default function Header() {
               {/* Mobile Navigation */}
               <div className="flex flex-col space-y-2">
                 <Link to="/browse">
-                  <Button variant="ghost" className="w-full justify-start text-gothic-white hover:text-gothic-purple">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
                     Browse
                   </Button>
                 </Link>
@@ -224,7 +224,7 @@ export default function Header() {
                 {isAuthenticated ? (
                   <>
                     <Link to="/seller/dashboard">
-                      <Button variant="ghost" className="w-full justify-start text-gothic-white hover:text-gothic-purple">
+                      <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
                         <Store className="mr-2" size={16} />
                         Seller Dashboard
                       </Button>
@@ -241,7 +241,7 @@ export default function Header() {
                 ) : (
                   <Button 
                     onClick={() => window.location.href = '/api/login'}
-                    className="w-full bg-gothic-purple hover:bg-gothic-purple/80 text-white rounded-2xl"
+                    className="w-full bg-primary hover:bg-primary/80 text-white rounded-2xl"
                   >
                     Sign In / Join
                   </Button>
