@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=UnifrakturMaguntia&display=swap");
 
 @font-face {
   font-family: 'Bliamer';
@@ -45,7 +45,7 @@
   /* Typography */
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
-  --font-brand: 'Bliamer', 'Cinzel', 'Times New Roman', serif;
+  --font-brand: 'UnifrakturMaguntia', 'Cinzel', serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Shadows */
