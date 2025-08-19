@@ -1,0 +1,139 @@
+Perfect — here’s your full Replit build prompt, fully rewritten with the name Curio Market baked in everywhere (no more placeholders like Nocturne). You can copy–paste this straight into Replit or any codegen workflow.
+Replit Build Prompt — “Curio Market” (Gothic Etsy for Oddities)
+Goal: Build a full-stack multi-vendor marketplace—like Etsy, but focused on oddities (taxidermy, wet specimens, bones, curios, occult art). Visual vibe inspired by Killstar (gothic, luxe, high-contrast), but do not copy Killstar trademarks or assets.
+Site name: Curio Market
+Tech Stack
+Frontend: Next.js 14 (App Router), React, TypeScript, TailwindCSS + shadcn/ui, Framer Motion
+Backend: Next.js server actions + REST routes; Zod for validation
+DB & ORM: PostgreSQL (Prisma). SQLite in dev; Postgres in prod via env vars
+Auth: NextAuth (email/password; OAuth optional)
+Payments & Billing: Stripe
+File Storage: UploadThing or AWS S3 compatible
+Search: PostgreSQL full-text search (pg_trgm) for MVP
+Email: Resend (dev → console logger)
+Infra: Replit runner; .env.example included
+Brand & UI Guidelines (Killstar-inspired, not derivative)
+Palette: near-black #0B0B0D, off-white #F2F2F2, deep purple #5A2A83, blood red #9B1C31, muted gray #1F1F24
+Typography: Serif display (Playfair/Old Standard) for headings; humanist sans (Inter) for body
+Components: Oversized cards, rounded-2xl, soft shadows, subtle grain/noise background
+Assets: Generic gothic motifs (moons, sigils, filigree)
+Dark mode: Default dark, toggleable
+Core Positioning & Pricing
+Headline: “An independent marketplace for oddities.”
+Subhead: “Sell and discover curios, specimens, and occult art—without the gatekeeping.”
+Callout box: “Tired of Etsy being selective? Join a community built for oddities.”
+Seller pricing: Core plan $10/month + 3% platform fee per transaction (Stripe handles payments)
+Banner: “Curio Market verifies sellers, requires compliance with local laws, and restricts prohibited items.”
+User Roles
+Visitor: browse, search, view listings, add to cart
+Buyer: account, checkout, orders, messages, reviews, favorites
+Seller: subscription, shop profile, listings CRUD, inventory, orders, payouts, analytics
+Admin: moderation, takedowns, category management, disputes
+MVP Features
+Accounts & Auth
+Email/password login, verification, reset
+Profiles with buyer/seller/admin roles
+Seller Onboarding & Subscription
+Stripe checkout for $10/month subscription → activates seller account
+Shop setup: name, banner, avatar, bio, location, policies
+Listings
+CRUD with drafts/publish
+Fields: title, description, price, quantity, SKU, provenance, species/material, category, tags
+Up to 10 images per listing
+Variants (optional for MVP)
+SEO-friendly slugs
+Browsing & Discovery
+Search (FTS + trigram)
+Filters: category, price, location, condition, material/species
+Sort: relevance, newest, price, best-selling
+Favorites & shop follows
+Cart & Checkout
+Session cart
+Stripe PaymentIntent with 3% platform fee
+Flat-rate shipping per listing/shop (configurable)
+Order confirmation emails
+Orders
+Buyer: order list, status, invoice
+Seller: order inbox, mark shipped, refunds (admin approval)
+Statuses: pending, paid, fulfilled, refunded, disputed
+Messaging
+Buyer↔Seller threads (per order or pre-sale)
+Notifications via email
+Reviews
+Buyers leave star ratings + text/images
+Report reviews
+Moderation & Compliance
+Report items/users
+Prohibited items checklist:
+No human remains (unless legal, default blocked)
+No endangered species (CITES), firearms, explosives, or hazards
+Admin
+KPIs (GMV, fees, active shops)
+Approve/suspend listings
+Manage categories/attributes
+Refund handling
+CMS
+Static pages: About, FAQ, Policies, Pricing
+Blog (optional, MDX)
+Data Model (Prisma Outline)
+User (id, name, email, role, avatar, createdAt)
+Seller (id, userId, shopName, bio, banner, isActive, stripeCustomerId, stripeSubId, address)
+Subscription (id, sellerId, plan, status, periodEnd)
+Category / Attribute / ListingAttribute
+Listing (id, sellerId, title, slug, description, price, quantity, provenance, speciesOrMaterial, categoryId, state)
+ListingImage
+Cart / CartItem
+Order / OrderItem
+MessageThread / Message
+Review
+Favorite / ShopFollow
+Flag
+AuditLog
+API Routes
+/api/auth/* NextAuth
+/api/sellers/onboard
+/api/webhooks/stripe
+/api/listings CRUD
+/api/search
+/api/cart
+/api/checkout
+/api/orders
+/api/messages
+/api/reviews
+/api/admin/*
+Copy Blocks
+Pricing (Seller page):
+“Core plan $10/month. Keep more of your earnings with Curio Market’s 3% platform fee (plus standard processing).”
+Selective jab:
+“Tired of Etsy being selective about what’s ‘allowed’? Curio Market was built for oddities—within the law and with respect.”
+Compliance note:
+“Sellers are responsible for complying with all laws. Prohibited items include endangered species, human remains, and hazardous materials.”
+Security & Privacy
+Hash passwords (bcrypt)
+Signed upload URLs
+RBAC middleware
+Rate limiting
+GDPR endpoints: /api/me/export, /api/me/delete
+Dev Experience
+Monorepo structure
+Scripts: dev, build, start, db:migrate, db:seed, lint, typecheck
+Seed with 5 shops, 30 listings, 10 orders
+Test accounts:
+Admin: admin@curio.test / Admin123!
+Seller: seller@curio.test / Seller123!
+Buyer: buyer@curio.test / Buyer123!
+.env.example includes: DATABASE_URL, NEXTAUTH_SECRET, STRIPE_SECRET_KEY, PLATFORM_FEE_PERCENT=3
+Readme with setup + Stripe test cards
+Integration tests for auth, listing, checkout
+Acceptance Criteria
+A seller subscribes for $10/month, creates shop, lists item, gets paid test order with 3% fee.
+Buyer browses, searches, carts, checks out, and messages seller.
+Admin can suspend listing, refund, resolve flags.
+Landing page shows Curio Market branding, pricing, and Etsy-selective callout.
+Gothic theme loads with seeded demo content.
+Stretch Goals
+Coupons, bulk shipping, saved searches
+Collections, homepage curation
+Dispute workflow
+CSV import for listings
+Build Curio Market now with this stack and spec. Generate schema, routes, UI, seed data, and tests. Start the dev server and output admin/seller/buyer URLs for QA.
