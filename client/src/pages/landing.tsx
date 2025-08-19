@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import ydvp2ozsrtg31 from "@assets/ydvp2ozsrtg31.webp";
 
 export default function Landing() {
-  const { data: featuredListings } = useQuery({
+  const { data: featuredListings = [] } = useQuery({
     queryKey: ["/api/listings/featured"],
   });
 
@@ -178,7 +178,7 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" data-testid="featured-grid">
-            {featuredListings?.map((listing: any) => (
+            {Array.isArray(featuredListings) && featuredListings.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}
           </div>
