@@ -37,9 +37,7 @@ export default function Landing() {
                 Discover extraordinary finds, made especially for you.
               </h2>
 
-              <p className="text-lg text-foreground/80 mb-8 leading-relaxed">
-                Find rare specimens, vintage curiosities, and unique artifacts from collectors who share your passion for the unusual.
-              </p>
+              <p className="text-foreground/80 mb-8 text-[17px]">Find rare specimens, curiosities, and artifacts from collectors who share your passion </p>
 
               {/* Search Bar */}
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
