@@ -19,20 +19,20 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      {/* Announcement Bar - Etsy Style */}
-      <div className="bg-accent text-accent-foreground text-center py-2 px-4">
+      {/* Announcement Bar - Black & Red Theme */}
+      <div className="bg-primary text-primary-foreground text-center py-2 px-4">
         <p className="text-sm font-medium">
           Free shipping on orders over $75 • Support independent collectors and artists
         </p>
       </div>
-      {/* Hero Section - Etsy Style */}
-      <section className="relative bg-gradient-to-b from-background to-muted/20 py-12 sm:py-16 lg:py-20" data-testid="hero-section">
+      {/* Hero Section - Black & Red Theme */}
+      <section className="relative bg-background py-12 sm:py-16 lg:py-20 border-b-2 border-primary/20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Hero Content */}
             <div className="text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-brand font-bold mb-6 leading-tight tracking-wide" data-testid="hero-title">
-                <span className="text-primary">CURIO MARKET</span>
+                <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
               </h1>
               
               <h2 className="sm:text-3xl font-serif font-light mb-6 text-foreground/90 text-[28px]">
@@ -53,7 +53,7 @@ export default function Landing() {
                 </div>
                 <Button 
                   size="lg" 
-                  className="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-full font-medium"
+                  className="bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow"
                   data-testid="button-search"
                 >
                   Search
@@ -120,7 +120,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-7xl">
           <div className="mb-12">
             <h2 className="text-3xl font-serif font-bold mb-2" data-testid="categories-title">
-              Shop our popular categories
+              Shop our popular <span className="text-primary">categories</span>
             </h2>
             <p className="text-foreground/70" data-testid="categories-subtitle">
               Browse thousands of unique items in every category imaginable
@@ -188,7 +188,7 @@ export default function Landing() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-special">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-serif font-bold mb-4">What makes Curio Market special</h2>
+            <h2 className="text-3xl font-serif font-bold mb-4">What makes <span className="text-primary">Curio Market</span> special</h2>
             <p className="text-foreground/70 max-w-2xl mx-auto">
               A global marketplace for unique and creative goods, connecting collectors with passionate sellers
             </p>

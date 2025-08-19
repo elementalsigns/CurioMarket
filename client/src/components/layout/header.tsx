@@ -49,12 +49,14 @@ export default function Header() {
   };
 
   return (
-    <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
+    <nav className="bg-background border-b-2 border-primary/20 sticky top-0 z-50 shadow-sm" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center" data-testid="logo">
-            <h1 className="text-xl font-brand font-bold text-primary tracking-wider">CURIO MARKET</h1>
+            <h1 className="text-xl font-brand font-bold tracking-wider">
+              <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
+            </h1>
           </Link>
 
           {/* Search Bar - Desktop */}
