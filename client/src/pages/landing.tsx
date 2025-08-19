@@ -84,32 +84,32 @@ export default function Landing() {
               <div className="space-y-4">
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80"
-                    alt="Vintage curiosities"
-                    className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                    src="https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    alt="Vintage taxidermy specimen"
+                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80"
-                    alt="Antique specimens"
-                    className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                    src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    alt="Antique medical instruments"
+                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
-              <div className="pt-8 space-y-4">
+              <div className="space-y-4">
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80"
-                    alt="Gothic oddities"
-                    className="w-full h-32 object-cover hover:scale-105 transition-transform duration-300"
+                    src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    alt="Gothic curiosities collection"
+                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="rounded-lg overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80"
-                    alt="Unique artifacts"
-                    className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240&q=80"
+                    alt="Vintage anatomical specimens"
+                    className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
