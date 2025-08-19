@@ -255,13 +255,15 @@ export default function Landing() {
             </div>
 
             <div className="relative">
-              {/* Marketplace Image */}
-              <div className="rounded-lg overflow-hidden shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000&q=80" 
-                  alt="Collector arranging oddities and curiosities in their shop" 
-                  className="w-full h-auto"
-                  data-testid="img-marketplace"
+              {/* Artem Mortis YouTube Video */}
+              <div className="rounded-lg overflow-hidden shadow-2xl aspect-video">
+                <iframe 
+                  src="https://www.youtube.com/embed/wdgmb5U3iAU" 
+                  title="Artem Mortis - Gothic Curiosities & Specimens"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                  data-testid="video-artem-mortis"
                 />
               </div>
               
