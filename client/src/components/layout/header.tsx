@@ -35,7 +35,7 @@ export default function Header() {
     enabled: isAuthenticated,
   });
 
-  const cartItemCount = cartData?.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
+  const cartItemCount = Array.isArray(cartData?.items) ? cartData.items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,9 +130,9 @@ export default function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2 p-2" data-testid="user-menu-trigger">
-                    {user?.profileImageUrl ? (
+                    {(user as any)?.profileImageUrl ? (
                       <img 
-                        src={user.profileImageUrl} 
+                        src={(user as any).profileImageUrl} 
                         alt="Profile" 
                         className="w-8 h-8 rounded-full object-cover"
                         data-testid="user-avatar"
