@@ -49,6 +49,7 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
+        brand: ["var(--font-brand)"],
         mono: ["var(--font-mono)"],
       },
       borderRadius: {

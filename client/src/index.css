@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: 'Bliamer';
-  src: url('/fonts/Bliamer.otf') format('opentype');
+  src: url('/fonts/Bliamer.otf?v=1') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -45,7 +45,7 @@
   /* Typography */
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
-  --font-brand: 'Bliamer', serif;
+  --font-brand: 'Bliamer', 'Cinzel', 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Shadows */
