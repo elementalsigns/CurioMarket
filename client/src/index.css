@@ -14,7 +14,7 @@
 
 :root {
   /* Victorian Gothic Color Palette - Elegant & Refined */
-  --victorian-charcoal: hsl(25, 8%, 4%); /* Deep charcoal with warm undertones */
+  --victorian-charcoal: hsl(25, 8%, 8%); /* Lighter charcoal with warm undertones */
   --victorian-ivory: hsl(30, 15%, 95%); /* Warm ivory white */
   --victorian-burgundy: hsl(0, 65%, 25%); /* Rich wine burgundy */
   --victorian-brass: hsl(43, 85%, 45%); /* Antique brass gold */
@@ -24,9 +24,9 @@
   /* UI Colors */
   --background: var(--victorian-charcoal);
   --foreground: var(--victorian-ivory);
-  --card: hsl(25, 8%, 6%);
+  --card: hsl(25, 8%, 10%);
   --card-foreground: var(--victorian-ivory);
-  --popover: hsl(25, 8%, 6%);
+  --popover: hsl(25, 8%, 10%);
   --popover-foreground: var(--victorian-ivory);
   --primary: var(--victorian-burgundy);
   --primary-foreground: var(--victorian-ivory);
