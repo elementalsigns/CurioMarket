@@ -298,8 +298,8 @@ export default function Landing() {
               {/* Marketplace Image */}
               <div className="rounded-lg overflow-hidden shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000&q=80" 
-                  alt="Victorian antique shop interior with curiosities and specimens" 
+                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000&q=80" 
+                  alt="Collector arranging oddities and curiosities in their shop" 
                   className="w-full h-auto"
                   data-testid="img-marketplace"
                 />
