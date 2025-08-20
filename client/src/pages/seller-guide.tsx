@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,13 +22,53 @@ import {
 } from "lucide-react";
 
 export default function SellerGuide() {
+  // Nuclear-level CSS override for white background issue
+  useEffect(() => {
+    const originalBodyStyle = document.body.style.cssText;
+    const originalHtmlStyle = document.documentElement.style.cssText;
+    
+    // Apply comprehensive background fixes
+    document.body.style.cssText = `
+      background: hsl(212, 5%, 5%) !important;
+      background-color: hsl(212, 5%, 5%) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    `;
+    document.documentElement.style.cssText = `
+      background: hsl(212, 5%, 5%) !important;
+      background-color: hsl(212, 5%, 5%) !important;
+    `;
+
+    // Force all potential white elements to use dark background
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .seller-guide-page,
+      .seller-guide-page *,
+      .seller-guide-page section,
+      .seller-guide-page div,
+      .seller-guide-page main {
+        background: hsl(212, 5%, 5%) !important;
+        background-color: hsl(212, 5%, 5%) !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.body.style.cssText = originalBodyStyle;
+      document.documentElement.style.cssText = originalHtmlStyle;
+      if (styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+      }
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+    <div className="seller-guide-page min-h-screen bg-background flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
       <Header />
       
-      <main className="flex-1" data-testid="seller-guide-main">
+      <main className="flex-1" data-testid="seller-guide-main" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
         {/* Hero Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background border-b border-border" data-testid="hero-section">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background border-b border-border" data-testid="hero-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
           <div className="container mx-auto max-w-4xl">
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-3 mb-6">
@@ -51,7 +92,7 @@ export default function SellerGuide() {
         </section>
 
         {/* Quick Stats */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" data-testid="stats-section">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" data-testid="stats-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
           <div className="container mx-auto max-w-6xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="text-center" data-testid="stat-sellers">
@@ -80,7 +121,7 @@ export default function SellerGuide() {
         </section>
 
         {/* Getting Started Guide */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="getting-started-section">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="getting-started-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
           <div className="container mx-auto max-w-4xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-serif font-bold mb-4" data-testid="getting-started-title">
@@ -379,7 +420,7 @@ export default function SellerGuide() {
         </section>
 
         {/* Fees and Pricing */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="fees-section">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="fees-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
           <div className="container mx-auto max-w-4xl">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-serif font-bold mb-4" data-testid="fees-title">
