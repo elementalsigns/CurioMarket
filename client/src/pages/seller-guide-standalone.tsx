@@ -91,8 +91,8 @@ function SellerGuideStandalone() {
         /* Footer Styles - Match home page exactly */
         .footer { background: #0a0a0a; border-top: 1px solid hsla(0, 77%, 26%, 0.2); padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
         .footer-container { max-width: 80rem; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
-        .footer-brand { grid-column: span 2; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; margin-bottom: 3rem; }
+        .footer-brand { grid-column: span 1; }
         .footer-brand .logo { margin-bottom: 1rem; display: flex; align-items: center; }
         .footer-description { color: #a1a1aa; margin-bottom: 1.5rem; max-width: 28rem; line-height: 1.6; }
         .social-links { display: flex; gap: 1rem; }
@@ -259,12 +259,13 @@ function SellerGuideStandalone() {
               </div>
 
               <div className="footer-section">
-                <h4>Marketplace</h4>
+                <h4>Shop</h4>
                 <ul className="footer-links">
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse'}>Browse Items</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/categories'}>Categories</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/sellers'}>Featured Sellers</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/new-arrivals'}>New Arrivals</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse'}>All Categories</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=wet-specimens'}>Wet Specimens</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=taxidermy'}>Taxidermy</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=bones-skulls'}>Bones & Skulls</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=occult-art'}>Occult Art</button></li>
                 </ul>
               </div>
 
