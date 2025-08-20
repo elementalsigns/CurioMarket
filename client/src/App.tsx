@@ -46,6 +46,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
+          <Route path="/account-demo" component={AccountDemo} />
           <Route component={NotFound} />
         </>
       ) : (
