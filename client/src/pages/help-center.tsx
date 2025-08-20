@@ -132,8 +132,10 @@ export default function HelpCenter() {
     <div className="min-h-screen bg-background" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
       <Header />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
-        <div className="max-w-6xl mx-auto" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ 
+        background: 'linear-gradient(135deg, hsl(212, 5%, 5%) 0%, hsl(220, 6%, 7%) 25%, hsl(216, 5%, 6%) 50%, hsl(214, 5%, 8%) 75%, hsl(212, 5%, 5%) 100%)'
+      }}>
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
             <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-[#6A1B1B] transition-colors duration-300 cursor-default">
