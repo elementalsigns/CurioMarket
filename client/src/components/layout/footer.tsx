@@ -94,14 +94,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                  Safety Guidelines
-                </Button>
+                <Link to="/safety">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Safety Guidelines
+                  </Button>
+                </Link>
               </li>
               <li>
-                <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                  Contact Us
-                </Button>
+                <Link to="/contact">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Contact Us
+                  </Button>
+                </Link>
               </li>
             </ul>
           </div>
