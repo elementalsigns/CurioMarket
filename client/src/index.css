@@ -66,6 +66,50 @@ section {
   background-color: hsl(212, 5%, 5%) !important;
 }
 
+/* Nuclear option - force all white backgrounds to be dark */
+* {
+  color-scheme: dark !important;
+}
+
+/* Target Radix UI components specifically */
+[data-radix-tabs-content],
+[data-radix-tabs-list],
+[data-radix-tabs-trigger],
+[data-radix-accordion-root],
+[data-radix-accordion-item],
+[data-radix-accordion-header],
+[data-radix-accordion-trigger],
+[data-radix-accordion-content] {
+  background-color: hsl(212, 5%, 5%) !important;
+  border-color: hsl(240, 5%, 20%) !important;
+}
+
+/* Force all components with white/light backgrounds to dark */
+.bg-white,
+.bg-gray-50,
+.bg-gray-100,
+.bg-slate-50,
+.bg-slate-100,
+.bg-zinc-50,
+.bg-zinc-100,
+[role="tabpanel"],
+[role="tab"],
+[role="tablist"] {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
+/* Specifically target help page elements */
+.help-center *,
+[data-testid^="help"] *,
+[data-testid*="help"] * {
+  background-color: transparent !important;
+}
+
+/* Override any component library defaults */
+[class*="bg-"]:not([class*="bg-zinc"]):not([class*="bg-red"]):not([class*="bg-purple"]):not([class*="bg-amber"]):not([class*="bg-blue"]):not([class*="bg-background"]) {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
 :root {
   /* Foxblood Modern Noir Gothic Color Scheme */
   --curio-noir-black: hsl(212, 5%, 5%); /* Deep noir black #0D0D0D */
