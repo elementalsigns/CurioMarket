@@ -33,7 +33,7 @@ export default function Landing() {
             <div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl curio-logo font-bold mb-8 leading-[0.9]" data-testid="hero-title">
                 <span>
-                  <span className="script-initial">C</span>urio
+                  <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span>{" "}
                 <span className="font-black">
                   <span className="script-initial">M</span>arket
