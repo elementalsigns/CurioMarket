@@ -16,17 +16,34 @@ export default function HelpCenter() {
   useEffect(() => {
     const originalBodyBg = document.body.style.backgroundColor;
     const originalHtmlBg = document.documentElement.style.backgroundColor;
+    const originalBodyClass = document.body.className;
     
-    document.body.style.backgroundColor = 'hsl(212, 5%, 5%)';
-    document.documentElement.style.backgroundColor = 'hsl(212, 5%, 5%)';
+    // Force all possible background properties
+    document.body.style.setProperty('background-color', 'hsl(212, 5%, 5%)', 'important');
+    document.body.style.setProperty('background', 'hsl(212, 5%, 5%)', 'important');
+    document.documentElement.style.setProperty('background-color', 'hsl(212, 5%, 5%)', 'important');
+    document.documentElement.style.setProperty('background', 'hsl(212, 5%, 5%)', 'important');
+    
     document.body.classList.add('help-center-body');
     document.documentElement.classList.add('help-center-html');
+    
+    // Also force root element if it exists
+    const root = document.getElementById('root');
+    if (root) {
+      root.style.setProperty('background-color', 'hsl(212, 5%, 5%)', 'important');
+      root.style.setProperty('background', 'hsl(212, 5%, 5%)', 'important');
+    }
     
     return () => {
       document.body.style.backgroundColor = originalBodyBg;
       document.documentElement.style.backgroundColor = originalHtmlBg;
+      document.body.className = originalBodyClass;
       document.body.classList.remove('help-center-body');
       document.documentElement.classList.remove('help-center-html');
+      if (root) {
+        root.style.backgroundColor = '';
+        root.style.background = '';
+      }
     };
   }, []);
 

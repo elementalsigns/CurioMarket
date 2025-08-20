@@ -88,6 +88,22 @@ html.help-center-html,
   background: hsl(212, 5%, 5%) !important;
 }
 
+/* Nuclear option - override EVERYTHING when help center is active */
+body.help-center-body *,
+body.help-center-body *::before,
+body.help-center-body *::after {
+  background-color: transparent !important;
+}
+
+body.help-center-body,
+body.help-center-body #root,
+body.help-center-body .container,
+body.help-center-body main,
+body.help-center-body section,
+body.help-center-body div {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
 /* Target every possible element that could have a white background */
 .help-center-page *,
 .help-center-page *::before,
