@@ -1,4 +1,6 @@
 // Privacy Policy page with embedded CSS to avoid React error boundaries
+import { Link } from "wouter";
+
 function PrivacyPolicyStandalone() {
   return (
     <div>
@@ -294,21 +296,21 @@ function PrivacyPolicyStandalone() {
               <div className="footer-section">
                 <h4>Shop</h4>
                 <ul className="footer-links">
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse'}>All Categories</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=wet-specimens'}>Wet Specimens</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=taxidermy'}>Taxidermy</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=bones-skulls'}>Bones & Skulls</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=occult-art'}>Occult Art</button></li>
+                  <li><Link to="/browse" className="footer-link">All Categories</Link></li>
+                  <li><Link to="/browse?category=wet-specimens" className="footer-link">Wet Specimens</Link></li>
+                  <li><Link to="/browse?category=taxidermy" className="footer-link">Taxidermy</Link></li>
+                  <li><Link to="/browse?category=bones-skulls" className="footer-link">Bones & Skulls</Link></li>
+                  <li><Link to="/browse?category=occult-art" className="footer-link">Occult Art</Link></li>
                 </ul>
               </div>
 
               <div className="footer-section">
                 <h4>Support</h4>
                 <ul className="footer-links">
-                  <li><button className="footer-link" onClick={() => window.location.href = '/help'}>Help Center</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/seller/guide'}>Seller Guide</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/safety'}>Safety Guidelines</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/contact'}>Contact Us</button></li>
+                  <li><Link to="/help" className="footer-link">Help Center</Link></li>
+                  <li><Link to="/seller/guide" className="footer-link">Seller Guide</Link></li>
+                  <li><Link to="/safety" className="footer-link">Safety Guidelines</Link></li>
+                  <li><Link to="/contact" className="footer-link">Contact Us</Link></li>
                 </ul>
               </div>
             </div>
@@ -318,9 +320,9 @@ function PrivacyPolicyStandalone() {
                 © 2024 Curio Market. All rights reserved.
               </p>
               <div className="footer-legal">
-                <button className="footer-link" onClick={() => window.location.href = '/privacy'}>Privacy Policy</button>
-                <button className="footer-link" onClick={() => window.location.href = '/terms'}>Terms of Service</button>
-                <button className="footer-link" onClick={() => window.location.href = '/prohibited'}>Prohibited Items</button>
+                <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+                <Link to="/terms" className="footer-link">Terms of Service</Link>
+                <Link to="/prohibited" className="footer-link">Prohibited Items</Link>
               </div>
             </div>
           </div>
