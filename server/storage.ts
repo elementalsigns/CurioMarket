@@ -444,12 +444,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Search and discovery
-  async searchListings(query: string, filters?: any): Promise<{ listings: Listing[]; total: number }> {
-    return this.getListings({ 
+  async searchListings(query: string, filters?: any): Promise<{ listings: any[]; total: number }> {
+    const result = await this.getListings({ 
       search: query, 
       ...filters,
       state: 'published'
     });
+    
+    // Add images to each listing
+    const listingsWithImages = await Promise.all(
+      result.listings.map(async (listing) => {
+        const images = await this.getListingImages(listing.id);
+        return { ...listing, images };
+      })
+    );
+    
+    return { listings: listingsWithImages, total: result.total };
   }
 
   async getFeaturedListings(limit: number = 8): Promise<any[]> {
