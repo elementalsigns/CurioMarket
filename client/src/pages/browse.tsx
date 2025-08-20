@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import FooterDebug from "@/components/layout/footer-debug";
 import ProductCard from "@/components/product-card";
 import SearchFilters from "@/components/search-filters";
 import { Search, Filter, Grid, List } from "lucide-react";
@@ -230,7 +230,7 @@ export default function Browse() {
         </div>
       </div>
 
-      <Footer />
+      <FooterDebug />
     </div>
   );
 }
