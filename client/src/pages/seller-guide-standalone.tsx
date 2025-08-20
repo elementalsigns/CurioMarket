@@ -87,6 +87,32 @@ function SellerGuideStandalone() {
         .cta-section { text-align: center; }
         .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
         .btn-large { padding: 0.75rem 2rem; font-size: 1.125rem; font-weight: 500; border-radius: 6px; cursor: pointer; }
+        
+        /* Footer Styles */
+        .footer { background: #0a0a0a; border-top: 1px solid rgba(106, 27, 27, 0.2); padding: 4rem 1rem; margin-top: 4rem; }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        .footer-brand { grid-column: span 2; }
+        .footer-brand .logo { margin-bottom: 1rem; }
+        .footer-description { color: #a1a1aa; margin-bottom: 1.5rem; max-width: 400px; line-height: 1.6; }
+        .social-links { display: flex; gap: 1rem; }
+        .social-btn { background: transparent; border: none; color: #a1a1aa; padding: 0.5rem; cursor: pointer; transition: color 0.3s; }
+        .social-btn:hover { color: hsl(0, 77%, 26%); }
+        .footer-section h4 { color: white; font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 0.5rem; }
+        .footer-link { color: #a1a1aa; text-decoration: none; transition: color 0.3s; cursor: pointer; }
+        .footer-link:hover { color: hsl(0, 77%, 26%); }
+        .footer-bottom { border-top: 1px solid rgba(106, 27, 27, 0.2); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .footer-copyright { color: #71717a; font-size: 0.875rem; }
+        .footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .footer-legal .footer-link { font-size: 0.875rem; }
+        
+        @media (max-width: 768px) {
+          .footer-brand { grid-column: span 1; }
+          .footer-bottom { flex-direction: column; text-align: center; }
+          .footer-legal { justify-content: center; }
+        }
       `}</style>
       
       <div className="seller-guide-container">
@@ -186,6 +212,64 @@ function SellerGuideStandalone() {
             </div>
           </div>
         </main>
+
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-grid">
+              <div className="footer-brand">
+                <div className="logo">
+                  <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+                </div>
+                <p className="footer-description">
+                  The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
+                </p>
+                <div className="social-links">
+                  <button className="social-btn">
+                    <i className="fab fa-instagram" style={{fontSize: '1.25rem'}}></i>
+                  </button>
+                  <button className="social-btn">
+                    <i className="fab fa-twitter" style={{fontSize: '1.25rem'}}></i>
+                  </button>
+                  <button className="social-btn">
+                    <i className="fab fa-facebook" style={{fontSize: '1.25rem'}}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="footer-section">
+                <h4>Shop</h4>
+                <ul className="footer-links">
+                  <li><a href="/browse" className="footer-link">All Categories</a></li>
+                  <li><a href="/browse?category=wet-specimens" className="footer-link">Wet Specimens</a></li>
+                  <li><a href="/browse?category=taxidermy" className="footer-link">Taxidermy</a></li>
+                  <li><a href="/browse?category=bones-skulls" className="footer-link">Bones & Skulls</a></li>
+                  <li><a href="/browse?category=occult-art" className="footer-link">Occult Art</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-section">
+                <h4>Support</h4>
+                <ul className="footer-links">
+                  <li><a href="/help" className="footer-link">Help Center</a></li>
+                  <li><a href="/seller/guide" className="footer-link">Seller Guide</a></li>
+                  <li><a href="/safety" className="footer-link">Safety Guidelines</a></li>
+                  <li><a href="/contact" className="footer-link">Contact Us</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="footer-bottom">
+              <p className="footer-copyright">
+                © 2024 Curio Market. All rights reserved.
+              </p>
+              <div className="footer-legal">
+                <a href="/privacy" className="footer-link">Privacy Policy</a>
+                <a href="/terms" className="footer-link">Terms of Service</a>
+                <a href="/prohibited" className="footer-link">Prohibited Items</a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
