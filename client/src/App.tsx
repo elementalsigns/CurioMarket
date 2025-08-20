@@ -17,6 +17,7 @@ import Subscribe from "@/pages/subscribe";
 import UserProfile from "@/pages/user-profile";
 import SellerTerms from "@/pages/seller-terms";
 import SellerGuide from "@/pages/seller-guide";
+import TestSellerGuide from "@/pages/test-seller-guide";
 import HelpCenter from "@/pages/help-center";
 
 function Router() {
@@ -36,7 +37,7 @@ function Router() {
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/seller/terms" component={SellerTerms} />
-          <Route path="/seller/guide" component={SellerGuide} />
+          <Route path="/seller/guide" component={TestSellerGuide} />
           <Route path="/help" component={HelpCenter} />
           <Route component={NotFound} />
         </>
@@ -46,7 +47,7 @@ function Router() {
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/seller/terms" component={SellerTerms} />
-          <Route path="/seller/guide" component={SellerGuide} />
+          <Route path="/seller/guide" component={TestSellerGuide} />
           <Route path="/help" component={HelpCenter} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
