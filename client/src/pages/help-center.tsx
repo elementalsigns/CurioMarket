@@ -252,15 +252,15 @@ export default function HelpCenter() {
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <TabsList className="grid w-full grid-cols-3 bg-zinc-900/50 border-zinc-800" style={{backgroundColor: 'hsl(240, 5%, 11%)'}}>
-              <TabsTrigger value="faq" className="flex items-center gap-2">
+              <TabsTrigger value="faq" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-faq">
                 <Book size={16} />
                 FAQ
               </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-2">
+              <TabsTrigger value="safety" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-safety">
                 <Shield size={16} />
                 Safety
               </TabsTrigger>
-              <TabsTrigger value="contact" className="flex items-center gap-2">
+              <TabsTrigger value="contact" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-contact">
                 <MessageCircle size={16} />
                 Contact
               </TabsTrigger>
