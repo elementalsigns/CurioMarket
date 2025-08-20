@@ -178,34 +178,26 @@ export default function ProductCard({ listing, viewMode = "grid" }: ProductCardP
           )}
         </div>
         
-        <CardContent className="p-4">
-          <h3 className="font-serif font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-2" data-testid={`title-${listing.id}`}>
+        <CardContent className="p-4 flex flex-col h-32">
+          <h3 className="font-serif font-bold text-base mb-1 group-hover:text-primary transition-colors line-clamp-2 flex-shrink-0" data-testid={`title-${listing.id}`}>
             {listing.title}
           </h3>
-          <p className="text-foreground/70 text-sm mb-2 line-clamp-2" data-testid={`description-${listing.id}`}>
+          <p className="text-foreground/70 text-xs mb-2 line-clamp-2 flex-grow" data-testid={`description-${listing.id}`}>
             {listing.description}
           </p>
           
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-primary font-bold text-xl" data-testid={`price-${listing.id}`}>
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-primary font-bold text-lg" data-testid={`price-${listing.id}`}>
               ${listing.price}
             </span>
             
             {listing.reviews?.length > 0 && (
-              <div className="flex items-center text-sm text-foreground/60" data-testid={`rating-${listing.id}`}>
-                <Star className="text-yellow-500 fill-current mr-1" size={14} />
+              <div className="flex items-center text-xs text-foreground/60" data-testid={`rating-${listing.id}`}>
+                <Star className="text-yellow-500 fill-current mr-1" size={12} />
                 <span>{averageRating.toFixed(1)}</span>
-                <span>({listing.reviews.length})</span>
               </div>
             )}
           </div>
-          
-          {listing.seller?.location && (
-            <div className="flex items-center text-xs text-foreground/60" data-testid={`location-${listing.id}`}>
-              <MapPin size={14} className="mr-1" />
-              <span>{listing.seller.location}</span>
-            </div>
-          )}
         </CardContent>
       </Card>
     </Link>
