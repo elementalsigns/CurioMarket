@@ -204,7 +204,7 @@ export default function Header() {
                 <Button 
                   variant="outline" 
                   onClick={() => window.location.href = '/api/login'}
-                  className="text-foreground border-border hover:text-red-600 hover:border-red-600 font-medium transition-colors"
+                  className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
                   data-testid="button-sign-in"
                 >
                   Sign in
