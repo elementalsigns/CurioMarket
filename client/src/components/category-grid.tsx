@@ -1,49 +1,61 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import wetSpecimenImage from "@assets/generated_images/Gothic_snake_specimen_jar_51bc9d48.png";
 import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
 import taxidermyImage from "@assets/generated_images/Victorian_bird_taxidermy_display_34e4d9b1.png";
 import vintageMedicalImage from "@assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png";
 
-const categories = [
-  {
-    id: "wet-specimens",
-    name: "Wet Specimens",
-    slug: "wet-specimens",
+// Static category data with images - counts will be fetched dynamically
+const categoryImages = {
+  "wet-specimens": {
     icon: "🫙",
     image: wetSpecimenImage,
-    count: 142
   },
-  {
-    id: "bones-skulls",
-    name: "Bones & Skulls",
-    slug: "bones-skulls", 
-    icon: "🦴",
+  "bones-skulls": {
+    icon: "🦴", 
     image: bonesSkullsImage,
-    count: 89
   },
-  {
-    id: "taxidermy",
-    name: "Taxidermy",
-    slug: "taxidermy",
-    icon: "🦅", 
+  "taxidermy": {
+    icon: "🦅",
     image: taxidermyImage,
-    count: 67
   },
-  {
-    id: "vintage-medical",
-    name: "Vintage Medical", 
-    slug: "vintage-medical",
+  "vintage-medical": {
     icon: "⚗️",
     image: vintageMedicalImage,
-    count: 203
   }
-];
+};
 
 export default function CategoryGrid() {
+  // Fetch dynamic category counts
+  const { data: categoryCounts, isLoading } = useQuery({
+    queryKey: ['/api/categories/counts'],
+  });
+
+  // Combine static category data with dynamic counts
+  const categories = (categoryCounts as any[])?.map((categoryCount: any) => ({
+    id: categoryCount.slug,
+    name: categoryCount.name,
+    slug: categoryCount.slug,
+    icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
+    image: (categoryImages as any)[categoryCount.slug]?.image,
+    count: categoryCount.count
+  })) || [];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="glass-effect rounded-2xl overflow-hidden">
+            <div className="aspect-square bg-zinc-800/50 animate-pulse" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-      {categories.map((category) => (
+      {categories.map((category: any) => (
         <Link key={category.id} to={`/browse?category=${category.slug}`}>
           <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
             <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>

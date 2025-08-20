@@ -269,6 +269,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get category counts for popular categories
+  app.get('/api/categories/counts', async (req, res) => {
+    try {
+      const categoryCounts = await storage.getCategoryCounts();
+      res.json(categoryCounts);
+    } catch (error) {
+      console.error("Error fetching category counts:", error);
+      res.status(500).json({ message: "Failed to fetch category counts" });
+    }
+  });
+
   app.get('/api/listings/featured', async (req, res) => {
     try {
       // For development, return sample listings with authentic specimen images
