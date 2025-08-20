@@ -133,7 +133,7 @@ export default function HelpCenter() {
       <Header />
       
       <div style={{flex: 1, backgroundColor: 'hsl(212, 5%, 5%)'}} className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
             <h1 className="text-4xl font-serif font-bold mb-4">
@@ -188,8 +188,8 @@ export default function HelpCenter() {
           </div>
 
           {/* Main Content */}
-          <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs">
-            <TabsList className="grid w-full grid-cols-3 bg-zinc-900/50 border-zinc-800">
+          <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+            <TabsList className="grid w-full grid-cols-3 bg-zinc-900/50 border-zinc-800" style={{backgroundColor: 'hsl(240, 5%, 11%)'}}>
               <TabsTrigger value="faq" className="flex items-center gap-2">
                 <Book size={16} />
                 FAQ
@@ -205,7 +205,7 @@ export default function HelpCenter() {
             </TabsList>
 
             {/* FAQ Tab */}
-            <TabsContent value="faq" className="space-y-6" data-testid="faq-tab">
+            <TabsContent value="faq" className="space-y-6" data-testid="faq-tab" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -254,7 +254,7 @@ export default function HelpCenter() {
             </TabsContent>
 
             {/* Safety Tab */}
-            <TabsContent value="safety" className="space-y-6" data-testid="safety-tab">
+            <TabsContent value="safety" className="space-y-6" data-testid="safety-tab" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -290,7 +290,7 @@ export default function HelpCenter() {
             </TabsContent>
 
             {/* Contact Tab */}
-            <TabsContent value="contact" className="space-y-6" data-testid="contact-tab">
+            <TabsContent value="contact" className="space-y-6" data-testid="contact-tab" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="bg-zinc-900/50 border-zinc-800">
                   <CardHeader>
