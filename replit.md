@@ -15,6 +15,18 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Safety Guidelines & Contact Pages Implementation (August 2025)
+- **Feature**: Created comprehensive Safety Guidelines page at `/safety` route with essential safety protocols
+- **Content**: Personal safety measures, legal compliance information, prohibited items section, and contact information
+- **Implementation**: Used inline styles approach to avoid component complexity issues and ensure stable rendering
+- **Design**: Maintains gothic aesthetic with dark theme, red accents, and Victorian typography consistent with site branding
+- **Integration**: Added to footer navigation links and both authenticated/non-authenticated route flows
+- **Technical Solution**: Resolved routing issues by simplifying component structure and avoiding complex UI library dependencies
+- **Contact Page**: Also implemented comprehensive Contact Us page at `/contact` with professional contact forms
+- **Files Created**: `client/src/pages/safety.tsx`, `client/src/pages/contact-us.tsx`
+- **Files Modified**: `client/src/App.tsx`, `client/src/components/layout/footer.tsx`
+- **Status**: Completed successfully - both pages display properly with consistent gothic branding
+
 ## Seller Guide Page Fix & Styling (August 2025)
 - **Issue**: NotFound modal appearing at bottom of seller guide page due to unhandled promise rejections
 - **Resolution**: Created standalone seller guide component with embedded CSS to bypass React error boundaries
