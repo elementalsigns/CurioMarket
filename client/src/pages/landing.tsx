@@ -17,7 +17,7 @@ export default function Landing() {
   });
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gradient-to-br from-black via-black to-gray-900">
       <Header />
       {/* Announcement Bar - Black & Red Theme */}
       <div className="bg-primary text-primary-foreground text-center py-2 px-4">
@@ -26,7 +26,7 @@ export default function Landing() {
         </p>
       </div>
       {/* Hero Section - Foxblood Noir Style */}
-      <section className="relative bg-black py-12 sm:py-16 lg:py-20" data-testid="hero-section">
+      <section className="relative bg-gradient-to-b from-black via-gray-900 to-black py-12 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero Content */}
@@ -126,7 +126,7 @@ export default function Landing() {
         </div>
       </section>
       {/* Featured Products - Etsy Style */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black" data-testid="section-featured">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-black to-gray-800" data-testid="section-featured">
         <div className="container mx-auto max-w-7xl">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -198,7 +198,7 @@ export default function Landing() {
         </div>
       </section>
       {/* For Sellers Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black" data-testid="section-sellers">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-bl from-black via-gray-900 to-black" data-testid="section-sellers">
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
