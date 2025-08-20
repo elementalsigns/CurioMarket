@@ -452,12 +452,21 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async getFeaturedListings(limit: number = 8): Promise<Listing[]> {
+  async getFeaturedListings(limit: number = 8): Promise<any[]> {
     const result = await this.getListings({ 
       limit, 
       state: 'published'
     });
-    return result.listings;
+    
+    // Add images to each listing
+    const listingsWithImages = await Promise.all(
+      result.listings.map(async (listing) => {
+        const images = await this.getListingImages(listing.id);
+        return { ...listing, images };
+      })
+    );
+    
+    return listingsWithImages;
   }
 
   async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }> {
