@@ -225,7 +225,7 @@ export default function Browse() {
                 </div>
               </div>
             )}
-          </div>
+            </div>
         </div>
         </div>
       </div>
