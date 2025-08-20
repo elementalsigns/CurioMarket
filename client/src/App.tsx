@@ -19,7 +19,7 @@ import AccountManager from "@/pages/account-manager";
 import SellerTerms from "@/pages/seller-terms";
 import SellerGuide from "@/pages/seller-guide";
 import SellerGuideClean from "@/pages/seller-guide-clean";
-import WorkingDemo from "@/pages/working-demo";
+import DemoSimple from "@/pages/demo-simple";
 import SellerGuideSimple from "@/pages/seller-guide-simple";
 import SellerGuideMinimal from "@/pages/seller-guide-minimal";
 import SellerGuideFinal from "@/pages/seller-guide-final";
@@ -46,7 +46,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
-          <Route path="/account-demo" component={WorkingDemo} />
+          <Route path="/account-demo" component={DemoSimple} />
           <Route component={NotFound} />
         </>
       ) : (
@@ -64,7 +64,7 @@ function Router() {
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
           <Route path="/account" component={AccountManager} />
-          <Route path="/account-demo" component={WorkingDemo} />
+          <Route path="/account-demo" component={DemoSimple} />
           <Route component={NotFound} />
         </>
       )}
