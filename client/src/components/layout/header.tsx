@@ -106,38 +106,48 @@ export default function Header() {
               </DropdownMenu>
             </div>
 
-            <div className="flex items-center" data-testid="logo">
+            <Link 
+              to="/" 
+              className="flex items-center logo-container" 
+              data-testid="logo"
+              style={{
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
+                if (logo) {
+                  logo.classList.add('logo-hovered');
+                }
+              }}
+              onMouseLeave={(e) => {
+                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
+                if (logo) {
+                  logo.classList.remove('logo-hovered');
+                }
+              }}
+            >
               <h1 
-                className="text-2xl curio-logo font-bold select-none"
+                className="text-2xl curio-logo font-bold" 
                 style={{
-                  fontFamily: 'EB Garamond, serif',
-                  fontWeight: '600',
-                  letterSpacing: '0.05em',
-                  fontVariant: 'small-caps',
-                  color: 'white',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)',
                   transition: 'all 0.3s ease',
-                  cursor: 'default',
-                  userSelect: 'none'
+                  cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#6A1B1B';
-                  e.currentTarget.style.textShadow = '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.8)';
-                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.color = 'red';
+                  e.currentTarget.style.textShadow = '0 0 10px red';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
                 }}
               >
                 <span>
-                  <span style={{fontFamily: 'Great Vibes, cursive', fontSize: '1.2em'}}>C</span><span>u</span>r<span>i</span>o
+                  <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>
-                  <span style={{fontFamily: 'Great Vibes, cursive', fontSize: '1.2em'}}>M</span>arket
+                  <span className="script-initial">M</span>arket
                 </span>
               </h1>
-            </div>
+            </Link>
           </div>
 
 
