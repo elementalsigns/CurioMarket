@@ -204,7 +204,7 @@ export default function CreateListing() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.isArray(categories) && categories.map((category: any) => (
+                            {categories?.map((category: any) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>

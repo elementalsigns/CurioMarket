@@ -174,49 +174,6 @@ h1.curio-logo:hover .script-initial,
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }
 
-/* Glass effect for cards */
-.glass-effect {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Force all containers to have dark background */
-.container {
-  background-color: hsl(212, 5%, 5%) !important;
-}
-
-/* Override any white card backgrounds */
-[data-radix-collection-item] {
-  background-color: transparent !important;
-}
-
-/* Ensure tab content has proper background */
-[role="tabpanel"] {
-  background-color: hsl(212, 5%, 5%) !important;
-}
-
-/* Override shadcn card backgrounds */
-.bg-card {
-  background-color: hsl(212, 5%, 5%) !important;
-}
-
-/* Override any popover or dropdown backgrounds */
-[data-radix-popper-content-wrapper] {
-  background-color: hsl(212, 5%, 5%) !important;
-}
-
-/* Ensure all divs maintain dark background */
-div:not([class*="border"]):not([class*="gradient"]) {
-  background-color: transparent;
-}
-
-/* Force dark background for main content areas */
-main, article, section {
-  background-color: hsl(212, 5%, 5%) !important;
-}
-
 
 
 

@@ -5,49 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Search, HelpCircle, Shield, MessageCircle, Book, AlertTriangle } from "lucide-react";
 
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
-
-  const handleEmailSupport = () => {
-    window.location.href = "mailto:support@curiomarket.com?subject=Support Request&body=Please describe your issue in detail.";
-  };
-
-  const handleReportSafety = () => {
-    toast({
-      title: "Safety Report",
-      description: "Redirecting to safety report form...",
-    });
-    // In a real app, this would redirect to a dedicated report form
-    setTimeout(() => {
-      window.location.href = "mailto:safety@curiomarket.com?subject=Safety Concern&body=Please describe the safety concern in detail including item/seller information.";
-    }, 1000);
-  };
-
-  const handleReportSeller = () => {
-    toast({
-      title: "Seller Report",
-      description: "Redirecting to seller report form...",
-    });
-    setTimeout(() => {
-      window.location.href = "mailto:disputes@curiomarket.com?subject=Seller Issue&body=Please provide order number and details of the issue.";
-    }, 1000);
-  };
-
-  const handleReportTechnical = () => {
-    toast({
-      title: "Technical Report",
-      description: "Redirecting to technical support...",
-    });
-    setTimeout(() => {
-      window.location.href = "mailto:tech@curiomarket.com?subject=Technical Issue&body=Please describe the technical problem including steps to reproduce.";
-    }, 1000);
-  };
 
   const faqData = [
     {
@@ -166,33 +129,31 @@ export default function HelpCenter() {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div className="min-h-screen bg-background" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
+    <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ 
-        background: 'linear-gradient(135deg, hsl(212, 5%, 5%) 0%, hsl(220, 6%, 7%) 25%, hsl(216, 5%, 6%) 50%, hsl(214, 5%, 8%) 75%, hsl(212, 5%, 5%) 100%)'
-      }}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
-            <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-[#6A1B1B] transition-colors duration-300 cursor-default">
-              Help Center
+            <h1 className="text-4xl font-serif font-bold mb-4">
+              Help <span className="text-red-600">Center</span>
             </h1>
-            <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Find answers to common questions and learn how to make the most of Curio Market
             </p>
           </div>
 
           {/* Search */}
-          <Card className="glass-effect border border-zinc-800 mb-8" data-testid="help-search">
+          <Card className="mb-8" data-testid="help-search">
             <CardContent className="p-6">
               <div className="relative max-w-2xl mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
                 <Input
                   placeholder="Search help articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 text-base bg-zinc-900/50 border-zinc-700 focus:border-red-600"
+                  className="pl-10 h-12 text-base"
                   data-testid="search-input"
                 />
               </div>
@@ -201,43 +162,43 @@ export default function HelpCenter() {
 
           {/* Quick Help Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid">
-            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-[#6A1B1B]/50">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
-                <HelpCircle className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
+                <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Frequently Asked Questions</h3>
-                <p className="text-sm text-foreground/70">Common questions about buying, selling, and using Curio Market</p>
+                <p className="text-sm text-muted-foreground">Common questions about buying, selling, and using Curio Market</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-purple-600/50">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <Shield className="mx-auto mb-4 text-purple-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Safety Guidelines</h3>
-                <p className="text-sm text-foreground/70">Best practices for safe and legal transactions</p>
+                <p className="text-sm text-muted-foreground">Best practices for safe and legal transactions</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-blue-600/50">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <MessageCircle className="mx-auto mb-4 text-blue-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Contact Support</h3>
-                <p className="text-sm text-foreground/70">Get personalized help from our support team</p>
+                <p className="text-sm text-muted-foreground">Get personalized help from our support team</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs">
-            <TabsList className="grid w-full grid-cols-3 bg-zinc-900 border border-zinc-800">
-              <TabsTrigger value="faq" className="flex items-center gap-2 data-[state=active]:bg-[#6A1B1B] data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="faq" className="flex items-center gap-2">
                 <Book size={16} />
                 FAQ
               </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              <TabsTrigger value="safety" className="flex items-center gap-2">
                 <Shield size={16} />
                 Safety
               </TabsTrigger>
-              <TabsTrigger value="contact" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <TabsTrigger value="contact" className="flex items-center gap-2">
                 <MessageCircle size={16} />
                 Contact
               </TabsTrigger>
@@ -245,10 +206,10 @@ export default function HelpCenter() {
 
             {/* FAQ Tab */}
             <TabsContent value="faq" className="space-y-6" data-testid="faq-tab">
-              <Card className="glass-effect border border-zinc-800">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 font-serif">
-                    <Book className="text-[#6A1B1B]" size={24} />
+                  <CardTitle className="flex items-center gap-2">
+                    <Book className="text-red-600" size={24} />
                     Frequently Asked Questions
                   </CardTitle>
                 </CardHeader>
@@ -258,7 +219,7 @@ export default function HelpCenter() {
                       {filteredFAQ.map((category, categoryIndex) => (
                         <div key={categoryIndex}>
                           <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="text-sm border-[#6A1B1B]/50 text-[#6A1B1B]">
+                            <Badge variant="outline" className="text-sm">
                               {category.category}
                             </Badge>
                           </div>
@@ -267,12 +228,12 @@ export default function HelpCenter() {
                               <AccordionItem 
                                 key={faqIndex} 
                                 value={`${categoryIndex}-${faqIndex}`}
-                                className="border border-zinc-800 rounded-lg px-4 bg-zinc-900/30"
+                                className="border border-border rounded-lg px-4"
                               >
-                                <AccordionTrigger className="text-left hover:no-underline hover:text-[#6A1B1B] transition-colors">
+                                <AccordionTrigger className="text-left hover:no-underline">
                                   {faq.q}
                                 </AccordionTrigger>
-                                <AccordionContent className="text-foreground/70">
+                                <AccordionContent className="text-muted-foreground">
                                   {faq.a}
                                 </AccordionContent>
                               </AccordionItem>
@@ -282,7 +243,7 @@ export default function HelpCenter() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-foreground/50">
+                    <div className="text-center py-8 text-muted-foreground">
                       <Search size={48} className="mx-auto mb-4 opacity-50" />
                       <p>No results found for "{searchQuery}"</p>
                       <p className="text-sm">Try different search terms or browse all categories</p>
@@ -294,31 +255,31 @@ export default function HelpCenter() {
 
             {/* Safety Tab */}
             <TabsContent value="safety" className="space-y-6" data-testid="safety-tab">
-              <Card className="glass-effect border border-zinc-800">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 font-serif">
+                  <CardTitle className="flex items-center gap-2">
                     <Shield className="text-purple-600" size={24} />
                     Safety Guidelines
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="bg-[#6A1B1B]/20 border border-[#6A1B1B]/30 rounded-lg p-4">
+                    <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="text-[#6A1B1B]" size={20} />
-                        <h4 className="font-medium text-[#6A1B1B]">Notice:</h4>
+                        <AlertTriangle className="text-amber-400" size={20} />
+                        <h4 className="font-medium text-amber-400">Important Notice</h4>
                       </div>
-                      <p className="text-sm text-foreground/70">
+                      <p className="text-sm text-muted-foreground">
                         Curio Market deals with unique and sometimes regulated items. Always verify legal requirements and follow safety protocols when handling specimens and oddities.
                       </p>
                     </div>
 
                     <div className="grid gap-6">
                       {safetyGuidelines.map((guideline, index) => (
-                        <Card key={index} className="border-l-4 border-l-[#6A1B1B] bg-zinc-900/30 border border-zinc-800">
+                        <Card key={index} className="border-l-4 border-l-purple-600">
                           <CardContent className="p-4">
-                            <h4 className="font-medium mb-2 text-[#6A1B1B]">{guideline.title}</h4>
-                            <p className="text-sm text-foreground/70">{guideline.content}</p>
+                            <h4 className="font-medium mb-2">{guideline.title}</h4>
+                            <p className="text-sm text-muted-foreground">{guideline.content}</p>
                           </CardContent>
                         </Card>
                       ))}
@@ -331,39 +292,34 @@ export default function HelpCenter() {
             {/* Contact Tab */}
             <TabsContent value="contact" className="space-y-6" data-testid="contact-tab">
               <div className="grid md:grid-cols-2 gap-6">
-                <Card className="glass-effect border border-zinc-800">
+                <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-serif">
+                    <CardTitle className="flex items-center gap-2">
                       <MessageCircle className="text-blue-600" size={24} />
                       Contact Support
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Email Support</h4>
-                      <p className="text-sm text-foreground/70 mb-2">
+                      <h4 className="font-medium mb-2">Email Support</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
                         For general inquiries, account issues, or seller support:
                       </p>
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
-                        onClick={handleEmailSupport}
-                        data-testid="button-email-support"
-                      >
+                      <Button variant="outline" className="w-full">
                         support@curiomarket.com
                       </Button>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Response Time</h4>
-                      <p className="text-sm text-foreground/70">
+                      <h4 className="font-medium mb-2">Response Time</h4>
+                      <p className="text-sm text-muted-foreground">
                         We typically respond within 24-48 hours during business days.
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Before Contacting Support</h4>
-                      <ul className="text-sm text-foreground/70 space-y-1">
+                      <h4 className="font-medium mb-2">Before Contacting Support</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
                         <li>• Check our FAQ section above</li>
                         <li>• Try searching for your specific issue</li>
                         <li>• Have your order number ready (if applicable)</li>
@@ -372,52 +328,37 @@ export default function HelpCenter() {
                   </CardContent>
                 </Card>
 
-                <Card className="glass-effect border border-zinc-800">
+                <Card>
                   <CardHeader>
-                    <CardTitle className="font-serif">Report Issues</CardTitle>
+                    <CardTitle>Report Issues</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Safety Concerns</h4>
-                      <p className="text-sm text-foreground/70 mb-2">
+                      <h4 className="font-medium mb-2">Safety Concerns</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
-                      <Button 
-                        variant="outline" 
-                        className="w-full text-[#6A1B1B] border-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
-                        onClick={handleReportSafety}
-                        data-testid="button-report-safety"
-                      >
+                      <Button variant="outline" className="w-full text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
                         Report Safety Issue
                       </Button>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Seller Issues</h4>
-                      <p className="text-sm text-foreground/70 mb-2">
+                      <h4 className="font-medium mb-2">Seller Issues</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
                         Problems with a specific seller or transaction:
                       </p>
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
-                        onClick={handleReportSeller}
-                        data-testid="button-report-seller"
-                      >
+                      <Button variant="outline" className="w-full">
                         Report Seller Issue
                       </Button>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Technical Problems</h4>
-                      <p className="text-sm text-foreground/70 mb-2">
+                      <h4 className="font-medium mb-2">Technical Problems</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
                         Website bugs or technical difficulties:
                       </p>
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
-                        onClick={handleReportTechnical}
-                        data-testid="button-report-technical"
-                      >
+                      <Button variant="outline" className="w-full">
                         Report Technical Issue
                       </Button>
                     </div>
