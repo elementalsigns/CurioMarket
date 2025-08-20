@@ -61,7 +61,7 @@ export default function Header() {
             <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-foreground hover:text-red-600 hover:bg-transparent font-medium flex items-center transition-colors" data-testid="categories-dropdown">
+                  <Button variant="ghost" className="text-foreground hover:text-red-600 hover:bg-transparent font-medium flex items-center transition-colors border-none focus:border-none focus:ring-0 focus:outline-none" data-testid="categories-dropdown">
                     Categories <ChevronDown size={16} className="ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
