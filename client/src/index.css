@@ -134,6 +134,35 @@
   transform: rotate(15deg) scaleX(2) translateX(0.1em);
 }
 
+/* Amazon-style curved connection from 'i' to 'u' in Curio */
+.curio-word {
+  position: relative;
+  display: inline-block;
+}
+
+.curio-word::after {
+  content: '';
+  position: absolute;
+  top: 70%;
+  left: 1.8em; /* Position after 'i' */
+  width: 1.2em;
+  height: 0.4em;
+  border: 2px solid var(--curio-blood-red);
+  border-top: none;
+  border-left: none;
+  border-radius: 0 0 20px 0;
+  transform: rotate(-10deg) scaleY(1.2);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(106, 27, 27, 0.3);
+}
+
+.curio-logo:hover .curio-word::after {
+  opacity: 1;
+  transform: rotate(-10deg) scaleY(1.4) translateX(0.1em);
+  box-shadow: 0 3px 6px rgba(106, 27, 27, 0.5);
+}
+
 .dark {
   /* Consistent Foxblood noir theme */
   --background: var(--curio-noir-black);
