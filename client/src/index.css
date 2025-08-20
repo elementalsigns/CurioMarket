@@ -76,9 +76,15 @@
 }
 
 .curio-logo:hover {
-  color: var(--curio-blood-red);
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5);
+  color: var(--curio-blood-red) !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
   transform: scale(1.02);
+}
+
+/* More specific selector for header logo */
+h1.curio-logo:hover {
+  color: var(--curio-blood-red) !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
 }
 
 /* Tapered full-width underline */
@@ -94,8 +100,9 @@
   transition: opacity 0.3s ease;
 }
 
-.curio-logo:hover::after {
-  opacity: 0.8;
+.curio-logo:hover::after,
+h1.curio-logo:hover::after {
+  opacity: 0.8 !important;
 }
 
 /* Script-style initial letters */
@@ -111,9 +118,10 @@
   transition: all 0.3s ease;
 }
 
-.curio-logo:hover .script-initial {
+.curio-logo:hover .script-initial,
+h1.curio-logo:hover .script-initial {
   transform: translateY(-0.08em) scale(1.05);
-  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }
 
 

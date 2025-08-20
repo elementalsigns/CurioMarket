@@ -107,7 +107,7 @@ export default function Header() {
             </div>
 
             <Link to="/" className="flex items-center" data-testid="logo">
-              <h1 className="text-2xl curio-logo font-bold">
+              <h1 className="text-2xl curio-logo font-bold hover:text-red-600">
                 <span>
                   <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>
