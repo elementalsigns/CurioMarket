@@ -12,6 +12,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force pure black background everywhere */
+html, body {
+  background-color: hsl(212, 5%, 5%) !important;
+  color: hsl(0, 0%, 100%) !important;
+}
+
+/* Ensure all main containers use black background */
+#root {
+  background-color: hsl(212, 5%, 5%) !important;
+  min-height: 100vh;
+}
+
 :root {
   /* Foxblood Modern Noir Gothic Color Scheme */
   --curio-noir-black: hsl(212, 5%, 5%); /* Deep noir black #0D0D0D */
