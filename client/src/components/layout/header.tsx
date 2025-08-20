@@ -126,7 +126,21 @@ export default function Header() {
                 }
               }}
             >
-              <h1 className="text-2xl curio-logo font-bold" style={{transition: 'all 0.3s ease'}}>
+              <h1 
+                className="text-2xl curio-logo font-bold" 
+                style={{
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'red';
+                  e.currentTarget.style.textShadow = '0 0 10px red';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
+                }}
+              >
                 <span>
                   <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>
