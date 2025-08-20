@@ -62,7 +62,7 @@ export default function Header() {
             </Link>
 
             {/* Categories Dropdown - Desktop */}
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="text-foreground hover:text-primary font-medium flex items-center" data-testid="categories-dropdown">
@@ -130,10 +130,6 @@ export default function Header() {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex items-center space-x-8">
-            <Link to="/browse" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="link-browse">
-              Categories
-            </Link>
-            
             {isAuthenticated ? (
               <Link to="/seller-dashboard" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="link-sell">
                 Sell on Curio Market
@@ -152,22 +148,6 @@ export default function Header() {
 
           {/* Right Side Icons & User Menu */}
           <div className="flex items-center space-x-4">
-            {/* Shopping Cart - Always show */}
-            <Link to="/cart">
-              <Button 
-                variant="ghost" 
-                className="text-foreground hover:text-primary p-2 relative"
-                data-testid="button-cart"
-              >
-                <ShoppingCart size={20} />
-                {isAuthenticated && cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
             {isAuthenticated && (
               <Button 
                 variant="ghost" 
@@ -242,6 +222,22 @@ export default function Header() {
                 </Button>
               </div>
             )}
+
+            {/* Shopping Cart - Far Right */}
+            <Link to="/cart">
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-primary p-2 relative"
+                data-testid="button-cart"
+              >
+                <ShoppingCart size={20} />
+                {isAuthenticated && cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
