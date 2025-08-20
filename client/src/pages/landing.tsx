@@ -32,10 +32,10 @@ export default function Landing() {
             {/* Hero Content */}
             <div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl curio-logo font-bold mb-8 leading-[0.9]" data-testid="hero-title">
-                <span className="text-foreground">
+                <span>
                   <span className="script-initial">C</span>urio
                 </span>{" "}
-                <span className="text-primary font-black">
+                <span className="font-black">
                   <span className="script-initial">M</span>arket
                 </span>
               </h1>

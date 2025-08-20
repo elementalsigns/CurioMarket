@@ -106,9 +106,9 @@ export default function Header() {
 
             <Link to="/" className="flex items-center" data-testid="logo">
               <h1 className="text-2xl curio-logo font-bold">
-                <span className="text-foreground">
+                <span>
                   <span className="script-initial">C</span>urio
-                </span> <span className="text-primary">
+                </span> <span>
                   <span className="script-initial">M</span>arket
                 </span>
               </h1>
