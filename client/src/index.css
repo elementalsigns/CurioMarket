@@ -103,6 +103,32 @@ section {
   background-color: hsl(212, 5%, 5%) !important;
 }
 
+/* Target any overlays, modals, or popover content in help center */
+.help-center-page [data-radix-popper-content-wrapper],
+.help-center-page [data-radix-popover-content],
+.help-center-page [data-radix-dialog-content],
+.help-center-page [data-radix-modal-content],
+.help-center-page .fixed,
+.help-center-page .absolute,
+.help-center-page [role="dialog"],
+.help-center-page [role="alertdialog"],
+.help-center-page [data-state="open"],
+.help-center-page [data-state="visible"],
+.help-center-page .z-50,
+.help-center-page .z-40,
+.help-center-page .z-30 {
+  background-color: hsl(212, 5%, 5%) !important;
+  border-color: hsl(240, 5%, 20%) !important;
+}
+
+/* Force any white overlays to be transparent or dark */
+.help-center-page .bg-background,
+.help-center-page .bg-card,
+.help-center-page .bg-popover,
+.help-center-page .bg-muted {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
 :root {
   /* Foxblood Modern Noir Gothic Color Scheme */
   --curio-noir-black: hsl(212, 5%, 5%); /* Deep noir black #0D0D0D */
