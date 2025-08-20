@@ -13,6 +13,14 @@ Preferred communication style: Simple, everyday language.
 - Hover effects: Consistent red text hover effects across all navigation elements
 - Notice styling: Red "Notice:" text with red-bordered boxes instead of white/primary colors
 
+# Recent Changes
+
+## Layout Fix (August 2025)
+- **White Space Issue Resolution**: Resolved persistent white space under footer using inline styles
+- **Method**: Applied direct HTML styling in index.html and React components to override CSS conflicts
+- **Technical Details**: Used `height: 100vh` on body, `height: 100%` cascade through DOM, flexbox layout with `flex: 1` on main content
+- **Files Modified**: `client/index.html`, `client/src/App.tsx`, `client/src/pages/home.tsx`, `client/src/index.css`
+
 # System Architecture
 
 ## Frontend Architecture
