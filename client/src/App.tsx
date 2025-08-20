@@ -31,6 +31,7 @@ import ContactUs from "@/pages/contact-us";
 import PrivacyPolicyStandalone from "@/pages/privacy-policy";
 import TermsOfServiceStandalone from "@/pages/terms-of-service";
 import ProhibitedItemsStandalone from "@/pages/prohibited-items";
+import CookiesPolicyStandalone from "@/pages/cookies-policy";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -56,6 +57,7 @@ function Router() {
           <Route path="/privacy" component={PrivacyPolicyStandalone} />
           <Route path="/terms" component={TermsOfServiceStandalone} />
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
+          <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       ) : (
@@ -71,6 +73,7 @@ function Router() {
           <Route path="/privacy" component={PrivacyPolicyStandalone} />
           <Route path="/terms" component={TermsOfServiceStandalone} />
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
+          <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/listings/create" component={CreateListing} />
