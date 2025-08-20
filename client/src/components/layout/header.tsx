@@ -53,15 +53,9 @@ export default function Header() {
     <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
-          {/* Left Side - Logo & Categories */}
+          {/* Left Side - Categories & Logo */}
           <div className="flex items-center space-x-6">
-            <Link to="/" className="flex items-center" data-testid="logo">
-              <h1 className="text-xl font-brand font-bold tracking-wider">
-                <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
-              </h1>
-            </Link>
-
-            {/* Categories Dropdown - Desktop */}
+            {/* Categories Dropdown - Far Left */}
             <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -109,24 +103,15 @@ export default function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
+            <Link to="/" className="flex items-center" data-testid="logo">
+              <h1 className="text-xl font-brand font-bold tracking-wider">
+                <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
+              </h1>
+            </Link>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
-                <Input
-                  type="text"
-                  placeholder="Search for anything"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-3 bg-input border-border rounded-full text-sm"
-                  data-testid="input-search"
-                />
-              </div>
-            </form>
-          </div>
+
 
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex items-center space-x-8">
@@ -255,21 +240,6 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-primary/20" data-testid="mobile-menu">
             <div className="space-y-4">
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
-                  <Input
-                    type="text"
-                    placeholder="Search oddities..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-input border-border rounded-2xl"
-                    data-testid="input-search-mobile"
-                  />
-                </div>
-              </form>
-
               {/* Mobile Navigation */}
               <div className="flex flex-col space-y-2">
                 <Link to="/browse">
