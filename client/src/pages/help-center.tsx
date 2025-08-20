@@ -189,7 +189,7 @@ export default function HelpCenter() {
 
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3 bg-zinc-900/50 border-zinc-800">
               <TabsTrigger value="faq" className="flex items-center gap-2">
                 <Book size={16} />
                 FAQ
@@ -219,7 +219,7 @@ export default function HelpCenter() {
                       {filteredFAQ.map((category, categoryIndex) => (
                         <div key={categoryIndex}>
                           <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="text-sm">
+                            <Badge variant="outline" className="text-sm bg-zinc-800/50 border-zinc-700">
                               {category.category}
                             </Badge>
                           </div>
@@ -243,7 +243,7 @@ export default function HelpCenter() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-muted-foreground bg-zinc-900/20 rounded-lg">
                       <Search size={48} className="mx-auto mb-4 opacity-50" />
                       <p>No results found for "{searchQuery}"</p>
                       <p className="text-sm">Try different search terms or browse all categories</p>
@@ -264,7 +264,7 @@ export default function HelpCenter() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                    <div className="bg-amber-950/30 border border-amber-900/50 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="text-amber-400" size={20} />
                         <h4 className="font-medium text-amber-400">Important Notice</h4>
