@@ -49,7 +49,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
-          <Route path="/safety" component={SafetyTest} />
+          <Route path="/safety" component={SafetyGuidelines} />
           <Route path="/contact" component={ContactUs} />
           <Route path="/account-demo" component={DemoSimple} />
           <Route component={NotFound} />
@@ -62,7 +62,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
-          <Route path="/safety" component={SafetyTest} />
+          <Route path="/safety" component={SafetyGuidelines} />
           <Route path="/contact" component={ContactUs} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
