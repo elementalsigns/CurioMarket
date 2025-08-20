@@ -106,8 +106,8 @@ export default function Header() {
               </DropdownMenu>
             </div>
 
-            <div className="flex items-center" data-testid="logo">
-              <h1 className="text-2xl curio-logo font-bold logo-hover-target">
+            <div className="flex items-center pointer-events-none" data-testid="logo">
+              <h1 className="text-2xl curio-logo font-bold logo-hover-target pointer-events-auto">
                 <span>
                   <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>

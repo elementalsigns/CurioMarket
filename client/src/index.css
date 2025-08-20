@@ -115,11 +115,20 @@ a .logo-hovered,
   transform: scale(1.02) !important;
 }
 
-/* Logo hover effect - clean CSS approach */
-.logo-hover-target:hover {
+/* Logo hover effect - persistent and strong */
+.logo-hover-target:hover,
+.curio-logo.logo-hover-target:hover,
+h1.curio-logo.logo-hover-target:hover {
   color: var(--curio-blood-red) !important;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.8) !important;
   transform: scale(1.02) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Ensure logo is not clickable but hover still works */
+.logo-hover-target {
+  cursor: default !important;
+  pointer-events: auto !important;
 }
 
 /* Tapered full-width underline */
@@ -137,7 +146,8 @@ a .logo-hovered,
 
 .curio-logo:hover::after,
 h1.curio-logo:hover::after,
-.logo-hover-target:hover::after {
+.logo-hover-target:hover::after,
+.curio-logo.logo-hover-target:hover::after {
   opacity: 0.8 !important;
 }
 
@@ -156,7 +166,8 @@ h1.curio-logo:hover::after,
 
 .curio-logo:hover .script-initial,
 h1.curio-logo:hover .script-initial,
-.logo-hover-target:hover .script-initial {
+.logo-hover-target:hover .script-initial,
+.curio-logo.logo-hover-target:hover .script-initial {
   transform: translateY(-0.08em) scale(1.05);
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }
