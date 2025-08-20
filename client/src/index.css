@@ -77,16 +77,9 @@
   flex-direction: column;
 }
 
-/* Victorian Gothic Logo Style with Script Initials */
+/* Simplified logo base - inline styles will override */
 .curio-logo {
-  font-family: var(--font-brand-curvy);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  font-variant: small-caps;
-  color: var(--curio-pure-white) !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1) !important;
   position: relative;
-  transition: all 0.3s ease !important;
   display: inline-block;
 }
 
@@ -96,42 +89,7 @@
   transform: scale(1.02);
 }
 
-/* More specific selector for header logo */
-h1.curio-logo:hover,
-.logo-container:hover .curio-logo,
-h1.curio-logo.logo-hovered {
-  color: var(--curio-blood-red) !important;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
-  transform: scale(1.02) !important;
-}
-
-/* Force red color for hovered state - maximum specificity */
-.logo-hovered,
-h1.logo-hovered.curio-logo.text-2xl,
-a .logo-hovered,
-.logo-container .logo-hovered {
-  color: red !important;
-  text-shadow: 0 4px 8px rgba(255, 0, 0, 0.8) !important;
-  transform: scale(1.02) !important;
-}
-
-/* Logo hover effect - persistent and strong */
-.logo-hover-target:hover,
-.curio-logo.logo-hover-target:hover,
-h1.curio-logo.logo-hover-target:hover {
-  color: var(--curio-blood-red) !important;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.8) !important;
-  transform: scale(1.02) !important;
-  transition: all 0.3s ease !important;
-}
-
-/* Ensure logo is not clickable but hover still works */
-.logo-hover-target {
-  cursor: default !important;
-  pointer-events: auto !important;
-}
-
-/* Tapered full-width underline */
+/* Removed complex CSS - using inline styles for logo hover */
 .curio-logo::after {
   content: '';
   position: absolute;
