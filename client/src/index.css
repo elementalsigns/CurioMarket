@@ -100,11 +100,18 @@ a .logo-hovered,
   transform: scale(1.02) !important;
 }
 
-/* Nuclear option - override everything */
-[data-testid="logo"] h1:hover,
-[data-testid="logo"]:hover h1 {
-  color: red !important;
-  text-shadow: 0 0 10px red !important;
+/* Logo hover effect - using maximum specificity and overriding inline styles */
+.logo-hover-target:hover,
+h1.logo-hover-target.curio-logo.text-2xl.font-bold:hover,
+[data-testid="logo"] .logo-hover-target:hover {
+  color: var(--curio-blood-red) !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.8) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Override any inline styles that might be interfering */
+body[style] #root[style] * .logo-hover-target:hover {
+  color: var(--curio-blood-red) !important;
 }
 
 /* Tapered full-width underline */
@@ -122,8 +129,7 @@ a .logo-hovered,
 
 .curio-logo:hover::after,
 h1.curio-logo:hover::after,
-.logo-container:hover .curio-logo::after,
-.logo-hovered::after {
+.logo-hover-target:hover::after {
   opacity: 0.8 !important;
 }
 
@@ -142,8 +148,7 @@ h1.curio-logo:hover::after,
 
 .curio-logo:hover .script-initial,
 h1.curio-logo:hover .script-initial,
-.logo-container:hover .curio-logo .script-initial,
-.logo-hovered .script-initial {
+.logo-hover-target:hover .script-initial {
   transform: translateY(-0.08em) scale(1.05);
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }

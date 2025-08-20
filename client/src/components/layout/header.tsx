@@ -106,48 +106,15 @@ export default function Header() {
               </DropdownMenu>
             </div>
 
-            <Link 
-              to="/" 
-              className="flex items-center logo-container" 
-              data-testid="logo"
-              style={{
-                textDecoration: 'none'
-              }}
-              onMouseEnter={(e) => {
-                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
-                if (logo) {
-                  logo.classList.add('logo-hovered');
-                }
-              }}
-              onMouseLeave={(e) => {
-                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
-                if (logo) {
-                  logo.classList.remove('logo-hovered');
-                }
-              }}
-            >
-              <h1 
-                className="text-2xl curio-logo font-bold" 
-                style={{
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'red';
-                  e.currentTarget.style.textShadow = '0 0 10px red';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
-                }}
-              >
+            <div className="flex items-center" data-testid="logo">
+              <h1 className="text-2xl curio-logo font-bold logo-hover-target">
                 <span>
                   <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>
                   <span className="script-initial">M</span>arket
                 </span>
               </h1>
-            </Link>
+            </div>
           </div>
 
 
