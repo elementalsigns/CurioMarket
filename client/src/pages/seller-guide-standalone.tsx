@@ -89,7 +89,7 @@ function SellerGuideStandalone() {
         .btn-large { padding: 0.75rem 2rem; font-size: 1.125rem; font-weight: 500; border-radius: 6px; cursor: pointer; }
         
         /* Footer Styles - Match home page exactly */
-        .footer { background: #0a0a0a; border-top: 1px solid rgba(106, 27, 27, 0.2); padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
+        .footer { background: #0a0a0a; border-top: 1px solid rgba(255, 255, 255, 0.2); padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
         .footer-container { max-width: 80rem; margin: 0 auto; }
         .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
         .footer-brand { grid-column: span 2; }
@@ -116,7 +116,7 @@ function SellerGuideStandalone() {
           height: auto;
         }
         .footer-link:hover { color: rgb(220, 38, 38); background: transparent; }
-        .footer-bottom { border-top: 1px solid rgba(106, 27, 27, 0.2); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .footer-copyright { color: rgba(113, 113, 122, 1); font-size: 0.875rem; margin-bottom: 1rem; }
         .footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
         .footer-legal .footer-link { font-size: 0.875rem; margin-bottom: 0; }
