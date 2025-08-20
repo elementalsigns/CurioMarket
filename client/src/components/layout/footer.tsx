@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Footer() {
   return (
-    <footer className="bg-background border-t border-primary/20 py-16 px-4 sm:px-6 lg:px-8" data-testid="footer">
+    <footer className="bg-background border-t border-primary/20 py-16 px-4 sm:px-6 lg:px-8 mt-auto" data-testid="footer">
       <div className="container mx-auto max-w-7xl">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}

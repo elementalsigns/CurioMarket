@@ -152,12 +152,16 @@
 
   html {
     @apply bg-background;
+    height: 100%;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground min-h-screen;
+    @apply font-sans antialiased bg-background text-foreground;
     /* Clean modern noir - no texture, pure minimalism like Foxblood */
     background: var(--curio-pure-black);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -189,9 +193,18 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    margin: 0;
+    padding: 0;
   }
 
   .page-content {
     flex: 1;
+  }
+
+  /* Ensure root element fills viewport */
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 }
