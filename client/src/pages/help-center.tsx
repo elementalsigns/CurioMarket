@@ -145,9 +145,12 @@ export default function HelpCenter() {
         position: 'relative',
         zIndex: 2
       }} className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-6xl mx-auto" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+        <div className="max-w-6xl mx-auto space-y-8" style={{
+          backgroundColor: 'hsl(212, 5%, 5%)',
+          minHeight: '100%'
+        }}>
           {/* Header */}
-          <div className="text-center mb-12" data-testid="help-header">
+          <div className="text-center mb-12" data-testid="help-header" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <h1 className="text-4xl font-serif font-bold mb-4">
               Help <span className="text-red-600">Center</span>
             </h1>
@@ -173,7 +176,7 @@ export default function HelpCenter() {
           </Card>
 
           {/* Quick Help Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid">
+          <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
                 <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />

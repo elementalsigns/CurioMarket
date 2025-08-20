@@ -86,6 +86,16 @@ html:has(.help-center-page),
   background-color: transparent !important;
 }
 
+/* Force specific containers and cards to have dark backgrounds */
+.help-center-page .container,
+.help-center-page .mx-auto,
+.help-center-page .space-y-8,
+.help-center-page .space-y-6,
+.help-center-page .grid,
+.help-center-page .max-w-6xl {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
 /* Specifically override common white background classes */
 .help-center-page .bg-white,
 .help-center-page .bg-slate-50,
