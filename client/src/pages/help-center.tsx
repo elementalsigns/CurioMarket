@@ -147,15 +147,27 @@ export default function HelpCenter() {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div className="help-center-page" style={{
-      display: 'flex', 
-      flexDirection: 'column', 
-      height: '100vh', 
-      backgroundColor: 'hsl(212, 5%, 5%)',
-      position: 'relative',
-      zIndex: 1
-    }}>
-      <Header />
+    <>
+      {/* Force full viewport dark background */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'hsl(212, 5%, 5%)',
+        zIndex: -1
+      }} />
+      
+      <div className="help-center-page" style={{
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100vh', 
+        backgroundColor: 'hsl(212, 5%, 5%)',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <Header />
       
       <div style={{
         flex: 1, 
@@ -404,6 +416,7 @@ export default function HelpCenter() {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
