@@ -129,11 +129,11 @@ export default function HelpCenter() {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
       <Header />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
+        <div className="max-w-6xl mx-auto" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
             <h1 className="text-4xl font-serif font-bold mb-4">
