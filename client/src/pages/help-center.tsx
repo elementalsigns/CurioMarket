@@ -136,8 +136,8 @@ export default function HelpCenter() {
         <div className="max-w-6xl mx-auto" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
-            <h1 className="text-4xl font-serif font-bold mb-4">
-              Help <span className="text-red-600">Center</span>
+            <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-red-600 transition-colors duration-300 cursor-default">
+              Help Center
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
               Find answers to common questions and learn how to make the most of Curio Market
@@ -264,12 +264,12 @@ export default function HelpCenter() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                    <div className="bg-red-950/20 border border-red-900/30 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="text-amber-400" size={20} />
-                        <h4 className="font-medium text-amber-400">Important Notice</h4>
+                        <AlertTriangle className="text-red-400" size={20} />
+                        <h4 className="font-medium text-red-400">Notice:</h4>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-foreground/70">
                         Curio Market deals with unique and sometimes regulated items. Always verify legal requirements and follow safety protocols when handling specimens and oddities.
                       </p>
                     </div>
@@ -301,24 +301,24 @@ export default function HelpCenter() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2">Email Support</h4>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <h4 className="font-medium mb-2 text-red-400">Email Support</h4>
+                      <p className="text-sm text-foreground/70 mb-2">
                         For general inquiries, account issues, or seller support:
                       </p>
-                      <Button variant="outline" className="w-full border-blue-600/50 text-blue-400 hover:bg-blue-600 hover:text-white">
+                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
                         support@curiomarket.com
                       </Button>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium mb-2">Response Time</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium mb-2 text-red-400">Response Time</h4>
+                      <p className="text-sm text-foreground/70">
                         We typically respond within 24-48 hours during business days.
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2">Before Contacting Support</h4>
+                      <h4 className="font-medium mb-2 text-red-400">Before Contacting Support</h4>
                       <ul className="text-sm text-foreground/70 space-y-1">
                         <li>• Check our FAQ section above</li>
                         <li>• Try searching for your specific issue</li>
@@ -334,7 +334,7 @@ export default function HelpCenter() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2">Safety Concerns</h4>
+                      <h4 className="font-medium mb-2 text-red-400">Safety Concerns</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
@@ -344,21 +344,21 @@ export default function HelpCenter() {
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2">Seller Issues</h4>
+                      <h4 className="font-medium mb-2 text-red-400">Seller Issues</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Problems with a specific seller or transaction:
                       </p>
-                      <Button variant="outline" className="w-full border-zinc-600 hover:bg-zinc-700">
+                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
                         Report Seller Issue
                       </Button>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2">Technical Problems</h4>
+                      <h4 className="font-medium mb-2 text-red-400">Technical Problems</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Website bugs or technical difficulties:
                       </p>
-                      <Button variant="outline" className="w-full border-zinc-600 hover:bg-zinc-700">
+                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
                         Report Technical Issue
                       </Button>
                     </div>
