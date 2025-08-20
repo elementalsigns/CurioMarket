@@ -114,19 +114,21 @@ export default function Header() {
                 textDecoration: 'none'
               }}
               onMouseEnter={(e) => {
-                const logo = e.currentTarget.querySelector('.curio-logo') as HTMLElement;
+                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
+                console.log('Hover enter - found logo:', logo);
                 if (logo) {
-                  logo.style.color = '#dc2626';
-                  logo.style.transform = 'scale(1.02)';
-                  logo.style.textShadow = '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5)';
+                  logo.style.setProperty('color', '#dc2626', 'important');
+                  logo.style.setProperty('transform', 'scale(1.02)', 'important');
+                  logo.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
                 }
               }}
               onMouseLeave={(e) => {
-                const logo = e.currentTarget.querySelector('.curio-logo') as HTMLElement;
+                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
+                console.log('Hover leave - found logo:', logo);
                 if (logo) {
-                  logo.style.color = 'white';
-                  logo.style.transform = 'scale(1)';
-                  logo.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)';
+                  logo.style.setProperty('color', '#ffffff', 'important');
+                  logo.style.setProperty('transform', 'scale(1)', 'important');
+                  logo.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
                 }
               }}
             >
