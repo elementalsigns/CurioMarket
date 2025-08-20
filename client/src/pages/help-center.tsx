@@ -139,21 +139,21 @@ export default function HelpCenter() {
             <h1 className="text-4xl font-serif font-bold mb-4">
               Help <span className="text-red-600">Center</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
               Find answers to common questions and learn how to make the most of Curio Market
             </p>
           </div>
 
           {/* Search */}
-          <Card className="mb-8" data-testid="help-search">
+          <Card className="glass-effect border border-zinc-800 mb-8" data-testid="help-search">
             <CardContent className="p-6">
               <div className="relative max-w-2xl mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
                 <Input
                   placeholder="Search help articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 text-base"
+                  className="pl-10 h-12 text-base bg-zinc-900/50 border-zinc-700 focus:border-red-600"
                   data-testid="search-input"
                 />
               </div>
@@ -162,43 +162,43 @@ export default function HelpCenter() {
 
           {/* Quick Help Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid">
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-red-600/50">
               <CardContent className="p-6">
                 <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Frequently Asked Questions</h3>
-                <p className="text-sm text-muted-foreground">Common questions about buying, selling, and using Curio Market</p>
+                <p className="text-sm text-foreground/70">Common questions about buying, selling, and using Curio Market</p>
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-purple-600/50">
               <CardContent className="p-6">
                 <Shield className="mx-auto mb-4 text-purple-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Safety Guidelines</h3>
-                <p className="text-sm text-muted-foreground">Best practices for safe and legal transactions</p>
+                <p className="text-sm text-foreground/70">Best practices for safe and legal transactions</p>
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-blue-600/50">
               <CardContent className="p-6">
                 <MessageCircle className="mx-auto mb-4 text-blue-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Contact Support</h3>
-                <p className="text-sm text-muted-foreground">Get personalized help from our support team</p>
+                <p className="text-sm text-foreground/70">Get personalized help from our support team</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="faq" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-3 bg-zinc-900 border border-zinc-800">
+              <TabsTrigger value="faq" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
                 <Book size={16} />
                 FAQ
               </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-2">
+              <TabsTrigger value="safety" className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                 <Shield size={16} />
                 Safety
               </TabsTrigger>
-              <TabsTrigger value="contact" className="flex items-center gap-2">
+              <TabsTrigger value="contact" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <MessageCircle size={16} />
                 Contact
               </TabsTrigger>
@@ -206,9 +206,9 @@ export default function HelpCenter() {
 
             {/* FAQ Tab */}
             <TabsContent value="faq" className="space-y-6" data-testid="faq-tab">
-              <Card>
+              <Card className="glass-effect border border-zinc-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-serif">
                     <Book className="text-red-600" size={24} />
                     Frequently Asked Questions
                   </CardTitle>
@@ -219,7 +219,7 @@ export default function HelpCenter() {
                       {filteredFAQ.map((category, categoryIndex) => (
                         <div key={categoryIndex}>
                           <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="text-sm">
+                            <Badge variant="outline" className="text-sm border-red-600/50 text-red-400">
                               {category.category}
                             </Badge>
                           </div>
@@ -228,12 +228,12 @@ export default function HelpCenter() {
                               <AccordionItem 
                                 key={faqIndex} 
                                 value={`${categoryIndex}-${faqIndex}`}
-                                className="border border-border rounded-lg px-4"
+                                className="border border-zinc-800 rounded-lg px-4 bg-zinc-900/30"
                               >
-                                <AccordionTrigger className="text-left hover:no-underline">
+                                <AccordionTrigger className="text-left hover:no-underline hover:text-red-400 transition-colors">
                                   {faq.q}
                                 </AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
+                                <AccordionContent className="text-foreground/70">
                                   {faq.a}
                                 </AccordionContent>
                               </AccordionItem>
@@ -243,7 +243,7 @@ export default function HelpCenter() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-foreground/50">
                       <Search size={48} className="mx-auto mb-4 opacity-50" />
                       <p>No results found for "{searchQuery}"</p>
                       <p className="text-sm">Try different search terms or browse all categories</p>
@@ -255,9 +255,9 @@ export default function HelpCenter() {
 
             {/* Safety Tab */}
             <TabsContent value="safety" className="space-y-6" data-testid="safety-tab">
-              <Card>
+              <Card className="glass-effect border border-zinc-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-serif">
                     <Shield className="text-purple-600" size={24} />
                     Safety Guidelines
                   </CardTitle>
@@ -276,10 +276,10 @@ export default function HelpCenter() {
 
                     <div className="grid gap-6">
                       {safetyGuidelines.map((guideline, index) => (
-                        <Card key={index} className="border-l-4 border-l-purple-600">
+                        <Card key={index} className="border-l-4 border-l-purple-600 bg-zinc-900/30 border border-zinc-800">
                           <CardContent className="p-4">
-                            <h4 className="font-medium mb-2">{guideline.title}</h4>
-                            <p className="text-sm text-muted-foreground">{guideline.content}</p>
+                            <h4 className="font-medium mb-2 text-purple-400">{guideline.title}</h4>
+                            <p className="text-sm text-foreground/70">{guideline.content}</p>
                           </CardContent>
                         </Card>
                       ))}
@@ -292,9 +292,9 @@ export default function HelpCenter() {
             {/* Contact Tab */}
             <TabsContent value="contact" className="space-y-6" data-testid="contact-tab">
               <div className="grid md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="glass-effect border border-zinc-800">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 font-serif">
                       <MessageCircle className="text-blue-600" size={24} />
                       Contact Support
                     </CardTitle>
@@ -305,7 +305,7 @@ export default function HelpCenter() {
                       <p className="text-sm text-muted-foreground mb-2">
                         For general inquiries, account issues, or seller support:
                       </p>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full border-blue-600/50 text-blue-400 hover:bg-blue-600 hover:text-white">
                         support@curiomarket.com
                       </Button>
                     </div>
@@ -319,7 +319,7 @@ export default function HelpCenter() {
 
                     <div>
                       <h4 className="font-medium mb-2">Before Contacting Support</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
+                      <ul className="text-sm text-foreground/70 space-y-1">
                         <li>• Check our FAQ section above</li>
                         <li>• Try searching for your specific issue</li>
                         <li>• Have your order number ready (if applicable)</li>
@@ -328,14 +328,14 @@ export default function HelpCenter() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="glass-effect border border-zinc-800">
                   <CardHeader>
-                    <CardTitle>Report Issues</CardTitle>
+                    <CardTitle className="font-serif">Report Issues</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">Safety Concerns</h4>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-foreground/70 mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
                       <Button variant="outline" className="w-full text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
@@ -345,20 +345,20 @@ export default function HelpCenter() {
 
                     <div>
                       <h4 className="font-medium mb-2">Seller Issues</h4>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-foreground/70 mb-2">
                         Problems with a specific seller or transaction:
                       </p>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full border-zinc-600 hover:bg-zinc-700">
                         Report Seller Issue
                       </Button>
                     </div>
 
                     <div>
                       <h4 className="font-medium mb-2">Technical Problems</h4>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-foreground/70 mb-2">
                         Website bugs or technical difficulties:
                       </p>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full border-zinc-600 hover:bg-zinc-700">
                         Report Technical Issue
                       </Button>
                     </div>
