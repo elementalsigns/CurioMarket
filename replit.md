@@ -6,6 +6,13 @@ Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and 
 
 Preferred communication style: Simple, everyday language.
 
+## Design Preferences
+- Typography: Victorian/gothic style with EB Garamond body text
+- Logo styling: White text that turns red on hover with tapered red underline
+- Color scheme: Darker zinc gradients preferred over gray for subtle depth
+- Hover effects: Consistent red text hover effects across all navigation elements
+- Notice styling: Red "Notice:" text with red-bordered boxes instead of white/primary colors
+
 # System Architecture
 
 ## Frontend Architecture
