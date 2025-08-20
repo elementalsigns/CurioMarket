@@ -83,10 +83,18 @@
 
 /* More specific selector for header logo */
 h1.curio-logo:hover,
-.logo-container:hover .curio-logo {
+.logo-container:hover .curio-logo,
+h1.curio-logo.logo-hovered {
   color: var(--curio-blood-red) !important;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
-  transform: scale(1.02);
+  transform: scale(1.02) !important;
+}
+
+/* Force red color for hovered state */
+.logo-hovered {
+  color: #dc2626 !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
+  transform: scale(1.02) !important;
 }
 
 /* Tapered full-width underline */
@@ -104,7 +112,8 @@ h1.curio-logo:hover,
 
 .curio-logo:hover::after,
 h1.curio-logo:hover::after,
-.logo-container:hover .curio-logo::after {
+.logo-container:hover .curio-logo::after,
+.logo-hovered::after {
   opacity: 0.8 !important;
 }
 
@@ -123,7 +132,8 @@ h1.curio-logo:hover::after,
 
 .curio-logo:hover .script-initial,
 h1.curio-logo:hover .script-initial,
-.logo-container:hover .curio-logo .script-initial {
+.logo-container:hover .curio-logo .script-initial,
+.logo-hovered .script-initial {
   transform: translateY(-0.08em) scale(1.05);
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }
