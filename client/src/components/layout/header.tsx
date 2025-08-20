@@ -38,6 +38,11 @@ export default function Header() {
     enabled: isAuthenticated,
   });
 
+  const { data: sellerData } = useQuery({
+    queryKey: ["/api/seller/profile"],
+    enabled: isAuthenticated,
+  });
+
   const cartItemCount = (cartData && Array.isArray((cartData as any).items)) ? (cartData as any).items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -167,25 +172,43 @@ export default function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link to="/seller/dashboard" className="flex items-center">
-                      <Store className="mr-2" size={16} />
-                      Your shop
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/seller/listings/create" className="flex items-center">
-                      <Plus className="mr-2" size={16} />
-                      Sell on Curio Market
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center">
-                      <Settings className="mr-2" size={16} />
-                      Your account
-                    </Link>
-                  </DropdownMenuItem>
+                  {sellerData ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/account" className="flex items-center">
+                          <Store className="mr-2" size={16} />
+                          Shop Manager
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/seller/dashboard" className="flex items-center">
+                          <Settings className="mr-2" size={16} />
+                          Shop Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/seller/listings/create" className="flex items-center">
+                          <Plus className="mr-2" size={16} />
+                          Add Listing
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/account" className="flex items-center">
+                          <User className="mr-2" size={16} />
+                          Your Account
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/seller/terms" className="flex items-center">
+                          <Store className="mr-2" size={16} />
+                          Sell on Curio Market
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="mr-2" size={16} />

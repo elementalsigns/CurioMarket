@@ -33,6 +33,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get seller profile
+  app.get('/api/seller/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+      res.json(seller);
+    } catch (error) {
+      console.error("Error fetching seller profile:", error);
+      res.status(500).json({ message: "Failed to fetch seller profile" });
+    }
+  });
+
+  // Get seller listings
+  app.get('/api/seller/listings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+      const listings = await storage.getListingsBySellerId(seller.id);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching seller listings:", error);
+      res.status(500).json({ message: "Failed to fetch seller listings" });
+    }
+  });
+
+  // Get seller stats
+  app.get('/api/seller/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+      
+      // Mock stats for now - will be replaced with real data
+      const stats = {
+        totalSales: 0,
+        totalRevenue: "0.00",
+        averageRating: "N/A",
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching seller stats:", error);
+      res.status(500).json({ message: "Failed to fetch seller stats" });
+    }
+  });
+
   // Seller onboarding and subscription
   app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
     try {

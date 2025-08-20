@@ -15,6 +15,7 @@ import CreateListing from "@/pages/create-listing";
 import Checkout from "@/pages/checkout";
 import Subscribe from "@/pages/subscribe";
 import UserProfile from "@/pages/user-profile";
+import AccountManager from "@/pages/account-manager";
 import SellerTerms from "@/pages/seller-terms";
 import SellerGuide from "@/pages/seller-guide";
 import SellerGuideClean from "@/pages/seller-guide-clean";
@@ -60,6 +61,7 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
+          <Route path="/account" component={AccountManager} />
           <Route component={NotFound} />
         </>
       )}
