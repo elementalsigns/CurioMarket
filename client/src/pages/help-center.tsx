@@ -199,7 +199,18 @@ export default function HelpCenter() {
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <h1 className="text-4xl font-serif font-bold mb-4">
-              Help <span style={{color: 'hsl(0, 77%, 26%)'}}>Center</span>
+              <span 
+                className="transition-colors duration-300 cursor-pointer"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'hsl(0, 77%, 26%)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'white';
+                }}
+                style={{color: 'white'}}
+              >
+                Help Center
+              </span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Find answers to common questions and learn how to make the most of Curio Market
