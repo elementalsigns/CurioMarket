@@ -250,8 +250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: "4",
           slug: "preserved-wet-specimen-jar",
-          title: "Preserved Heart Specimen",
-          description: "Victorian era anatomical heart specimen preserved in original formaldehyde solution. Authentic medical curiosity with brass label.",
+          title: "Preserved Frog Specimen",
+          description: "Victorian era frog specimen preserved in original formaldehyde solution. Authentic scientific curiosity from antique laboratory collection.",
           price: "95.00",
           category: "wet-specimens",
           status: "active",
@@ -259,8 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img4",
             listingId: "4",
-            url: "/assets/generated_images/Victorian_preserved_heart_specimen_c40cd840.png",
-            alt: "Preserved heart specimen in laboratory jar",
+            url: "/assets/generated_images/Victorian_preserved_frog_specimen_9698e184.png",
+            alt: "Preserved frog specimen in laboratory jar",
             sortOrder: 0
           }],
           seller: {
