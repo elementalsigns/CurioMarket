@@ -52,13 +52,7 @@ export default function Header() {
   };
 
   return (
-    <>
-      {/* Free Shipping Banner */}
-      <div className="bg-background text-white text-center py-2 text-sm border-b-2 border-[#6A1B1B]" data-testid="shipping-banner">
-        Free shipping on orders over $75 • Fast worldwide delivery
-      </div>
-      
-      <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
+    <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
           {/* Left Side - Categories & Logo */}
@@ -309,6 +303,5 @@ export default function Header() {
       {/* Cart Sidebar */}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </nav>
-    </>
   );
 }
