@@ -8,7 +8,7 @@ export default function NotFound() {
   // Don't render NotFound on specific pages to prevent overlay issues
   if (typeof window !== 'undefined') {
     const path = window.location.pathname;
-    if (path === '/seller/guide' || path === '/safety' || path === '/contact') {
+    if (path === '/seller/guide' || path === '/safety' || path === '/contact' || path === '/privacy' || path === '/terms' || path === '/prohibited') {
       return null;
     }
   }
