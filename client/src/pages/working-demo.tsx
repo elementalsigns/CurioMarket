@@ -91,7 +91,7 @@ function WorkingDemo() {
                 cursor: 'pointer',
                 fontWeight: 'bold'
               }}
-              onclick="toggleMode('buyer')"
+              onClick={() => {}}
             >
               Buyer View
             </button>
@@ -104,7 +104,7 @@ function WorkingDemo() {
                 borderRadius: '0.25rem',
                 cursor: 'pointer'
               }}
-              onclick="toggleMode('seller')"
+              onClick={() => {}}
             >
               Seller View
             </button>
