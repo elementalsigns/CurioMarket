@@ -15,6 +15,13 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Seller Guide Page Fix (August 2025)
+- **Issue**: NotFound modal appearing at bottom of seller guide page due to unhandled promise rejections
+- **Resolution**: Created standalone seller guide component with embedded CSS to bypass React error boundaries
+- **Implementation**: Modified NotFound component to not render on /seller/guide path, preventing overlay issues
+- **Technical Details**: Used pure inline styles and simplified component structure to eliminate JavaScript runtime errors
+- **Files Modified**: `client/src/pages/seller-guide-standalone.tsx` (created), `client/src/pages/not-found.tsx`, `client/src/App.tsx`
+
 ## Seller Guide Page Implementation (August 2025)
 - **Feature**: Created comprehensive seller guide page at `/seller/guide` route
 - **Content**: Step-by-step onboarding process, best practices, pricing transparency, and community building tips
