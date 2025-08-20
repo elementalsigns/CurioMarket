@@ -199,7 +199,7 @@ export default function HelpCenter() {
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <h1 className="text-4xl font-serif font-bold mb-4">
-              Help <span className="text-red-600">Center</span>
+              Help <span style={{color: 'hsl(0, 77%, 26%)'}}>Center</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Find answers to common questions and learn how to make the most of Curio Market
@@ -226,7 +226,7 @@ export default function HelpCenter() {
           <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
-                <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />
+                <HelpCircle className="mx-auto mb-4" style={{color: 'hsl(0, 77%, 26%)'}} size={48} />
                 <h3 className="font-serif font-bold mb-2">Frequently Asked Questions</h3>
                 <p className="text-sm text-muted-foreground">Common questions about buying, selling, and using Curio Market</p>
               </CardContent>
@@ -252,15 +252,15 @@ export default function HelpCenter() {
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
             <TabsList className="grid w-full grid-cols-3 bg-zinc-900/50 border-zinc-800" style={{backgroundColor: 'hsl(240, 5%, 11%)'}}>
-              <TabsTrigger value="faq" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-faq">
+              <TabsTrigger value="faq" className="flex items-center gap-2 transition-colors" style={{'--hover-color': 'hsl(0, 77%, 26%)'}} data-testid="tab-faq">
                 <Book size={16} />
                 FAQ
               </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-safety">
+              <TabsTrigger value="safety" className="flex items-center gap-2 transition-colors" style={{'--hover-color': 'hsl(0, 77%, 26%)'}} data-testid="tab-safety">
                 <Shield size={16} />
                 Safety
               </TabsTrigger>
-              <TabsTrigger value="contact" className="flex items-center gap-2 hover:text-red-600 transition-colors" data-testid="tab-contact">
+              <TabsTrigger value="contact" className="flex items-center gap-2 transition-colors" style={{'--hover-color': 'hsl(0, 77%, 26%)'}} data-testid="tab-contact">
                 <MessageCircle size={16} />
                 Contact
               </TabsTrigger>
@@ -271,7 +271,7 @@ export default function HelpCenter() {
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Book className="text-red-600" size={24} />
+                    <Book style={{color: 'hsl(0, 77%, 26%)'}} size={24} />
                     Frequently Asked Questions
                   </CardTitle>
                 </CardHeader>
@@ -400,7 +400,20 @@ export default function HelpCenter() {
                       <p className="text-sm text-muted-foreground mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
-                      <Button variant="outline" className="w-full text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
+                      <Button 
+                        variant="outline" 
+                        className="w-full hover:text-white transition-colors" 
+                        style={{
+                          color: 'hsl(0, 77%, 26%)', 
+                          borderColor: 'hsl(0, 77%, 26%)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'hsl(0, 77%, 26%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
                         Report Safety Issue
                       </Button>
                     </div>
