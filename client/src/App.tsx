@@ -27,6 +27,7 @@ import SellerGuideStandalone from "@/pages/seller-guide-standalone";
 import TestSellerGuide from "@/pages/test-seller-guide";
 import HelpCenter from "@/pages/help-center";
 import SafetyGuidelines from "@/pages/safety-guidelines";
+import SafetyGuidelinesSimple from "@/pages/safety-guidelines-simple";
 import ContactUs from "@/pages/contact-us";
 import SafetyTest from "@/pages/safety-test";
 
@@ -49,7 +50,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
-          <Route path="/safety" component={SafetyGuidelines} />
+          <Route path="/safety" component={SafetyGuidelinesSimple} />
           <Route path="/contact" component={ContactUs} />
           <Route path="/account-demo" component={DemoSimple} />
           <Route component={NotFound} />
@@ -62,7 +63,7 @@ function Router() {
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
-          <Route path="/safety" component={SafetyGuidelines} />
+          <Route path="/safety" component={SafetyGuidelinesSimple} />
           <Route path="/contact" component={ContactUs} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
