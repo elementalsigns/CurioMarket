@@ -129,7 +129,7 @@ export default function HelpCenter() {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'hsl(212, 5%, 5%)'}}>
+    <div className="help-center-page" style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'hsl(212, 5%, 5%)'}}>
       <Header />
       
       <div style={{flex: 1, backgroundColor: 'hsl(212, 5%, 5%)'}} className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
