@@ -193,15 +193,29 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
   }
 
   .page-content {
     flex: 1;
   }
 
-  /* Ensure root element fills viewport */
+  /* Additional footer fix */
+  footer[data-testid="footer"] {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Prevent body overflow that creates white space */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Force full height on viewport */
+  html {
+    height: 100%;
+  }
+
+  /* Ensure root element fills viewport completely */
   #root {
     min-height: 100vh;
     display: flex;
