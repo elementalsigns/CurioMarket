@@ -88,30 +88,45 @@ function SellerGuideStandalone() {
         .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
         .btn-large { padding: 0.75rem 2rem; font-size: 1.125rem; font-weight: 500; border-radius: 6px; cursor: pointer; }
         
-        /* Footer Styles */
-        .footer { background: #0a0a0a; border-top: 1px solid rgba(106, 27, 27, 0.2); padding: 4rem 1rem; margin-top: 4rem; }
-        .footer-content { max-width: 1200px; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        /* Footer Styles - Match home page exactly */
+        .footer { background: #0a0a0a; border-top: 1px solid rgba(106, 27, 27, 0.2); padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
+        .footer-container { max-width: 80rem; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
         .footer-brand { grid-column: span 2; }
-        .footer-brand .logo { margin-bottom: 1rem; }
-        .footer-description { color: #a1a1aa; margin-bottom: 1.5rem; max-width: 400px; line-height: 1.6; }
+        .footer-brand .logo { margin-bottom: 1rem; display: flex; align-items: center; }
+        .footer-description { color: #a1a1aa; margin-bottom: 1.5rem; max-width: 28rem; line-height: 1.6; }
         .social-links { display: flex; gap: 1rem; }
-        .social-btn { background: transparent; border: none; color: #a1a1aa; padding: 0.5rem; cursor: pointer; transition: color 0.3s; }
-        .social-btn:hover { color: hsl(0, 77%, 26%); }
-        .footer-section h4 { color: white; font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; }
+        .social-btn { background: transparent; border: none; color: #a1a1aa; padding: 0.5rem; cursor: pointer; transition: color 0.3s; border-radius: 0.375rem; }
+        .social-btn:hover { color: hsl(0, 77%, 26%); background: transparent; }
+        .footer-section h4 { color: white; font-size: 1.125rem; font-family: Georgia, serif; font-weight: bold; margin-bottom: 1rem; }
         .footer-links { list-style: none; }
         .footer-links li { margin-bottom: 0.5rem; }
-        .footer-link { color: #a1a1aa; text-decoration: none; transition: color 0.3s; cursor: pointer; }
-        .footer-link:hover { color: hsl(0, 77%, 26%); }
+        .footer-link { 
+          color: #a1a1aa; 
+          text-decoration: none; 
+          transition: color 0.3s, background-color 0.3s; 
+          cursor: pointer; 
+          padding: 0.25rem 0;
+          border-radius: 0.375rem;
+          display: inline-block;
+          background: transparent;
+          border: none;
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          height: auto;
+        }
+        .footer-link:hover { color: rgb(220, 38, 38); background: transparent; }
         .footer-bottom { border-top: 1px solid rgba(106, 27, 27, 0.2); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .footer-copyright { color: #71717a; font-size: 0.875rem; }
+        .footer-copyright { color: rgba(113, 113, 122, 1); font-size: 0.875rem; margin-bottom: 1rem; }
         .footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-        .footer-legal .footer-link { font-size: 0.875rem; }
+        .footer-legal .footer-link { font-size: 0.875rem; margin-bottom: 0; }
         
         @media (max-width: 768px) {
+          .footer-grid { grid-template-columns: 1fr; }
           .footer-brand { grid-column: span 1; }
           .footer-bottom { flex-direction: column; text-align: center; }
           .footer-legal { justify-content: center; }
+          .footer-copyright { margin-bottom: 0; }
         }
       `}</style>
       
@@ -214,11 +229,17 @@ function SellerGuideStandalone() {
         </main>
 
         <footer className="footer">
-          <div className="footer-content">
+          <div className="footer-container">
             <div className="footer-grid">
               <div className="footer-brand">
                 <div className="logo">
-                  <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+                  <h3 style={{fontSize: '1.5rem', fontWeight: 'bold', margin: 0}}>
+                    <span>
+                      <span className="script-initial">C</span><span>u</span>r<span>i</span>o
+                    </span> <span>
+                      <span className="script-initial">M</span>arket
+                    </span>
+                  </h3>
                 </div>
                 <p className="footer-description">
                   The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
@@ -239,21 +260,21 @@ function SellerGuideStandalone() {
               <div className="footer-section">
                 <h4>Shop</h4>
                 <ul className="footer-links">
-                  <li><a href="/browse" className="footer-link">All Categories</a></li>
-                  <li><a href="/browse?category=wet-specimens" className="footer-link">Wet Specimens</a></li>
-                  <li><a href="/browse?category=taxidermy" className="footer-link">Taxidermy</a></li>
-                  <li><a href="/browse?category=bones-skulls" className="footer-link">Bones & Skulls</a></li>
-                  <li><a href="/browse?category=occult-art" className="footer-link">Occult Art</a></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse'}>All Categories</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=wet-specimens'}>Wet Specimens</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=taxidermy'}>Taxidermy</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=bones-skulls'}>Bones & Skulls</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/browse?category=occult-art'}>Occult Art</button></li>
                 </ul>
               </div>
 
               <div className="footer-section">
                 <h4>Support</h4>
                 <ul className="footer-links">
-                  <li><a href="/help" className="footer-link">Help Center</a></li>
-                  <li><a href="/seller/guide" className="footer-link">Seller Guide</a></li>
-                  <li><a href="/safety" className="footer-link">Safety Guidelines</a></li>
-                  <li><a href="/contact" className="footer-link">Contact Us</a></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/help'}>Help Center</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/seller/guide'}>Seller Guide</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/safety'}>Safety Guidelines</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/contact'}>Contact Us</button></li>
                 </ul>
               </div>
             </div>
@@ -263,9 +284,9 @@ function SellerGuideStandalone() {
                 © 2024 Curio Market. All rights reserved.
               </p>
               <div className="footer-legal">
-                <a href="/privacy" className="footer-link">Privacy Policy</a>
-                <a href="/terms" className="footer-link">Terms of Service</a>
-                <a href="/prohibited" className="footer-link">Prohibited Items</a>
+                <button className="footer-link" onClick={() => window.location.href = '/privacy'}>Privacy Policy</button>
+                <button className="footer-link" onClick={() => window.location.href = '/terms'}>Terms of Service</button>
+                <button className="footer-link" onClick={() => window.location.href = '/prohibited'}>Prohibited Items</button>
               </div>
             </div>
           </div>
