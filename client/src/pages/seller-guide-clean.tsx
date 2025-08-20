@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function SellerGuideClean() {
+  console.log("SellerGuideClean component is being rendered");
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <Header />
