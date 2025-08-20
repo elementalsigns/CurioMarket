@@ -202,9 +202,9 @@ export default function Header() {
                   Sign up
                 </Button>
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   onClick={() => window.location.href = '/api/login'}
-                  className="text-foreground hover:text-primary font-medium"
+                  className="text-foreground border-border hover:text-red-600 hover:border-red-600 font-medium transition-colors"
                   data-testid="button-sign-in"
                 >
                   Sign in
