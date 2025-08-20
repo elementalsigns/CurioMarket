@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,24 @@ import { Search, HelpCircle, Shield, MessageCircle, Book, AlertTriangle } from "
 
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Force body background to be dark when this component mounts
+  useEffect(() => {
+    const originalBodyBg = document.body.style.backgroundColor;
+    const originalHtmlBg = document.documentElement.style.backgroundColor;
+    
+    document.body.style.backgroundColor = 'hsl(212, 5%, 5%)';
+    document.documentElement.style.backgroundColor = 'hsl(212, 5%, 5%)';
+    document.body.classList.add('help-center-body');
+    document.documentElement.classList.add('help-center-html');
+    
+    return () => {
+      document.body.style.backgroundColor = originalBodyBg;
+      document.documentElement.style.backgroundColor = originalHtmlBg;
+      document.body.classList.remove('help-center-body');
+      document.documentElement.classList.remove('help-center-html');
+    };
+  }, []);
 
   const faqData = [
     {

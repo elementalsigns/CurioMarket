@@ -77,6 +77,15 @@ body:has(.help-center-page),
 html:has(.help-center-page),
 #root:has(.help-center-page) {
   background-color: hsl(212, 5%, 5%) !important;
+  background: hsl(212, 5%, 5%) !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+body.help-center-body,
+html.help-center-html,
+#root.help-center-root {
+  background-color: hsl(212, 5%, 5%) !important;
+  background: hsl(212, 5%, 5%) !important;
 }
 
 /* Target every possible element that could have a white background */
