@@ -106,26 +106,7 @@ export default function Header() {
               </DropdownMenu>
             </div>
 
-            <Link 
-              to="/" 
-              className="flex items-center logo-container" 
-              data-testid="logo"
-              style={{
-                textDecoration: 'none'
-              }}
-              onMouseEnter={(e) => {
-                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
-                if (logo) {
-                  logo.classList.add('logo-hovered');
-                }
-              }}
-              onMouseLeave={(e) => {
-                const logo = e.currentTarget.querySelector('h1') as HTMLElement;
-                if (logo) {
-                  logo.classList.remove('logo-hovered');
-                }
-              }}
-            >
+            <Link to="/" className="flex items-center" data-testid="logo">
               <h1 
                 className="text-2xl curio-logo font-bold" 
                 style={{
@@ -133,12 +114,14 @@ export default function Header() {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'red';
-                  e.currentTarget.style.textShadow = '0 0 10px red';
+                  e.currentTarget.style.setProperty('color', '#dc2626', 'important');
+                  e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
+                  e.currentTarget.style.setProperty('transform', 'scale(1.02)', 'important');
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5)';
+                  e.currentTarget.style.setProperty('color', '#ffffff', 'important');
+                  e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
+                  e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
                 }}
               >
                 <span>

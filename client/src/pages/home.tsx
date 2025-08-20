@@ -125,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gothic-gray/20" data-testid="section-categories">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-zinc-900/20" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
