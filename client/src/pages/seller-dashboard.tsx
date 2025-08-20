@@ -83,6 +83,13 @@ export default function SellerDashboard() {
     );
   }
 
+  const { 
+    seller = { shopName: "Your Shop", bio: "", location: "", policies: "" }, 
+    listings = [], 
+    orders = [], 
+    stats = { totalSales: 0, totalOrders: 0, totalListings: 0, conversionRate: 0 }
+  } = dashboardData || {};
+
   if (!dashboardData?.seller) {
     return (
       <div className="min-h-screen bg-background">
@@ -100,8 +107,6 @@ export default function SellerDashboard() {
       </div>
     );
   }
-
-  const { seller, listings, orders, stats } = dashboardData;
 
   return (
     <div className="min-h-screen bg-background">
