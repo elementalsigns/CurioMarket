@@ -1,5 +1,9 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import wetSpecimenImage from "@assets/generated_images/Gothic_wet_specimen_jar_e0e9946f.png";
+import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
+import taxidermyImage from "@assets/generated_images/Victorian_bird_taxidermy_display_34e4d9b1.png";
+import vintageMedicalImage from "@assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png";
 
 const categories = [
   {
@@ -7,7 +11,7 @@ const categories = [
     name: "Wet Specimens",
     slug: "wet-specimens",
     icon: "🫙",
-    image: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
+    image: wetSpecimenImage,
     count: 142
   },
   {
@@ -15,7 +19,7 @@ const categories = [
     name: "Bones & Skulls",
     slug: "bones-skulls", 
     icon: "🦴",
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
+    image: bonesSkullsImage,
     count: 89
   },
   {
@@ -23,7 +27,7 @@ const categories = [
     name: "Taxidermy",
     slug: "taxidermy",
     icon: "🦅", 
-    image: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
+    image: taxidermyImage,
     count: 67
   },
   {
@@ -31,7 +35,7 @@ const categories = [
     name: "Vintage Medical", 
     slug: "vintage-medical",
     icon: "⚗️",
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80",
+    image: vintageMedicalImage,
     count: 203
   }
 ];
