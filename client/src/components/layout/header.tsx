@@ -21,7 +21,8 @@ import {
   Store,
   Settings,
   LogOut,
-  Plus
+  Plus,
+  ChevronDown
 } from "lucide-react";
 
 export default function Header() {
@@ -52,12 +53,63 @@ export default function Header() {
     <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
-          {/* Logo */}
-          <Link to="/" className="flex items-center" data-testid="logo">
-            <h1 className="text-xl font-brand font-bold tracking-wider">
-              <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
-            </h1>
-          </Link>
+          {/* Left Side - Logo & Categories */}
+          <div className="flex items-center space-x-6">
+            <Link to="/" className="flex items-center" data-testid="logo">
+              <h1 className="text-xl font-brand font-bold tracking-wider">
+                <span className="text-foreground">CURIO</span> <span className="text-primary">MARKET</span>
+              </h1>
+            </Link>
+
+            {/* Categories Dropdown - Desktop */}
+            <div className="hidden lg:block">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-foreground hover:text-primary font-medium flex items-center" data-testid="categories-dropdown">
+                    Categories <ChevronDown size={16} className="ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=taxidermy" className="flex items-center">
+                      Taxidermy & Bones
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=vintage-medical" className="flex items-center">
+                      Vintage Medical
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=gothic-decor" className="flex items-center">
+                      Gothic Home Decor
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=oddities" className="flex items-center">
+                      Oddities & Curiosities
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=specimens" className="flex items-center">
+                      Antique Specimens
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=victorian" className="flex items-center">
+                      Victorian Era
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse" className="flex items-center font-medium">
+                      View All Categories
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
@@ -100,31 +152,30 @@ export default function Header() {
 
           {/* Right Side Icons & User Menu */}
           <div className="flex items-center space-x-4">
+            {/* Shopping Cart - Always show */}
+            <Link to="/cart">
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-primary p-2 relative"
+                data-testid="button-cart"
+              >
+                <ShoppingCart size={20} />
+                {isAuthenticated && cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {isAuthenticated && (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="text-foreground hover:text-primary p-2"
-                  data-testid="button-favorites"
-                >
-                  <Heart size={20} />
-                </Button>
-                
-                <Link to="/cart">
-                  <Button 
-                    variant="ghost" 
-                    className="text-foreground hover:text-primary p-2 relative"
-                    data-testid="button-cart"
-                  >
-                    <ShoppingCart size={20} />
-                    {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
-                        {cartItemCount}
-                      </span>
-                    )}
-                  </Button>
-                </Link>
-              </>
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-primary p-2"
+                data-testid="button-favorites"
+              >
+                <Heart size={20} />
+              </Button>
             )}
 
             {/* User Menu */}
@@ -173,6 +224,14 @@ export default function Header() {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/api/login'}
+                  className="text-foreground border-border hover:bg-muted font-medium"
+                  data-testid="button-sign-up"
+                >
+                  Sign up
+                </Button>
                 <Button 
                   variant="ghost" 
                   onClick={() => window.location.href = '/api/login'}
