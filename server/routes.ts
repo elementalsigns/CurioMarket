@@ -5,6 +5,8 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import Stripe from "stripe";
 import { z } from "zod";
 import { insertListingSchema, insertSellerSchema } from "@shared/schema";
+import express from "express";
+import path from "path";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-01-27.acacia",
@@ -13,6 +15,9 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "3");
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Static file serving for assets
+  app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
+
   // Auth middleware
   await setupAuth(app);
 
@@ -182,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img1",
             listingId: "1",
-            url: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            url: "/assets/generated_images/Victorian_bird_skeleton_display_3a3e29e9.png",
             alt: "Victorian bird skeleton in glass dome",
             sortOrder: 0
           }],
@@ -206,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img2",
             listingId: "2",
-            url: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            url: "/assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png",
             alt: "Vintage medical surgical tools",
             sortOrder: 0
           }],
@@ -230,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img3",
             listingId: "3", 
-            url: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
+            url: "/assets/generated_images/Annotated_Victorian_medical_skull_83d06452.png",
             alt: "Anatomical skull specimen",
             sortOrder: 0
           }],
@@ -245,8 +250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: "4",
           slug: "preserved-wet-specimen-jar",
-          title: "Preserved Wet Specimen Jar",
-          description: "Vintage laboratory specimen preserved in original formaldehyde solution. Authentic scientific curiosity from the 1940s.",
+          title: "Preserved Heart Specimen",
+          description: "Victorian era anatomical heart specimen preserved in original formaldehyde solution. Authentic medical curiosity with brass label.",
           price: "95.00",
           category: "wet-specimens",
           status: "active",
@@ -254,8 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img4",
             listingId: "4",
-            url: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
-            alt: "Preserved specimen in laboratory jar",
+            url: "/assets/generated_images/Victorian_preserved_heart_specimen_c40cd840.png",
+            alt: "Preserved heart specimen in laboratory jar",
             sortOrder: 0
           }],
           seller: {
@@ -269,8 +274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: "5",
           slug: "gothic-raven-taxidermy",
-          title: "Gothic Raven Taxidermy",
-          description: "Professionally mounted raven in natural pose. Ethically sourced and expertly preserved for gothic home decor.",
+          title: "Victorian Bat Wing Specimen",
+          description: "Preserved bat wings mounted in antique wooden frame with glass front. Victorian taxidermy craftsmanship in excellent condition.",
           price: "350.00",
           category: "taxidermy",
           status: "active",
@@ -278,8 +283,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img5",
             listingId: "5",
-            url: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
-            alt: "Gothic raven taxidermy display",
+            url: "/assets/generated_images/Victorian_bat_wing_specimen_a0f07aa9.png",
+            alt: "Victorian bat wing specimen display",
             sortOrder: 0
           }],
           seller: {
@@ -293,8 +298,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: "6",
           slug: "vintage-apothecary-bottles",
-          title: "Vintage Apothecary Bottles Set",
-          description: "Complete set of 12 vintage apothecary bottles with original labels. Perfect for gothic home decor or collectors.",
+          title: "Victorian Crystal Collection",
+          description: "Rare collection of Victorian era mineral specimens and crystals in original wooden display case with brass labels.",
           price: "175.00",
           category: "vintage-medical",
           status: "active",
@@ -302,8 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           images: [{
             id: "img6",
             listingId: "6",
-            url: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80",
-            alt: "Vintage apothecary bottle collection",
+            url: "/assets/generated_images/Victorian_crystal_mineral_collection_9d28ba7d.png",
+            alt: "Victorian crystal mineral collection",
             sortOrder: 0
           }],
           seller: {
