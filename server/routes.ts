@@ -9,7 +9,7 @@ import express from "express";
 import path from "path";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-01-27.acacia",
+  apiVersion: "2025-07-30.basil",
 }) : null;
 
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "3");
@@ -82,6 +82,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User email required" });
       }
 
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment processing not configured" });
+      }
+
       // Check if user already has active subscription
       if (user.stripeSubscriptionId) {
         const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
@@ -109,10 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [{
           price_data: {
             currency: 'usd',
-            product_data: {
-              name: 'Curio Market Seller Plan',
-              description: 'Monthly seller subscription with 3% platform fee',
-            },
+            product: 'prod_seller_plan', // Use predefined product ID or create product separately
             unit_amount: 1000, // $10.00
             recurring: {
               interval: 'month',
@@ -563,7 +564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const listing = await storage.getListing(item.listingId);
         if (!listing) continue;
 
-        const itemTotal = parseFloat(listing.price) * item.quantity;
+        const itemTotal = parseFloat(listing.price) * (item.quantity || 1);
         subtotal += itemTotal;
         shippingCost += parseFloat(listing.shippingCost || '0');
 
@@ -581,6 +582,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const platformFee = subtotal * (PLATFORM_FEE_PERCENT / 100);
       const total = subtotal + shippingCost + platformFee;
+
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment processing not configured" });
+      }
 
       // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({

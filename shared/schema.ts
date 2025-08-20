@@ -70,7 +70,7 @@ export const categories = pgTable("categories", {
   slug: varchar("slug").unique().notNull(),
   description: text("description"),
   icon: varchar("icon"),
-  parentId: varchar("parent_id").references(() => categories.id),
+  parentId: varchar("parent_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
