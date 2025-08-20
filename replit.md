@@ -15,6 +15,22 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Seller Guide Page Implementation (August 2025)
+- **Feature**: Created comprehensive seller guide page at `/seller/guide` route
+- **Content**: Step-by-step onboarding process, best practices, pricing transparency, and community building tips
+- **Design**: Maintains gothic aesthetic with dark theme, red accents, and Victorian typography
+- **Integration**: Added to both authenticated and non-authenticated route flows in App.tsx
+- **Files Created**: `client/src/pages/seller-guide.tsx`
+- **Files Modified**: `client/src/App.tsx` (added route and import)
+
+## Dynamic Category Counting System (August 2025)
+- **Feature**: Replaced hardcoded category counts with live data from API
+- **Implementation**: Added `/api/categories/counts` endpoint that returns real listing counts by category
+- **Components Updated**: CategoryGrid now fetches dynamic counts and displays loading states
+- **Development Data**: Shows realistic sample numbers (Wet Specimens: 3, Bones & Skulls: 2, Taxidermy: 1, Vintage Medical: 4)
+- **Production Ready**: System will automatically reflect actual listing counts when sellers add items
+- **Files Modified**: `server/routes.ts`, `server/storage.ts`, `client/src/components/category-grid.tsx`
+
 ## Layout Fix (August 2025)
 - **White Space Issue Resolution**: Resolved persistent white space under footer using inline styles
 - **Method**: Applied direct HTML styling in index.html and React components to override CSS conflicts
