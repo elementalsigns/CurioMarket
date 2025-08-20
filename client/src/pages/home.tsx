@@ -63,12 +63,9 @@ export default function Home() {
     <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'hsl(212, 5%, 5%)'}}>
       <Header />
       
-      <div style={{
-        flex: 1, 
-        background: 'linear-gradient(135deg, hsl(212, 5%, 5%) 0%, hsl(220, 6%, 7%) 25%, hsl(216, 5%, 6%) 50%, hsl(214, 5%, 8%) 75%, hsl(212, 5%, 5%) 100%)'
-      }}>
+      <div style={{flex: 1, backgroundColor: 'hsl(212, 5%, 5%)'}}>
       {/* Welcome Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'transparent' }} data-testid="section-welcome">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-welcome">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4" data-testid="welcome-title">
@@ -83,7 +80,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6 mb-16" data-testid="quick-actions">
             <Card className="glass-effect hover-lift cursor-pointer">
               <CardContent className="p-6 text-center">
-                <ShoppingCart className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
+                <ShoppingCart className="mx-auto mb-4 text-gothic-purple" size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Browse Market</h3>
                 <p className="text-foreground/70 mb-4">
                   Explore thousands of unique oddities and curios
@@ -98,7 +95,7 @@ export default function Home() {
 
             <Card className="glass-effect hover-lift cursor-pointer">
               <CardContent className="p-6 text-center">
-                <Heart className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
+                <Heart className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
                 <p className="text-foreground/70 mb-4">
                   {(favorites as any)?.length || 0} items saved for later
@@ -111,13 +108,13 @@ export default function Home() {
 
             <Card className="glass-effect hover-lift cursor-pointer">
               <CardContent className="p-6 text-center">
-                <Star className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
+                <Star className="mx-auto mb-4 text-yellow-500" size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Become a Seller</h3>
                 <p className="text-foreground/70 mb-4">
                   Share your oddities with collectors worldwide
                 </p>
                 <Link to="/seller/terms">
-                  <Button className="bg-[#6A1B1B] hover:bg-[#6A1B1B]/80" data-testid="button-become-seller">
+                  <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-become-seller">
                     Start Selling
                   </Button>
                 </Link>
@@ -128,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'transparent' }} data-testid="section-categories">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
@@ -144,7 +141,7 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'transparent' }} data-testid="section-featured">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-featured">
         <div className="container mx-auto max-w-7xl">
           <div className="flex justify-between items-center mb-12">
             <div>
@@ -158,7 +155,7 @@ export default function Home() {
             <Link to="/browse">
               <Button 
                 variant="ghost" 
-                className="text-white hover:text-[#6A1B1B] transition-colors font-medium"
+                className="text-gothic-purple hover:text-gothic-red transition-colors font-medium"
                 data-testid="button-view-all"
               >
                 View All <ArrowRight className="ml-2" size={16} />
