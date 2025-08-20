@@ -1,55 +1,33 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import CategoryGrid from "@/components/category-grid";
-import ProductCard from "@/components/product-card";
-import { ArrowRight, Heart, ShoppingCart, Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { Link } from "wouter";
+import { Search } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
-  const { toast } = useToast();
+  const { isLoading } = useAuth();
+  const [, navigate] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: featuredListings, error: featuredError } = useQuery({
-    queryKey: ["/api/listings/featured"],
-  });
-
-  const { data: favorites, error: favoritesError } = useQuery({
-    queryKey: ["/api/user/favorites"],
-    enabled: !!user,
-  });
-
-  useEffect(() => {
-    if (featuredError && isUnauthorizedError(featuredError as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
     }
-  }, [featuredError, toast]);
+  };
 
-  useEffect(() => {
-    if (favoritesError && isUnauthorizedError(favoritesError as Error)) {
-      toast({
-        title: "Unauthorized", 
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [favoritesError, toast]);
+  const categories = [
+    { name: "Taxidermy", slug: "taxidermy" },
+    { name: "Vintage Medical", slug: "vintage-medical" },
+    { name: "Oddities", slug: "oddities" },
+    { name: "Specimens", slug: "specimens" },
+    { name: "Gothic Art", slug: "gothic-art" },
+  ];
 
   if (isLoading) {
     return (
@@ -61,115 +39,91 @@ export default function Home() {
 
   return (
     <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'hsl(212, 5%, 5%)'}}>
+      {/* Red Shipping Banner */}
+      <div className="bg-[#6A1B1B] text-white text-center py-2 text-sm" data-testid="shipping-banner">
+        Free shipping on orders over $75 • Support independent collectors and artists
+      </div>
+      
       <Header />
       
       <div style={{flex: 1, backgroundColor: 'hsl(212, 5%, 5%)'}}>
-      {/* Welcome Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-welcome">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4" data-testid="welcome-title">
-              Welcome back, {(user as any)?.firstName || 'Collector'}
+        {/* Hero Section */}
+        <section className="py-32 px-4 sm:px-6 lg:px-8 text-center" data-testid="hero-section">
+          <div className="container mx-auto max-w-4xl">
+            {/* Large Logo */}
+            <h1 className="text-6xl md:text-8xl font-serif font-bold mb-8" data-testid="hero-logo">
+              <span className="script-initial">C</span>urio <span className="script-initial">M</span>arket
             </h1>
-            <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
-              Discover new oddities and manage your collection
-            </p>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16" data-testid="quick-actions">
-            <Card className="glass-effect hover-lift cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <ShoppingCart className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
-                <h3 className="text-xl font-serif font-bold mb-2">Browse Market</h3>
-                <p className="text-foreground/70 mb-4">
-                  Explore thousands of unique oddities and curios
-                </p>
-                <Link to="/browse">
-                  <Button variant="outline" data-testid="button-browse-market">
-                    Start Browsing
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-effect hover-lift cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Heart className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
-                <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
-                <p className="text-foreground/70 mb-4">
-                  {(favorites as any)?.length || 0} items saved for later
-                </p>
-                <Button variant="outline" data-testid="button-view-favorites">
-                  View Favorites
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-effect hover-lift cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Star className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
-                <h3 className="text-xl font-serif font-bold mb-2">Become a Seller</h3>
-                <p className="text-foreground/70 mb-4">
-                  Share your oddities with collectors worldwide
-                </p>
-                <Link to="/seller/terms">
-                  <Button className="bg-[#6A1B1B] hover:bg-[#6A1B1B]/80" data-testid="button-become-seller">
-                    Start Selling
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Categories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-categories">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
-              Explore Categories
-            </h2>
-            <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="categories-subtitle">
-              Find exactly what speaks to your dark curiosity
-            </p>
-          </div>
-
-          <CategoryGrid />
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-featured">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                Recently Added
-              </h2>
-              <p className="text-foreground/70" data-testid="featured-subtitle">
-                Fresh oddities from our community of collectors
+            
+            {/* Hero Text */}
+            <div className="mb-8">
+              <p className="text-2xl md:text-3xl font-serif mb-4" data-testid="hero-tagline">
+                Extraordinary oddities, curios & specimens.
+              </p>
+              <p className="text-xl md:text-2xl font-serif text-foreground/80" data-testid="hero-subtitle">
+                For collectors with discerning taste.
               </p>
             </div>
-            <Link to="/browse">
-              <Button 
-                variant="ghost" 
-                className="text-white hover:text-[#6A1B1B] transition-colors font-medium"
-                data-testid="button-view-all"
-              >
-                View All <ArrowRight className="ml-2" size={16} />
-              </Button>
-            </Link>
-          </div>
+            
+            <p className="text-lg text-foreground/70 mb-12 max-w-2xl mx-auto" data-testid="hero-description">
+              Find rare specimens, curiosities, and artifacts from collectors who share your passion
+            </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch" data-testid="featured-grid">
-            {(featuredListings as any)?.map((listing: any) => (
-              <ProductCard key={listing.id} listing={listing} />
-            ))}
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex max-w-2xl mx-auto mb-8" data-testid="search-form">
+              <Input
+                type="text"
+                placeholder="Search for oddities and curiosities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 mr-4 bg-background/50 border-border text-white placeholder:text-foreground/50"
+                data-testid="search-input"
+              />
+              <Button 
+                type="submit" 
+                className="bg-[#6A1B1B] hover:bg-[#6A1B1B]/80 px-8"
+                data-testid="search-button"
+              >
+                <Search className="mr-2" size={16} />
+                Search
+              </Button>
+            </form>
+
+            {/* Category Tags */}
+            <div className="flex flex-wrap justify-center gap-3 mb-16" data-testid="category-tags">
+              <Badge variant="outline" className="text-foreground border-border hover:bg-background/50">
+                Popular
+              </Badge>
+              {categories.map((category) => (
+                <Badge 
+                  key={category.slug}
+                  variant="outline" 
+                  className="text-foreground border-border hover:bg-background/50 cursor-pointer"
+                  onClick={() => navigate(`/browse?category=${category.slug}`)}
+                  data-testid={`category-tag-${category.slug}`}
+                >
+                  {category.name}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Categories Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8" data-testid="categories-section">
+          <div className="container mx-auto max-w-7xl">
+            <div className="mb-12">
+              <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
+                Shop our popular <span className="text-[#6A1B1B]">categories</span>
+              </h2>
+              <p className="text-lg text-foreground/70" data-testid="categories-subtitle">
+                Browse thousands of unique items in every category imaginable
+              </p>
+            </div>
+
+            <CategoryGrid />
+          </div>
+        </section>
       </div>
 
       <Footer />
