@@ -3,12 +3,58 @@ function SellerGuideStandalone() {
   return (
     <div>
       <style>{`
+        @import url("https://fonts.googleapis.com/css2?family=Great+Vibes&family=EB+Garamond:wght@400;500;600;700&display=swap");
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #0a0a0a !important; color: white !important; font-family: Georgia, serif !important; }
         .seller-guide-container { min-height: 100vh; background: #0a0a0a; color: white; font-family: Georgia, serif; }
         .nav-bar { background: #0a0a0a; border-bottom: 1px solid #27272a; padding: 1rem 0; }
         .nav-content { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.75rem; color: white; }
+        .logo { 
+          font-size: 1.75rem; 
+          color: white; 
+          font-family: 'EB Garamond', serif;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          font-variant: small-caps;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
+          position: relative;
+          transition: all 0.3s ease;
+          display: inline-block;
+        }
+        .logo:hover {
+          color: hsl(0, 77%, 26%);
+          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5);
+          transform: scale(1.02);
+        }
+        .logo::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: -10%;
+          width: 120%;
+          height: 3px;
+          background: linear-gradient(90deg, transparent 0%, hsl(0, 77%, 26%) 15%, hsl(0, 77%, 26%) 85%, transparent 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .logo:hover::after {
+          opacity: 0.8;
+        }
+        .script-initial {
+          font-family: 'Great Vibes', cursive;
+          font-size: 1.3em;
+          font-weight: normal;
+          position: relative;
+          display: inline-block;
+          margin-right: -0.05em;
+          transform: translateY(-0.05em);
+          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(106, 27, 27, 0.4);
+          transition: all 0.3s ease;
+        }
+        .logo:hover .script-initial {
+          transform: translateY(-0.08em) scale(1.05);
+          text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
+        }
         .nav-buttons { display: flex; gap: 1rem; }
         .btn-primary { background: hsl(0, 77%, 26%); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
         .btn-secondary { background: transparent; color: white; padding: 0.5rem 1rem; border: 1px solid #52525b; border-radius: 4px; cursor: pointer; }
@@ -46,7 +92,9 @@ function SellerGuideStandalone() {
       <div className="seller-guide-container">
         <nav className="nav-bar">
           <div className="nav-content">
-            <div className="logo">Curio <em>Market</em></div>
+            <div className="logo">
+              <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+            </div>
             <div className="nav-buttons">
               <button className="btn-primary">Sign up</button>
               <button className="btn-secondary">Sign in</button>
