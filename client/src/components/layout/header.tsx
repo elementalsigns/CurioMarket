@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import CartSidebar from "@/components/cart-sidebar";
 import { 
   Search, 
   Heart, 
@@ -30,6 +31,7 @@ export default function Header() {
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const { data: cartData } = useQuery({
     queryKey: ["/api/cart"],
@@ -179,7 +181,7 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/orders" className="flex items-center">
+                    <Link to="/profile" className="flex items-center">
                       <Settings className="mr-2" size={16} />
                       Your account
                     </Link>
@@ -213,20 +215,19 @@ export default function Header() {
             )}
 
             {/* Shopping Cart - Far Right */}
-            <Link to="/cart">
-              <Button 
-                variant="ghost" 
-                className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
-                data-testid="button-cart"
-              >
-                <ShoppingCart size={20} />
-                {isAuthenticated && cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
+              onClick={() => setCartOpen(true)}
+              data-testid="button-cart"
+            >
+              <ShoppingCart size={20} />
+              {isAuthenticated && cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
+                  {cartItemCount}
+                </span>
+              )}
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -282,6 +283,9 @@ export default function Header() {
           </div>
         )}
       </div>
+      
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </nav>
   );
 }

@@ -171,6 +171,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search functionality
+  app.get('/api/search', async (req, res) => {
+    try {
+      const { q: query, category, minPrice, maxPrice, sortBy } = req.query;
+      
+      // Use the same sample data as featured listings but apply filters
+      const allListings = [
+        {
+          id: "1",
+          slug: "victorian-bird-skeleton-display",
+          title: "Victorian Bird Skeleton Display",
+          description: "Authentic 19th century songbird skeleton mounted in glass dome. Perfect condition with original Victorian presentation.",
+          price: "285.00",
+          category: "bones-skulls",
+          status: "active",
+          sellerId: "seller1",
+          images: [{
+            id: "img1",
+            listingId: "1",
+            url: "/assets/generated_images/Victorian_bird_skeleton_display_3a3e29e9.png",
+            alt: "Victorian bird skeleton in glass dome",
+            sortOrder: 0
+          }],
+          seller: { 
+            id: "seller1", 
+            shopName: "Victorian Specimens Co."
+          }
+        },
+        {
+          id: "2",
+          slug: "antique-medical-amputation-kit",
+          title: "Antique Medical Amputation Kit", 
+          description: "Complete Civil War era surgical amputation set with original leather case. Historical medical curiosity.",
+          price: "1250.00",
+          category: "vintage-medical",
+          status: "active",
+          sellerId: "seller2",
+          images: [{
+            id: "img2",
+            listingId: "2",
+            url: "/assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png",
+            alt: "Vintage medical surgical tools",
+            sortOrder: 0
+          }],
+          seller: {
+            id: "seller2",
+            shopName: "Historic Medical"
+          }
+        }
+      ];
+
+      let filteredListings = allListings;
+
+      // Apply filters
+      if (query) {
+        filteredListings = filteredListings.filter(listing =>
+          listing.title.toLowerCase().includes((query as string).toLowerCase()) ||
+          listing.description.toLowerCase().includes((query as string).toLowerCase())
+        );
+      }
+
+      if (category && category !== 'all') {
+        filteredListings = filteredListings.filter(listing =>
+          listing.category === category
+        );
+      }
+
+      if (minPrice) {
+        filteredListings = filteredListings.filter(listing =>
+          parseFloat(listing.price) >= parseFloat(minPrice as string)
+        );
+      }
+
+      if (maxPrice) {
+        filteredListings = filteredListings.filter(listing =>
+          parseFloat(listing.price) <= parseFloat(maxPrice as string)
+        );
+      }
+
+      // Apply sorting
+      if (sortBy === 'price_low') {
+        filteredListings.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+      } else if (sortBy === 'price_high') {
+        filteredListings.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+      }
+
+      res.json({
+        listings: filteredListings,
+        totalCount: filteredListings.length,
+        page: 1,
+        totalPages: 1
+      });
+    } catch (error) {
+      console.error("Error searching listings:", error);
+      res.status(500).json({ message: "Failed to search listings" });
+    }
+  });
+
   app.get('/api/listings/featured', async (req, res) => {
     try {
       // For development, return sample listings with authentic specimen images
