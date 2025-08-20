@@ -10,13 +10,13 @@ function SellerGuideStandalone() {
         .nav-content { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.75rem; color: white; }
         .nav-buttons { display: flex; gap: 1rem; }
-        .btn-primary { background: #dc2626; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: hsl(0, 77%, 26%); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
         .btn-secondary { background: transparent; color: white; padding: 0.5rem 1rem; border: 1px solid #52525b; border-radius: 4px; cursor: pointer; }
         .main-content { padding: 3rem 1rem; }
         .content-wrapper { max-width: 1000px; margin: 0 auto; }
         .hero { text-align: center; margin-bottom: 4rem; }
         .hero h1 { font-size: 3.5rem; font-weight: bold; margin: 0 0 1.5rem 0; color: white; }
-        .hero .accent { color: #dc2626; }
+        .hero .accent { color: hsl(0, 77%, 26%); }
         .hero p { font-size: 1.25rem; color: #a1a1aa; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
         .stat-card { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 2rem; text-align: center; }
@@ -26,16 +26,16 @@ function SellerGuideStandalone() {
         .section-subtitle { font-size: 1.25rem; color: #a1a1aa; text-align: center; margin-bottom: 3rem; max-width: 700px; margin-left: auto; margin-right: auto; }
         .steps { display: flex; flex-direction: column; gap: 3rem; margin-bottom: 4rem; }
         .step { display: flex; gap: 1.5rem; align-items: flex-start; }
-        .step-number { width: 48px; height: 48px; background: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.25rem; flex-shrink: 0; }
+        .step-number { width: 48px; height: 48px; background: hsl(0, 77%, 26%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.25rem; flex-shrink: 0; }
         .step-content h3 { font-size: 1.75rem; font-weight: 600; margin-bottom: 1rem; color: white; }
         .step-content p { color: #a1a1aa; line-height: 1.6; margin-bottom: 1.5rem; }
-        .notice { background: #18181b; border: 2px solid #dc2626; border-radius: 8px; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
-        .notice-label { color: #dc2626; font-weight: 500; }
+        .notice { background: #18181b; border: 2px solid hsl(0, 77%, 26%); border-radius: 8px; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .notice-label { color: hsl(0, 77%, 26%); font-weight: 500; }
         .notice-text { color: #d4d4d8; }
         .pricing-section { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 2.5rem; margin-bottom: 4rem; }
         .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
         .pricing-item { text-align: center; }
-        .price { font-size: 3rem; font-weight: bold; color: #dc2626; margin-bottom: 1rem; }
+        .price { font-size: 3rem; font-weight: bold; color: hsl(0, 77%, 26%); margin-bottom: 1rem; }
         .price-label { font-size: 1.25rem; color: white; margin-bottom: 0.5rem; }
         .price-desc { color: #a1a1aa; }
         .cta-section { text-align: center; }
