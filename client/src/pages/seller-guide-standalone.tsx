@@ -271,10 +271,10 @@ function SellerGuideStandalone() {
               <div className="footer-section">
                 <h4>Support</h4>
                 <ul className="footer-links">
-                  <li><button className="footer-link" onClick={() => window.location.href = '/help-center'}>Help</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/seller/guide'}>Seller</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/safety'}>Safety</button></li>
-                  <li><button className="footer-link" onClick={() => window.location.href = '/contact'}>Contact</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/help'}>Help Center</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/seller/guide'}>Seller Guide</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/safety'}>Safety Guidelines</button></li>
+                  <li><button className="footer-link" onClick={() => window.location.href = '/contact'}>Contact Us</button></li>
                 </ul>
               </div>
             </div>
