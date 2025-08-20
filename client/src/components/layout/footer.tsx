@@ -8,9 +8,14 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4" data-testid="footer-logo">
-              <div className="text-2xl">🌙</div>
-              <h3 className="text-2xl font-serif font-bold text-foreground">Curio Market</h3>
+            <div className="flex items-center mb-4" data-testid="footer-logo">
+              <h3 className="text-2xl curio-logo font-bold">
+                <span>
+                  <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
+                </span> <span>
+                  <span className="script-initial">M</span>arket
+                </span>
+              </h3>
             </div>
             <p className="text-foreground/70 mb-6 max-w-md" data-testid="footer-description">
               The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
