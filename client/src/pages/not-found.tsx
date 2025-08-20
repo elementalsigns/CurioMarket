@@ -4,9 +4,12 @@ import { AlertCircle } from "lucide-react";
 export default function NotFound() {
   console.log("NotFound component is being rendered");
   
-  // Don't render NotFound on seller guide page to prevent overlay issues
-  if (typeof window !== 'undefined' && window.location.pathname === '/seller/guide') {
-    return null;
+  // Don't render NotFound on specific pages to prevent overlay issues
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    if (path === '/seller/guide' || path === '/safety' || path === '/contact') {
+      return null;
+    }
   }
   
   return (
