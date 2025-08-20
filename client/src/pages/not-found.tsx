@@ -3,6 +3,12 @@ import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   console.log("NotFound component is being rendered");
+  
+  // Don't render NotFound on seller guide page to prevent overlay issues
+  if (typeof window !== 'undefined' && window.location.pathname === '/seller/guide') {
+    return null;
+  }
+  
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
       <Card className="w-full max-w-md mx-4 bg-zinc-900 border-zinc-800">
