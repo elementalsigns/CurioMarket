@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
 export default function Footer() {
+  console.log('Footer component rendered');
   return (
     <footer className="bg-background border-t border-primary/20 py-16 px-4 sm:px-6 lg:px-8 flex-shrink-0" data-testid="footer">
       <div className="container mx-auto max-w-7xl">
