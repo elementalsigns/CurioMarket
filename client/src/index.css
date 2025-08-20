@@ -69,6 +69,36 @@ section {
 /* Help center specific overrides only */
 .help-center-page {
   color-scheme: dark !important;
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
+/* Force the entire viewport and body to be dark when on help center */
+body:has(.help-center-page),
+html:has(.help-center-page),
+#root:has(.help-center-page) {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
+/* Target every possible element that could have a white background */
+.help-center-page *,
+.help-center-page *::before,
+.help-center-page *::after {
+  background-color: transparent !important;
+}
+
+/* Specifically override common white background classes */
+.help-center-page .bg-white,
+.help-center-page .bg-slate-50,
+.help-center-page .bg-gray-50,
+.help-center-page .bg-neutral-50,
+.help-center-page [style*="background-color: white"],
+.help-center-page [style*="background-color: #fff"],
+.help-center-page [style*="background-color: #ffffff"],
+.help-center-page [style*="background: white"],
+.help-center-page [style*="background: #fff"],
+.help-center-page [style*="background: #ffffff"] {
+  background-color: hsl(212, 5%, 5%) !important;
+  background: hsl(212, 5%, 5%) !important;
 }
 
 /* Target Radix UI components specifically ONLY in help center */
