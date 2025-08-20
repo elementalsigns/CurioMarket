@@ -111,13 +111,13 @@ export default function Footer() {
             © 2024 Curio Market. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-foreground/60">
-            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-primary">
+            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-red-600 hover:bg-transparent transition-colors">
               Privacy Policy
             </Button>
-            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-primary">
+            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-red-600 hover:bg-transparent transition-colors">
               Terms of Service
             </Button>
-            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-primary">
+            <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-red-600 hover:bg-transparent transition-colors">
               Prohibited Items
             </Button>
           </div>
