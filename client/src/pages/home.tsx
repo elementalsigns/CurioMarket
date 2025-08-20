@@ -60,16 +60,16 @@ export default function Home() {
   }
 
   return (
-    <div className="page-layout bg-background">
+    <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
       <Header />
       
-      <div className="page-content">
+      <div style={{flex: 1}}>
       {/* Welcome Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" data-testid="section-welcome">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4" data-testid="welcome-title">
-              Welcome back, {user?.firstName || 'Collector'}
+              Welcome back, {(user as any)?.firstName || 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
               Discover new oddities and manage your collection
@@ -98,7 +98,7 @@ export default function Home() {
                 <Heart className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
                 <p className="text-foreground/70 mb-4">
-                  {favorites?.length || 0} items saved for later
+                  {(favorites as any)?.length || 0} items saved for later
                 </p>
                 <Button variant="outline" data-testid="button-view-favorites">
                   View Favorites
@@ -164,7 +164,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="featured-grid">
-            {featuredListings?.map((listing: any) => (
+            {(featuredListings as any)?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}
           </div>

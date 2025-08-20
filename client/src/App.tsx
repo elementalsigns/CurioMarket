@@ -56,7 +56,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="dark page-layout bg-background">
+        <div className="dark" style={{height: '100%', display: 'flex', flexDirection: 'column', background: 'black'}}>
           <Toaster />
           <Router />
         </div>
