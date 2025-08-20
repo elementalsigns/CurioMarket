@@ -15,6 +15,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+## Legal Pages Implementation (August 2025)
+- **Feature**: Created comprehensive legal framework with Privacy Policy, Terms of Service, and Prohibited Items pages
+- **Implementation**: Three standalone pages with embedded CSS and consistent gothic styling at `/privacy`, `/terms`, `/prohibited`
+- **Content Focus**: 
+  - Privacy Policy: GDPR-compliant data protection with Stripe integration details
+  - Terms of Service: Marketplace rules, $10/month seller fees, 3% transaction fees, dispute resolution
+  - Prohibited Items: **Explicit bans on human remains and protected/threatened species** as requested
+- **Legal Compliance**: Addresses CITES, ESA, wildlife protection laws, and ethical marketplace standards
+- **Design**: Consistent footer layout, red notice boxes, gothic branding with Victorian typography
+- **Routes**: Added to both authenticated and non-authenticated user flows in App.tsx
+- **Files Created**: `client/src/pages/privacy-policy.tsx`, `client/src/pages/terms-of-service.tsx`, `client/src/pages/prohibited-items.tsx`
+- **Files Modified**: `client/src/App.tsx` (added routes and imports)
+- **Status**: Complete legal framework ready for marketplace launch
+
 ## Footer Consistency Update (August 2025)
 - **Feature**: Standardized footer layout across all pages to match home page design
 - **Implementation**: Updated NotFound and Seller Guide pages with consistent footer component

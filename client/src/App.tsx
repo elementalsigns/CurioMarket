@@ -28,6 +28,9 @@ import TestSellerGuide from "@/pages/test-seller-guide";
 import HelpCenter from "@/pages/help-center";
 import Safety from "@/pages/safety";
 import ContactUs from "@/pages/contact-us";
+import PrivacyPolicyStandalone from "@/pages/privacy-policy";
+import TermsOfServiceStandalone from "@/pages/terms-of-service";
+import ProhibitedItemsStandalone from "@/pages/prohibited-items";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +53,9 @@ function Router() {
           <Route path="/help" component={HelpCenter} />
           <Route path="/safety" component={Safety} />
           <Route path="/contact" component={ContactUs} />
+          <Route path="/privacy" component={PrivacyPolicyStandalone} />
+          <Route path="/terms" component={TermsOfServiceStandalone} />
+          <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/account-demo" component={DemoSimple} />
           <Route component={NotFound} />
         </>
@@ -63,6 +69,9 @@ function Router() {
           <Route path="/help" component={HelpCenter} />
           <Route path="/safety" component={Safety} />
           <Route path="/contact" component={ContactUs} />
+          <Route path="/privacy" component={PrivacyPolicyStandalone} />
+          <Route path="/terms" component={TermsOfServiceStandalone} />
+          <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/listings/create" component={CreateListing} />
