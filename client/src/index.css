@@ -108,30 +108,9 @@
   transition: all 0.3s ease;
 }
 
-/* Swirl connection effect */
-.script-initial::after {
-  content: '';
-  position: absolute;
-  top: 60%;
-  right: -0.1em;
-  width: 0.3em;
-  height: 1px;
-  background: var(--curio-blood-red);
-  border-radius: 50%;
-  box-shadow: 0 0 3px rgba(106, 27, 27, 0.6);
-  transform: rotate(15deg) scaleX(1.5);
-  opacity: 0.8;
-  transition: all 0.3s ease;
-}
-
 .curio-logo:hover .script-initial {
   transform: translateY(-0.08em) scale(1.05);
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
-}
-
-.curio-logo:hover .script-initial::after {
-  opacity: 1;
-  transform: rotate(15deg) scaleX(2) translateX(0.1em);
 }
 
 
