@@ -135,23 +135,7 @@ export default function Header() {
 
 
 
-          {/* Navigation Links - Desktop */}
-          <div className="hidden lg:flex items-center space-x-8">
-            {isAuthenticated ? (
-              <Link to="/seller-dashboard" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="link-sell">
-                Sell on Curio Market
-              </Link>
-            ) : (
-              <Button 
-                variant="ghost" 
-                onClick={() => window.location.href = '/api/login'}
-                className="text-foreground hover:text-primary transition-colors font-medium p-0"
-                data-testid="button-sell"
-              >
-                Sell on Curio Market
-              </Button>
-            )}
-          </div>
+
 
           {/* Right Side Icons & User Menu */}
           <div className="flex items-center space-x-4">
