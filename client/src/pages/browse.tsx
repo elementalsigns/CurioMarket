@@ -39,10 +39,11 @@ export default function Browse() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-layout bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-content">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold mb-4" data-testid="browse-title">
             Browse Oddities
@@ -93,6 +94,12 @@ export default function Browse() {
                 <SearchFilters 
                   filters={filters} 
                   onFiltersChange={setFilters}
+                  onClearFilters={() => setFilters({
+                    category: "",
+                    minPrice: "",
+                    maxPrice: "",
+                    sortBy: "newest",
+                  })}
                 />
               </CardContent>
             </Card>
@@ -156,8 +163,7 @@ export default function Browse() {
                 {searchResults.listings.map((listing: any) => (
                   <ProductCard 
                     key={listing.id} 
-                    listing={listing} 
-                    viewMode={viewMode}
+                    listing={listing}
                   />
                 ))}
               </div>
@@ -205,6 +211,7 @@ export default function Browse() {
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
 

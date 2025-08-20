@@ -125,10 +125,11 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-layout bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="user-profile">
+      <div className="page-content">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="user-profile">
         <div className="max-w-6xl mx-auto">
           {/* Profile Header */}
           <Card className="mb-8">
@@ -363,6 +364,7 @@ export default function UserProfile() {
               </Card>
             </TabsContent>
           </Tabs>
+        </div>
         </div>
       </div>
       

@@ -60,9 +60,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-layout bg-background">
       <Header />
       
+      <div className="page-content">
       {/* Welcome Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" data-testid="section-welcome">
         <div className="container mx-auto max-w-7xl">
@@ -169,6 +170,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

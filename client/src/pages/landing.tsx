@@ -17,8 +17,9 @@ export default function Landing() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-black to-zinc-900">
+    <div className="page-layout bg-gradient-to-br from-black via-black to-zinc-900">
       <Header />
+      <div className="page-content">
       {/* Announcement Bar - Black & Red Theme */}
       <div className="bg-primary text-primary-foreground text-center py-2 px-4">
         <p className="text-sm font-medium">
@@ -346,6 +347,7 @@ export default function Landing() {
           </Card>
         </div>
       </section>
+      </div>
       <Footer />
     </div>
   );

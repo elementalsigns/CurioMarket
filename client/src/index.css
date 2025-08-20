@@ -183,4 +183,15 @@
   .hover-lift {
     @apply transition-all duration-300 hover:scale-105 hover:shadow-xl;
   }
+
+  /* Page layout utility to prevent white space under footer */
+  .page-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-content {
+    flex: 1;
+  }
 }
