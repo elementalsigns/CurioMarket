@@ -163,7 +163,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="featured-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch" data-testid="featured-grid">
             {(featuredListings as any)?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}

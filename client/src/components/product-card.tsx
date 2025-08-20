@@ -62,10 +62,10 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
 
   return (
     <Link href={`/product/${listing.slug}`}>
-      <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg border-border" data-testid={`product-card-${listing.id}`}>
-        <CardContent className="p-0">
+      <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg border-border h-full flex flex-col" data-testid={`product-card-${listing.id}`}>
+        <CardContent className="p-0 flex flex-col h-full">
           {/* Product Image */}
-          <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
+          <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted relative">
             {listing.images?.[0] ? (
               <img
                 src={listing.images[0].url}
@@ -108,27 +108,31 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
           </div>
 
           {/* Product Details */}
-          <div className="p-4 space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm leading-tight line-clamp-2" data-testid={`product-title-${listing.id}`}>
-                {listing.title}
-              </h3>
-              <span className="font-bold text-primary shrink-0" data-testid={`product-price-${listing.id}`}>
-                ${listing.price}
-              </span>
+          <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-sm leading-tight line-clamp-2 flex-1" data-testid={`product-title-${listing.id}`}>
+                  {listing.title}
+                </h3>
+                <span className="font-bold text-primary shrink-0" data-testid={`product-price-${listing.id}`}>
+                  ${listing.price}
+                </span>
+              </div>
+              
+              {listing.seller && (
+                <p className="text-xs text-muted-foreground" data-testid={`product-seller-${listing.id}`}>
+                  by {listing.seller.shopName}
+                </p>
+              )}
             </div>
             
-            {listing.seller && (
-              <p className="text-xs text-muted-foreground" data-testid={`product-seller-${listing.id}`}>
-                by {listing.seller.shopName}
-              </p>
-            )}
-            
-            {listing.category && (
-              <Badge variant="outline" className="text-xs" data-testid={`product-category-${listing.id}`}>
-                {listing.category.name}
-              </Badge>
-            )}
+            <div className="mt-auto">
+              {listing.category && (
+                <Badge variant="outline" className="text-xs" data-testid={`product-category-${listing.id}`}>
+                  {listing.category.name}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
