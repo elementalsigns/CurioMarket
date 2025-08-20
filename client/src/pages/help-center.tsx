@@ -5,12 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Search, HelpCircle, Shield, MessageCircle, Book, AlertTriangle } from "lucide-react";
 
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+
+  const handleEmailSupport = () => {
+    window.location.href = "mailto:support@curiomarket.com?subject=Support Request&body=Please describe your issue in detail.";
+  };
+
+  const handleReportSafety = () => {
+    toast({
+      title: "Safety Report",
+      description: "Redirecting to safety report form...",
+    });
+    // In a real app, this would redirect to a dedicated report form
+    setTimeout(() => {
+      window.location.href = "mailto:safety@curiomarket.com?subject=Safety Concern&body=Please describe the safety concern in detail including item/seller information.";
+    }, 1000);
+  };
+
+  const handleReportSeller = () => {
+    toast({
+      title: "Seller Report",
+      description: "Redirecting to seller report form...",
+    });
+    setTimeout(() => {
+      window.location.href = "mailto:disputes@curiomarket.com?subject=Seller Issue&body=Please provide order number and details of the issue.";
+    }, 1000);
+  };
+
+  const handleReportTechnical = () => {
+    toast({
+      title: "Technical Report",
+      description: "Redirecting to technical support...",
+    });
+    setTimeout(() => {
+      window.location.href = "mailto:tech@curiomarket.com?subject=Technical Issue&body=Please describe the technical problem including steps to reproduce.";
+    }, 1000);
+  };
 
   const faqData = [
     {
@@ -307,7 +344,12 @@ export default function HelpCenter() {
                       <p className="text-sm text-foreground/70 mb-2">
                         For general inquiries, account issues, or seller support:
                       </p>
-                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
+                        onClick={handleEmailSupport}
+                        data-testid="button-email-support"
+                      >
                         support@curiomarket.com
                       </Button>
                     </div>
@@ -340,7 +382,12 @@ export default function HelpCenter() {
                       <p className="text-sm text-foreground/70 mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
-                      <Button variant="outline" className="w-full text-[#6A1B1B] border-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-[#6A1B1B] border-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
+                        onClick={handleReportSafety}
+                        data-testid="button-report-safety"
+                      >
                         Report Safety Issue
                       </Button>
                     </div>
@@ -350,7 +397,12 @@ export default function HelpCenter() {
                       <p className="text-sm text-foreground/70 mb-2">
                         Problems with a specific seller or transaction:
                       </p>
-                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
+                        onClick={handleReportSeller}
+                        data-testid="button-report-seller"
+                      >
                         Report Seller Issue
                       </Button>
                     </div>
@@ -360,7 +412,12 @@ export default function HelpCenter() {
                       <p className="text-sm text-foreground/70 mb-2">
                         Website bugs or technical difficulties:
                       </p>
-                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white"
+                        onClick={handleReportTechnical}
+                        data-testid="button-report-technical"
+                      >
                         Report Technical Issue
                       </Button>
                     </div>
