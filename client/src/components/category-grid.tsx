@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import wetSpecimenImage from "@assets/generated_images/Gothic_wet_specimen_jar_e0e9946f.png";
+import wetSpecimenImage from "@assets/generated_images/Gothic_snake_specimen_jar_51bc9d48.png";
 import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
 import taxidermyImage from "@assets/generated_images/Victorian_bird_taxidermy_display_34e4d9b1.png";
 import vintageMedicalImage from "@assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png";
