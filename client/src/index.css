@@ -415,10 +415,12 @@ h1.curio-logo:hover .script-initial,
     flex: 1;
   }
 
-  /* Additional footer fix */
+  /* Footer positioning */
   footer[data-testid="footer"] {
     position: relative;
     z-index: 1;
+    bottom: 0;
+    width: 100%;
   }
 
   /* Prevent body overflow that creates white space */
@@ -426,16 +428,9 @@ h1.curio-logo:hover .script-initial,
     overflow-x: hidden;
   }
   
-  /* Absolute positioning fix for persistent white space */
+  /* Layout positioning */
   .page-layout {
     position: relative;
-  }
-  
-  footer[data-testid="footer"] {
-    position: relative;
-    bottom: 0;
-    width: 100%;
-    margin-bottom: -1px;
   }
   
   /* Force body to have exact height */
