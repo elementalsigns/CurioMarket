@@ -99,11 +99,7 @@
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
 }
 
-/* Slower transition for "u" and "i" letters */
-.slow-letter {
-  transition: color 0.8s ease;
-  display: inline-block;
-}
+
 
 
 
