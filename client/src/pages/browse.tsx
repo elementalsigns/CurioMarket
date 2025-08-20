@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,20 @@ export default function Browse() {
     maxPrice: "",
     sortBy: "newest",
   });
+
+  // Extract URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category');
+    const q = urlParams.get('q');
+    
+    if (category) {
+      setFilters(prev => ({ ...prev, category }));
+    }
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, []);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
