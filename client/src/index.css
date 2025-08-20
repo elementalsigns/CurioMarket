@@ -24,6 +24,20 @@ html, body {
   min-height: 100vh;
 }
 
+/* Override any white backgrounds */
+* {
+  box-sizing: border-box;
+}
+
+.bg-background {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
+/* Force sections to have proper background */
+section {
+  background-color: hsl(212, 5%, 5%) !important;
+}
+
 :root {
   /* Foxblood Modern Noir Gothic Color Scheme */
   --curio-noir-black: hsl(212, 5%, 5%); /* Deep noir black #0D0D0D */

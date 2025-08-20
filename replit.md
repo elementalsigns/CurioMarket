@@ -21,6 +21,12 @@ Preferred communication style: Simple, everyday language.
 - **Technical Details**: Used `height: 100vh` on body, `height: 100%` cascade through DOM, flexbox layout with `flex: 1` on main content
 - **Files Modified**: `client/index.html`, `client/src/App.tsx`, `client/src/pages/home.tsx`, `client/src/index.css`
 
+## Background Color Fix (August 2025)
+- **Issue**: White background appeared in sections during logo hover troubleshooting
+- **Resolution**: Added comprehensive CSS overrides and inline styles to enforce pure black background
+- **Technical Details**: Applied hsl(212, 5%, 5%) throughout all components, sections, and root elements
+- **Files Modified**: `client/src/pages/home.tsx`, `client/src/index.css`, `client/src/App.tsx`
+
 # System Architecture
 
 ## Frontend Architecture
