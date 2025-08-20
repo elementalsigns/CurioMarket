@@ -145,7 +145,7 @@ export default function HelpCenter() {
           </div>
 
           {/* Search */}
-          <Card className="mb-8" data-testid="help-search">
+          <Card className="mb-8 bg-zinc-900/50 border-zinc-800" data-testid="help-search">
             <CardContent className="p-6">
               <div className="relative max-w-2xl mx-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
@@ -162,7 +162,7 @@ export default function HelpCenter() {
 
           {/* Quick Help Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid">
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
                 <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Frequently Asked Questions</h3>
@@ -170,7 +170,7 @@ export default function HelpCenter() {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
                 <Shield className="mx-auto mb-4 text-purple-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Safety Guidelines</h3>
@@ -178,7 +178,7 @@ export default function HelpCenter() {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
                 <MessageCircle className="mx-auto mb-4 text-blue-600" size={48} />
                 <h3 className="font-serif font-bold mb-2">Contact Support</h3>
@@ -206,7 +206,7 @@ export default function HelpCenter() {
 
             {/* FAQ Tab */}
             <TabsContent value="faq" className="space-y-6" data-testid="faq-tab">
-              <Card>
+              <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Book className="text-red-600" size={24} />
@@ -228,7 +228,7 @@ export default function HelpCenter() {
                               <AccordionItem 
                                 key={faqIndex} 
                                 value={`${categoryIndex}-${faqIndex}`}
-                                className="border border-border rounded-lg px-4"
+                                className="border border-zinc-700 rounded-lg px-4 bg-zinc-900/30"
                               >
                                 <AccordionTrigger className="text-left hover:no-underline">
                                   {faq.q}
@@ -255,7 +255,7 @@ export default function HelpCenter() {
 
             {/* Safety Tab */}
             <TabsContent value="safety" className="space-y-6" data-testid="safety-tab">
-              <Card>
+              <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="text-purple-600" size={24} />
@@ -276,7 +276,7 @@ export default function HelpCenter() {
 
                     <div className="grid gap-6">
                       {safetyGuidelines.map((guideline, index) => (
-                        <Card key={index} className="border-l-4 border-l-purple-600">
+                        <Card key={index} className="border-l-4 border-l-purple-600 bg-zinc-900/30 border-zinc-800">
                           <CardContent className="p-4">
                             <h4 className="font-medium mb-2">{guideline.title}</h4>
                             <p className="text-sm text-muted-foreground">{guideline.content}</p>
@@ -292,7 +292,7 @@ export default function HelpCenter() {
             {/* Contact Tab */}
             <TabsContent value="contact" className="space-y-6" data-testid="contact-tab">
               <div className="grid md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="bg-zinc-900/50 border-zinc-800">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MessageCircle className="text-blue-600" size={24} />
@@ -328,7 +328,7 @@ export default function HelpCenter() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-zinc-900/50 border-zinc-800">
                   <CardHeader>
                     <CardTitle>Report Issues</CardTitle>
                   </CardHeader>
