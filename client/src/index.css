@@ -62,6 +62,21 @@
   --shadow-xl: 0 20px 25px -5px hsl(240 4% 4% / 0.1), 0 8px 10px -6px hsl(240 4% 4% / 0.1);
 }
 
+/* White space fix using CSS classes instead of inline styles */
+.curio-body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: black;
+  overflow-x: hidden;
+}
+
+.curio-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Victorian Gothic Logo Style with Script Initials */
 .curio-logo {
   font-family: var(--font-brand-curvy);
@@ -100,18 +115,11 @@ a .logo-hovered,
   transform: scale(1.02) !important;
 }
 
-/* Logo hover effect - using maximum specificity and overriding inline styles */
-.logo-hover-target:hover,
-h1.logo-hover-target.curio-logo.text-2xl.font-bold:hover,
-[data-testid="logo"] .logo-hover-target:hover {
+/* Logo hover effect - clean CSS approach */
+.logo-hover-target:hover {
   color: var(--curio-blood-red) !important;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.8) !important;
   transform: scale(1.02) !important;
-}
-
-/* Override any inline styles that might be interfering */
-body[style] #root[style] * .logo-hover-target:hover {
-  color: var(--curio-blood-red) !important;
 }
 
 /* Tapered full-width underline */
