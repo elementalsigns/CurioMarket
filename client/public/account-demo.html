@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Manager Demo - Curio Market</title>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -290,28 +292,110 @@
         
         .footer {
             margin-top: 4rem;
-            background: rgba(0, 0, 0, 0.8);
-            border-top: 1px solid rgba(82, 82, 91, 1);
-            padding: 2rem;
+            background: hsl(212, 5%, 5%);
+            border-top: 1px solid rgba(220, 38, 127, 0.2);
+            padding: 4rem 2rem;
         }
         
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 2rem;
+            margin-bottom: 3rem;
         }
         
-        .footer-section h3,
-        .footer-section h4 {
-            margin-bottom: 0.75rem;
+        .footer-brand {
+            grid-column: span 1;
         }
         
-        .footer-section p {
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .curio-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .script-initial {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2rem;
+            font-weight: normal;
+            color: white;
+            transition: color 0.3s ease;
+        }
+        
+        .slow-letter {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .footer-brand p {
             color: rgba(161, 161, 170, 1);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 300px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: rgba(161, 161, 170, 1);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: hsl(0, 77%, 26%);
+        }
+        
+        .footer-section h4 {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: white;
+            font-family: 'EB Garamond', serif;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: rgba(161, 161, 170, 1);
+            text-decoration: none;
             font-size: 0.9rem;
-            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section a:hover {
+            color: hsl(0, 77%, 26%);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(82, 82, 91, 1);
+            padding-top: 2rem;
+            text-align: center;
+        }
+        
+        .footer-bottom p {
+            color: rgba(161, 161, 170, 1);
+            font-size: 0.875rem;
+            margin: 0;
         }
     </style>
 </head>
@@ -434,18 +518,61 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section">
-                <h3>Curio Market</h3>
-                <p>The marketplace for oddities and curiosities</p>
+            <!-- Brand -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <h3 class="curio-logo">
+                        <span>
+                            <span class="script-initial">C</span><span class="slow-letter">u</span>r<span class="slow-letter">i</span>o
+                        </span>
+                        <span>
+                            <span class="script-initial">M</span>arket
+                        </span>
+                    </h3>
+                </div>
+                <p>The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram">
+                        <i class="fab fa-instagram" style="font-size: 1.25rem;"></i>
+                    </a>
+                    <a href="#" aria-label="Twitter">
+                        <i class="fab fa-twitter" style="font-size: 1.25rem;"></i>
+                    </a>
+                    <a href="#" aria-label="Facebook">
+                        <i class="fab fa-facebook" style="font-size: 1.25rem;"></i>
+                    </a>
+                </div>
             </div>
+
+            <!-- Shop -->
             <div class="footer-section">
                 <h4>Shop</h4>
-                <p>Browse categories and find unique items</p>
+                <ul>
+                    <li><a href="/browse">All Categories</a></li>
+                    <li><a href="/browse?category=wet-specimens">Wet Specimens</a></li>
+                    <li><a href="/browse?category=taxidermy">Taxidermy</a></li>
+                    <li><a href="/browse?category=bones-skulls">Bones & Skulls</a></li>
+                    <li><a href="/browse?category=vintage-medical">Vintage Medical</a></li>
+                    <li><a href="/browse?category=oddities">Oddities</a></li>
+                </ul>
             </div>
+
+            <!-- Support -->
             <div class="footer-section">
                 <h4>Support</h4>
-                <p>Get help with your account and orders</p>
+                <ul>
+                    <li><a href="/help">Help Center</a></li>
+                    <li><a href="/seller/guide">Seller Guide</a></li>
+                    <li><a href="/seller/terms">Seller Terms</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                </ul>
             </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Curio Market. All rights reserved.</p>
         </div>
     </footer>
 </body>
