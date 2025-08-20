@@ -31,9 +31,9 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             {/* Hero Content */}
             <div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold mb-8 leading-[0.9] tracking-tight" data-testid="hero-title">
-                <span className="text-foreground">CURIO</span>{" "}
-                <span className="text-primary font-black">MARKET</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl curio-logo font-bold mb-8 leading-[0.9]" data-testid="hero-title">
+                <span className="text-foreground">Curio</span>{" "}
+                <span className="text-primary font-black">Market</span>
               </h1>
               
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-light mb-8 text-muted-foreground leading-relaxed">

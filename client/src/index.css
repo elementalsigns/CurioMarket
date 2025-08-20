@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=UnifrakturCook:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Lobster:wght@400&display=swap");
 
 @font-face {
   font-family: 'Bliamer';
@@ -50,6 +50,7 @@
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --font-brand: 'UnifrakturCook', serif;
+  --font-brand-curvy: 'Pacifico', cursive;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Shadows */
@@ -59,6 +60,20 @@
   --shadow-md: 0 4px 6px -1px hsl(240 4% 4% / 0.1), 0 2px 4px -2px hsl(240 4% 4% / 0.1);
   --shadow-lg: 0 10px 15px -3px hsl(240 4% 4% / 0.1), 0 4px 6px -4px hsl(240 4% 4% / 0.1);
   --shadow-xl: 0 20px 25px -5px hsl(240 4% 4% / 0.1), 0 8px 10px -6px hsl(240 4% 4% / 0.1);
+}
+
+/* Custom Curvy Logo Style */
+.curio-logo {
+  font-family: var(--font-brand-curvy);
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: all 0.3s ease;
+}
+
+.curio-logo:hover {
+  transform: perspective(1000px) rotateY(0deg) scale(1.02);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .dark {
