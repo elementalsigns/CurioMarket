@@ -113,54 +113,51 @@
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
 }
 
-/* Amazon-style curved arrow from 'i' to 'u' in Curio */
+/* Red arrow from 'i' to 'u' - "connecting You to I" */
 .curio-word {
   position: relative;
   display: inline-block;
 }
 
+/* Arrow shaft - straight line under 'i' pointing to 'u' */
 .curio-word::after {
   content: '';
   position: absolute;
-  bottom: -0.3em;
-  left: 1.9em; /* Position under 'i' */
-  width: 1.4em;
-  height: 0.8em;
-  border: 3px solid var(--curio-blood-red);
-  border-top: none;
-  border-left: none;
-  border-radius: 0 0 50px 0;
-  opacity: 0.85;
+  bottom: -0.2em;
+  left: 1.95em; /* Position directly under 'i' */
+  width: 0.7em;
+  height: 3px;
+  background: var(--curio-blood-red);
+  opacity: 0.9;
   transition: all 0.3s ease;
-  transform-origin: left bottom;
+  box-shadow: 0 1px 3px rgba(106, 27, 27, 0.4);
 }
 
-/* Arrow head pointing up and right */
+/* Arrow head pointing toward 'u' */
 .curio-word::before {
   content: '';
   position: absolute;
-  bottom: -0.15em;
-  right: 0.6em; /* Position at end of curve */
+  bottom: -0.32em;
+  left: 2.55em; /* Position at end of arrow shaft */
   width: 0;
   height: 0;
-  border-left: 6px solid var(--curio-blood-red);
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  opacity: 0.85;
+  border-left: 8px solid var(--curio-blood-red);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  opacity: 0.9;
   transition: all 0.3s ease;
-  transform: rotate(-20deg);
 }
 
 .curio-logo:hover .curio-word::after {
   opacity: 1;
-  border-color: var(--curio-blood-red);
-  filter: drop-shadow(0 0 4px rgba(106, 27, 27, 0.4));
+  background: var(--curio-blood-red);
+  box-shadow: 0 2px 6px rgba(106, 27, 27, 0.6);
 }
 
 .curio-logo:hover .curio-word::before {
   opacity: 1;
   border-left-color: var(--curio-blood-red);
-  filter: drop-shadow(0 0 4px rgba(106, 27, 27, 0.4));
+  filter: drop-shadow(0 1px 3px rgba(106, 27, 27, 0.6));
 }
 
 
