@@ -216,7 +216,7 @@ export default function Header() {
             <Link to="/cart">
               <Button 
                 variant="ghost" 
-                className="text-foreground hover:text-primary p-2 relative"
+                className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
                 data-testid="button-cart"
               >
                 <ShoppingCart size={20} />
