@@ -46,7 +46,22 @@ export default function SellerGuide() {
       .seller-guide-page *,
       .seller-guide-page section,
       .seller-guide-page div,
-      .seller-guide-page main {
+      .seller-guide-page main,
+      .seller-guide-page article,
+      .seller-guide-page aside,
+      .seller-guide-page nav,
+      .seller-guide-page header,
+      .seller-guide-page footer {
+        background: hsl(212, 5%, 5%) !important;
+        background-color: hsl(212, 5%, 5%) !important;
+      }
+      
+      * {
+        background: hsl(212, 5%, 5%) !important;
+        background-color: hsl(212, 5%, 5%) !important;
+      }
+      
+      body, html, #root {
         background: hsl(212, 5%, 5%) !important;
         background-color: hsl(212, 5%, 5%) !important;
       }
@@ -63,38 +78,39 @@ export default function SellerGuide() {
   }, []);
 
   return (
-    <div className="seller-guide-page min-h-screen bg-background flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
-      <Header />
-      
-      <main className="flex-1" data-testid="seller-guide-main" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
-        {/* Hero Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background border-b border-border" data-testid="hero-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
-          <div className="container mx-auto max-w-4xl">
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <BookOpen className="h-12 w-12 text-gothic-red" data-testid="hero-icon" />
-                <h1 className="text-5xl font-serif font-bold" data-testid="hero-title">
-                  Seller's <span className="text-gothic-red">Guide</span>
-                </h1>
-              </div>
-              <p className="text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed" data-testid="hero-subtitle">
-                Transform your passion for the macabre into a thriving business. Learn everything you need to know about selling on Curio Market, from creating compelling listings to building a loyal customer base.
-              </p>
-              <div className="mt-8">
-                <Link to="/seller/terms">
-                  <Button size="lg" className="bg-gothic-red hover:bg-gothic-red/80 text-white px-8 py-4 text-lg font-medium" data-testid="start-selling-button">
-                    Start Selling Today
-                  </Button>
-                </Link>
+    <div className="seller-guide-page min-h-screen bg-background flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)', minHeight: '100vh', height: '100%'}}>
+      <div style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)', width: '100%', minHeight: '100vh'}}>
+        <Header />
+        
+        <main className="flex-1" data-testid="seller-guide-main" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)', width: '100%'}}>
+          {/* Hero Section */}
+          <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background border-b border-border" data-testid="hero-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)', width: '100%'}}>
+            <div className="container mx-auto max-w-4xl" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
+              <div className="text-center mb-12" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
+                <div className="flex items-center justify-center gap-3 mb-6" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
+                  <BookOpen className="h-12 w-12 text-gothic-red" data-testid="hero-icon" />
+                  <h1 className="text-5xl font-serif font-bold" data-testid="hero-title">
+                    Seller's <span className="text-gothic-red">Guide</span>
+                  </h1>
+                </div>
+                <p className="text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed" data-testid="hero-subtitle">
+                  Transform your passion for the macabre into a thriving business. Learn everything you need to know about selling on Curio Market, from creating compelling listings to building a loyal customer base.
+                </p>
+                <div className="mt-8" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
+                  <Link to="/seller/terms">
+                    <Button size="lg" className="bg-gothic-red hover:bg-gothic-red/80 text-white px-8 py-4 text-lg font-medium" data-testid="start-selling-button">
+                      Start Selling Today
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         {/* Quick Stats */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" data-testid="stats-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
-          <div className="container mx-auto max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" data-testid="stats-section" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)', width: '100%'}}>
+          <div className="container mx-auto max-w-6xl" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8" style={{backgroundColor: 'hsl(212, 5%, 5%)', background: 'hsl(212, 5%, 5%)'}}>
               <Card className="text-center" data-testid="stat-sellers">
                 <CardContent className="pt-6">
                   <Users className="h-8 w-8 text-gothic-red mx-auto mb-3" />
@@ -528,7 +544,8 @@ export default function SellerGuide() {
         </section>
       </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }
