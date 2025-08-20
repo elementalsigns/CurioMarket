@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -345,9 +346,11 @@ export default function UserProfile() {
                       <p className="text-sm text-foreground/70 mb-4">
                         Start selling your oddities and curiosities on Curio Market.
                       </p>
-                      <Button>
-                        Start Selling
-                      </Button>
+                      <Link to="/seller/terms">
+                        <Button>
+                          Start Selling
+                        </Button>
+                      </Link>
                     </div>
                   )}
                   

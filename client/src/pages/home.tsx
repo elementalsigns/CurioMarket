@@ -113,7 +113,7 @@ export default function Home() {
                 <p className="text-foreground/70 mb-4">
                   Share your oddities with collectors worldwide
                 </p>
-                <Link to="/seller/onboard">
+                <Link to="/seller/terms">
                   <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-become-seller">
                     Start Selling
                   </Button>

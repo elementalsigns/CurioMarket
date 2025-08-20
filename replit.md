@@ -27,6 +27,19 @@ Preferred communication style: Simple, everyday language.
 - **Technical Details**: Applied hsl(212, 5%, 5%) throughout all components, sections, and root elements
 - **Files Modified**: `client/src/pages/home.tsx`, `client/src/index.css`, `client/src/App.tsx`
 
+## Product Card Symmetry Fix (August 2025)
+- **Issue**: Product boxes in "Recently Added" section had inconsistent heights
+- **Resolution**: Applied flexbox layout with h-full and flex-col classes for uniform card heights
+- **Technical Details**: Used flex-1, justify-between, and items-stretch for proper content distribution
+- **Files Modified**: `client/src/components/product-card.tsx`, `client/src/pages/home.tsx`
+
+## Seller Terms & Agreement Implementation (August 2025)
+- **Feature**: Added comprehensive seller agreement page with prohibited items policy
+- **Details**: Professional terms covering human remains, endangered species, legal compliance, and documentation requirements
+- **Implementation**: Created `/seller/terms` route with mandatory agreement checkboxes before seller registration
+- **Files Added**: `client/src/pages/seller-terms.tsx`
+- **Files Modified**: `client/src/App.tsx`, `client/src/pages/home.tsx`, `client/src/pages/user-profile.tsx`
+
 # System Architecture
 
 ## Frontend Architecture

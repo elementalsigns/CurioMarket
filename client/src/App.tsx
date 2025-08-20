@@ -15,6 +15,7 @@ import CreateListing from "@/pages/create-listing";
 import Checkout from "@/pages/checkout";
 import Subscribe from "@/pages/subscribe";
 import UserProfile from "@/pages/user-profile";
+import SellerTerms from "@/pages/seller-terms";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
+          <Route path="/seller/terms" component={SellerTerms} />
           <Route component={NotFound} />
         </>
       ) : (
@@ -39,6 +41,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
+          <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/listings/create" component={CreateListing} />
