@@ -140,6 +140,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Recently Viewed */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-zinc-900 via-black to-zinc-800" data-testid="section-recently-viewed">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-3xl font-serif font-bold mb-2" data-testid="recently-viewed-title">
+                Recently viewed & more like this
+              </h2>
+              <p className="text-foreground/70" data-testid="recently-viewed-subtitle">
+                Items you've browsed and similar oddities
+              </p>
+            </div>
+            <Link to="/browse">
+              <Button 
+                variant="ghost"
+                className="text-primary hover:text-primary/80 hover:bg-transparent p-0"
+                data-testid="button-view-more"
+              >
+                See more <ArrowRight className="ml-1" size={16} />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="recently-viewed-grid">
+            {Array.isArray(featuredListings) && (featuredListings as any)?.map((listing: any) => (
+              <ProductCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured Products */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-featured">
         <div className="container mx-auto max-w-7xl">
