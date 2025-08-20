@@ -312,7 +312,6 @@ function ProhibitedItemsStandalone() {
                 <li>Email: compliance@curiomarket.com</li>
                 <li>Emergency: violations@curiomarket.com</li>
                 <li>Mail: Curio Market Compliance, 123 Gothic Lane, Salem, MA 01970</li>
-                <li>Phone: 1-800-CURIOS (1-800-287-4679)</li>
               </ul>
             </div>
           </div>

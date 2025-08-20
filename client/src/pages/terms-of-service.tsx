@@ -280,7 +280,6 @@ function TermsOfServiceStandalone() {
               <ul>
                 <li>Email: legal@curiomarket.com</li>
                 <li>Mail: Curio Market Legal Department, 123 Gothic Lane, Salem, MA 01970</li>
-                <li>Phone: 1-800-CURIOS (1-800-287-4679)</li>
               </ul>
             </div>
           </div>
