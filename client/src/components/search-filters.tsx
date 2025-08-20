@@ -46,9 +46,11 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
   });
 
   const handleFilterChange = (key: string, value: string) => {
+    // Convert "all" to empty string for category filter
+    const actualValue = key === 'category' && value === 'all' ? '' : value;
     onFiltersChange({
       ...filters,
-      [key]: value,
+      [key]: actualValue,
     });
   };
 
@@ -121,8 +123,8 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
-              {(categories || []).map((category: any) => (
+              <SelectItem value="all">All Categories</SelectItem>
+              {Array.isArray(categories) && categories.map((category: any) => (
                 <SelectItem key={category.slug} value={category.slug}>
                   {category.name}
                 </SelectItem>
@@ -203,7 +205,7 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
               <div className="flex flex-wrap gap-1">
                 {filters.category && (
                   <Badge variant="outline" className="text-xs" data-testid="filter-category">
-                    Category: {(categories || []).find((cat: any) => cat.slug === filters.category)?.name}
+                    Category: {Array.isArray(categories) ? categories.find((cat: any) => cat.slug === filters.category)?.name : filters.category}
                     <Button
                       variant="ghost"
                       size="icon"

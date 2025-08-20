@@ -18,6 +18,9 @@ export default function Browse() {
     sortBy: "newest",
   });
 
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showFilters, setShowFilters] = useState(false);
+
   // Extract URL parameters on component mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -31,8 +34,6 @@ export default function Browse() {
       setSearchQuery(q);
     }
   }, []);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showFilters, setShowFilters] = useState(false);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ["/api/search", searchQuery, filters],
