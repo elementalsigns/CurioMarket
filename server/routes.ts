@@ -252,6 +252,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get featured listings - MUST be before /:id route
+  app.get('/api/listings/featured', async (req, res) => {
+    try {
+      const { limit = 8 } = req.query;
+      const listings = await storage.getFeaturedListings(parseInt(limit as string));
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching featured listings:", error);
+      res.status(500).json({ error: "Failed to fetch featured listings" });
+    }
+  });
+
   // Get single listing (public)
   app.get('/api/listings/:id', async (req, res) => {
     try {
@@ -390,18 +402,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error searching listings:", error);
       res.status(500).json({ error: "Failed to search listings" });
-    }
-  });
-
-  // Get featured listings
-  app.get('/api/listings/featured', async (req, res) => {
-    try {
-      const { limit = 8 } = req.query;
-      const listings = await storage.getFeaturedListings(parseInt(limit as string));
-      res.json(listings);
-    } catch (error) {
-      console.error("Error fetching featured listings:", error);
-      res.status(500).json({ error: "Failed to fetch featured listings" });
     }
   });
 
