@@ -106,8 +106,31 @@ export default function Header() {
               </DropdownMenu>
             </div>
 
-            <Link to="/" className="flex items-center logo-container" data-testid="logo">
-              <h1 className="text-2xl curio-logo font-bold">
+            <Link 
+              to="/" 
+              className="flex items-center logo-container" 
+              data-testid="logo"
+              style={{
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                const logo = e.currentTarget.querySelector('.curio-logo') as HTMLElement;
+                if (logo) {
+                  logo.style.color = '#dc2626';
+                  logo.style.transform = 'scale(1.02)';
+                  logo.style.textShadow = '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                const logo = e.currentTarget.querySelector('.curio-logo') as HTMLElement;
+                if (logo) {
+                  logo.style.color = 'white';
+                  logo.style.transform = 'scale(1)';
+                  logo.style.textShadow = '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)';
+                }
+              }}
+            >
+              <h1 className="text-2xl curio-logo font-bold" style={{transition: 'all 0.3s ease'}}>
                 <span>
                   <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
                 </span> <span>
