@@ -136,7 +136,7 @@ export default function HelpCenter() {
         <div className="max-w-6xl mx-auto" style={{ backgroundColor: 'hsl(212, 5%, 5%)' }}>
           {/* Header */}
           <div className="text-center mb-12" data-testid="help-header">
-            <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-red-600 transition-colors duration-300 cursor-default">
+            <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-[#6A1B1B] transition-colors duration-300 cursor-default">
               Help Center
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
@@ -162,9 +162,9 @@ export default function HelpCenter() {
 
           {/* Quick Help Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12" data-testid="quick-help-grid">
-            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-red-600/50">
+            <Card className="glass-effect text-center hover:shadow-xl transition-all duration-300 cursor-pointer border border-zinc-800 hover:border-[#6A1B1B]/50">
               <CardContent className="p-6">
-                <HelpCircle className="mx-auto mb-4 text-red-600" size={48} />
+                <HelpCircle className="mx-auto mb-4 text-[#6A1B1B]" size={48} />
                 <h3 className="font-serif font-bold mb-2">Frequently Asked Questions</h3>
                 <p className="text-sm text-foreground/70">Common questions about buying, selling, and using Curio Market</p>
               </CardContent>
@@ -190,7 +190,7 @@ export default function HelpCenter() {
           {/* Main Content */}
           <Tabs defaultValue="faq" className="space-y-8" data-testid="help-tabs">
             <TabsList className="grid w-full grid-cols-3 bg-zinc-900 border border-zinc-800">
-              <TabsTrigger value="faq" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              <TabsTrigger value="faq" className="flex items-center gap-2 data-[state=active]:bg-[#6A1B1B] data-[state=active]:text-white">
                 <Book size={16} />
                 FAQ
               </TabsTrigger>
@@ -209,7 +209,7 @@ export default function HelpCenter() {
               <Card className="glass-effect border border-zinc-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-serif">
-                    <Book className="text-red-600" size={24} />
+                    <Book className="text-[#6A1B1B]" size={24} />
                     Frequently Asked Questions
                   </CardTitle>
                 </CardHeader>
@@ -219,7 +219,7 @@ export default function HelpCenter() {
                       {filteredFAQ.map((category, categoryIndex) => (
                         <div key={categoryIndex}>
                           <div className="flex items-center gap-2 mb-4">
-                            <Badge variant="outline" className="text-sm border-red-600/50 text-red-400">
+                            <Badge variant="outline" className="text-sm border-[#6A1B1B]/50 text-[#6A1B1B]">
                               {category.category}
                             </Badge>
                           </div>
@@ -230,7 +230,7 @@ export default function HelpCenter() {
                                 value={`${categoryIndex}-${faqIndex}`}
                                 className="border border-zinc-800 rounded-lg px-4 bg-zinc-900/30"
                               >
-                                <AccordionTrigger className="text-left hover:no-underline hover:text-red-400 transition-colors">
+                                <AccordionTrigger className="text-left hover:no-underline hover:text-[#6A1B1B] transition-colors">
                                   {faq.q}
                                 </AccordionTrigger>
                                 <AccordionContent className="text-foreground/70">
@@ -264,10 +264,10 @@ export default function HelpCenter() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div className="bg-red-950/20 border border-red-900/30 rounded-lg p-4">
+                    <div className="bg-[#6A1B1B]/20 border border-[#6A1B1B]/30 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="text-red-400" size={20} />
-                        <h4 className="font-medium text-red-400">Notice:</h4>
+                        <AlertTriangle className="text-[#6A1B1B]" size={20} />
+                        <h4 className="font-medium text-[#6A1B1B]">Notice:</h4>
                       </div>
                       <p className="text-sm text-foreground/70">
                         Curio Market deals with unique and sometimes regulated items. Always verify legal requirements and follow safety protocols when handling specimens and oddities.
@@ -276,9 +276,9 @@ export default function HelpCenter() {
 
                     <div className="grid gap-6">
                       {safetyGuidelines.map((guideline, index) => (
-                        <Card key={index} className="border-l-4 border-l-purple-600 bg-zinc-900/30 border border-zinc-800">
+                        <Card key={index} className="border-l-4 border-l-[#6A1B1B] bg-zinc-900/30 border border-zinc-800">
                           <CardContent className="p-4">
-                            <h4 className="font-medium mb-2 text-purple-400">{guideline.title}</h4>
+                            <h4 className="font-medium mb-2 text-[#6A1B1B]">{guideline.title}</h4>
                             <p className="text-sm text-foreground/70">{guideline.content}</p>
                           </CardContent>
                         </Card>
@@ -301,24 +301,24 @@ export default function HelpCenter() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Email Support</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Email Support</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         For general inquiries, account issues, or seller support:
                       </p>
-                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
+                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
                         support@curiomarket.com
                       </Button>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Response Time</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Response Time</h4>
                       <p className="text-sm text-foreground/70">
                         We typically respond within 24-48 hours during business days.
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Before Contacting Support</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Before Contacting Support</h4>
                       <ul className="text-sm text-foreground/70 space-y-1">
                         <li>• Check our FAQ section above</li>
                         <li>• Try searching for your specific issue</li>
@@ -334,31 +334,31 @@ export default function HelpCenter() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Safety Concerns</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Safety Concerns</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Report potentially illegal items or safety violations:
                       </p>
-                      <Button variant="outline" className="w-full text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
+                      <Button variant="outline" className="w-full text-[#6A1B1B] border-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
                         Report Safety Issue
                       </Button>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Seller Issues</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Seller Issues</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Problems with a specific seller or transaction:
                       </p>
-                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
+                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
                         Report Seller Issue
                       </Button>
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-2 text-red-400">Technical Problems</h4>
+                      <h4 className="font-medium mb-2 text-[#6A1B1B]">Technical Problems</h4>
                       <p className="text-sm text-foreground/70 mb-2">
                         Website bugs or technical difficulties:
                       </p>
-                      <Button variant="outline" className="w-full border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white">
+                      <Button variant="outline" className="w-full border-[#6A1B1B]/50 text-[#6A1B1B] hover:bg-[#6A1B1B] hover:text-white">
                         Report Technical Issue
                       </Button>
                     </div>
