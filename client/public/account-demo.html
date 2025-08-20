@@ -29,9 +29,8 @@
             align-items: center;
         }
         
-        .logo {
+        .header .curio-logo {
             font-size: 1.5rem;
-            font-weight: bold;
         }
         
         .header-buttons {
@@ -317,17 +316,56 @@
         }
         
         .curio-logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
+            font-family: 'EB Garamond', serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            font-variant: small-caps;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1) !important;
+            position: relative;
+            transition: all 0.3s ease !important;
+            display: inline-block;
+            cursor: pointer;
         }
-        
+
+        .curio-logo:hover {
+            color: hsl(0, 77%, 26%) !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
+            transform: scale(1.02);
+        }
+
+        /* Tapered full-width underline */
+        .curio-logo::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: -10%;
+            width: 120%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, hsl(0, 77%, 26%) 15%, hsl(0, 77%, 26%) 85%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .curio-logo:hover::after {
+            opacity: 0.8 !important;
+        }
+
         .script-initial {
             font-family: 'Great Vibes', cursive;
-            font-size: 2rem;
+            font-size: 1.3em;
             font-weight: normal;
-            color: white;
-            transition: color 0.3s ease;
+            position: relative;
+            display: inline-block;
+            margin-right: -0.05em;
+            transform: translateY(-0.05em);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(106, 27, 27, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .curio-logo:hover .script-initial {
+            transform: translateY(-0.08em) scale(1.05);
+            text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
         }
         
         .slow-letter {
@@ -403,7 +441,14 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="logo">Curio Market</div>
+            <h1 class="curio-logo">
+                <span>
+                    <span class="script-initial">C</span><span class="slow-letter">u</span>r<span class="slow-letter">i</span>o
+                </span>
+                <span>
+                    <span class="script-initial">M</span>arket
+                </span>
+            </h1>
             <div class="header-buttons">
                 <button class="btn btn-outline">Sign up</button>
                 <button class="btn btn-primary">Sign in</button>
