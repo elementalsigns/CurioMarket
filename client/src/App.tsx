@@ -18,6 +18,7 @@ import UserProfile from "@/pages/user-profile";
 import SellerTerms from "@/pages/seller-terms";
 import SellerGuide from "@/pages/seller-guide";
 import SellerGuideClean from "@/pages/seller-guide-clean";
+import SellerGuideSimple from "@/pages/seller-guide-simple";
 import TestSellerGuide from "@/pages/test-seller-guide";
 import HelpCenter from "@/pages/help-center";
 
@@ -38,7 +39,7 @@ function Router() {
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/seller/terms" component={SellerTerms} />
-          <Route path="/seller/guide" component={SellerGuideClean} />
+          <Route path="/seller/guide" component={SellerGuideSimple} />
           <Route path="/help" component={HelpCenter} />
           <Route component={NotFound} />
         </>
@@ -48,7 +49,7 @@ function Router() {
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/seller/terms" component={SellerTerms} />
-          <Route path="/seller/guide" component={SellerGuideClean} />
+          <Route path="/seller/guide" component={SellerGuideSimple} />
           <Route path="/help" component={HelpCenter} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
