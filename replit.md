@@ -15,12 +15,15 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-## Seller Guide Page Fix (August 2025)
+## Seller Guide Page Fix & Styling (August 2025)
 - **Issue**: NotFound modal appearing at bottom of seller guide page due to unhandled promise rejections
 - **Resolution**: Created standalone seller guide component with embedded CSS to bypass React error boundaries
 - **Implementation**: Modified NotFound component to not render on /seller/guide path, preventing overlay issues
+- **Styling Updates**: Updated red colors to match site's blood-red theme (hsl(0, 77%, 26%)) and logo to match home page Victorian gothic styling
+- **Logo Enhancement**: Added EB Garamond font, script-style initials with Great Vibes, hover effects, and tapered underline
 - **Technical Details**: Used pure inline styles and simplified component structure to eliminate JavaScript runtime errors
 - **Files Modified**: `client/src/pages/seller-guide-standalone.tsx` (created), `client/src/pages/not-found.tsx`, `client/src/App.tsx`
+- **Status**: Completed successfully - page displays properly with consistent branding
 
 ## Seller Guide Page Implementation (August 2025)
 - **Feature**: Created comprehensive seller guide page at `/seller/guide` route
