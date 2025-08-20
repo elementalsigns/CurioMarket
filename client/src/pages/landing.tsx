@@ -337,10 +337,10 @@ export default function Landing() {
             </Card>
           </div>
 
-          <Card className="bg-primary/10 border border-primary/30 rounded-lg max-w-4xl mx-auto" data-testid="compliance-notice">
+          <Card className="bg-red-600/10 border border-red-600/30 rounded-lg max-w-4xl mx-auto" data-testid="compliance-notice">
             <CardContent className="p-6">
               <p className="text-foreground/90">
-                <strong>Notice:</strong> Our marketplace maintains rigorous seller verification, requires adherence to local laws, and prohibits illegal items. All sellers are responsible for compliance with applicable regulations.
+                <strong className="text-red-600">Notice:</strong> Our marketplace maintains rigorous seller verification, requires adherence to local laws, and prohibits illegal items. All sellers are responsible for compliance with applicable regulations.
               </p>
             </CardContent>
           </Card>
