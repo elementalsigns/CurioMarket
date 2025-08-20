@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Crimson+Text:wght@400;600&family=EB+Garamond:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Crimson+Text:wght@400;600&family=EB+Garamond:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Dancing+Script:wght@400;500;600;700&family=Great+Vibes&display=swap");
 
 @font-face {
   font-family: 'Bliamer';
@@ -62,7 +62,7 @@
   --shadow-xl: 0 20px 25px -5px hsl(240 4% 4% / 0.1), 0 8px 10px -6px hsl(240 4% 4% / 0.1);
 }
 
-/* Victorian Gothic Logo Style */
+/* Victorian Gothic Logo Style with Script Initials */
 .curio-logo {
   font-family: var(--font-brand-curvy);
   font-weight: 600;
@@ -71,6 +71,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(106, 27, 27, 0.3);
   position: relative;
   transition: all 0.3s ease;
+  display: inline-block;
 }
 
 .curio-logo:hover {
@@ -92,6 +93,45 @@
 
 .curio-logo:hover::after {
   opacity: 0.7;
+}
+
+/* Script-style initial letters */
+.script-initial {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.3em;
+  font-weight: normal;
+  position: relative;
+  display: inline-block;
+  margin-right: -0.05em;
+  transform: translateY(-0.05em);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(106, 27, 27, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* Swirl connection effect */
+.script-initial::after {
+  content: '';
+  position: absolute;
+  top: 60%;
+  right: -0.1em;
+  width: 0.3em;
+  height: 1px;
+  background: var(--curio-blood-red);
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(106, 27, 27, 0.6);
+  transform: rotate(15deg) scaleX(1.5);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.curio-logo:hover .script-initial {
+  transform: translateY(-0.08em) scale(1.05);
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
+}
+
+.curio-logo:hover .script-initial::after {
+  opacity: 1;
+  transform: rotate(15deg) scaleX(2) translateX(0.1em);
 }
 
 .dark {
