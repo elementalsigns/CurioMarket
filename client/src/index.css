@@ -82,9 +82,11 @@
 }
 
 /* More specific selector for header logo */
-h1.curio-logo:hover {
+h1.curio-logo:hover,
+.logo-container:hover .curio-logo {
   color: var(--curio-blood-red) !important;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5) !important;
+  transform: scale(1.02);
 }
 
 /* Tapered full-width underline */
@@ -101,7 +103,8 @@ h1.curio-logo:hover {
 }
 
 .curio-logo:hover::after,
-h1.curio-logo:hover::after {
+h1.curio-logo:hover::after,
+.logo-container:hover .curio-logo::after {
   opacity: 0.8 !important;
 }
 
@@ -119,7 +122,8 @@ h1.curio-logo:hover::after {
 }
 
 .curio-logo:hover .script-initial,
-h1.curio-logo:hover .script-initial {
+h1.curio-logo:hover .script-initial,
+.logo-container:hover .curio-logo .script-initial {
   transform: translateY(-0.08em) scale(1.05);
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6) !important;
 }
