@@ -1044,6 +1044,93 @@ export class DatabaseStorage implements IStorage {
         )
       );
   }
+
+  // Review operations
+  async getReviewsForSeller(userId: string, options: { filter: string; sortBy: string }): Promise<any[]> {
+    // Mock reviews for demonstration - would be replaced with real DB queries
+    return [
+      {
+        id: "review1",
+        rating: 5,
+        title: "Absolutely stunning piece!",
+        content: "This Victorian mourning locket exceeded all my expectations. The craftsmanship is exquisite and it arrived perfectly packaged. Highly recommend this seller!",
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        buyerName: "Sarah M.",
+        buyerAvatar: "",
+        productName: "Victorian Mourning Locket with Hair",
+        productSlug: "victorian-mourning-locket",
+        productImage: "",
+        verified: true,
+        helpful: 12,
+        sellerResponse: "Thank you so much for your kind words! I'm thrilled you're happy with your purchase.",
+        sellerResponseDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: "review2",
+        rating: 4,
+        title: "Great quality, fast shipping",
+        content: "Beautiful taxidermy butterfly collection. Arrived quickly and well-protected. One small wing was slightly damaged but overall very pleased.",
+        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+        buyerName: "Michael R.",
+        buyerAvatar: "",
+        productName: "Butterfly Specimen Collection",
+        productSlug: "butterfly-collection",
+        productImage: "",
+        verified: true,
+        helpful: 8,
+      },
+      {
+        id: "review3",
+        rating: 3,
+        title: "Good but not perfect",
+        content: "The crystal skull is nice but smaller than expected. Shipping took longer than advertised.",
+        createdAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+        buyerName: "Alex K.",
+        buyerAvatar: "",
+        productName: "Clear Quartz Crystal Skull",
+        productSlug: "crystal-skull",
+        productImage: "",
+        verified: true,
+        helpful: 3,
+      },
+    ];
+  }
+
+  async getReviewStats(userId: string): Promise<any> {
+    return {
+      averageRating: 4.6,
+      totalReviews: 127,
+      positivePercentage: 94,
+      responseRate: 87,
+    };
+  }
+
+  async createReview(data: any): Promise<any> {
+    const review = {
+      id: crypto.randomUUID(),
+      ...data,
+      verified: true,
+      helpful: 0,
+      createdAt: new Date().toISOString(),
+    };
+    return review;
+  }
+
+  async respondToReview(reviewId: string, userId: string, response: string): Promise<any> {
+    return {
+      id: reviewId,
+      sellerResponse: response,
+      sellerResponseDate: new Date().toISOString(),
+    };
+  }
+
+  async getProductReviews(productId: string, options: { page: number; limit: number; sortBy: string }): Promise<any> {
+    return {
+      reviews: [],
+      total: 0,
+      averageRating: 0,
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();

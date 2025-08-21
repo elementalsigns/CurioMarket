@@ -196,7 +196,7 @@ export const messages = pgTable("messages", {
   readAt: timestamp("read_at"),
 });
 
-// Reviews
+// Reviews - Enhanced with more fields
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").references(() => orders.id).notNull(),
@@ -204,8 +204,13 @@ export const reviews = pgTable("reviews", {
   sellerId: varchar("seller_id").references(() => users.id).notNull(),
   listingId: varchar("listing_id").references(() => listings.id).notNull(),
   rating: integer("rating").notNull(), // 1-5
+  title: varchar("title"),
   content: text("content"),
   images: text("images").array(),
+  verified: boolean("verified").default(false), // Verified purchase
+  helpful: integer("helpful").default(0), // Helpful votes count
+  sellerResponse: text("seller_response"),
+  sellerResponseDate: timestamp("seller_response_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

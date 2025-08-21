@@ -852,6 +852,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== REVIEWS ===================
+
+  // Get reviews for seller
+  app.get("/api/reviews", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { filter = 'all', sortBy = 'newest' } = req.query;
+      
+      const reviews = await storage.getReviewsForSeller(userId, {
+        filter: filter as string,
+        sortBy: sortBy as string,
+      });
+      
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Get review statistics
+  app.get("/api/reviews/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const stats = await storage.getReviewStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching review stats:", error);
+      res.status(500).json({ message: "Failed to fetch review statistics" });
+    }
+  });
+
+  // Create a review
+  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
+    try {
+      const buyerId = req.user?.claims?.sub;
+      const { productId, orderId, rating, title, content } = req.body;
+
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      }
+
+      const review = await storage.createReview({
+        orderId,
+        buyerId,
+        listingId: productId,
+        rating,
+        title,
+        content,
+      });
+
+      res.status(201).json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Respond to a review
+  app.post("/api/reviews/:reviewId/respond", isAuthenticated, async (req: any, res) => {
+    try {
+      const { reviewId } = req.params;
+      const { response } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      const updatedReview = await storage.respondToReview(reviewId, userId, response);
+      
+      if (!updatedReview) {
+        return res.status(404).json({ message: "Review not found or unauthorized" });
+      }
+
+      res.json(updatedReview);
+    } catch (error) {
+      console.error("Error responding to review:", error);
+      res.status(500).json({ message: "Failed to respond to review" });
+    }
+  });
+
+  // Get reviews for a specific product
+  app.get("/api/products/:productId/reviews", async (req: any, res) => {
+    try {
+      const { productId } = req.params;
+      const { page = 1, limit = 10, sortBy = 'newest' } = req.query;
+      
+      const reviews = await storage.getProductReviews(productId, {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        sortBy: sortBy as string,
+      });
+      
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching product reviews:", error);
+      res.status(500).json({ message: "Failed to fetch product reviews" });
+    }
+  });
+
   // =================== SELLER DASHBOARD ENHANCEMENT ===================
 
   // Analytics
