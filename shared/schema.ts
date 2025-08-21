@@ -46,6 +46,15 @@ export const notificationTypeEnum = pgEnum('notification_type', ['order', 'messa
 // Payout status enum
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'failed']);
 
+// Verification status enum
+export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'verified', 'rejected', 'expired']);
+
+// Verification type enum
+export const verificationTypeEnum = pgEnum('verification_type', ['email', 'phone', 'identity', 'address', 'business', 'tax_id']);
+
+// Review status enum
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected']);
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -56,6 +65,22 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default('buyer').notNull(),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  // Verification fields
+  emailVerified: boolean("email_verified").default(false),
+  phoneNumber: varchar("phone_number"),
+  phoneVerified: boolean("phone_verified").default(false),
+  identityVerified: boolean("identity_verified").default(false),
+  addressVerified: boolean("address_verified").default(false),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  country: varchar("country").default('US'),
+  dateOfBirth: timestamp("date_of_birth"),
+  // Account status
+  accountStatus: varchar("account_status").default('active'), // active, suspended, banned
+  verificationLevel: integer("verification_level").default(0), // 0-5, higher = more verified
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -71,6 +96,25 @@ export const sellers = pgTable("sellers", {
   location: varchar("location"),
   policies: text("policies"),
   isActive: boolean("is_active").default(true),
+  // Enhanced verification fields
+  businessVerified: boolean("business_verified").default(false),
+  taxIdVerified: boolean("tax_id_verified").default(false),
+  businessName: varchar("business_name"),
+  businessType: varchar("business_type"), // sole_proprietor, llc, corporation, etc
+  taxId: varchar("tax_id"), // EIN or SSN (encrypted)
+  businessLicense: varchar("business_license"),
+  businessAddress: text("business_address"),
+  businessPhone: varchar("business_phone"),
+  businessEmail: varchar("business_email"),
+  // Verification status
+  verificationStatus: reviewStatusEnum("verification_status").default('pending'),
+  verificationNotes: text("verification_notes"),
+  verifiedAt: timestamp("verified_at"),
+  verifiedBy: varchar("verified_by"), // Admin who verified
+  rejectionReason: text("rejection_reason"),
+  // Risk assessment
+  riskScore: integer("risk_score").default(0), // 0-100, higher = riskier
+  flaggedReasons: text("flagged_reasons").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -362,6 +406,88 @@ export const payouts = pgTable("payouts", {
   processedAt: timestamp("processed_at"),
 });
 
+// User verification requests
+export const verificationRequests = pgTable("verification_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: verificationTypeEnum("type").notNull(),
+  status: verificationStatusEnum("status").default('pending'),
+  // Data provided by user
+  data: jsonb("data"), // Flexible JSON field for different verification types
+  documents: text("documents").array(), // URLs to uploaded documents
+  // Admin review
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  notes: text("notes"), // Admin notes
+  rejectionReason: text("rejection_reason"),
+  // Verification codes/tokens
+  verificationCode: varchar("verification_code"), // For SMS/email verification
+  codeExpiresAt: timestamp("code_expires_at"),
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Verification templates for different types
+export const verificationTemplates = pgTable("verification_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: verificationTypeEnum("type").notNull(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  requiredFields: text("required_fields").array(), // JSON field names required
+  requiredDocuments: text("required_documents").array(), // Document types required
+  autoApprove: boolean("auto_approve").default(false), // Can be auto-approved
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Seller review queue for manual verification
+export const sellerReviewQueue = pgTable("seller_review_queue", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  queueType: varchar("queue_type").notNull(), // 'initial', 'appeal', 'routine_check'
+  priority: integer("priority").default(5), // 1-10, lower = higher priority
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  status: varchar("status").default('pending'), // pending, in_review, completed
+  riskFactors: text("risk_factors").array(), // Automatic risk flags
+  submittedDocuments: text("submitted_documents").array(),
+  reviewNotes: text("review_notes"),
+  decision: varchar("decision"), // approved, rejected, needs_more_info
+  decisionReason: text("decision_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Verification audit log
+export const verificationAuditLog = pgTable("verification_audit_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  sellerId: varchar("seller_id").references(() => sellers.id),
+  verificationRequestId: varchar("verification_request_id").references(() => verificationRequests.id),
+  action: varchar("action").notNull(), // submitted, approved, rejected, expired, etc.
+  actionBy: varchar("action_by").references(() => users.id),
+  details: jsonb("details"), // Additional context
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Identity verification sessions (for Stripe Identity or similar)
+export const identityVerificationSessions = pgTable("identity_verification_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  stripeSessionId: varchar("stripe_session_id").unique(),
+  status: varchar("status").default('processing'), // processing, verified, requires_input, canceled
+  type: varchar("type").default('document'), // document, selfie
+  lastError: jsonb("last_error"),
+  verifiedData: jsonb("verified_data"), // Name, DOB, address from document
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   seller: one(sellers, { fields: [users.id], references: [sellers.userId] }),
@@ -507,6 +633,23 @@ export const insertListingVariationSchema = createInsertSchema(listingVariations
   id: true,
 });
 
+export const insertVerificationRequestSchema = createInsertSchema(verificationRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSellerReviewQueueSchema = createInsertSchema(sellerReviewQueue).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIdentityVerificationSessionSchema = createInsertSchema(identityVerificationSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -537,3 +680,11 @@ export type ListingVariation = typeof listingVariations.$inferSelect;
 export type InsertListingVariation = z.infer<typeof insertListingVariationSchema>;
 export type SearchAnalytic = typeof searchAnalytics.$inferSelect;
 export type Payout = typeof payouts.$inferSelect;
+export type VerificationRequest = typeof verificationRequests.$inferSelect;
+export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
+export type VerificationTemplate = typeof verificationTemplates.$inferSelect;
+export type SellerReviewQueueItem = typeof sellerReviewQueue.$inferSelect;
+export type InsertSellerReviewQueueItem = z.infer<typeof insertSellerReviewQueueSchema>;
+export type VerificationAuditLog = typeof verificationAuditLog.$inferSelect;
+export type IdentityVerificationSession = typeof identityVerificationSessions.$inferSelect;
+export type InsertIdentityVerificationSession = z.infer<typeof insertIdentityVerificationSessionSchema>;

@@ -36,6 +36,7 @@ import Wishlists from "@/pages/wishlists";
 import SellerAnalytics from "@/pages/seller-analytics";
 import InventoryManagement from "@/pages/inventory-management";
 import Reviews from "@/pages/reviews";
+import Verification from "@/pages/verification";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -88,6 +89,7 @@ function Router() {
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
           <Route path="/account" component={AccountManager} />
+          <Route path="/verification" component={Verification} />
           <Route path="/wishlists" component={Wishlists} />
           <Route path="/account-demo" component={DemoSimple} />
         </>

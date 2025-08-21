@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSellerSchema, insertListingSchema } from "@shared/schema";
+import { verificationService } from "./verificationService";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-07-30.basil",
@@ -1120,6 +1121,257 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error promoting listings:", error);
       res.status(500).json({ error: "Failed to promote listings" });
+    }
+  });
+
+  // =================== VERIFICATION SYSTEM ===================
+
+  // Get user verification status
+  app.get('/api/verification/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const status = await verificationService.getUserVerificationStatus(userId);
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
+      res.status(500).json({ error: "Failed to fetch verification status" });
+    }
+  });
+
+  // Email verification
+  app.post('/api/verification/email/initiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const result = await verificationService.initiateEmailVerification(userId);
+      
+      // In a real app, send email with verification code here
+      console.log(`Email verification code for user ${userId}: ${result.code}`);
+      
+      res.json({ 
+        message: "Verification code sent to your email",
+        expiresAt: result.expiresAt 
+      });
+    } catch (error) {
+      console.error("Error initiating email verification:", error);
+      res.status(500).json({ error: "Failed to initiate email verification" });
+    }
+  });
+
+  app.post('/api/verification/email/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: "Verification code is required" });
+      }
+
+      const verified = await verificationService.verifyEmailCode(userId, code);
+      
+      if (verified) {
+        res.json({ success: true, message: "Email verified successfully" });
+      } else {
+        res.status(400).json({ error: "Invalid or expired verification code" });
+      }
+    } catch (error) {
+      console.error("Error verifying email code:", error);
+      res.status(500).json({ error: "Failed to verify email" });
+    }
+  });
+
+  // Phone verification
+  app.post('/api/verification/phone/initiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { phoneNumber } = req.body;
+      
+      if (!phoneNumber) {
+        return res.status(400).json({ error: "Phone number is required" });
+      }
+
+      const result = await verificationService.initiatePhoneVerification(userId, phoneNumber);
+      
+      // In a real app, send SMS with verification code here
+      console.log(`SMS verification code for ${phoneNumber}: ${result.code}`);
+      
+      res.json({ 
+        message: "Verification code sent to your phone",
+        expiresAt: result.expiresAt 
+      });
+    } catch (error) {
+      console.error("Error initiating phone verification:", error);
+      res.status(500).json({ error: "Failed to initiate phone verification" });
+    }
+  });
+
+  app.post('/api/verification/phone/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: "Verification code is required" });
+      }
+
+      const verified = await verificationService.verifyPhoneCode(userId, code);
+      
+      if (verified) {
+        res.json({ success: true, message: "Phone number verified successfully" });
+      } else {
+        res.status(400).json({ error: "Invalid or expired verification code" });
+      }
+    } catch (error) {
+      console.error("Error verifying phone code:", error);
+      res.status(500).json({ error: "Failed to verify phone number" });
+    }
+  });
+
+  // Identity verification
+  app.post('/api/verification/identity/initiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const result = await verificationService.initiateIdentityVerification(userId);
+      
+      res.json({
+        sessionId: result.sessionId,
+        sessionUrl: result.sessionUrl,
+        message: "Identity verification session created"
+      });
+    } catch (error) {
+      console.error("Error initiating identity verification:", error);
+      res.status(500).json({ error: "Failed to initiate identity verification" });
+    }
+  });
+
+  // Address verification
+  app.post('/api/verification/address', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { address, city, state, zipCode, country } = req.body;
+      
+      if (!address || !city || !state || !zipCode) {
+        return res.status(400).json({ error: "Address, city, state, and zip code are required" });
+      }
+
+      const result = await verificationService.initiateAddressVerification(userId, {
+        address,
+        city,
+        state,
+        zipCode,
+        country: country || 'US'
+      });
+      
+      res.json({
+        requestId: result.requestId,
+        message: "Address verification submitted for review"
+      });
+    } catch (error) {
+      console.error("Error submitting address verification:", error);
+      res.status(500).json({ error: "Failed to submit address verification" });
+    }
+  });
+
+  // Seller business verification
+  app.post('/api/verification/seller', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        businessName,
+        businessType,
+        taxId,
+        businessLicense,
+        businessAddress,
+        businessPhone,
+        businessEmail,
+        documents
+      } = req.body;
+      
+      if (!businessName || !businessType) {
+        return res.status(400).json({ error: "Business name and type are required" });
+      }
+
+      const result = await verificationService.initiateSellerVerification(req.body.sellerId || userId, {
+        userId,
+        businessName,
+        businessType,
+        taxId,
+        businessLicense,
+        businessAddress,
+        businessPhone,
+        businessEmail,
+        documents: documents || []
+      });
+      
+      res.json({
+        queueId: result.queueId,
+        message: "Seller verification submitted for review"
+      });
+    } catch (error) {
+      console.error("Error submitting seller verification:", error);
+      res.status(500).json({ error: "Failed to submit seller verification" });
+    }
+  });
+
+  // Admin verification management (restricted to admins)
+  app.get('/api/admin/verification/queue', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { status = 'pending', priority } = req.query;
+      const queue = await verificationService.getVerificationQueue(
+        status as string, 
+        priority ? parseInt(priority as string) : undefined
+      );
+      
+      res.json(queue);
+    } catch (error) {
+      console.error("Error fetching verification queue:", error);
+      res.status(500).json({ error: "Failed to fetch verification queue" });
+    }
+  });
+
+  app.post('/api/admin/verification/approve/:queueId', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { queueId } = req.params;
+      const { notes } = req.body;
+      
+      await verificationService.approveSellerVerification(queueId, user.id, notes);
+      
+      res.json({ success: true, message: "Seller verification approved" });
+    } catch (error) {
+      console.error("Error approving seller verification:", error);
+      res.status(500).json({ error: "Failed to approve seller verification" });
+    }
+  });
+
+  app.post('/api/admin/verification/reject/:queueId', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { queueId } = req.params;
+      const { reason } = req.body;
+      
+      if (!reason) {
+        return res.status(400).json({ error: "Rejection reason is required" });
+      }
+      
+      await verificationService.rejectSellerVerification(queueId, user.id, reason);
+      
+      res.json({ success: true, message: "Seller verification rejected" });
+    } catch (error) {
+      console.error("Error rejecting seller verification:", error);
+      res.status(500).json({ error: "Failed to reject seller verification" });
     }
   });
 
