@@ -196,7 +196,7 @@ export const messages = pgTable("messages", {
   readAt: timestamp("read_at"),
 });
 
-// Reviews - Enhanced with more fields
+// Reviews - Enhanced with photo upload support
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").references(() => orders.id).notNull(),
@@ -206,7 +206,7 @@ export const reviews = pgTable("reviews", {
   rating: integer("rating").notNull(), // 1-5
   title: varchar("title"),
   content: text("content"),
-  images: text("images").array(),
+  photos: text("photos").array(), // Array of photo URLs from object storage
   verified: boolean("verified").default(false), // Verified purchase
   helpful: integer("helpful").default(0), // Helpful votes count
   sellerResponse: text("seller_response"),

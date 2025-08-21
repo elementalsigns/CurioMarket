@@ -888,7 +888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
       const buyerId = req.user?.claims?.sub;
-      const { productId, orderId, rating, title, content } = req.body;
+      const { productId, orderId, rating, title, content, photos } = req.body;
 
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ message: "Rating must be between 1 and 5" });
@@ -901,12 +901,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rating,
         title,
         content,
+        photos: photos || [],
       });
 
       res.status(201).json(review);
     } catch (error) {
       console.error("Error creating review:", error);
       res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Get upload URL for review photos
+  app.post("/api/reviews/photos/upload", isAuthenticated, async (req: any, res) => {
+    try {
+      const ObjectStorageService = (await import('./objectStorage')).ObjectStorageService;
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getReviewPhotoUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting review photo upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Serve review photos
+  app.get("/objects/review-photos/:photoId(*)", async (req: any, res) => {
+    try {
+      const ObjectStorageService = (await import('./objectStorage')).ObjectStorageService;
+      const objectStorageService = new ObjectStorageService();
+      const photoFile = await objectStorageService.getReviewPhotoFile(req.path);
+      objectStorageService.downloadObject(photoFile, res);
+    } catch (error) {
+      console.error("Error serving review photo:", error);
+      if (error.name === 'ObjectNotFoundError') {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
     }
   });
 

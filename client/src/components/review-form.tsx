@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Camera, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 interface ReviewFormProps {
   productId: string;
@@ -20,6 +22,7 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const submitMutation = useMutation({
     mutationFn: async () => 
@@ -29,6 +32,7 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
         rating,
         title,
         content,
+        photos,
       }),
     onSuccess: () => {
       toast({ 
@@ -38,11 +42,42 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
       setRating(0);
       setTitle("");
       setContent("");
+      setPhotos([]);
       queryClient.invalidateQueries({ queryKey: ["/api/products", productId] });
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       onSuccess?.();
     },
   });
+
+  const handlePhotoUpload = async () => {
+    try {
+      const response = await apiRequest("POST", "/api/reviews/photos/upload");
+      return {
+        method: "PUT" as const,
+        url: response.uploadURL,
+      };
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to get upload URL",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handlePhotoComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    const newPhotos = result.successful.map((file) => file.uploadURL as string);
+    setPhotos(prev => [...prev, ...newPhotos]);
+    toast({
+      title: "Photo uploaded",
+      description: `${result.successful.length} photo(s) added to your review`,
+    });
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +157,52 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
               className="bg-zinc-800 border-zinc-700 text-white min-h-[120px]"
               data-testid="textarea-review-content"
             />
+          </div>
+
+          {/* Photo Upload Section */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Add Photos (optional)
+            </label>
+            <p className="text-sm text-zinc-400 mb-3">
+              Share photos to help other buyers see how the item looks
+            </p>
+            
+            {/* Photo Upload Button */}
+            <ObjectUploader
+              maxNumberOfFiles={5}
+              maxFileSize={5242880} // 5MB
+              allowedFileTypes={['image/*']}
+              onGetUploadParameters={handlePhotoUpload}
+              onComplete={handlePhotoComplete}
+              buttonClassName="bg-zinc-700 hover:bg-zinc-600 text-white border-zinc-600"
+            >
+              <Camera size={16} className="mr-2" />
+              Add Photos ({photos.length}/5)
+            </ObjectUploader>
+
+            {/* Photo Preview Grid */}
+            {photos.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                {photos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo}
+                      alt={`Review photo ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg bg-zinc-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(index)}
+                      className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      data-testid={`remove-photo-${index}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button

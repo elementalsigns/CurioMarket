@@ -1,6 +1,9 @@
 # Overview
 Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 3% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
+## Recent Enhancement (August 21, 2025)
+- **Review Photos System**: Complete photo upload functionality added to reviews, allowing buyers to share visual proof of their purchases. Includes secure object storage integration, photo galleries in review displays, and professional photo management with up to 5 photos per review.
+
 # User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -59,9 +62,10 @@ Preferred communication style: Simple, everyday language.
 - **Pricing**: $10/month seller subscription + 3% platform transaction fee.
 
 ## File & Asset Management
-- **Google Cloud Storage**: Primary file storage.
+- **Google Cloud Storage**: Primary file storage and review photo hosting.
 - **AWS S3**: Alternative/backup file storage.
-- **Uppy**: Frontend file upload components.
+- **Uppy**: Frontend file upload components for review photos and product images.
+- **Object Storage Service**: Custom service for secure photo uploads and serving.
 
 ## UI & Component Libraries
 - **Radix UI**: Accessible UI primitives.

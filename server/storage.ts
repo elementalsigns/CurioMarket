@@ -1054,6 +1054,7 @@ export class DatabaseStorage implements IStorage {
         rating: 5,
         title: "Absolutely stunning piece!",
         content: "This Victorian mourning locket exceeded all my expectations. The craftsmanship is exquisite and it arrived perfectly packaged. Highly recommend this seller!",
+        photos: ["/objects/review-photos/sample1.jpg", "/objects/review-photos/sample2.jpg"],
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
         buyerName: "Sarah M.",
         buyerAvatar: "",
@@ -1070,6 +1071,7 @@ export class DatabaseStorage implements IStorage {
         rating: 4,
         title: "Great quality, fast shipping",
         content: "Beautiful taxidermy butterfly collection. Arrived quickly and well-protected. One small wing was slightly damaged but overall very pleased.",
+        photos: ["/objects/review-photos/sample3.jpg"],
         createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
         buyerName: "Michael R.",
         buyerAvatar: "",
@@ -1106,9 +1108,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createReview(data: any): Promise<any> {
+    // Normalize photo URLs if they were uploaded
+    const normalizedPhotos = data.photos?.map((photo: string) => {
+      if (photo.startsWith("https://storage.googleapis.com/")) {
+        const ObjectStorageService = require('./objectStorage').ObjectStorageService;
+        const service = new ObjectStorageService();
+        return service.normalizeReviewPhotoPath(photo);
+      }
+      return photo;
+    }) || [];
+
     const review = {
       id: crypto.randomUUID(),
       ...data,
+      photos: normalizedPhotos,
       verified: true,
       helpful: 0,
       createdAt: new Date().toISOString(),

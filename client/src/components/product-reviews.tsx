@@ -25,6 +25,7 @@ interface Review {
   rating: number;
   title: string;
   content: string;
+  photos?: string[];
   createdAt: string;
   buyerName: string;
   buyerAvatar?: string;
@@ -111,6 +112,24 @@ function ReviewCard({ review }: { review: Review }) {
             </Button>
           )}
         </div>
+
+        {/* Review Photos */}
+        {review.photos && review.photos.length > 0 && (
+          <div className="mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {review.photos.map((photo, index) => (
+                <div key={index} className="relative group cursor-pointer">
+                  <img
+                    src={photo}
+                    alt={`Review photo ${index + 1}`}
+                    className="w-full h-24 md:h-32 object-cover rounded-lg bg-zinc-800 hover:opacity-90 transition-opacity"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {review.sellerResponse && (
           <div className="bg-zinc-900/50 p-4 rounded-lg mb-4">
