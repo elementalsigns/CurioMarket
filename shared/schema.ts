@@ -34,6 +34,18 @@ export const orderStatusEnum = pgEnum('order_status', ['pending', 'paid', 'fulfi
 // Listing state enum
 export const listingStateEnum = pgEnum('listing_state', ['draft', 'published', 'suspended']);
 
+// Listing condition enum
+export const conditionEnum = pgEnum('condition', ['excellent', 'very-good', 'good', 'fair', 'poor']);
+
+// Message status enum  
+export const messageStatusEnum = pgEnum('message_status', ['unread', 'read']);
+
+// Notification type enum
+export const notificationTypeEnum = pgEnum('notification_type', ['order', 'message', 'review', 'listing', 'system']);
+
+// Payout status enum
+export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'failed']);
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -76,7 +88,7 @@ export const categories = pgTable("categories", {
 
 
 
-// Listings
+// Listings - Enhanced with inventory tracking and variations
 export const listings = pgTable("listings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
@@ -85,13 +97,23 @@ export const listings = pgTable("listings", {
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   quantity: integer("quantity").default(1),
+  stockQuantity: integer("stock_quantity").default(1), // Current inventory
+  lowStockThreshold: integer("low_stock_threshold").default(1), // Auto alert threshold
   sku: varchar("sku"),
   provenance: text("provenance"),
   speciesOrMaterial: varchar("species_or_material"),
+  condition: conditionEnum("condition"),
+  age: varchar("age"), // e.g., "Victorian Era", "Modern", "1920s"
+  dimensions: varchar("dimensions"), // e.g., "12 x 8 x 6 inches"
+  weight: decimal("weight", { precision: 6, scale: 2 }), // in lbs
+  origin: varchar("origin"), // Geographic origin
   categoryId: varchar("category_id").references(() => categories.id),
   state: listingStateEnum("state").default('draft'),
   tags: text("tags").array(),
   shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).default('0'),
+  isPromoted: boolean("is_promoted").default(false), // Featured/promoted listing
+  promotedUntil: timestamp("promoted_until"), // When promotion expires
+  views: integer("views").default(0), // View counter
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -162,13 +184,16 @@ export const messageThreads = pgTable("message_threads", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Messages
+// Messages - Enhanced with status tracking
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   threadId: varchar("thread_id").references(() => messageThreads.id).notNull(),
   senderId: varchar("sender_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
+  status: messageStatusEnum("status").default('unread'),
+  attachments: text("attachments").array(), // File URLs
   createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
 });
 
 // Reviews
@@ -214,6 +239,124 @@ export const flags = pgTable("flags", {
   resolvedBy: varchar("resolved_by").references(() => users.id),
 });
 
+// Saved searches for users
+export const savedSearches = pgTable("saved_searches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: varchar("name").notNull(), // User-given name for the search
+  searchQuery: varchar("search_query"),
+  categoryFilter: varchar("category_filter"),
+  priceMin: decimal("price_min", { precision: 10, scale: 2 }),
+  priceMax: decimal("price_max", { precision: 10, scale: 2 }),
+  conditionFilter: conditionEnum("condition_filter"),
+  otherFilters: jsonb("other_filters"), // Additional filter parameters
+  notifyOnNew: boolean("notify_on_new").default(false), // Send notifications for new matches
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Wishlists
+export const wishlists = pgTable("wishlists", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  name: varchar("name").notNull(),
+  isPublic: boolean("is_public").default(false),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Wishlist items
+export const wishlistItems = pgTable("wishlist_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  wishlistId: varchar("wishlist_id").references(() => wishlists.id).notNull(),
+  listingId: varchar("listing_id").references(() => listings.id).notNull(),
+  notes: text("notes"), // Personal notes about the item
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Notifications
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: notificationTypeEnum("type").notNull(),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  actionUrl: varchar("action_url"), // URL to take action
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
+// Seller analytics data
+export const sellerAnalytics = pgTable("seller_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  date: timestamp("date").notNull(),
+  views: integer("views").default(0),
+  sales: integer("sales").default(0),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }).default('0'),
+  newFavorites: integer("new_favorites").default(0),
+  newFollowers: integer("new_followers").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Promotions and discounts
+export const promotions = pgTable("promotions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  discountType: varchar("discount_type").notNull(), // 'percentage', 'fixed_amount', 'free_shipping'
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minPurchase: decimal("min_purchase", { precision: 10, scale: 2 }),
+  maxDiscount: decimal("max_discount", { precision: 10, scale: 2 }),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").default(true),
+  maxUses: integer("max_uses"),
+  currentUses: integer("current_uses").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Listing variations (for items with different sizes, colors, etc.)
+export const listingVariations = pgTable("listing_variations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  listingId: varchar("listing_id").references(() => listings.id).notNull(),
+  name: varchar("name").notNull(), // e.g., "Small", "Large", "Blue", etc.
+  sku: varchar("sku"),
+  priceAdjustment: decimal("price_adjustment", { precision: 10, scale: 2 }).default('0'),
+  stockQuantity: integer("stock_quantity").default(0),
+  image: varchar("image"), // Optional variation-specific image
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+});
+
+// Search analytics for improving discovery
+export const searchAnalytics = pgTable("search_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  query: varchar("query").notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  sessionId: varchar("session_id"),
+  resultsCount: integer("results_count").default(0),
+  clickedResults: integer("clicked_results").array(), // IDs of listings clicked
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Stripe payout records
+export const payouts = pgTable("payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  stripePayoutId: varchar("stripe_payout_id").unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default('usd'),
+  status: payoutStatusEnum("status").default('pending'),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  ordersIncluded: text("orders_included").array(), // Order IDs included in this payout
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   seller: one(sellers, { fields: [users.id], references: [sellers.userId] }),
@@ -223,6 +366,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   messagesSent: many(messages, { relationName: "sender" }),
   reviews: many(reviews, { relationName: "buyer" }),
   flags: many(flags, { relationName: "reporter" }),
+  savedSearches: many(savedSearches),
+  wishlists: many(wishlists),
+  notifications: many(notifications),
 }));
 
 export const sellersRelations = relations(sellers, ({ one, many }) => ({
@@ -230,6 +376,9 @@ export const sellersRelations = relations(sellers, ({ one, many }) => ({
   listings: many(listings),
   orders: many(orders),
   followers: many(shopFollows),
+  analytics: many(sellerAnalytics),
+  promotions: many(promotions),
+  payouts: many(payouts),
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -246,6 +395,8 @@ export const listingsRelations = relations(listings, ({ one, many }) => ({
   orderItems: many(orderItems),
   reviews: many(reviews),
   favorites: many(favorites),
+  variations: many(listingVariations),
+  wishlistItems: many(wishlistItems),
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -254,6 +405,40 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   items: many(orderItems),
   reviews: many(reviews),
   messageThreads: many(messageThreads),
+}));
+
+export const savedSearchesRelations = relations(savedSearches, ({ one }) => ({
+  user: one(users, { fields: [savedSearches.userId], references: [users.id] }),
+}));
+
+export const wishlistsRelations = relations(wishlists, ({ one, many }) => ({
+  user: one(users, { fields: [wishlists.userId], references: [users.id] }),
+  items: many(wishlistItems),
+}));
+
+export const wishlistItemsRelations = relations(wishlistItems, ({ one }) => ({
+  wishlist: one(wishlists, { fields: [wishlistItems.wishlistId], references: [wishlists.id] }),
+  listing: one(listings, { fields: [wishlistItems.listingId], references: [listings.id] }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+export const sellerAnalyticsRelations = relations(sellerAnalytics, ({ one }) => ({
+  seller: one(sellers, { fields: [sellerAnalytics.sellerId], references: [sellers.id] }),
+}));
+
+export const promotionsRelations = relations(promotions, ({ one }) => ({
+  seller: one(sellers, { fields: [promotions.sellerId], references: [sellers.id] }),
+}));
+
+export const listingVariationsRelations = relations(listingVariations, ({ one }) => ({
+  listing: one(listings, { fields: [listingVariations.listingId], references: [listings.id] }),
+}));
+
+export const payoutsRelations = relations(payouts, ({ one }) => ({
+  seller: one(sellers, { fields: [payouts.sellerId], references: [sellers.id] }),
 }));
 
 // Insert schemas
@@ -291,6 +476,32 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const insertSavedSearchSchema = createInsertSchema(savedSearches).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWishlistSchema = createInsertSchema(wishlists).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
+export const insertPromotionSchema = createInsertSchema(promotions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertListingVariationSchema = createInsertSchema(listingVariations).omit({
+  id: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -307,3 +518,17 @@ export type ListingImage = typeof listingImages.$inferSelect;
 export type MessageThread = typeof messageThreads.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
+export type SavedSearch = typeof savedSearches.$inferSelect;
+export type InsertSavedSearch = z.infer<typeof insertSavedSearchSchema>;
+export type Wishlist = typeof wishlists.$inferSelect;
+export type InsertWishlist = z.infer<typeof insertWishlistSchema>;
+export type WishlistItem = typeof wishlistItems.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type SellerAnalytic = typeof sellerAnalytics.$inferSelect;
+export type Promotion = typeof promotions.$inferSelect;
+export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+export type ListingVariation = typeof listingVariations.$inferSelect;
+export type InsertListingVariation = z.infer<typeof insertListingVariationSchema>;
+export type SearchAnalytic = typeof searchAnalytics.$inferSelect;
+export type Payout = typeof payouts.$inferSelect;

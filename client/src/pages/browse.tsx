@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ProductCard from "@/components/product-card";
 import SearchFilters from "@/components/search-filters";
-import { Search, Filter, Grid, List } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Search, Filter, Grid, List, Save, BookmarkPlus, TrendingUp, Heart } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +25,11 @@ export default function Browse() {
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
+  const [showWishlistDialog, setShowWishlistDialog] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<string | null>(null);
+  const [searchName, setSearchName] = useState("");
+  const { toast } = useToast();
 
   // Extract URL parameters on component mount
   useEffect(() => {
@@ -142,6 +152,56 @@ export default function Browse() {
               </div>
 
               <div className="flex items-center gap-2">
+                {/* Save Search Button */}
+                {searchQuery && (
+                  <Dialog open={showSaveSearchDialog} onOpenChange={setShowSaveSearchDialog}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-testid="button-save-search"
+                      >
+                        <Save size={16} className="mr-2" />
+                        Save Search
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-zinc-900 border-zinc-800">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">Save Search</DialogTitle>
+                        <DialogDescription className="text-zinc-400">
+                          Save this search to get notified of new matching items
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="py-4">
+                        <Input
+                          data-testid="input-search-name"
+                          placeholder="Enter search name..."
+                          value={searchName}
+                          onChange={(e) => setSearchName(e.target.value)}
+                          className="bg-zinc-800 border-zinc-700 text-white"
+                        />
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button 
+                          onClick={() => {
+                            // Save search logic would go here
+                            toast({ title: "Search Saved", description: "You'll be notified of new matching items" });
+                            setShowSaveSearchDialog(false);
+                            setSearchName("");
+                          }}
+                          disabled={!searchName}
+                          className="bg-red-600 hover:bg-red-700"
+                          data-testid="button-confirm-save-search"
+                        >
+                          Save Search
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"

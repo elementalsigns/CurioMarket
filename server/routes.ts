@@ -530,6 +530,472 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== ENHANCED PRODUCT MANAGEMENT ===================
+
+  // Listing variations
+  app.get('/api/listings/:id/variations', async (req, res) => {
+    try {
+      const variations = await storage.getListingVariations(req.params.id);
+      res.json(variations);
+    } catch (error) {
+      console.error("Error fetching variations:", error);
+      res.status(500).json({ error: "Failed to fetch variations" });
+    }
+  });
+
+  app.post('/api/listings/:id/variations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(403).json({ error: "Seller access required" });
+      }
+
+      const variation = await storage.createListingVariation({
+        listingId: req.params.id,
+        ...req.body
+      });
+      res.json(variation);
+    } catch (error) {
+      console.error("Error creating variation:", error);
+      res.status(500).json({ error: "Failed to create variation" });
+    }
+  });
+
+  app.put('/api/variations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const variation = await storage.updateListingVariation(req.params.id, req.body);
+      res.json(variation);
+    } catch (error) {
+      console.error("Error updating variation:", error);
+      res.status(500).json({ error: "Failed to update variation" });
+    }
+  });
+
+  app.delete('/api/variations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteListingVariation(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting variation:", error);
+      res.status(500).json({ error: "Failed to delete variation" });
+    }
+  });
+
+  // Stock management
+  app.put('/api/listings/:id/stock', isAuthenticated, async (req: any, res) => {
+    try {
+      const { quantity } = req.body;
+      const listing = await storage.updateListingStock(req.params.id, quantity);
+      res.json(listing);
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      res.status(500).json({ error: "Failed to update stock" });
+    }
+  });
+
+  app.get('/api/seller/low-stock', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+      
+      const listings = await storage.getLowStockListings(seller.id);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching low stock listings:", error);
+      res.status(500).json({ error: "Failed to fetch low stock listings" });
+    }
+  });
+
+  // Bulk operations
+  app.put('/api/seller/listings/bulk', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+      
+      const { updates } = req.body;
+      const listings = await storage.bulkUpdateListings(seller.id, updates);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error bulk updating listings:", error);
+      res.status(500).json({ error: "Failed to bulk update listings" });
+    }
+  });
+
+  // =================== ADVANCED SEARCH & DISCOVERY ===================
+
+  // Saved searches
+  app.get('/api/saved-searches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const searches = await storage.getUserSavedSearches(userId);
+      res.json(searches);
+    } catch (error) {
+      console.error("Error fetching saved searches:", error);
+      res.status(500).json({ error: "Failed to fetch saved searches" });
+    }
+  });
+
+  app.post('/api/saved-searches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const search = await storage.createSavedSearch({
+        userId,
+        ...req.body
+      });
+      res.json(search);
+    } catch (error) {
+      console.error("Error creating saved search:", error);
+      res.status(500).json({ error: "Failed to create saved search" });
+    }
+  });
+
+  app.delete('/api/saved-searches/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteSavedSearch(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting saved search:", error);
+      res.status(500).json({ error: "Failed to delete saved search" });
+    }
+  });
+
+  // Wishlists
+  app.get('/api/wishlists', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const wishlists = await storage.getUserWishlists(userId);
+      res.json(wishlists);
+    } catch (error) {
+      console.error("Error fetching wishlists:", error);
+      res.status(500).json({ error: "Failed to fetch wishlists" });
+    }
+  });
+
+  app.post('/api/wishlists', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const wishlist = await storage.createWishlist({
+        userId,
+        ...req.body
+      });
+      res.json(wishlist);
+    } catch (error) {
+      console.error("Error creating wishlist:", error);
+      res.status(500).json({ error: "Failed to create wishlist" });
+    }
+  });
+
+  app.get('/api/wishlists/:id/items', isAuthenticated, async (req: any, res) => {
+    try {
+      const items = await storage.getWishlistItems(req.params.id);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching wishlist items:", error);
+      res.status(500).json({ error: "Failed to fetch wishlist items" });
+    }
+  });
+
+  app.post('/api/wishlists/:id/items', isAuthenticated, async (req: any, res) => {
+    try {
+      const { listingId, notes } = req.body;
+      const item = await storage.addToWishlist(req.params.id, listingId, notes);
+      res.json(item);
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      res.status(500).json({ error: "Failed to add to wishlist" });
+    }
+  });
+
+  app.delete('/api/wishlists/:id/items/:listingId', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.removeFromWishlist(req.params.id, req.params.listingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      res.status(500).json({ error: "Failed to remove from wishlist" });
+    }
+  });
+
+  // Recommendations
+  app.get('/api/recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const recommendations = await storage.getRecommendations(userId, limit);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ error: "Failed to fetch recommendations" });
+    }
+  });
+
+  // Search analytics
+  app.post('/api/search/track', async (req, res) => {
+    try {
+      const { query, resultsCount, userId, sessionId } = req.body;
+      await storage.trackSearch(query, resultsCount, userId, sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking search:", error);
+      res.status(500).json({ error: "Failed to track search" });
+    }
+  });
+
+  app.get('/api/search/popular', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const searches = await storage.getPopularSearches(limit);
+      res.json(searches);
+    } catch (error) {
+      console.error("Error fetching popular searches:", error);
+      res.status(500).json({ error: "Failed to fetch popular searches" });
+    }
+  });
+
+  // =================== ORDER MANAGEMENT & COMMUNICATION ===================
+
+  // Order tracking
+  app.put('/api/orders/:id/tracking', isAuthenticated, async (req: any, res) => {
+    try {
+      const { trackingInfo } = req.body;
+      const order = await storage.updateOrderTracking(req.params.id, trackingInfo);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order tracking:", error);
+      res.status(500).json({ error: "Failed to update order tracking" });
+    }
+  });
+
+  // Messages
+  app.get('/api/orders/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const messages = await storage.getOrderMessages(req.params.id);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching order messages:", error);
+      res.status(500).json({ error: "Failed to fetch order messages" });
+    }
+  });
+
+  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { threadId, content, attachments } = req.body;
+      const message = await storage.sendMessage(threadId, userId, content, attachments);
+      res.json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  app.put('/api/messages/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const message = await storage.markMessageAsRead(req.params.id);
+      res.json(message);
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ error: "Failed to mark message as read" });
+    }
+  });
+
+  app.get('/api/messages/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadMessageCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread message count:", error);
+      res.status(500).json({ error: "Failed to fetch unread message count" });
+    }
+  });
+
+  // =================== NOTIFICATIONS ===================
+
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const notifications = await storage.getUserNotifications(userId, limit);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const notification = await storage.markNotificationAsRead(req.params.id);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread notification count:", error);
+      res.status(500).json({ error: "Failed to fetch unread notification count" });
+    }
+  });
+
+  // =================== SELLER DASHBOARD ENHANCEMENT ===================
+
+  // Analytics
+  app.get('/api/seller/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const { startDate, endDate } = req.query;
+      const analytics = await storage.getSellerAnalytics(
+        seller.id,
+        new Date(startDate as string),
+        new Date(endDate as string)
+      );
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching seller analytics:", error);
+      res.status(500).json({ error: "Failed to fetch seller analytics" });
+    }
+  });
+
+  // Promotions
+  app.get('/api/seller/promotions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const promotions = await storage.getSellerPromotions(seller.id);
+      res.json(promotions);
+    } catch (error) {
+      console.error("Error fetching promotions:", error);
+      res.status(500).json({ error: "Failed to fetch promotions" });
+    }
+  });
+
+  app.post('/api/seller/promotions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const promotion = await storage.createPromotion({
+        sellerId: seller.id,
+        ...req.body
+      });
+      res.json(promotion);
+    } catch (error) {
+      console.error("Error creating promotion:", error);
+      res.status(500).json({ error: "Failed to create promotion" });
+    }
+  });
+
+  app.put('/api/promotions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const promotion = await storage.updatePromotion(req.params.id, req.body);
+      res.json(promotion);
+    } catch (error) {
+      console.error("Error updating promotion:", error);
+      res.status(500).json({ error: "Failed to update promotion" });
+    }
+  });
+
+  // Earnings and payouts
+  app.get('/api/seller/earnings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const period = req.query.period as 'week' | 'month' | 'year' || 'month';
+      const earnings = await storage.getSellerEarnings(seller.id, period);
+      res.json(earnings);
+    } catch (error) {
+      console.error("Error fetching seller earnings:", error);
+      res.status(500).json({ error: "Failed to fetch seller earnings" });
+    }
+  });
+
+  app.get('/api/seller/payouts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const payouts = await storage.getSellerPayouts(seller.id);
+      res.json(payouts);
+    } catch (error) {
+      console.error("Error fetching payouts:", error);
+      res.status(500).json({ error: "Failed to fetch payouts" });
+    }
+  });
+
+  // =================== ENHANCED LISTING OPERATIONS ===================
+
+  // Listing analytics and promotion
+  app.get('/api/listings/:id/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const analytics = await storage.getListingAnalytics(req.params.id);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching listing analytics:", error);
+      res.status(500).json({ error: "Failed to fetch listing analytics" });
+    }
+  });
+
+  app.post('/api/listings/:id/view', async (req, res) => {
+    try {
+      await storage.incrementListingViews(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error incrementing listing views:", error);
+      res.status(500).json({ error: "Failed to increment views" });
+    }
+  });
+
+  app.post('/api/seller/promote-listings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      const { listingIds, duration } = req.body;
+      await storage.promoteListings(seller.id, listingIds, duration);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error promoting listings:", error);
+      res.status(500).json({ error: "Failed to promote listings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

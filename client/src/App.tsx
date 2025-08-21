@@ -32,6 +32,9 @@ import PrivacyPolicyStandalone from "@/pages/privacy-policy";
 import TermsOfServiceStandalone from "@/pages/terms-of-service";
 import ProhibitedItemsStandalone from "@/pages/prohibited-items";
 import CookiesPolicyStandalone from "@/pages/cookies-policy";
+import Wishlists from "@/pages/wishlists";
+import SellerAnalytics from "@/pages/seller-analytics";
+import InventoryManagement from "@/pages/inventory-management";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -76,11 +79,14 @@ function Router() {
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
+          <Route path="/seller/analytics" component={SellerAnalytics} />
+          <Route path="/seller/inventory" component={InventoryManagement} />
           <Route path="/seller/listings/create" component={CreateListing} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
           <Route path="/account" component={AccountManager} />
+          <Route path="/wishlists" component={Wishlists} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       )}

@@ -14,6 +14,15 @@ import {
   favorites,
   shopFollows,
   flags,
+  savedSearches,
+  wishlists,
+  wishlistItems,
+  notifications,
+  sellerAnalytics,
+  promotions,
+  listingVariations,
+  searchAnalytics,
+  payouts,
   type User,
   type UpsertUser,
   type Seller,
@@ -28,6 +37,20 @@ import {
   type ListingImage,
   type MessageThread,
   type Message,
+  type SavedSearch,
+  type InsertSavedSearch,
+  type Wishlist,
+  type InsertWishlist,
+  type WishlistItem,
+  type Notification,
+  type InsertNotification,
+  type SellerAnalytic,
+  type Promotion,
+  type InsertPromotion,
+  type ListingVariation,
+  type InsertListingVariation,
+  type SearchAnalytic,
+  type Payout,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, ilike, or, sql, count, avg } from "drizzle-orm";
@@ -97,6 +120,56 @@ export interface IStorage {
   
   // Category counts
   getCategoryCounts(): Promise<any[]>;
+
+  // Enhanced Product Management
+  createListingVariation(variation: InsertListingVariation): Promise<ListingVariation>;
+  getListingVariations(listingId: string): Promise<ListingVariation[]>;
+  updateListingVariation(id: string, updates: Partial<InsertListingVariation>): Promise<ListingVariation>;
+  deleteListingVariation(id: string): Promise<void>;
+  updateListingStock(id: string, quantity: number): Promise<Listing>;
+  getLowStockListings(sellerId: string): Promise<Listing[]>;
+  bulkUpdateListings(sellerId: string, updates: Partial<InsertListing>[]): Promise<Listing[]>;
+  
+  // Advanced Search & Discovery
+  createSavedSearch(search: InsertSavedSearch): Promise<SavedSearch>;
+  getUserSavedSearches(userId: string): Promise<SavedSearch[]>;
+  deleteSavedSearch(id: string): Promise<void>;
+  createWishlist(wishlist: InsertWishlist): Promise<Wishlist>;
+  getUserWishlists(userId: string): Promise<Wishlist[]>;
+  addToWishlist(wishlistId: string, listingId: string, notes?: string): Promise<WishlistItem>;
+  removeFromWishlist(wishlistId: string, listingId: string): Promise<void>;
+  getWishlistItems(wishlistId: string): Promise<any[]>;
+  getRecommendations(userId: string, limit?: number): Promise<Listing[]>;
+  trackSearch(query: string, resultsCount: number, userId?: string, sessionId?: string): Promise<void>;
+  getPopularSearches(limit?: number): Promise<{ query: string; count: number }[]>;
+
+  // Order Management & Communication  
+  updateOrderTracking(orderId: string, trackingInfo: any): Promise<Order>;
+  getOrderMessages(orderId: string): Promise<Message[]>;
+  sendMessage(threadId: string, senderId: string, content: string, attachments?: string[]): Promise<Message>;
+  markMessageAsRead(messageId: string): Promise<Message>;
+  getUnreadMessageCount(userId: string): Promise<number>;
+  
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<Notification>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  
+  // Seller Dashboard Enhancement
+  recordAnalytics(sellerId: string, date: Date, data: Partial<SellerAnalytic>): Promise<void>;
+  getSellerAnalytics(sellerId: string, startDate: Date, endDate: Date): Promise<SellerAnalytic[]>;
+  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+  getSellerPromotions(sellerId: string): Promise<Promotion[]>;
+  updatePromotion(id: string, updates: Partial<InsertPromotion>): Promise<Promotion>;
+  getSellerEarnings(sellerId: string, period: 'week' | 'month' | 'year'): Promise<any>;
+  createPayout(sellerId: string, amount: number, orderIds: string[]): Promise<Payout>;
+  getSellerPayouts(sellerId: string): Promise<Payout[]>;
+  
+  // Enhanced listing operations
+  incrementListingViews(listingId: string): Promise<void>;
+  getListingAnalytics(listingId: string): Promise<any>;
+  promoteListings(sellerId: string, listingIds: string[], duration: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -527,6 +600,449 @@ export class DatabaseStorage implements IStorage {
         count: 4,
       }
     ];
+  }
+
+  // Enhanced Product Management
+  async createListingVariation(variation: InsertListingVariation): Promise<ListingVariation> {
+    const [newVariation] = await db.insert(listingVariations).values(variation).returning();
+    return newVariation;
+  }
+
+  async getListingVariations(listingId: string): Promise<ListingVariation[]> {
+    return await db
+      .select()
+      .from(listingVariations)
+      .where(eq(listingVariations.listingId, listingId))
+      .orderBy(asc(listingVariations.sortOrder));
+  }
+
+  async updateListingVariation(id: string, updates: Partial<InsertListingVariation>): Promise<ListingVariation> {
+    const [variation] = await db
+      .update(listingVariations)
+      .set(updates)
+      .where(eq(listingVariations.id, id))
+      .returning();
+    return variation;
+  }
+
+  async deleteListingVariation(id: string): Promise<void> {
+    await db.delete(listingVariations).where(eq(listingVariations.id, id));
+  }
+
+  async updateListingStock(id: string, quantity: number): Promise<Listing> {
+    const [listing] = await db
+      .update(listings)
+      .set({ 
+        stockQuantity: quantity,
+        updatedAt: new Date()
+      })
+      .where(eq(listings.id, id))
+      .returning();
+    return listing;
+  }
+
+  async getLowStockListings(sellerId: string): Promise<Listing[]> {
+    return await db
+      .select()
+      .from(listings)
+      .where(
+        and(
+          eq(listings.sellerId, sellerId),
+          sql`stock_quantity <= low_stock_threshold`
+        )
+      );
+  }
+
+  async bulkUpdateListings(sellerId: string, updates: Partial<InsertListing>[]): Promise<Listing[]> {
+    const results = [];
+    for (const update of updates) {
+      if (update.id) {
+        const [listing] = await db
+          .update(listings)
+          .set({ ...update, updatedAt: new Date() })
+          .where(and(eq(listings.id, update.id), eq(listings.sellerId, sellerId)))
+          .returning();
+        if (listing) results.push(listing);
+      }
+    }
+    return results;
+  }
+
+  // Advanced Search & Discovery
+  async createSavedSearch(search: InsertSavedSearch): Promise<SavedSearch> {
+    const [savedSearch] = await db.insert(savedSearches).values(search).returning();
+    return savedSearch;
+  }
+
+  async getUserSavedSearches(userId: string): Promise<SavedSearch[]> {
+    return await db
+      .select()
+      .from(savedSearches)
+      .where(eq(savedSearches.userId, userId))
+      .orderBy(desc(savedSearches.createdAt));
+  }
+
+  async deleteSavedSearch(id: string): Promise<void> {
+    await db.delete(savedSearches).where(eq(savedSearches.id, id));
+  }
+
+  async createWishlist(wishlist: InsertWishlist): Promise<Wishlist> {
+    const [newWishlist] = await db.insert(wishlists).values(wishlist).returning();
+    return newWishlist;
+  }
+
+  async getUserWishlists(userId: string): Promise<Wishlist[]> {
+    return await db
+      .select()
+      .from(wishlists)
+      .where(eq(wishlists.userId, userId))
+      .orderBy(desc(wishlists.createdAt));
+  }
+
+  async addToWishlist(wishlistId: string, listingId: string, notes?: string): Promise<WishlistItem> {
+    const [item] = await db.insert(wishlistItems).values({
+      wishlistId,
+      listingId,
+      notes
+    }).returning();
+    return item;
+  }
+
+  async removeFromWishlist(wishlistId: string, listingId: string): Promise<void> {
+    await db.delete(wishlistItems).where(
+      and(eq(wishlistItems.wishlistId, wishlistId), eq(wishlistItems.listingId, listingId))
+    );
+  }
+
+  async getWishlistItems(wishlistId: string): Promise<any[]> {
+    const items = await db
+      .select({
+        item: wishlistItems,
+        listing: listings,
+      })
+      .from(wishlistItems)
+      .leftJoin(listings, eq(wishlistItems.listingId, listings.id))
+      .where(eq(wishlistItems.wishlistId, wishlistId));
+      
+    const itemsWithImages = await Promise.all(
+      items.map(async ({ item, listing }) => {
+        if (listing) {
+          const images = await this.getListingImages(listing.id);
+          return { ...item, listing: { ...listing, images } };
+        }
+        return { ...item, listing: null };
+      })
+    );
+    
+    return itemsWithImages;
+  }
+
+  async getRecommendations(userId: string, limit: number = 10): Promise<Listing[]> {
+    // Get user's recent favorites and views
+    const userFavorites = await db
+      .select({ listingId: favorites.listingId })
+      .from(favorites)
+      .where(eq(favorites.userId, userId))
+      .limit(5);
+
+    if (userFavorites.length === 0) {
+      // If no favorites, return featured listings
+      return this.getFeaturedListings(limit);
+    }
+
+    // Get categories from user favorites
+    const favoriteListings = await db
+      .select({ categoryId: listings.categoryId })
+      .from(listings)
+      .where(sql`${listings.id} IN (${userFavorites.map(f => `'${f.listingId}'`).join(',')})`);
+
+    const categoryIds = [...new Set(favoriteListings.map(l => l.categoryId).filter(Boolean))];
+
+    if (categoryIds.length === 0) {
+      return this.getFeaturedListings(limit);
+    }
+
+    // Get similar items from same categories
+    const recommendations = await db
+      .select()
+      .from(listings)
+      .where(
+        and(
+          sql`${listings.categoryId} IN (${categoryIds.map(id => `'${id}'`).join(',')})`,
+          eq(listings.state, 'published'),
+          sql`${listings.id} NOT IN (${userFavorites.map(f => `'${f.listingId}'`).join(',')})`
+        )
+      )
+      .orderBy(desc(listings.views), desc(listings.createdAt))
+      .limit(limit);
+
+    return recommendations;
+  }
+
+  async trackSearch(query: string, resultsCount: number, userId?: string, sessionId?: string): Promise<void> {
+    await db.insert(searchAnalytics).values({
+      query,
+      userId,
+      sessionId,
+      resultsCount
+    });
+  }
+
+  async getPopularSearches(limit: number = 10): Promise<{ query: string; count: number }[]> {
+    const popular = await db
+      .select({
+        query: searchAnalytics.query,
+        count: count(searchAnalytics.id)
+      })
+      .from(searchAnalytics)
+      .where(sql`created_at >= NOW() - INTERVAL '7 days'`)
+      .groupBy(searchAnalytics.query)
+      .orderBy(desc(count(searchAnalytics.id)))
+      .limit(limit);
+
+    return popular.map(p => ({ query: p.query, count: Number(p.count) }));
+  }
+
+  // Order Management & Communication
+  async updateOrderTracking(orderId: string, trackingInfo: any): Promise<Order> {
+    const [order] = await db
+      .update(orders)
+      .set({
+        // Store tracking info in shipping address for now
+        shippingAddress: sql`COALESCE(${orders.shippingAddress}, '{}') || ${JSON.stringify({ tracking: trackingInfo })}`,
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+    return order;
+  }
+
+  async getOrderMessages(orderId: string): Promise<Message[]> {
+    const [thread] = await db
+      .select()
+      .from(messageThreads)
+      .where(eq(messageThreads.orderId, orderId));
+
+    if (!thread) return [];
+
+    return await db
+      .select()
+      .from(messages)
+      .where(eq(messages.threadId, thread.id))
+      .orderBy(asc(messages.createdAt));
+  }
+
+  async sendMessage(threadId: string, senderId: string, content: string, attachments?: string[]): Promise<Message> {
+    const [message] = await db.insert(messages).values({
+      threadId,
+      senderId,
+      content,
+      attachments: attachments || []
+    }).returning();
+    return message;
+  }
+
+  async markMessageAsRead(messageId: string): Promise<Message> {
+    const [message] = await db
+      .update(messages)
+      .set({ 
+        status: 'read',
+        readAt: new Date()
+      })
+      .where(eq(messages.id, messageId))
+      .returning();
+    return message;
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count(messages.id) })
+      .from(messages)
+      .leftJoin(messageThreads, eq(messages.threadId, messageThreads.id))
+      .where(
+        and(
+          or(eq(messageThreads.buyerId, userId), eq(messageThreads.sellerId, userId)),
+          eq(messages.status, 'unread'),
+          sql`${messages.senderId} != ${userId}`
+        )
+      );
+    return Number(result.count);
+  }
+
+  // Notifications
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db.insert(notifications).values(notification).returning();
+    return newNotification;
+  }
+
+  async getUserNotifications(userId: string, limit: number = 20): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set({ 
+        isRead: true,
+        readAt: new Date()
+      })
+      .where(eq(notifications.id, id))
+      .returning();
+    return notification;
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count(notifications.id) })
+      .from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+    return Number(result.count);
+  }
+
+  // Seller Dashboard Enhancement
+  async recordAnalytics(sellerId: string, date: Date, data: Partial<SellerAnalytic>): Promise<void> {
+    await db.insert(sellerAnalytics).values({
+      sellerId,
+      date,
+      ...data
+    }).onConflictDoUpdate({
+      target: [sellerAnalytics.sellerId, sellerAnalytics.date],
+      set: data
+    });
+  }
+
+  async getSellerAnalytics(sellerId: string, startDate: Date, endDate: Date): Promise<SellerAnalytic[]> {
+    return await db
+      .select()
+      .from(sellerAnalytics)
+      .where(
+        and(
+          eq(sellerAnalytics.sellerId, sellerId),
+          sql`${sellerAnalytics.date} >= ${startDate}`,
+          sql`${sellerAnalytics.date} <= ${endDate}`
+        )
+      )
+      .orderBy(asc(sellerAnalytics.date));
+  }
+
+  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
+    const [newPromotion] = await db.insert(promotions).values(promotion).returning();
+    return newPromotion;
+  }
+
+  async getSellerPromotions(sellerId: string): Promise<Promotion[]> {
+    return await db
+      .select()
+      .from(promotions)
+      .where(eq(promotions.sellerId, sellerId))
+      .orderBy(desc(promotions.createdAt));
+  }
+
+  async updatePromotion(id: string, updates: Partial<InsertPromotion>): Promise<Promotion> {
+    const [promotion] = await db
+      .update(promotions)
+      .set(updates)
+      .where(eq(promotions.id, id))
+      .returning();
+    return promotion;
+  }
+
+  async getSellerEarnings(sellerId: string, period: 'week' | 'month' | 'year'): Promise<any> {
+    const periodInterval = period === 'week' ? '7 days' : period === 'month' ? '30 days' : '365 days';
+    
+    const [result] = await db
+      .select({
+        totalEarnings: sql<number>`COALESCE(SUM(${orders.total} - ${orders.platformFee}), 0)`,
+        totalOrders: count(orders.id),
+        averageOrder: sql<number>`COALESCE(AVG(${orders.total}), 0)`
+      })
+      .from(orders)
+      .where(
+        and(
+          eq(orders.sellerId, sellerId),
+          eq(orders.status, 'fulfilled'),
+          sql`${orders.createdAt} >= NOW() - INTERVAL '${sql.raw(periodInterval)}'`
+        )
+      );
+
+    return {
+      totalEarnings: Number(result.totalEarnings),
+      totalOrders: Number(result.totalOrders),
+      averageOrder: Number(result.averageOrder)
+    };
+  }
+
+  async createPayout(sellerId: string, amount: number, orderIds: string[]): Promise<Payout> {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [payout] = await db.insert(payouts).values({
+      sellerId,
+      amount: amount.toString(),
+      periodStart: thirtyDaysAgo,
+      periodEnd: now,
+      ordersIncluded: orderIds
+    }).returning();
+    
+    return payout;
+  }
+
+  async getSellerPayouts(sellerId: string): Promise<Payout[]> {
+    return await db
+      .select()
+      .from(payouts)
+      .where(eq(payouts.sellerId, sellerId))
+      .orderBy(desc(payouts.createdAt));
+  }
+
+  // Enhanced listing operations
+  async incrementListingViews(listingId: string): Promise<void> {
+    await db
+      .update(listings)
+      .set({ views: sql`${listings.views} + 1` })
+      .where(eq(listings.id, listingId));
+  }
+
+  async getListingAnalytics(listingId: string): Promise<any> {
+    const [listing] = await db
+      .select({
+        views: listings.views,
+        favoritesCount: count(favorites.id),
+        createdAt: listings.createdAt
+      })
+      .from(listings)
+      .leftJoin(favorites, eq(favorites.listingId, listings.id))
+      .where(eq(listings.id, listingId))
+      .groupBy(listings.id);
+
+    return {
+      views: listing?.views || 0,
+      favorites: Number(listing?.favoritesCount) || 0,
+      daysActive: listing?.createdAt ? Math.floor((Date.now() - listing.createdAt.getTime()) / (1000 * 60 * 60 * 24)) : 0
+    };
+  }
+
+  async promoteListings(sellerId: string, listingIds: string[], duration: number): Promise<void> {
+    const promotedUntil = new Date(Date.now() + duration * 24 * 60 * 60 * 1000);
+    
+    await db
+      .update(listings)
+      .set({ 
+        isPromoted: true,
+        promotedUntil,
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(listings.sellerId, sellerId),
+          sql`${listings.id} IN (${listingIds.map(id => `'${id}'`).join(',')})`
+        )
+      );
   }
 }
 
