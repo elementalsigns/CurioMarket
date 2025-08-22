@@ -8,6 +8,7 @@ import CategoryGrid from "@/components/category-grid";
 import ProductCard from "@/components/product-card";
 import { ChevronDown, Star, Shield, Scale, CreditCard, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 
 
@@ -104,23 +105,24 @@ export default function Landing() {
           <div className="mt-12">
             <div className="flex flex-wrap gap-3 justify-center">
               {[
-                'Taxidermy & Bones', 
-                'Vintage Medical', 
-                'Gothic Home Decor', 
-                'Oddities & Curiosities',
-                'Antique Specimens',
-                'Victorian Era',
-                'Macabre Art',
-                'Scientific Instruments'
+                { name: 'Taxidermy & Bones', slug: 'taxidermy-bones' }, 
+                { name: 'Vintage Medical', slug: 'vintage-medical' }, 
+                { name: 'Gothic Home Decor', slug: 'gothic-home-decor' }, 
+                { name: 'Oddities & Curiosities', slug: 'oddities-curiosities' },
+                { name: 'Antique Specimens', slug: 'antique-specimens' },
+                { name: 'Victorian Era', slug: 'victorian-era' },
+                { name: 'Macabre Art', slug: 'macabre-art' },
+                { name: 'Scientific Instruments', slug: 'scientific-instruments' }
               ].map((category) => (
-                <Button 
-                  key={category}
-                  variant="outline" 
-                  className="rounded-full px-4 py-2 border-border hover:bg-primary hover:text-primary-foreground transition-colors"
-                  data-testid={`category-${category.toLowerCase().replace(/[^\w]/g, '-')}`}
-                >
-                  {category}
-                </Button>
+                <Link key={category.slug} to={`/browse?category=${category.slug}`}>
+                  <Button 
+                    variant="outline" 
+                    className="rounded-full px-4 py-2 border-border hover:text-accent hover:border-accent transition-colors cursor-pointer"
+                    data-testid={`category-${category.slug}`}
+                  >
+                    {category.name}
+                  </Button>
+                </Link>
               ))}
             </div>
           </div>
