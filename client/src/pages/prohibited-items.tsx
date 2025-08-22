@@ -85,7 +85,7 @@ function ProhibitedItemsStandalone() {
         
         /* Footer Styles - Match home page exactly */
         .footer { 
-          background: #0a0a0a; 
+          background: hsl(212, 5%, 5%); 
           border-top: 1px solid rgba(106, 27, 27, 0.2); 
           padding: 4rem 1rem; 
           flex-shrink: 0; 
