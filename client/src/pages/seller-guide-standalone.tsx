@@ -20,6 +20,7 @@ function SellerGuideStandalone() {
           position: relative;
           transition: all 0.3s ease;
           display: inline-block;
+          text-decoration: none;
         }
         .logo:hover {
           color: hsl(0, 77%, 26%);
@@ -133,9 +134,9 @@ function SellerGuideStandalone() {
       <div className="seller-guide-container">
         <nav className="nav-bar">
           <div className="nav-content">
-            <div className="logo">
+            <a href="/" className="logo">
               <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
-            </div>
+            </a>
             <div className="nav-buttons">
               <button className="btn-primary" onClick={() => window.location.href = '/api/login'}>Sign up</button>
               <button className="btn-secondary" onClick={() => window.location.href = '/api/login'}>Sign in</button>

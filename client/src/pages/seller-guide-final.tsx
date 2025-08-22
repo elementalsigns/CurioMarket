@@ -37,10 +37,12 @@ export default function SellerGuideFinal() {
           justifyContent: 'space-between', 
           alignItems: 'center' 
         }}>
-          <h1 style={{ fontSize: '1.75rem', margin: 0 }}>
-            <span style={{ color: 'white' }}>Curio</span>{' '}
-            <em style={{ color: 'white' }}>Market</em>
-          </h1>
+          <a href="/" style={{ textDecoration: 'none' }}>
+            <h1 style={{ fontSize: '1.75rem', margin: 0, color: 'white', transition: 'color 0.3s ease' }}>
+              <span style={{ color: 'white' }}>Curio</span>{' '}
+              <em style={{ color: 'white' }}>Market</em>
+            </h1>
+          </a>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <button style={{
               backgroundColor: '#dc2626',

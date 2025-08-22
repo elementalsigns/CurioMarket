@@ -208,9 +208,9 @@ function ProhibitedItemsStandalone() {
       <div className="prohibited-container">
         <nav className="nav-bar">
           <div className="nav-content">
-            <div className="logo">
+            <Link to="/" className="logo">
               <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
-            </div>
+            </Link>
             <div className="nav-buttons">
               <button className="btn-primary" onClick={() => window.location.href = '/api/login'}>Sign up</button>
               <button className="btn-secondary" onClick={() => window.location.href = '/api/login'}>Sign in</button>

@@ -21,14 +21,17 @@ function WorkingDemo() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <h1 style={{
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            margin: 0,
-            color: 'white'
-          }}>
-            Curio Market
-          </h1>
+          <a href="/" style={{ textDecoration: 'none' }}>
+            <h1 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              margin: 0,
+              color: 'white',
+              transition: 'color 0.3s ease'
+            }}>
+              Curio Market
+            </h1>
+          </a>
           <div style={{display: 'flex', gap: '1rem'}}>
             <button style={{
               backgroundColor: 'transparent',
