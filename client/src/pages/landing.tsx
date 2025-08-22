@@ -263,8 +263,8 @@ export default function Landing() {
               {/* Artem Mortis YouTube Video */}
               <div className="rounded-lg overflow-hidden shadow-2xl aspect-video">
                 <iframe 
-                  src="https://www.youtube.com/embed/cE0rdd8oxxA" 
-                  title="Artem Mortis - Gothic Curiosities & Specimens"
+                  src="https://www.youtube.com/embed/gpYvMDizBsU" 
+                  title="Cabinet of Curiosities - Vintage Oddities & Specimens"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                   allowFullScreen
