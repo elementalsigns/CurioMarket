@@ -141,7 +141,7 @@ function ProhibitedItemsStandalone() {
         <main className="main-content">
           <div className="content-wrapper">
             <div className="hero">
-              <h1>Prohibited <span className="accent">Items</span></h1>
+              <h1>Prohibited Items</h1>
               <p>Maintaining ethical standards and legal compliance is essential to preserving the integrity of our marketplace and protecting our community.</p>
             </div>
 
