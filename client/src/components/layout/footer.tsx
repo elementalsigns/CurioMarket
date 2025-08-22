@@ -122,7 +122,7 @@ export default function Footer() {
           <div className="flex space-x-6 text-sm text-foreground/60">
             <Link to="/privacy">
               <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/60 hover:text-red-600 hover:bg-transparent transition-colors">
-                <span className="text-foreground/60">Privacy Policy</span>
+                Privacy Policy
               </Button>
             </Link>
             <Link to="/terms">
