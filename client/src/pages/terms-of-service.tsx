@@ -79,44 +79,124 @@ function TermsOfServiceStandalone() {
         .notice-text { color: #d4d4d8; }
         
         /* Footer Styles - Match home page exactly */
-        .footer { background: #0a0a0a; border-top: 1px solid rgba(106, 27, 27, 0.2); padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
-        .footer-container { max-width: 80rem; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
-        .footer-brand { grid-column: span 2; }
-        .footer-brand .logo { margin-bottom: 1rem; display: flex; align-items: center; }
-        .footer-description { color: #a1a1aa; margin-bottom: 1.5rem; max-width: 28rem; line-height: 1.6; }
-        .social-links { display: flex; gap: 1rem; }
-        .social-btn { background: transparent; border: none; color: #a1a1aa; padding: 0.5rem; cursor: pointer; transition: color 0.3s; border-radius: 0.375rem; }
-        .social-btn:hover { color: hsl(0, 77%, 26%); background: transparent; }
-        .footer-section h4 { color: white; font-size: 1.125rem; font-family: Georgia, serif; font-weight: bold; margin-bottom: 1rem; }
-        .footer-links { list-style: none; }
-        .footer-links li { margin-bottom: 0.5rem; }
+        .footer { 
+          background: hsl(212, 5%, 5%); 
+          border-top: 1px solid rgba(106, 27, 27, 0.2); 
+          padding: 4rem 1rem; 
+          flex-shrink: 0; 
+        }
+        .footer-container { 
+          max-width: 80rem; 
+          margin: 0 auto; 
+        }
+        .footer-grid { 
+          display: grid; 
+          grid-template-columns: 2fr 1fr 1fr; 
+          gap: 4rem; 
+          margin-bottom: 3rem; 
+        }
+        .footer-brand { 
+          grid-column: span 1; 
+        }
+        .footer-logo { 
+          display: flex; 
+          align-items: center; 
+          margin-bottom: 1rem; 
+        }
+        .curio-logo {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: white;
+          font-family: 'EB Garamond', serif;
+        }
+        .slow-letter {
+          transition: color 0.3s ease;
+        }
+        .curio-logo:hover .slow-letter {
+          color: hsl(0, 77%, 26%);
+        }
+        .footer-description { 
+          color: rgba(161, 161, 170, 1); 
+          margin-bottom: 1.5rem; 
+          max-width: 28rem; 
+          line-height: 1.6; 
+        }
+        .footer-section h4 { 
+          color: white; 
+          font-size: 1.125rem; 
+          font-family: Georgia, serif; 
+          font-weight: bold; 
+          margin-bottom: 1rem; 
+        }
+        .footer-links { 
+          list-style: none; 
+          margin: 0;
+          padding: 0;
+        }
+        .footer-links li { 
+          margin-bottom: 0.5rem; 
+        }
         .footer-link { 
-          color: #a1a1aa; 
+          color: rgba(161, 161, 170, 1); 
           text-decoration: none; 
           transition: color 0.3s, background-color 0.3s; 
           cursor: pointer; 
-          padding: 0.25rem 0;
-          border-radius: 0.375rem;
-          display: inline-block;
+          padding: 0;
           background: transparent;
           border: none;
           font-size: 0.875rem;
           line-height: 1.25rem;
           height: auto;
+          display: inline-block;
         }
-        .footer-link:hover { color: rgb(220, 38, 38); background: transparent; }
-        .footer-bottom { border-top: 1px solid rgba(106, 27, 27, 0.2); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .footer-copyright { color: rgba(113, 113, 122, 1); font-size: 0.875rem; margin-bottom: 1rem; }
-        .footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-        .footer-legal .footer-link { font-size: 0.875rem; margin-bottom: 0; }
+        .footer-link:hover { 
+          color: rgb(220, 38, 38); 
+          background: transparent; 
+        }
+        .footer-bottom { 
+          border-top: 1px solid rgba(106, 27, 27, 0.2); 
+          padding-top: 2rem; 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          flex-wrap: wrap; 
+        }
+        .footer-copyright { 
+          color: rgba(113, 113, 122, 1); 
+          font-size: 0.875rem; 
+          margin-bottom: 1rem; 
+        }
+        .footer-legal { 
+          display: flex; 
+          gap: 1.5rem; 
+          flex-wrap: wrap; 
+        }
+        .footer-legal .footer-link { 
+          color: rgba(113, 113, 122, 1);
+          font-size: 0.875rem; 
+        }
+        .footer-legal .footer-link:hover { 
+          color: rgb(220, 38, 38); 
+        }
         
         @media (max-width: 768px) {
-          .footer-grid { grid-template-columns: 1fr; }
-          .footer-brand { grid-column: span 1; }
-          .footer-bottom { flex-direction: column; text-align: center; }
-          .footer-legal { justify-content: center; }
-          .footer-copyright { margin-bottom: 0; }
+          .footer-grid { 
+            grid-template-columns: 1fr; 
+            gap: 2rem;
+          }
+          .footer-brand { 
+            grid-column: span 1; 
+          }
+          .footer-bottom { 
+            flex-direction: column; 
+            text-align: center; 
+          }
+          .footer-legal { 
+            justify-content: center; 
+          }
+          .footer-copyright { 
+            margin-bottom: 1rem; 
+          }
         }
       `}</style>
       
@@ -284,6 +364,64 @@ function TermsOfServiceStandalone() {
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-container">
+            <div className="footer-grid">
+              {/* Brand */}
+              <div className="footer-brand">
+                <div className="footer-logo">
+                  <h3 className="curio-logo">
+                    <span>
+                      <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
+                    </span> <span>
+                      <span className="script-initial">M</span>arket
+                    </span>
+                  </h3>
+                </div>
+                <p className="footer-description">
+                  The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
+                </p>
+              </div>
+
+              {/* Shop */}
+              <div className="footer-section">
+                <h4>Shop</h4>
+                <ul className="footer-links">
+                  <li><Link to="/browse"><button className="footer-link">All Categories</button></Link></li>
+                  <li><Link to="/browse?category=wet-specimens"><button className="footer-link">Wet Specimens</button></Link></li>
+                  <li><Link to="/browse?category=taxidermy"><button className="footer-link">Taxidermy</button></Link></li>
+                  <li><Link to="/browse?category=bones-skulls"><button className="footer-link">Bones & Skulls</button></Link></li>
+                  <li><Link to="/browse?category=occult-art"><button className="footer-link">Occult Art</button></Link></li>
+                </ul>
+              </div>
+
+              {/* Support */}
+              <div className="footer-section">
+                <h4>Support</h4>
+                <ul className="footer-links">
+                  <li><Link to="/help"><button className="footer-link">Help Center</button></Link></li>
+                  <li><Link to="/seller/guide"><button className="footer-link">Seller Guide</button></Link></li>
+                  <li><Link to="/safety"><button className="footer-link">Safety Guidelines</button></Link></li>
+                  <li><Link to="/contact"><button className="footer-link">Contact Us</button></Link></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Footer */}
+            <div className="footer-bottom">
+              <p className="footer-copyright">
+                © 2024 Curio Market. All rights reserved.
+              </p>
+              <div className="footer-legal">
+                <Link to="/privacy"><button className="footer-link">Privacy Policy</button></Link>
+                <Link to="/terms"><button className="footer-link">Terms of Service</button></Link>
+                <Link to="/prohibited"><button className="footer-link">Prohibited Items</button></Link>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
