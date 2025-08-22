@@ -96,12 +96,12 @@ function ProhibitedItemsStandalone() {
         }
         .footer-grid { 
           display: grid; 
-          grid-template-columns: repeat(4, 1fr); 
-          gap: 2rem; 
+          grid-template-columns: 2fr 1fr 1fr; 
+          gap: 4rem; 
           margin-bottom: 3rem; 
         }
         .footer-brand { 
-          grid-column: span 2; 
+          grid-column: span 1; 
         }
         .footer-logo { 
           display: flex; 
@@ -125,24 +125,6 @@ function ProhibitedItemsStandalone() {
           margin-bottom: 1.5rem; 
           max-width: 28rem; 
           line-height: 1.6; 
-        }
-        .social-links { 
-          display: flex; 
-          gap: 1rem; 
-        }
-        .social-btn { 
-          background: transparent; 
-          border: none; 
-          color: rgba(161, 161, 170, 1); 
-          padding: 0.5rem; 
-          cursor: pointer; 
-          transition: color 0.3s; 
-          border-radius: 0.375rem; 
-          font-size: 1.25rem;
-        }
-        .social-btn:hover { 
-          color: hsl(0, 77%, 26%); 
-          background: transparent; 
         }
         .footer-section h4 { 
           color: white; 
@@ -205,6 +187,7 @@ function ProhibitedItemsStandalone() {
         @media (max-width: 768px) {
           .footer-grid { 
             grid-template-columns: 1fr; 
+            gap: 2rem;
           }
           .footer-brand { 
             grid-column: span 1; 
@@ -430,17 +413,6 @@ function ProhibitedItemsStandalone() {
                 <p className="footer-description">
                   The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
                 </p>
-                <div className="social-links">
-                  <button className="social-btn">
-                    <i className="fab fa-instagram"></i>
-                  </button>
-                  <button className="social-btn">
-                    <i className="fab fa-twitter"></i>
-                  </button>
-                  <button className="social-btn">
-                    <i className="fab fa-facebook"></i>
-                  </button>
-                </div>
               </div>
 
               {/* Shop */}
