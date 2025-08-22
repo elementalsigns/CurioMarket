@@ -71,16 +71,35 @@ export default function Landing() {
               {/* Popular Tags */}
               <div className="flex flex-wrap items-center gap-2 mb-8">
                 <span className="text-sm text-foreground/60">Popular:</span>
-                {['Taxidermy', 'Vintage Medical', 'Oddities', 'Specimens', 'Gothic Art'].map((tag) => (
-                  <Button 
-                    key={tag}
-                    variant="outline" 
-                    size="sm"
-                    className="rounded-full text-xs px-3 py-1 border-border hover:bg-muted"
-                    data-testid={`tag-${tag.toLowerCase().replace(' ', '-')}`}
-                  >
-                    {tag}
-                  </Button>
+                {[
+                  { name: 'Taxidermy', slug: 'taxidermy-bones' },
+                  { name: 'Vintage Medical', slug: 'vintage-medical' },
+                  { name: 'Oddities', slug: 'oddities-curiosities' },
+                  { name: 'Specimens', slug: 'antique-specimens' },
+                  { name: 'Gothic Art', slug: 'macabre-art' }
+                ].map((tag) => (
+                  <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="rounded-full text-xs px-3 py-1 border-border transition-colors cursor-pointer"
+                      style={{ 
+                        color: 'inherit',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'hsl(0, 77%, 26%)';
+                        e.currentTarget.style.borderColor = 'hsl(0, 77%, 26%)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'inherit';
+                        e.currentTarget.style.borderColor = '';
+                      }}
+                      data-testid={`tag-${tag.name.toLowerCase().replace(' ', '-')}`}
+                    >
+                      {tag.name}
+                    </Button>
+                  </Link>
                 ))}
               </div>
             </div>
