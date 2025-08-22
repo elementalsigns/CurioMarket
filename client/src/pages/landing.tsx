@@ -117,7 +117,19 @@ export default function Landing() {
                 <Link key={category.slug} to={`/browse?category=${category.slug}`}>
                   <Button 
                     variant="outline" 
-                    className="rounded-full px-4 py-2 border-border hover:text-accent hover:border-accent transition-colors cursor-pointer"
+                    className="rounded-full px-4 py-2 border-border hover:border-[hsl(0,77%,26%)] transition-colors cursor-pointer"
+                    style={{ 
+                      color: 'inherit',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'hsl(0, 77%, 26%)';
+                      e.currentTarget.style.borderColor = 'hsl(0, 77%, 26%)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'inherit';
+                      e.currentTarget.style.borderColor = '';
+                    }}
                     data-testid={`category-${category.slug}`}
                   >
                     {category.name}
