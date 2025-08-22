@@ -170,6 +170,23 @@ export interface IStorage {
   incrementListingViews(listingId: string): Promise<void>;
   getListingAnalytics(listingId: string): Promise<any>;
   promoteListings(sellerId: string, listingIds: string[], duration: number): Promise<void>;
+  
+  // Admin operations
+  getAdminStats(): Promise<any>;
+  getUsers(params: { page: number; limit: number; search: string }): Promise<User[]>;
+  banUser(userId: string, adminId: string, reason: string): Promise<void>;
+  unbanUser(userId: string, adminId: string): Promise<void>;
+  getShopsForAdmin(params: { page: number; limit: number; status: string }): Promise<any[]>;
+  suspendShop(shopId: string, adminId: string, reason: string): Promise<void>;
+  reactivateShop(shopId: string, adminId: string): Promise<void>;
+  getFlaggedContent(params: { page: number; limit: number; status: string }): Promise<any[]>;
+  moderateContent(flagId: string, adminId: string, action: string, notes?: string): Promise<void>;
+  getDisputes(params: { page: number; limit: number; status: string }): Promise<any[]>;
+  resolveDispute(disputeId: string, adminId: string, resolution: string, notes?: string): Promise<void>;
+  processRefund(orderId: string, adminId: string, amount: number, reason: string): Promise<void>;
+  getAdminActivityLog(params: { page: number; limit: number }): Promise<any[]>;
+  getPlatformSettings(): Promise<any>;
+  updatePlatformSettings(settings: any, adminId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1143,6 +1160,209 @@ export class DatabaseStorage implements IStorage {
       total: 0,
       averageRating: 0,
     };
+  }
+
+  // Admin operations
+  async getAdminStats(): Promise<any> {
+    // In a real implementation, this would aggregate actual data from the database
+    return {
+      totalUsers: 1250,
+      totalSellers: 89,
+      totalListings: 542,
+      totalOrders: 2143,
+      pendingVerifications: 7,
+      disputedOrders: 3,
+      flaggedContent: 2,
+      totalRevenue: 45890.50
+    };
+  }
+
+  async getUsers(params: { page: number; limit: number; search: string }): Promise<User[]> {
+    // Mock data for demonstration
+    return [
+      {
+        id: "user1",
+        email: "john.doe@example.com",
+        firstName: "John",
+        lastName: "Doe",
+        role: "buyer",
+        accountStatus: "active",
+        emailVerified: true,
+        phoneVerified: false,
+        verificationLevel: 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } as User,
+      {
+        id: "user2", 
+        email: "jane.seller@example.com",
+        firstName: "Jane",
+        lastName: "Seller",
+        role: "seller",
+        accountStatus: "active",
+        emailVerified: true,
+        phoneVerified: true,
+        verificationLevel: 2,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } as User
+    ];
+  }
+
+  async banUser(userId: string, adminId: string, reason: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        accountStatus: 'banned',
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async unbanUser(userId: string, adminId: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        accountStatus: 'active',
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getShopsForAdmin(params: { page: number; limit: number; status: string }): Promise<any[]> {
+    return [
+      {
+        id: "shop1",
+        shopName: "Gothic Curiosities",
+        ownerName: "Dark Collector",
+        totalListings: 45,
+        verificationStatus: "approved",
+        isActive: true
+      },
+      {
+        id: "shop2",
+        shopName: "Vintage Oddities",
+        ownerName: "Antique Hunter",
+        totalListings: 23,
+        verificationStatus: "pending",
+        isActive: true
+      }
+    ];
+  }
+
+  async suspendShop(shopId: string, adminId: string, reason: string): Promise<void> {
+    await db.update(sellers)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(sellers.id, shopId));
+  }
+
+  async reactivateShop(shopId: string, adminId: string): Promise<void> {
+    await db.update(sellers)
+      .set({ 
+        isActive: true,
+        updatedAt: new Date()
+      })
+      .where(eq(sellers.id, shopId));
+  }
+
+  async getFlaggedContent(params: { page: number; limit: number; status: string }): Promise<any[]> {
+    return [
+      {
+        id: "flag1",
+        contentType: "listing",
+        contentTitle: "Suspicious Bone Collection",
+        reporterName: "Concerned Buyer",
+        reason: "Potentially illegal animal parts",
+        severity: "high",
+        status: "pending"
+      },
+      {
+        id: "flag2",
+        contentType: "message",
+        contentTitle: "Inappropriate seller message",
+        reporterName: "Jane Doe",
+        reason: "Harassment",
+        severity: "medium",
+        status: "pending"
+      }
+    ];
+  }
+
+  async moderateContent(flagId: string, adminId: string, action: string, notes?: string): Promise<void> {
+    // In a real implementation, update flag status in database
+    console.log(`Content ${flagId} ${action} by admin ${adminId}: ${notes}`);
+  }
+
+  async getDisputes(params: { page: number; limit: number; status: string }): Promise<any[]> {
+    return [
+      {
+        id: "dispute1",
+        orderId: "order123",
+        buyerName: "Disappointed Customer",
+        sellerName: "Gothic Curiosities",
+        reason: "Item not as described",
+        amount: 89.99,
+        status: "open"
+      },
+      {
+        id: "dispute2",
+        orderId: "order456",
+        buyerName: "Angry Buyer",
+        sellerName: "Vintage Oddities", 
+        reason: "Item never arrived",
+        amount: 124.50,
+        status: "open"
+      }
+    ];
+  }
+
+  async resolveDispute(disputeId: string, adminId: string, resolution: string, notes?: string): Promise<void> {
+    // In a real implementation, update dispute status in database
+    console.log(`Dispute ${disputeId} resolved as ${resolution} by admin ${adminId}: ${notes}`);
+  }
+
+  async processRefund(orderId: string, adminId: string, amount: number, reason: string): Promise<void> {
+    // In a real implementation, process refund through Stripe and update order status
+    console.log(`Refund of $${amount} processed for order ${orderId} by admin ${adminId}: ${reason}`);
+  }
+
+  async getAdminActivityLog(params: { page: number; limit: number }): Promise<any[]> {
+    return [
+      {
+        id: "activity1",
+        adminId: "admin1",
+        adminName: "Site Administrator",
+        action: "banned_user",
+        target: "user123",
+        reason: "Terms of service violation",
+        timestamp: new Date()
+      },
+      {
+        id: "activity2",
+        adminId: "admin1", 
+        adminName: "Site Administrator",
+        action: "suspended_shop",
+        target: "shop456",
+        reason: "Policy violation",
+        timestamp: new Date()
+      }
+    ];
+  }
+
+  async getPlatformSettings(): Promise<any> {
+    return {
+      platformFee: 3,
+      maxListingImages: 10,
+      requireSellerVerification: true,
+      autoApproveListings: false,
+      maintenanceMode: false
+    };
+  }
+
+  async updatePlatformSettings(settings: any, adminId: string): Promise<any> {
+    // In a real implementation, update settings in database
+    return settings;
   }
 }
 

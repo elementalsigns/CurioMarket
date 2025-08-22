@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import express from "express";
 import path from "path";
@@ -1372,6 +1372,258 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error rejecting seller verification:", error);
       res.status(500).json({ error: "Failed to reject seller verification" });
+    }
+  });
+
+  // =================== ADMIN DASHBOARD ===================
+
+  // Admin middleware to check for admin role
+  const requireAdmin: RequestHandler = async (req: any, res, next) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ error: "Failed to verify admin status" });
+    }
+  };
+
+  // Admin dashboard statistics
+  app.get('/api/admin/stats', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ error: "Failed to fetch admin statistics" });
+    }
+  });
+
+  // Get all users for admin management
+  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, search = '' } = req.query;
+      const users = await storage.getUsers({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        search: search as string
+      });
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Ban a user
+  app.post('/api/admin/users/:userId/ban', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user.claims.sub;
+
+      if (!reason) {
+        return res.status(400).json({ error: "Ban reason is required" });
+      }
+
+      await storage.banUser(userId, adminId, reason);
+      res.json({ success: true, message: "User banned successfully" });
+    } catch (error) {
+      console.error("Error banning user:", error);
+      res.status(500).json({ error: "Failed to ban user" });
+    }
+  });
+
+  // Unban a user
+  app.post('/api/admin/users/:userId/unban', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const adminId = req.user.claims.sub;
+
+      await storage.unbanUser(userId, adminId);
+      res.json({ success: true, message: "User unbanned successfully" });
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      res.status(500).json({ error: "Failed to unban user" });
+    }
+  });
+
+  // Get all shops for admin management
+  app.get('/api/admin/shops', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, status = 'all' } = req.query;
+      const shops = await storage.getShopsForAdmin({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        status: status as string
+      });
+      res.json(shops);
+    } catch (error) {
+      console.error("Error fetching shops:", error);
+      res.status(500).json({ error: "Failed to fetch shops" });
+    }
+  });
+
+  // Suspend a shop
+  app.post('/api/admin/shops/:shopId/suspend', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { shopId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user.claims.sub;
+
+      if (!reason) {
+        return res.status(400).json({ error: "Suspension reason is required" });
+      }
+
+      await storage.suspendShop(shopId, adminId, reason);
+      res.json({ success: true, message: "Shop suspended successfully" });
+    } catch (error) {
+      console.error("Error suspending shop:", error);
+      res.status(500).json({ error: "Failed to suspend shop" });
+    }
+  });
+
+  // Reactivate a shop
+  app.post('/api/admin/shops/:shopId/reactivate', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { shopId } = req.params;
+      const adminId = req.user.claims.sub;
+
+      await storage.reactivateShop(shopId, adminId);
+      res.json({ success: true, message: "Shop reactivated successfully" });
+    } catch (error) {
+      console.error("Error reactivating shop:", error);
+      res.status(500).json({ error: "Failed to reactivate shop" });
+    }
+  });
+
+  // Get flagged content for moderation
+  app.get('/api/admin/flags', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, status = 'pending' } = req.query;
+      const flags = await storage.getFlaggedContent({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        status: status as string
+      });
+      res.json(flags);
+    } catch (error) {
+      console.error("Error fetching flagged content:", error);
+      res.status(500).json({ error: "Failed to fetch flagged content" });
+    }
+  });
+
+  // Moderate flagged content
+  app.post('/api/admin/flags/:flagId/moderate', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { flagId } = req.params;
+      const { action, notes } = req.body;
+      const adminId = req.user.claims.sub;
+
+      if (!action) {
+        return res.status(400).json({ error: "Moderation action is required" });
+      }
+
+      await storage.moderateContent(flagId, adminId, action, notes);
+      res.json({ success: true, message: "Content moderated successfully" });
+    } catch (error) {
+      console.error("Error moderating content:", error);
+      res.status(500).json({ error: "Failed to moderate content" });
+    }
+  });
+
+  // Get disputed orders
+  app.get('/api/admin/disputes', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, status = 'open' } = req.query;
+      const disputes = await storage.getDisputes({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        status: status as string
+      });
+      res.json(disputes);
+    } catch (error) {
+      console.error("Error fetching disputes:", error);
+      res.status(500).json({ error: "Failed to fetch disputes" });
+    }
+  });
+
+  // Resolve a dispute
+  app.post('/api/admin/disputes/:disputeId/resolve', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { disputeId } = req.params;
+      const { resolution, notes } = req.body;
+      const adminId = req.user.claims.sub;
+
+      if (!resolution) {
+        return res.status(400).json({ error: "Resolution is required" });
+      }
+
+      await storage.resolveDispute(disputeId, adminId, resolution, notes);
+      res.json({ success: true, message: "Dispute resolved successfully" });
+    } catch (error) {
+      console.error("Error resolving dispute:", error);
+      res.status(500).json({ error: "Failed to resolve dispute" });
+    }
+  });
+
+  // Process refund
+  app.post('/api/admin/orders/:orderId/refund', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { orderId } = req.params;
+      const { amount, reason } = req.body;
+      const adminId = req.user.claims.sub;
+
+      if (!amount || !reason) {
+        return res.status(400).json({ error: "Amount and reason are required" });
+      }
+
+      // In a real implementation, process the refund through Stripe
+      await storage.processRefund(orderId, adminId, amount, reason);
+      res.json({ success: true, message: "Refund processed successfully" });
+    } catch (error) {
+      console.error("Error processing refund:", error);
+      res.status(500).json({ error: "Failed to process refund" });
+    }
+  });
+
+  // Get admin activity log
+  app.get('/api/admin/activity', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 100 } = req.query;
+      const activities = await storage.getAdminActivityLog({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching admin activity:", error);
+      res.status(500).json({ error: "Failed to fetch admin activity" });
+    }
+  });
+
+  // Platform settings management
+  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const settings = await storage.getPlatformSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching platform settings:", error);
+      res.status(500).json({ error: "Failed to fetch platform settings" });
+    }
+  });
+
+  app.put('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const updatedSettings = await storage.updatePlatformSettings(req.body, adminId);
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating platform settings:", error);
+      res.status(500).json({ error: "Failed to update platform settings" });
     }
   });
 
