@@ -314,6 +314,70 @@ function ProhibitedItemsStandalone() {
             </div>
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-container">
+            <div className="footer-grid">
+              {/* Brand */}
+              <div className="footer-brand">
+                <div className="logo">
+                  <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+                </div>
+                <p className="footer-description">
+                  Your premier destination for oddities, curios, and unique specimens. Discover the extraordinary in our carefully curated marketplace.
+                </p>
+                <p style={{ color: '#a1a1aa', fontSize: '0.875rem' }}>
+                  Email: Info@curiosities.market
+                </p>
+              </div>
+
+              {/* Shop */}
+              <div className="footer-section">
+                <h4>Shop</h4>
+                <ul className="footer-links">
+                  <li><Link to="/browse"><button className="footer-link">All Categories</button></Link></li>
+                  <li><Link to="/browse?category=taxidermy"><button className="footer-link">Taxidermy</button></Link></li>
+                  <li><Link to="/browse?category=specimens"><button className="footer-link">Specimens</button></Link></li>
+                  <li><Link to="/browse?category=bones"><button className="footer-link">Bones & Skulls</button></Link></li>
+                </ul>
+              </div>
+
+              {/* Support */}
+              <div className="footer-section">
+                <h4>Support</h4>
+                <ul className="footer-links">
+                  <li><Link to="/help"><button className="footer-link">Help Center</button></Link></li>
+                  <li><Link to="/contact"><button className="footer-link">Contact Us</button></Link></li>
+                  <li><Link to="/seller-guide"><button className="footer-link">Seller Guide</button></Link></li>
+                  <li><Link to="/shipping"><button className="footer-link">Shipping Info</button></Link></li>
+                </ul>
+              </div>
+
+              {/* Legal */}
+              <div className="footer-section">
+                <h4>Legal</h4>
+                <ul className="footer-links">
+                  <li><Link to="/privacy-policy"><button className="footer-link">Privacy Policy</button></Link></li>
+                  <li><Link to="/terms-of-service"><button className="footer-link">Terms of Service</button></Link></li>
+                  <li><Link to="/prohibited-items"><button className="footer-link">Prohibited Items</button></Link></li>
+                  <li><Link to="/seller-terms"><button className="footer-link">Seller Terms</button></Link></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="footer-bottom">
+              <div className="footer-copyright">
+                © 2025 Curio Market. All rights reserved.
+              </div>
+              <div className="footer-legal">
+                <Link to="/privacy-policy"><button className="footer-link">Privacy</button></Link>
+                <Link to="/terms-of-service"><button className="footer-link">Terms</button></Link>
+                <Link to="/prohibited-items"><button className="footer-link">Prohibited Items</button></Link>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
