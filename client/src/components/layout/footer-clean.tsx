@@ -17,7 +17,7 @@ export default function FooterClean() {
               Your premier destination for oddities, curios, and unique specimens. Discover the extraordinary in our carefully curated marketplace.
             </p>
             <p className="text-foreground/60 text-sm">
-              Email: privacy@curiomarket.com
+              Email: Info@curiosities.market
             </p>
           </div>
 

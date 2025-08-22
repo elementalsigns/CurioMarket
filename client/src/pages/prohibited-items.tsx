@@ -309,9 +309,7 @@ function ProhibitedItemsStandalone() {
               <h3>Compliance Contact</h3>
               <p>For questions about prohibited items or to report violations:</p>
               <ul>
-                <li>Email: compliance@curiomarket.com</li>
-                <li>Emergency: violations@curiomarket.com</li>
-                <li>Mail: Curio Market Compliance, 123 Gothic Lane, Salem, MA 01970</li>
+                <li>Email: Info@curiosities.market</li>
               </ul>
             </div>
           </div>

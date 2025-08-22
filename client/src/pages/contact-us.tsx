@@ -51,21 +51,21 @@ export default function ContactUs() {
       icon: Mail,
       title: "Email Support",
       description: "General inquiries and support",
-      contact: "support@curiomarket.com",
+      contact: "Info@curiosities.market",
       responseTime: "Within 24 hours"
     },
     {
       icon: Shield,
       title: "Safety & Compliance",
       description: "Report prohibited items or safety concerns",
-      contact: "safety@curiomarket.com",
+      contact: "Info@curiosities.market",
       responseTime: "Within 12 hours"
     },
     {
       icon: MessageSquare,
       title: "Seller Support",
       description: "Questions about selling and shop management",
-      contact: "sellers@curiomarket.com",
+      contact: "Info@curiosities.market",
       responseTime: "Within 24 hours"
     }
   ];
@@ -73,7 +73,7 @@ export default function ContactUs() {
   const faqItems = [
     {
       question: "How do I report a prohibited item?",
-      answer: "Use our safety contact form or email safety@curiomarket.com with details about the listing."
+      answer: "Use our safety contact form or email Info@curiosities.market with details about the listing."
     },
     {
       question: "What payment methods do you accept?",

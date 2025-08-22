@@ -256,8 +256,7 @@ function PrivacyPolicyStandalone() {
               <h3>Contact Us</h3>
               <p>If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:</p>
               <ul>
-                <li>Email: privacy@curiomarket.com</li>
-                <li>Mail: Curio Market Privacy Team, 123 Gothic Lane, Salem, MA 01970</li>
+                <li>Email: Info@curiosities.market</li>
               </ul>
             </div>
           </div>

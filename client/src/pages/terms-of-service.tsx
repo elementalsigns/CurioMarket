@@ -278,8 +278,8 @@ function TermsOfServiceStandalone() {
               <h3>Legal Contact</h3>
               <p>For legal inquiries or terms-related questions:</p>
               <ul>
-                <li>Email: legal@curiomarket.com</li>
-                <li>Mail: Curio Market Legal Department, 123 Gothic Lane, Salem, MA 01970</li>
+                <li>Email: Info@curiosities.market</li>
+
               </ul>
             </div>
           </div>

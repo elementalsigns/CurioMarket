@@ -170,7 +170,7 @@ export default function CookiesPolicyStandalone() {
               If you have any questions about our use of cookies or this Cookie Policy, please contact us at:
             </p>
             <ul className="section-list">
-              <li>Email: privacy@curiomarket.com</li>
+              <li>Email: Info@curiosities.market</li>
               <li>Contact Form: <button className="footer-link" style={{color: 'hsl(0, 77%, 26%)', textDecoration: 'underline'}} onClick={() => window.location.href = '/contact'}>Contact Us</button></li>
             </ul>
             <p className="section-content">

@@ -379,7 +379,7 @@ export default function HelpCenter() {
                         For general inquiries, account issues, or seller support:
                       </p>
                       <Button variant="outline" className="w-full">
-                        support@curiomarket.com
+                        Info@curiosities.market
                       </Button>
                     </div>
                     
