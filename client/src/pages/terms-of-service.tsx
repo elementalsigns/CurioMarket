@@ -136,7 +136,7 @@ function TermsOfServiceStandalone() {
         <main className="main-content">
           <div className="content-wrapper">
             <div className="hero">
-              <h1>Terms of <span className="accent">Service</span></h1>
+              <h1>Terms of Service</h1>
               <p>The legal framework governing your use of Curio Market and the responsibilities of all participants in our marketplace.</p>
             </div>
 
