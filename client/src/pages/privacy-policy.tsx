@@ -136,7 +136,7 @@ function PrivacyPolicyStandalone() {
         <main className="main-content">
           <div className="content-wrapper">
             <div className="hero">
-              <h1>Privacy <span className="accent">Policy</span></h1>
+              <h1>Privacy Policy</h1>
               <p>Protecting your personal information and maintaining your privacy is fundamental to our mission at Curio Market.</p>
             </div>
 
