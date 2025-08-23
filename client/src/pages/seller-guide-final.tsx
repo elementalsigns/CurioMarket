@@ -79,7 +79,7 @@ export default function SellerGuideFinal() {
               margin: '0 0 1.5rem 0',
               color: 'white'
             }}>
-              Seller's <span style={{ color: '#dc2626' }}>Guide</span>
+              Seller's Guide
             </h1>
             <p style={{ 
               fontSize: '1.25rem', 
