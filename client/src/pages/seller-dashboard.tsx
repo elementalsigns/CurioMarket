@@ -12,6 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Link } from "wouter";
+import { SocialSharing } from "@/components/social-sharing";
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();

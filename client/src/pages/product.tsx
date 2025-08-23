@@ -10,6 +10,8 @@ import { Heart, Share2, ShoppingCart, Star, MapPin, Shield, MessageCircle } from
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { SocialSharing } from "@/components/social-sharing";
+import { MetaTags } from "@/components/meta-tags";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Product() {
@@ -132,6 +134,14 @@ export default function Product() {
 
   return (
     <div className="min-h-screen bg-background">
+      <MetaTags
+        title={`${listing.title} - ${listing.seller?.shopName || 'Curio Market'}`}
+        description={listing.description}
+        image={listing.images?.[0]?.url}
+        type="product"
+        price={listing.price}
+        currency="USD"
+      />
       <Header />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -306,6 +316,18 @@ export default function Product() {
                       <ShoppingCart size={16} className="mr-2" />
                       Add to Cart
                     </Button>
+                    <SocialSharing 
+                      listing={{
+                        id: listing.id,
+                        title: listing.title,
+                        description: listing.description,
+                        price: listing.price,
+                        images: listing.images || [],
+                        sellerShopName: listing.seller?.shopName
+                      }}
+                      variant="outline"
+                      className="rounded-2xl"
+                    />
                     <Button variant="outline" className="rounded-2xl" data-testid="button-message">
                       <MessageCircle size={16} className="mr-2" />
                       Message

@@ -926,6 +926,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== SOCIAL SHARING ANALYTICS ===================
+
+  app.post('/api/analytics/share', async (req, res) => {
+    try {
+      const { listingId, platform, timestamp } = req.body;
+      
+      // Track the share event
+      await storage.trackShareEvent({
+        listingId,
+        platform,
+        timestamp: new Date(timestamp)
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking share:", error);
+      res.status(500).json({ error: "Failed to track share" });
+    }
+  });
+
+  app.get('/api/analytics/shares/:listingId', isAuthenticated, async (req: any, res) => {
+    try {
+      const shares = await storage.getListingShares(req.params.listingId);
+      res.json(shares);
+    } catch (error) {
+      console.error("Error fetching share analytics:", error);
+      res.status(500).json({ error: "Failed to fetch share analytics" });
+    }
+  });
+
   // =================== NOTIFICATIONS ===================
 
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {

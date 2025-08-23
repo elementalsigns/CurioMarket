@@ -688,3 +688,17 @@ export type InsertSellerReviewQueueItem = z.infer<typeof insertSellerReviewQueue
 export type VerificationAuditLog = typeof verificationAuditLog.$inferSelect;
 export type IdentityVerificationSession = typeof identityVerificationSessions.$inferSelect;
 export type InsertIdentityVerificationSession = z.infer<typeof insertIdentityVerificationSessionSchema>;
+
+// Social sharing analytics
+export const shareEvents = pgTable("share_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  listingId: varchar("listing_id").notNull().references(() => listings.id),
+  platform: varchar("platform").notNull(), // facebook, twitter, pinterest, etc.
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type ShareEvent = typeof shareEvents.$inferSelect;
+export type InsertShareEvent = typeof shareEvents.$inferInsert;

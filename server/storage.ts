@@ -23,6 +23,7 @@ import {
   listingVariations,
   searchAnalytics,
   payouts,
+  shareEvents,
   type User,
   type UpsertUser,
   type Seller,
@@ -51,6 +52,8 @@ import {
   type InsertListingVariation,
   type SearchAnalytic,
   type Payout,
+  type ShareEvent,
+  type InsertShareEvent,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, ilike, or, sql, count, avg } from "drizzle-orm";
@@ -451,6 +454,24 @@ export class DatabaseStorage implements IStorage {
   async clearCart(userId: string): Promise<void> {
     const cart = await this.getOrCreateCart(userId);
     await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+  }
+
+  // Social sharing analytics
+  async trackShareEvent(shareData: any): Promise<void> {
+    await db.insert(shareEvents).values(shareData);
+  }
+
+  async getListingShares(listingId: string): Promise<any[]> {
+    return await db
+      .select({
+        platform: shareEvents.platform,
+        count: sql<number>`count(*)`.as('count'),
+        lastShared: sql<string>`max(${shareEvents.timestamp})`.as('last_shared')
+      })
+      .from(shareEvents)
+      .where(eq(shareEvents.listingId, listingId))
+      .groupBy(shareEvents.platform)
+      .orderBy(sql`count(*) desc`);
   }
 
   async getOrder(id: string): Promise<Order | undefined> {
