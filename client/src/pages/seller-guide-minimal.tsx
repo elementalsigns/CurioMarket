@@ -76,7 +76,7 @@ export default function SellerGuideMinimal() {
                   <div className="bg-zinc-900 border border-red-600 rounded p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-red-500 font-medium">Notice:</span>
-                      <span className="text-zinc-300">All sellers must subscribe to our $10/month plan plus 3% transaction fees</span>
+                      <span className="text-zinc-300">All sellers must subscribe to our $10/month plan plus 2.6% platform fee (5.5% total with Stripe processing)</span>
                     </div>
                   </div>
                 </div>
@@ -120,9 +120,10 @@ export default function SellerGuideMinimal() {
                 <div className="text-zinc-400">Access to seller tools, analytics, and support</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-red-500 mb-4">3%</div>
-                <div className="text-xl text-white mb-2">Transaction Fee</div>
-                <div className="text-zinc-400">Applied only to completed sales</div>
+                <div className="text-4xl font-bold text-red-500 mb-4">5.5%</div>
+                <div className="text-xl text-white mb-2">Total Fees</div>
+                <div className="text-zinc-400">2.6% platform + 2.9% Stripe processing</div>
+                <div className="text-sm text-zinc-500 mt-2">Example: Keep $94.20 on a $100 sale</div>
               </div>
             </div>
           </div>

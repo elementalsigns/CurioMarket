@@ -182,7 +182,7 @@ export default function Subscribe() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <p className="text-foreground/80">
-                    Keep more of your earnings with Curio Market's 3% platform fee (plus standard payment processing).
+                    Keep more of your earnings with Curio Market's 2.6% platform fee. Combined with Stripe's 2.9% processing fee, total fees are just 5.5%.
                   </p>
 
                   <div className="space-y-3">
@@ -224,12 +224,27 @@ export default function Subscribe() {
                       <h4 className="font-serif font-bold mb-2">Fee Breakdown</h4>
                       <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
+                          <span>Stripe Processing:</span>
+                          <span>2.9% + $0.30</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Platform Fee:</span>
+                          <span>2.6%</span>
+                        </div>
+                        <div className="border-t border-gothic-purple/30 mt-2 pt-2 flex justify-between font-semibold">
+                          <span>Total Fees:</span>
+                          <span>5.5% + $0.30</span>
+                        </div>
+                        <div className="text-xs text-foreground/60 mt-2">
+                          Example: On a $100 sale, you keep $94.20 after all fees.
+                        </div>
+                        <div className="flex justify-between">
                           <span>Monthly subscription</span>
                           <span>$10.00</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Platform fee per sale</span>
-                          <span>3%</span>
+                          <span>2.6%</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Payment processing</span>

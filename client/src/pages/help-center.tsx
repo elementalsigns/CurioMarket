@@ -91,7 +91,7 @@ export default function HelpCenter() {
       questions: [
         {
           q: "How much does it cost to sell on Curio Market?",
-          a: "There's a $10/month subscription fee plus a 3% platform fee on completed sales. No listing fees or hidden costs."
+          a: "There's a $10/month subscription fee plus a 2.6% platform fee (5.5% total with Stripe processing) on completed sales. No listing fees or hidden costs."
         },
         {
           q: "What items are prohibited?",

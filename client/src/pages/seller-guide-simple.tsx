@@ -122,7 +122,7 @@ export default function SellerGuideSimple() {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                     <span style={{ color: '#dc2626', fontWeight: '500' }}>Notice:</span>
-                    <span style={{ color: '#d4d4d8' }}>All sellers must subscribe to our $10/month plan plus 3% transaction fees</span>
+                    <span style={{ color: '#d4d4d8' }}>All sellers must subscribe to our $10/month plan plus 2.6% platform fee (5.5% total with Stripe processing)</span>
                   </div>
                 </div>
               </div>

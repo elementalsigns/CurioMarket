@@ -321,10 +321,10 @@ export default function Checkout() {
                       ).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Platform Fee (3%)</span>
+                      <span>Platform Fee (2.6%)</span>
                       <span>${(cartData.items.reduce((sum: number, item: any) => 
                         sum + (parseFloat(item.listing?.price || '0') * item.quantity), 0
-                      ) * 0.03).toFixed(2)}</span>
+                      ) * 0.026).toFixed(2)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
@@ -334,7 +334,7 @@ export default function Checkout() {
                           const itemTotal = parseFloat(item.listing?.price || '0') * item.quantity;
                           const shipping = parseFloat(item.listing?.shippingCost || '0');
                           return sum + itemTotal + shipping;
-                        }, 0) * 1.03).toFixed(2)}
+                        }, 0) * 1.026).toFixed(2)}
                       </span>
                     </div>
                   </div>

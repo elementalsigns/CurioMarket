@@ -179,7 +179,7 @@ function SellerGuideStandalone() {
                     <p>Sign up and review our seller terms. We maintain high standards to ensure quality and authenticity for all items.</p>
                     <div className="notice">
                       <span className="notice-label">Notice:</span>
-                      <span className="notice-text">All sellers must subscribe to our $10/month plan plus 3% transaction fees</span>
+                      <span className="notice-text">All sellers must subscribe to our $10/month plan plus 2.6% platform fee (5.5% total with Stripe processing)</span>
                     </div>
                   </div>
                 </div>
@@ -211,9 +211,9 @@ function SellerGuideStandalone() {
                   <div className="price-desc">Access to seller tools, analytics, and support</div>
                 </div>
                 <div className="pricing-item">
-                  <div className="price">3%</div>
-                  <div className="price-label">Transaction Fee</div>
-                  <div className="price-desc">Applied only to completed sales</div>
+                  <div className="price">5.5%</div>
+                  <div className="price-label">Total Fees</div>
+                  <div className="price-desc">2.6% platform + 2.9% Stripe processing</div>
                 </div>
               </div>
             </div>

@@ -237,7 +237,7 @@ function TermsOfServiceStandalone() {
               <h3>Seller Requirements</h3>
               <ul>
                 <li>Monthly subscription fee of $10 per seller account</li>
-                <li>3% transaction fee on completed sales</li>
+                <li>2.6% platform fee on completed sales (5.5% total with Stripe processing)</li>
                 <li>Compliance with all applicable laws and regulations</li>
                 <li>Accurate representation of all listed items</li>
                 <li>Proper documentation for regulated items</li>
@@ -310,7 +310,8 @@ function TermsOfServiceStandalone() {
               <p>All sellers must maintain an active monthly subscription ($10/month) to list items and receive payments. Subscriptions automatically renew unless cancelled.</p>
 
               <h3>Transaction Fees</h3>
-              <p>A 3% transaction fee is deducted from the final sale price of each completed transaction. This fee covers payment processing, fraud protection, and platform maintenance.</p>
+              <p>A 2.6% platform fee is deducted from the final sale price of each completed transaction. Combined with Stripe's 2.9% processing fee, total fees are 5.5%. This covers payment processing, fraud protection, and platform maintenance.</p>
+              <p><strong>Fee Example:</strong> On a $100 sale, total fees are $5.50 ($2.60 platform + $2.90 Stripe), leaving you with $94.50.</p>
 
               <h3>Refunds and Chargebacks</h3>
               <p>Subscription fees are non-refundable. Transaction fees may be refunded in cases of seller violations or platform errors. Chargebacks may result in account suspension.</p>

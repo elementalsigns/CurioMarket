@@ -253,8 +253,11 @@ export default function Landing() {
                     </div>
                   </div>
                   <p className="text-foreground/80 mb-4">
-                    Keep more of your earnings with our low 3% fee on sales, plus standard payment processing.
+                    Keep more of your earnings with our 2.6% platform fee. Total fees are just 5.5% including Stripe processing.
                   </p>
+                  <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-foreground/90"><strong>Fee Example:</strong> On a $100 sale, you keep $94.20 after all fees ($2.60 platform + $2.90 Stripe + $0.30 fixed).</p>
+                  </div>
                   <ul className="space-y-2 mb-6">
                     <li className="flex items-center text-foreground/80">
                       <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>

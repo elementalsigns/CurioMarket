@@ -173,7 +173,7 @@ export default function SellerGuide() {
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                       <div>
                         <div className="font-medium">Subscription Setup</div>
-                        <div className="text-sm text-foreground/70">$10/month + 3% transaction fee</div>
+                        <div className="text-sm text-foreground/70">$10/month + 2.6% platform fee (5.5% total)</div>
                       </div>
                     </div>
                   </div>
@@ -487,8 +487,8 @@ export default function SellerGuide() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
-                  <div className="text-4xl font-bold">3%</div>
-                  <div className="text-foreground/70">per completed sale</div>
+                  <div className="text-4xl font-bold">5.5%</div>
+                  <div className="text-foreground/70">total fees (2.6% platform + 2.9% Stripe)</div>
                   <ul className="space-y-2 text-sm text-left">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
@@ -513,7 +513,7 @@ export default function SellerGuide() {
 
             <div className="mt-8 text-center">
               <p className="text-sm text-foreground/60">
-                <strong>Example:</strong> If you sell an item for $100, you keep $87 after the 3% transaction fee and monthly subscription prorated daily.
+                <strong>Example:</strong> If you sell an item for $100, you keep $94.20 after the 5.5% total fees ($2.60 platform + $2.90 Stripe + $0.30 fixed) plus monthly subscription prorated daily.
               </p>
             </div>
           </div>

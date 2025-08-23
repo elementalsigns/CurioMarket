@@ -109,7 +109,7 @@ export default function SellerGuideClean() {
                       <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <span className="font-medium text-red-400">Notice:</span>
-                        <span className="text-zinc-300 ml-2">All sellers must subscribe to our $10/month plan plus 3% transaction fees</span>
+                        <span className="text-zinc-300 ml-2">All sellers must subscribe to our $10/month plan plus 2.6% platform fee (5.5% total with Stripe processing)</span>
                       </div>
                     </div>
                   </div>

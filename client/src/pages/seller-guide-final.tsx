@@ -211,7 +211,7 @@ export default function SellerGuideFinal() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                       <span style={{ color: '#dc2626', fontWeight: '500' }}>Notice:</span>
-                      <span style={{ color: '#d4d4d8' }}>All sellers must subscribe to our $10/month plan plus 3% transaction fees</span>
+                      <span style={{ color: '#d4d4d8' }}>All sellers must subscribe to our $10/month plan plus 2.6% platform fee (5.5% total with Stripe processing)</span>
                     </div>
                   </div>
                 </div>
@@ -318,12 +318,15 @@ export default function SellerGuideFinal() {
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#dc2626', marginBottom: '1rem' }}>
-                  3%
+                  5.5%
                 </div>
                 <div style={{ fontSize: '1.25rem', color: 'white', marginBottom: '0.5rem' }}>
-                  Transaction Fee
+                  Total Fees
                 </div>
                 <div style={{ color: '#a1a1aa' }}>
+                  2.6% platform + 2.9% Stripe processing
+                </div>
+                <div style={{ fontSize: '0.875rem', color: '#71717a', marginTop: '0.5rem' }}>
                   Applied only to completed sales
                 </div>
               </div>

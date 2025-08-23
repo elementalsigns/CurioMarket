@@ -126,7 +126,7 @@ export default function SellerOnboarding() {
               <CardContent className="p-6">
                 <DollarSign className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="font-serif font-bold mb-2">Low Fees</h3>
-                <p className="text-sm text-foreground/70">Only 3% platform fee plus payment processing</p>
+                <p className="text-sm text-foreground/70">2.6% platform fee (5.5% total with Stripe)</p>
               </CardContent>
             </Card>
 
