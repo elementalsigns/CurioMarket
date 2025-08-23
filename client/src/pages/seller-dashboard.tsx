@@ -290,7 +290,14 @@ export default function SellerDashboard() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-4" data-testid="content-orders">
-            <h2 className="text-2xl font-serif font-bold">Recent Orders</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Recent Orders</h2>
+              <Link to="/seller/orders">
+                <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-manage-orders">
+                  Manage All Orders
+                </Button>
+              </Link>
+            </div>
             
             {orders.length > 0 ? (
               <div className="space-y-4" data-testid="orders-list">

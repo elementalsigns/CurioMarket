@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSellerSchema, insertListingSchema } from "@shared/schema";
 import { verificationService } from "./verificationService";
+import { emailService } from "./emailService";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-07-30.basil",
@@ -454,6 +455,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating payment intent:", error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create order after successful payment
+  app.post('/api/orders/create', isAuthenticated, async (req: any, res) => {
+    try {
+      const { paymentIntentId, cartItems, shippingAddress } = req.body;
+      const userId = req.user.claims.sub;
+      
+      if (!stripe) {
+        return res.status(500).json({ error: "Stripe not configured" });
+      }
+      
+      // Verify payment intent is successful
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: "Payment not completed" });
+      }
+      
+      // Group items by seller to create separate orders
+      const ordersBySeller: { [sellerId: string]: any[] } = {};
+      let totalAmount = 0;
+      
+      for (const item of cartItems) {
+        const listing = await storage.getListing(item.listingId);
+        if (!listing) continue;
+        
+        const sellerId = listing.sellerId;
+        if (!ordersBySeller[sellerId]) {
+          ordersBySeller[sellerId] = [];
+        }
+        
+        const itemTotal = parseFloat(listing.price) * (item.quantity || 1);
+        totalAmount += itemTotal;
+        
+        ordersBySeller[sellerId].push({
+          listing,
+          quantity: item.quantity || 1,
+          price: listing.price,
+          itemTotal
+        });
+      }
+      
+      const createdOrders = [];
+      
+      // Create orders for each seller
+      for (const [sellerId, items] of Object.entries(ordersBySeller)) {
+        const orderTotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
+        const orderShippingCost = items.reduce((sum, item) => sum + parseFloat(item.listing.shippingCost || '0'), 0);
+        
+        // Create order
+        const order = await storage.createOrder({
+          buyerId: userId,
+          sellerId,
+          total: (orderTotal + orderShippingCost).toString(),
+          subtotal: orderTotal.toString(),
+          shippingCost: orderShippingCost.toString(),
+          platformFee: (orderTotal * (PLATFORM_FEE_PERCENT / 100)).toString(),
+          status: 'paid',
+          stripePaymentIntentId: paymentIntentId,
+          shippingAddress
+        });
+        
+        // Create order items
+        for (const item of items) {
+          await storage.createOrderItem({
+            orderId: order.id,
+            listingId: item.listing.id,
+            quantity: item.quantity,
+            price: item.price,
+            title: item.listing.title
+          });
+        }
+        
+        createdOrders.push(order);
+        
+        // Send order confirmation email
+        try {
+          const orderDetails = await storage.getOrderWithDetails(order.id);
+          if (orderDetails && orderDetails.buyerEmail) {
+            const emailData = {
+              customerEmail: orderDetails.buyerEmail,
+              customerName: `${orderDetails.buyerFirstName} ${orderDetails.buyerLastName}`,
+              orderId: orderDetails.id,
+              orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
+              orderTotal: orderDetails.total,
+              orderItems: orderDetails.items,
+              shippingAddress: orderDetails.shippingAddress,
+              shopName: orderDetails.sellerShopName,
+              sellerEmail: orderDetails.sellerEmail
+            };
+            
+            await emailService.sendOrderConfirmation(emailData);
+          }
+        } catch (emailError) {
+          console.error('Failed to send order confirmation email:', emailError);
+          // Continue processing even if email fails
+        }
+      }
+      
+      // Clear the cart after successful order creation
+      await storage.clearCart(userId);
+      
+      res.json({ orders: createdOrders, success: true });
+    } catch (error: any) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ error: error.message || "Failed to create order" });
     }
   });
 

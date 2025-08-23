@@ -443,6 +443,16 @@ export class DatabaseStorage implements IStorage {
     return newOrder;
   }
 
+  async createOrderItem(orderItem: any): Promise<any> {
+    const [newOrderItem] = await db.insert(orderItems).values(orderItem).returning();
+    return newOrderItem;
+  }
+
+  async clearCart(userId: string): Promise<void> {
+    const cart = await this.getOrCreateCart(userId);
+    await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
+  }
+
   async getOrder(id: string): Promise<Order | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
     return order;
@@ -821,17 +831,69 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Order Management & Communication
-  async updateOrderTracking(orderId: string, trackingInfo: any): Promise<Order> {
+  async updateOrderTracking(orderId: string, trackingInfo: { trackingNumber: string; carrier: string }): Promise<Order> {
     const [order] = await db
       .update(orders)
       .set({
-        // Store tracking info in shipping address for now
         shippingAddress: sql`COALESCE(${orders.shippingAddress}, '{}') || ${JSON.stringify({ tracking: trackingInfo })}`,
+        status: 'shipped',
         updatedAt: new Date()
       })
       .where(eq(orders.id, orderId))
       .returning();
     return order;
+  }
+
+  async markOrderAsDelivered(orderId: string): Promise<Order> {
+    const [order] = await db
+      .update(orders)
+      .set({
+        status: 'delivered',
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+    return order;
+  }
+
+  async getOrderWithDetails(orderId: string): Promise<any> {
+    const order = await db
+      .select({
+        id: orders.id,
+        buyerId: orders.buyerId,
+        sellerId: orders.sellerId,
+        total: orders.total,
+        status: orders.status,
+        shippingAddress: orders.shippingAddress,
+        createdAt: orders.createdAt,
+        buyerEmail: users.email,
+        buyerFirstName: users.firstName,
+        buyerLastName: users.lastName,
+        sellerShopName: sellers.shopName,
+        sellerEmail: sql<string>`(SELECT email FROM ${users} WHERE id = ${sellers.userId})`
+      })
+      .from(orders)
+      .leftJoin(users, eq(orders.buyerId, users.id))
+      .leftJoin(sellers, eq(orders.sellerId, sellers.id))
+      .where(eq(orders.id, orderId))
+      .limit(1);
+
+    if (!order.length) return null;
+
+    const items = await db
+      .select({
+        title: listings.title,
+        price: orderItems.price,
+        quantity: orderItems.quantity
+      })
+      .from(orderItems)
+      .leftJoin(listings, eq(orderItems.listingId, listings.id))
+      .where(eq(orderItems.orderId, orderId));
+
+    return {
+      ...order[0],
+      items
+    };
   }
 
   async getOrderMessages(orderId: string): Promise<Message[]> {

@@ -11,6 +11,7 @@ import Browse from "@/pages/browse";
 import Product from "@/pages/product";
 import SellerOnboarding from "@/pages/seller-onboarding";
 import SellerDashboard from "@/pages/seller-dashboard";
+import SellerOrders from "@/pages/seller-orders";
 import CreateListing from "@/pages/create-listing";
 import Checkout from "@/pages/checkout";
 import Subscribe from "@/pages/subscribe";
@@ -82,6 +83,7 @@ function Router() {
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
+          <Route path="/seller/orders" component={SellerOrders} />
           <Route path="/seller/analytics" component={SellerAnalytics} />
           <Route path="/seller/inventory" component={InventoryManagement} />
           <Route path="/seller/reviews" component={Reviews} />

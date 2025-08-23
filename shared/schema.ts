@@ -29,7 +29,7 @@ export const sessions = pgTable(
 export const userRoleEnum = pgEnum('user_role', ['visitor', 'buyer', 'seller', 'admin']);
 
 // Order status enum
-export const orderStatusEnum = pgEnum('order_status', ['pending', 'paid', 'fulfilled', 'refunded', 'disputed']);
+export const orderStatusEnum = pgEnum('order_status', ['pending', 'paid', 'shipped', 'delivered', 'fulfilled', 'refunded', 'disputed']);
 
 // Listing state enum
 export const listingStateEnum = pgEnum('listing_state', ['draft', 'published', 'suspended']);
