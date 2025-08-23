@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Link } from "wouter";
 import { SocialSharing } from "@/components/social-sharing";
+import type { Promotion, InsertPromotion } from "@shared/schema";
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -188,9 +191,10 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
+            <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">Shop Profile</TabsTrigger>
           </TabsList>
 
@@ -343,6 +347,16 @@ export default function SellerDashboard() {
             )}
           </TabsContent>
 
+          {/* Promotions Tab */}
+          <TabsContent value="promotions" className="space-y-4" data-testid="content-promotions">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Discount Codes & Promotions</h2>
+              <PromotionDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: ["/api/seller/promotions"] })} />
+            </div>
+            
+            <PromotionsList />
+          </TabsContent>
+
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4" data-testid="content-profile">
             <h2 className="text-2xl font-serif font-bold">Shop Profile</h2>
@@ -388,6 +402,396 @@ export default function SellerDashboard() {
       </div>
 
       <Footer />
+    </div>
+  );
+}
+
+// Promotion Dialog Component
+function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<InsertPromotion>({
+    defaultValues: {
+      name: "",
+      description: "",
+      discountType: "percentage",
+      discountValue: "0",
+      minPurchase: "0",
+      maxDiscount: "",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      isActive: true,
+      maxUses: undefined,
+    },
+  });
+
+  const createPromotionMutation = useMutation({
+    mutationFn: async (data: InsertPromotion) => {
+      return apiRequest("POST", "/api/seller/promotions", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Promotion Created",
+        description: "Your discount code has been created successfully",
+      });
+      setOpen(false);
+      form.reset();
+      onSuccess();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: InsertPromotion) => {
+    createPromotionMutation.mutate(data);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-create-promotion">
+          <Plus className="h-4 w-4 mr-2" />
+          Create Promotion
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="font-serif">Create New Promotion</DialogTitle>
+        </DialogHeader>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Promotion Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., SPOOKY20" {...field} data-testid="input-promotion-name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="discountType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-discount-type">
+                          <SelectValue placeholder="Select discount type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentage Off</SelectItem>
+                        <SelectItem value="fixed_amount">Fixed Amount Off</SelectItem>
+                        <SelectItem value="free_shipping">Free Shipping</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe your promotion..." 
+                      {...field} 
+                      data-testid="input-promotion-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="discountValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {form.watch("discountType") === "percentage" ? "Percentage (%)" : "Amount ($)"}
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        min="0"
+                        {...field} 
+                        data-testid="input-discount-value"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="minPurchase"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Min Purchase ($)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        min="0"
+                        {...field} 
+                        data-testid="input-min-purchase"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="maxUses"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Uses (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min="1"
+                        placeholder="Unlimited"
+                        {...field} 
+                        data-testid="input-max-uses"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : field.value}
+                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                        data-testid="input-start-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : field.value}
+                        onChange={(e) => field.onChange(new Date(e.target.value))}
+                        data-testid="input-end-date"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setOpen(false)}
+                data-testid="button-cancel-promotion"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={createPromotionMutation.isPending}
+                className="bg-gothic-red hover:bg-gothic-red/80"
+                data-testid="button-save-promotion"
+              >
+                {createPromotionMutation.isPending ? "Creating..." : "Create Promotion"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Promotions List Component
+function PromotionsList() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: promotions = [], isLoading } = useQuery({
+    queryKey: ["/api/seller/promotions"],
+  });
+
+  const updatePromotionMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<InsertPromotion> }) => {
+      return apiRequest("PUT", `/api/promotions/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/promotions"] });
+      toast({
+        title: "Promotion Updated",
+        description: "Your promotion has been updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const togglePromotionStatus = (promotion: Promotion) => {
+    updatePromotionMutation.mutate({
+      id: promotion.id,
+      updates: { isActive: !promotion.isActive },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (promotions.length === 0) {
+    return (
+      <Card className="glass-effect" data-testid="no-promotions">
+        <CardContent className="p-12 text-center">
+          <Tag className="mx-auto mb-4 text-foreground/40" size={48} />
+          <h3 className="text-xl font-serif font-bold mb-2">No Promotions Yet</h3>
+          <p className="text-foreground/70 mb-4">
+            Create discount codes and promotions to boost your sales and attract more customers.
+          </p>
+          <PromotionDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: ["/api/seller/promotions"] })} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4" data-testid="promotions-list">
+      {promotions.map((promotion: Promotion) => (
+        <Card key={promotion.id} className="glass-effect" data-testid={`promotion-${promotion.id}`}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-lg font-serif font-bold" data-testid={`promotion-name-${promotion.id}`}>
+                    {promotion.name}
+                  </h3>
+                  <Badge
+                    variant={promotion.isActive ? "default" : "secondary"}
+                    data-testid={`promotion-status-${promotion.id}`}
+                  >
+                    {promotion.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                  {promotion.discountType === "percentage" && (
+                    <Badge variant="outline" className="bg-gothic-purple/10 text-gothic-purple">
+                      <Percent className="h-3 w-3 mr-1" />
+                      {promotion.discountValue}% Off
+                    </Badge>
+                  )}
+                  {promotion.discountType === "fixed_amount" && (
+                    <Badge variant="outline" className="bg-gothic-red/10 text-gothic-red">
+                      ${promotion.discountValue} Off
+                    </Badge>
+                  )}
+                  {promotion.discountType === "free_shipping" && (
+                    <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                      Free Shipping
+                    </Badge>
+                  )}
+                </div>
+                
+                {promotion.description && (
+                  <p className="text-foreground/70 text-sm mb-2" data-testid={`promotion-description-${promotion.id}`}>
+                    {promotion.description}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-4 text-sm text-foreground/60">
+                  <span>
+                    {new Date(promotion.startDate).toLocaleDateString()} - {new Date(promotion.endDate).toLocaleDateString()}
+                  </span>
+                  {promotion.maxUses && (
+                    <span data-testid={`promotion-usage-${promotion.id}`}>
+                      Used: {promotion.currentUses || 0}/{promotion.maxUses}
+                    </span>
+                  )}
+                  {promotion.minPurchase && parseFloat(promotion.minPurchase) > 0 && (
+                    <span>Min: ${promotion.minPurchase}</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => togglePromotionStatus(promotion)}
+                  disabled={updatePromotionMutation.isPending}
+                  data-testid={`button-toggle-${promotion.id}`}
+                >
+                  {promotion.isActive ? "Deactivate" : "Activate"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  data-testid={`button-edit-promotion-${promotion.id}`}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
