@@ -26,7 +26,9 @@ import {
   XCircle,
   Clock,
   FileText,
-  Settings
+  Settings,
+  Package,
+  X
 } from "lucide-react";
 
 interface AdminStats {
@@ -80,6 +82,12 @@ export default function AdminDashboard() {
   // Fetch shops/sellers
   const { data: shops } = useQuery({
     queryKey: ['/api/admin/shops'],
+    retry: false,
+  });
+
+  // Fetch all listings for admin
+  const { data: allListings = [] } = useQuery({
+    queryKey: ['/api/admin/listings'],
     retry: false,
   });
 
@@ -220,10 +228,11 @@ export default function AdminDashboard() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="verification" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-zinc-900">
+          <TabsList className="grid w-full grid-cols-7 bg-zinc-900">
             <TabsTrigger value="verification" data-testid="tab-verification">Verifications</TabsTrigger>
             <TabsTrigger value="disputes" data-testid="tab-disputes">Disputes</TabsTrigger>
             <TabsTrigger value="moderation" data-testid="tab-moderation">Moderation</TabsTrigger>
+            <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
             <TabsTrigger value="shops" data-testid="tab-shops">Shops</TabsTrigger>
             <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
@@ -515,6 +524,128 @@ export default function AdminDashboard() {
                   {!flaggedContent?.length && (
                     <div className="text-center py-8 text-zinc-400">
                       No flagged content
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Listings Management */}
+          <TabsContent value="listings">
+            <Card className="bg-zinc-900 border-zinc-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  All Platform Listings
+                </CardTitle>
+                <CardDescription>
+                  View and manage all items added by sellers across the platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {allListings.length === 0 ? (
+                    <div className="text-center py-8 text-zinc-400">
+                      <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No listings found</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-zinc-700">
+                            <th className="text-left p-3">Item</th>
+                            <th className="text-left p-3">Seller</th>
+                            <th className="text-left p-3">Price</th>
+                            <th className="text-left p-3">Category</th>
+                            <th className="text-left p-3">Status</th>
+                            <th className="text-left p-3">Views</th>
+                            <th className="text-left p-3">Created</th>
+                            <th className="text-left p-3">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allListings.map((listing: any) => (
+                            <tr key={listing.id} className="border-b border-zinc-800 hover:bg-zinc-800/50">
+                              <td className="p-3">
+                                <div className="flex items-center gap-3">
+                                  {listing.images?.[0] && (
+                                    <img 
+                                      src={listing.images[0]} 
+                                      alt={listing.title}
+                                      className="w-12 h-12 rounded object-cover"
+                                    />
+                                  )}
+                                  <div>
+                                    <p className="font-medium text-white">{listing.title}</p>
+                                    <p className="text-xs text-zinc-400 truncate max-w-[200px]">
+                                      {listing.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="p-3">
+                                <p className="text-white">{listing.seller?.shopName || 'Unknown'}</p>
+                              </td>
+                              <td className="p-3">
+                                <p className="text-green-400 font-medium">${listing.price}</p>
+                              </td>
+                              <td className="p-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {listing.category || 'Uncategorized'}
+                                </Badge>
+                              </td>
+                              <td className="p-3">
+                                <Badge 
+                                  variant={listing.status === 'active' ? 'default' : 'secondary'}
+                                  className="text-xs"
+                                >
+                                  {listing.status || 'unknown'}
+                                </Badge>
+                              </td>
+                              <td className="p-3">
+                                <p className="text-zinc-400">{listing.views || 0}</p>
+                              </td>
+                              <td className="p-3">
+                                <p className="text-zinc-400 text-xs">
+                                  {new Date(listing.createdAt).toLocaleDateString()}
+                                </p>
+                              </td>
+                              <td className="p-3">
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => window.open(`/listing/${listing.id}`, '_blank')}
+                                    data-testid={`button-view-${listing.id}`}
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                  </Button>
+                                  {listing.status === 'active' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-6 px-2 text-xs border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                                      onClick={() => {
+                                        const reason = prompt("Reason for removing listing:");
+                                        if (reason) {
+                                          // API call to deactivate listing
+                                          console.log(`Remove listing ${listing.id}: ${reason}`);
+                                        }
+                                      }}
+                                      data-testid={`button-remove-${listing.id}`}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>

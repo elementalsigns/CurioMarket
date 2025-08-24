@@ -166,6 +166,9 @@ export interface IStorage {
   getSellerPromotions(sellerId: string): Promise<Promotion[]>;
   updatePromotion(id: string, updates: Partial<InsertPromotion>): Promise<Promotion>;
   getSellerEarnings(sellerId: string, period: 'week' | 'month' | 'year'): Promise<any>;
+
+  // Admin Management
+  getAllListingsForAdmin(params: { page: number; limit: number; search: string; status: string }): Promise<any[]>;
   createPayout(sellerId: string, amount: number, orderIds: string[]): Promise<Payout>;
   getSellerPayouts(sellerId: string): Promise<Payout[]>;
   
@@ -1446,6 +1449,59 @@ export class DatabaseStorage implements IStorage {
   async updatePlatformSettings(settings: any, adminId: string): Promise<any> {
     // In a real implementation, update settings in database
     return settings;
+  }
+
+  async getAllListingsForAdmin(params: { page: number; limit: number; search: string; status: string }): Promise<any[]> {
+    const { page, limit, search, status } = params;
+    const offset = (page - 1) * limit;
+
+    let query = db
+      .select({
+        id: listings.id,
+        title: listings.title,
+        description: listings.description,
+        price: listings.price,
+        category: listings.category,
+        condition: listings.condition,
+        status: listings.status,
+        views: listings.views,
+        createdAt: listings.createdAt,
+        updatedAt: listings.updatedAt,
+        seller: {
+          id: sellers.id,
+          shopName: sellers.shopName,
+          userId: sellers.userId
+        },
+        images: sql<string[]>`COALESCE(
+          (SELECT ARRAY_AGG(${listingImages.url}) FROM ${listingImages} WHERE ${listingImages.listingId} = ${listings.id}),
+          ARRAY[]::text[]
+        )`
+      })
+      .from(listings)
+      .leftJoin(sellers, eq(listings.sellerId, sellers.id));
+
+    // Add search filter
+    if (search && search.trim() !== '') {
+      query = query.where(
+        or(
+          ilike(listings.title, `%${search}%`),
+          ilike(listings.description, `%${search}%`),
+          ilike(sellers.shopName, `%${search}%`)
+        )
+      );
+    }
+
+    // Add status filter
+    if (status && status !== 'all') {
+      query = query.where(eq(listings.status, status));
+    }
+
+    const results = await query
+      .orderBy(desc(listings.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return results;
   }
 }
 

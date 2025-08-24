@@ -1556,6 +1556,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all listings for admin management
+  app.get('/api/admin/listings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, search = '', status = 'all' } = req.query;
+      const listings = await storage.getAllListingsForAdmin({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        search: search as string,
+        status: status as string
+      });
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching admin listings:", error);
+      res.status(500).json({ error: "Failed to fetch listings" });
+    }
+  });
+
   // Ban a user
   app.post('/api/admin/users/:userId/ban', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
