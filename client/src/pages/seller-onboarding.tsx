@@ -104,8 +104,8 @@ export default function SellerOnboarding() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12" data-testid="onboarding-header">
-            <h1 className="text-4xl font-serif font-bold mb-4">
-              Become a <span className="text-gothic-purple">Curio</span> Seller
+            <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-gothic-red transition-colors cursor-default">
+              Become a Curiosities Seller
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
               Join thousands of collectors sharing their unique oddities with the world. Set up your shop in minutes.
