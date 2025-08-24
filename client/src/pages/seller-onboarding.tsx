@@ -114,15 +114,15 @@ export default function SellerOnboarding() {
 
           {/* Benefits */}
           <div className="grid md:grid-cols-4 gap-6 mb-12" data-testid="benefits-grid">
-            <Card className="glass-effect text-center">
+            <Card className="glass-effect text-center hover:border-gothic-red transition-colors">
               <CardContent className="p-6">
-                <Store className="mx-auto mb-4 text-gothic-purple" size={48} />
+                <Store className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="font-serif font-bold mb-2">Your Own Shop</h3>
                 <p className="text-sm text-foreground/70">Custom branding and unlimited listings</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-effect text-center">
+            <Card className="glass-effect text-center hover:border-gothic-red transition-colors">
               <CardContent className="p-6">
                 <DollarSign className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="font-serif font-bold mb-2">Low Fees</h3>
@@ -130,15 +130,15 @@ export default function SellerOnboarding() {
               </CardContent>
             </Card>
 
-            <Card className="glass-effect text-center">
+            <Card className="glass-effect text-center hover:border-gothic-red transition-colors">
               <CardContent className="p-6">
-                <Users className="mx-auto mb-4 text-gothic-purple" size={48} />
+                <Users className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="font-serif font-bold mb-2">Growing Community</h3>
                 <p className="text-sm text-foreground/70">Access to thousands of oddity collectors</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-effect text-center">
+            <Card className="glass-effect text-center hover:border-gothic-red transition-colors">
               <CardContent className="p-6">
                 <BarChart3 className="mx-auto mb-4 text-gothic-red" size={48} />
                 <h3 className="font-serif font-bold mb-2">Analytics</h3>
