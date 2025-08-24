@@ -115,7 +115,7 @@ export default function SellerTerms() {
                     <div className="space-y-2 text-muted-foreground">
                       <p><strong>Legal Knowledge:</strong> You are solely responsible for knowing and complying with all applicable laws in your jurisdiction, the buyer's jurisdiction, and any transit jurisdictions.</p>
                       
-                      <p><strong>Accurate Descriptions:</strong> All listings must include accurate species identification, collection location (where legally permissible), and collection method.</p>
+                      <p><strong>Accurate Descriptions:</strong> All listings must include accurate species identification.</p>
                       
                       <p><strong>Shipping Compliance:</strong> You must comply with all shipping regulations, including proper packaging, labeling, and declaration of contents.</p>
                       
