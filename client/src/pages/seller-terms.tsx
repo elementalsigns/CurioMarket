@@ -88,7 +88,7 @@ export default function SellerTerms() {
                         <li>CITES permits may be required for any regulated species (even if legally obtained)</li>
                         <li>State hunting/trapping licenses and tags where applicable</li>
                         <li>Import/export documentation for international specimens may be required</li>
-                        <li>Chain of custody documentation proving legal acquisition</li>
+                        <li>If required maintain and provide, chain of custody documentation proving legal acquisition</li>
                       </ul>
                     </div>
                     
