@@ -203,8 +203,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Only use fields that exist in current database schema
+    // Include the user ID from authentication claims
     const safeUserData = {
+      id: userData.id, // Use the ID from Replit claims
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -216,7 +217,7 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values(safeUserData)
       .onConflictDoUpdate({
-        target: users.email, // Use email as conflict target since it's unique
+        target: users.id, // Use ID as conflict target since we know the specific user ID
         set: safeUserData,
       })
       .returning();
