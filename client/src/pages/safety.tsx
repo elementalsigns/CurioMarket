@@ -1,5 +1,6 @@
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { Link } from "wouter";
 
 export default function Safety() {
   return (
@@ -103,12 +104,16 @@ export default function Safety() {
               or if you need to report a violation, please contact our team.
             </p>
             <div style={{display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center'}}>
-              <button style={{backgroundColor: '#dc2626', color: 'white', padding: '0.75rem 2rem', borderRadius: '0.25rem', border: 'none', cursor: 'pointer', fontSize: '1rem'}}>
-                Report an Issue
-              </button>
-              <button style={{border: '1px solid #3f3f46', color: '#d4d4d8', backgroundColor: 'transparent', padding: '0.75rem 2rem', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '1rem'}}>
-                Contact Support
-              </button>
+              <Link to="/help">
+                <button style={{backgroundColor: '#dc2626', color: 'white', padding: '0.75rem 2rem', borderRadius: '0.25rem', border: 'none', cursor: 'pointer', fontSize: '1rem'}}>
+                  Report an Issue
+                </button>
+              </Link>
+              <Link to="/contact">
+                <button style={{border: '1px solid #3f3f46', color: '#d4d4d8', backgroundColor: 'transparent', padding: '0.75rem 2rem', borderRadius: '0.25rem', cursor: 'pointer', fontSize: '1rem'}}>
+                  Contact Support
+                </button>
+              </Link>
             </div>
           </div>
         </div>
