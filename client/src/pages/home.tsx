@@ -74,7 +74,7 @@ export default function Home() {
                 transition: 'color 0.3s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.setProperty('color', '#dc2626', 'important');
+                e.currentTarget.style.setProperty('color', '#6A1B1B', 'important');
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.setProperty('color', '', 'important');
