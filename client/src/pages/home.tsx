@@ -69,7 +69,7 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4" data-testid="welcome-title">
-              Welcome back, {(user as any)?.firstName || 'Collector'}
+              Welcome back, {(user as any)?.claims?.first_name || (user as any)?.claims?.name || 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
               Discover new oddities and manage your collection
