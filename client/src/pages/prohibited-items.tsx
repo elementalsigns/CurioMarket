@@ -247,19 +247,23 @@ function ProhibitedItemsStandalone() {
 
               <div className="category-box">
                 <h3>Human Remains and Artifacts</h3>
-                <p><strong>Absolutely prohibited under all circumstances:</strong></p>
+                <p><strong>Prohibited items include:</strong></p>
                 <ul>
-                  <li>Human remains, bones, skulls, or any body parts</li>
-                  <li>Human hair, teeth, or other bodily materials</li>
+                  <li>Human remains, bones, skulls, or any body parts (except teeth and hair)</li>
                   <li>Funeral artifacts containing human remains</li>
-                  <li>Medical specimens derived from human sources</li>
-                  <li>Items crafted from human materials</li>
+                  <li>Medical specimens derived from human sources (except teeth and hair)</li>
+                  <li>Items crafted from human materials (except teeth and hair)</li>
                   <li>Photographs or documentation of human remains</li>
                   <li>Replicas or casts claiming to be from human sources</li>
                 </ul>
+                <p><strong>Permitted exceptions:</strong></p>
+                <ul>
+                  <li>Human teeth (properly documented and ethically sourced)</li>
+                  <li>Human hair (properly documented and ethically sourced)</li>
+                </ul>
                 <div className="notice">
                   <span className="notice-label">Notice:</span>
-                  <span className="notice-text">This includes historical, archaeological, medical, or educational specimens regardless of age or origin.</span>
+                  <span className="notice-text">All human specimens and bones are prohibited except for teeth and hair, which must be properly documented and ethically sourced. This policy applies to historical, archaeological, medical, or educational specimens regardless of age or origin.</span>
                 </div>
               </div>
 

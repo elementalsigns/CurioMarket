@@ -60,7 +60,7 @@ export default function SellerTerms() {
                     <div className="bg-red-950/20 border border-red-900/30 rounded-lg p-4">
                       <h4 className="font-medium text-red-400 mb-2">Strictly Prohibited:</h4>
                       <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                        <li><strong>Human remains or artifacts:</strong> No human bones, teeth, hair, organs, or any other human-derived materials</li>
+                        <li><strong>Human remains or artifacts:</strong> No human bones, organs, or body parts (except teeth and hair when properly documented and ethically sourced)</li>
                         <li><strong>Endangered species:</strong> No items from animals listed under CITES, ESA, or local endangered species laws</li>
                         <li><strong>Threatened species:</strong> No items from animals classified as threatened or vulnerable</li>
                         <li><strong>Illegal wildlife trade:</strong> No items obtained through poaching, illegal hunting, or trafficking</li>

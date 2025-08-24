@@ -342,7 +342,8 @@ export default function CreateListing() {
                       <h4 className="font-serif font-bold mb-2">Compliance Reminder</h4>
                       <p className="text-sm text-foreground/80">
                         Ensure your listing complies with all local, state, and federal laws. Prohibited items include 
-                        endangered species, human remains (unless legally permitted), firearms, explosives, and hazardous materials.
+                        endangered species, human remains (except teeth and hair), firearms, explosives, and hazardous materials. 
+                        Human teeth and hair must be properly documented and ethically sourced.
                       </p>
                     </CardContent>
                   </Card>

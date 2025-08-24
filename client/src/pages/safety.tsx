@@ -74,11 +74,14 @@ export default function Safety() {
               <div>
                 <h4 style={{color: 'white', fontWeight: 'bold', marginBottom: '1rem'}}>Human Remains</h4>
                 <ul style={{listStyle: 'none', padding: 0, color: '#d4d4d8'}}>
-                  <li style={{marginBottom: '0.5rem'}}>• Modern human remains (post-1600)</li>
-                  <li style={{marginBottom: '0.5rem'}}>• Skulls and bones of recent origin</li>
-                  <li style={{marginBottom: '0.5rem'}}>• Body parts or preserved tissue</li>
-                  <li style={{marginBottom: '0.5rem'}}>• Hair or teeth (except antique jewelry)</li>
+                  <li style={{marginBottom: '0.5rem'}}>• Human bones, skulls, or any body parts (except teeth and hair)</li>
+                  <li style={{marginBottom: '0.5rem'}}>• Body parts or preserved tissue (except teeth and hair)</li>
+                  <li style={{marginBottom: '0.5rem'}}>• Medical specimens (except properly documented teeth and hair)</li>
+                  <li style={{marginBottom: '0.5rem'}}>• Items crafted from human materials (except teeth and hair)</li>
                 </ul>
+                <p style={{color: '#a1a1aa', fontSize: '0.875rem', marginTop: '0.5rem'}}>
+                  <strong>Permitted:</strong> Human teeth and hair (properly documented and ethically sourced)
+                </p>
               </div>
               <div>
                 <h4 style={{color: 'white', fontWeight: 'bold', marginBottom: '1rem'}}>Protected Species</h4>
