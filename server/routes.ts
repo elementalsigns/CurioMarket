@@ -9,6 +9,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertSellerSchema, insertListingSchema } from "@shared/schema";
 import { verificationService } from "./verificationService";
 import { emailService } from "./emailService";
+import { ObjectStorageService } from "./objectStorage";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-07-30.basil",
@@ -22,6 +23,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth middleware
   await setupAuth(app);
+
+  // Object storage routes
+  app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -162,6 +175,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating seller subscription:", error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Seller onboarding route
+  app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Verify user has active subscription
+      if (!user?.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active seller subscription required" });
+      }
+
+      if (stripe) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status !== 'active') {
+          return res.status(403).json({ error: "Active seller subscription required" });
+        }
+      }
+
+      const sellerData = insertSellerSchema.parse({
+        userId,
+        ...req.body
+      });
+
+      const seller = await storage.createSeller(sellerData);
+      
+      // Update user role to seller
+      await storage.upsertUser({ 
+        id: userId, 
+        role: 'seller' as const,
+        email: user.email || '',
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl
+      });
+
+      res.json(seller);
+    } catch (error: any) {
+      console.error("Error creating seller profile:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create seller profile" });
     }
   });
 
