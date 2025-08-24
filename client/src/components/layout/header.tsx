@@ -167,7 +167,7 @@ export default function Header() {
                         data-testid="user-avatar"
                       />
                     ) : (
-                      <User size={24} className="text-foreground" />
+                      <User size={24} />
                     )}
                   </Button>
                 </DropdownMenuTrigger>
