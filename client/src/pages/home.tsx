@@ -68,7 +68,7 @@ export default function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-welcome">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4" data-testid="welcome-title">
+            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4 hover:text-red-600 transition-colors cursor-pointer" data-testid="welcome-title">
               Welcome back, {(user as any)?.claims?.first_name || (user as any)?.claims?.name || 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
