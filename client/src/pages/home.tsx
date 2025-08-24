@@ -90,9 +90,9 @@ export default function Home() {
 
           {/* Quick Actions */}
           <div className="grid md:grid-cols-3 gap-6 mb-16" data-testid="quick-actions">
-            <Card className="glass-effect hover-lift cursor-pointer">
+            <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
-                <ShoppingCart className="mx-auto mb-4 text-gothic-purple" size={48} />
+                <ShoppingCart className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Browse Market</h3>
                 <p className="text-foreground/70 mb-4">
                   Explore thousands of unique oddities and curios
@@ -105,9 +105,9 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="glass-effect hover-lift cursor-pointer">
+            <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
-                <Heart className="mx-auto mb-4 text-gothic-red" size={48} />
+                <Heart className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
                 <p className="text-foreground/70 mb-4">
                   {(favorites as any)?.length || 0} items saved for later
@@ -118,9 +118,9 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="glass-effect hover-lift cursor-pointer">
+            <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
-                <Star className="mx-auto mb-4 text-yellow-500" size={48} />
+                <Star className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Become a Seller</h3>
                 <p className="text-foreground/70 mb-4">
                   Share your oddities with collectors worldwide
