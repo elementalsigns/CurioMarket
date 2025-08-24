@@ -158,7 +158,7 @@ export default function SellerTerms() {
                 data-testid="checkbox-terms"
               />
               <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                I have read and agree to the Curio Market Terms of Service and Seller Agreement
+                I have read and agree to the Curiosities Market (also written as curio market) Terms of Service and Seller Agreement
               </label>
             </div>
             
