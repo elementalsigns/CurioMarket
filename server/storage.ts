@@ -203,15 +203,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Only use fields that exist in current database schema
+    const safeUserData = {
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profileImageUrl: userData.profileImageUrl,
+      updatedAt: new Date(),
+    };
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(safeUserData)
       .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
+        target: users.email, // Use email as conflict target since it's unique
+        set: safeUserData,
       })
       .returning();
     return user;
