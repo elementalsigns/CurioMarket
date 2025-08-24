@@ -225,8 +225,7 @@ export default function SellerOnboarding() {
                   <CardContent className="p-4">
                     <h4 className="font-serif font-bold mb-2">Important Compliance Information</h4>
                     <p className="text-sm text-foreground/80">
-                      By creating a seller account, you agree to comply with all local, state, and federal laws regarding the sale of oddities and specimens. 
-                      Prohibited items include endangered species (CITES protected), human remains (unless legally permitted), firearms, explosives, and hazardous materials.
+                      By creating a seller account, you agree to comply with all local, state, and federal laws regarding the sale of oddities and specimens. Prohibited items include endangered species (CITES protected), human remains (with the exception of hair and teeth), firearms, explosives, and hazardous materials.
                     </p>
                   </CardContent>
                 </Card>
