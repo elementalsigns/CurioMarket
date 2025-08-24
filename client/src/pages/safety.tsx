@@ -76,7 +76,6 @@ export default function Safety() {
                 <ul style={{listStyle: 'none', padding: 0, color: '#d4d4d8'}}>
                   <li style={{marginBottom: '0.5rem'}}>• Human bones, skulls, or any body parts (except teeth and hair)</li>
                   <li style={{marginBottom: '0.5rem'}}>• Body parts or preserved tissue (except teeth and hair)</li>
-                  <li style={{marginBottom: '0.5rem'}}>• Medical specimens (except properly documented teeth and hair)</li>
                   <li style={{marginBottom: '0.5rem'}}>• Items crafted from human materials (except teeth and hair)</li>
                 </ul>
                 <p style={{color: '#a1a1aa', fontSize: '0.875rem', marginTop: '0.5rem'}}>
