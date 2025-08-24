@@ -407,7 +407,7 @@ export class DatabaseStorage implements IStorage {
       // Update quantity
       const [updatedItem] = await db
         .update(cartItems)
-        .set({ quantity: existingItem.quantity + quantity })
+        .set({ quantity: (existingItem.quantity || 0) + quantity })
         .where(eq(cartItems.id, existingItem.id))
         .returning();
       return updatedItem;
@@ -454,7 +454,7 @@ export class DatabaseStorage implements IStorage {
     return newOrderItem;
   }
 
-  async clearCart(userId: string): Promise<void> {
+  async clearCartByUserId(userId: string): Promise<void> {
     const cart = await this.getOrCreateCart(userId);
     await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
   }

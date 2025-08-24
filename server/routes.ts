@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (subscription.status === 'active') {
           return res.json({ 
             subscriptionId: subscription.id,
-            clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
+            clientSecret: null,
             status: 'active'
           });
         }
@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: 'usd',
             recurring: { interval: 'month' },
             unit_amount: 1000, // $10.00
-            product_data: {
+            product: {
               name: 'Curio Market Seller Subscription',
               description: 'Monthly seller access to Curio Market platform'
             }
@@ -145,9 +145,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionId: subscription.id
       });
 
+      const latestInvoice = subscription.latest_invoice;
+      let clientSecret = null;
+      if (typeof latestInvoice === 'object' && latestInvoice?.payment_intent) {
+        const paymentIntent = latestInvoice.payment_intent;
+        if (typeof paymentIntent === 'object' && paymentIntent?.client_secret) {
+          clientSecret = paymentIntent.client_secret;
+        }
+      }
+      
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
+        clientSecret,
         status: subscription.status
       });
     } catch (error: any) {
@@ -184,8 +193,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user role to seller
       await storage.upsertUser({ 
         id: userId, 
-        role: 'seller',
-        email: user.email,
+        role: 'seller' as const,
+        email: user.email || '',
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl
@@ -1070,9 +1079,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const photoFile = await objectStorageService.getReviewPhotoFile(req.path);
       objectStorageService.downloadObject(photoFile, res);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error serving review photo:", error);
-      if (error.name === 'ObjectNotFoundError') {
+      if (error?.name === 'ObjectNotFoundError') {
         return res.sendStatus(404);
       }
       return res.sendStatus(500);
