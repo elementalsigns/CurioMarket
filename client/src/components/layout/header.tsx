@@ -147,7 +147,7 @@ export default function Header() {
             {isAuthenticated && (
               <Button 
                 variant="ghost" 
-                className="text-foreground hover:text-primary p-2"
+                className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
                 data-testid="button-favorites"
               >
                 <Heart size={20} />
@@ -158,7 +158,7 @@ export default function Header() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 p-2" data-testid="user-menu-trigger">
+                  <Button variant="ghost" className="flex items-center space-x-2 p-2 text-foreground hover:text-red-600 hover:bg-transparent transition-colors" data-testid="user-menu-trigger">
                     {(user as any)?.profileImageUrl ? (
                       <img 
                         src={(user as any).profileImageUrl} 
