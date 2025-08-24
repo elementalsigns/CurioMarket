@@ -150,7 +150,7 @@ export default function SellerOnboarding() {
           {/* Onboarding Form */}
           <Card className="glass-effect border border-gothic-purple/30" data-testid="onboarding-form">
             <CardHeader>
-              <CardTitle className="text-2xl font-serif">Set Up Your Shop</CardTitle>
+              <CardTitle className="text-2xl font-serif hover:text-gothic-red transition-colors cursor-default">Set Up Your Shop</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
