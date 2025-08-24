@@ -66,7 +66,7 @@ export default function SellerTerms() {
                         <li><strong>Illegal wildlife trade:</strong> No items obtained through poaching, illegal hunting, or trafficking</li>
                         <li><strong>Protected native species:</strong> No items from species protected by federal, state, or local laws</li>
                         <li><strong>Marine mammals:</strong> No whale bone, dolphin teeth, seal products, or similar marine mammal items</li>
-                        <li><strong>Birds of prey:</strong> No feathers, talons, or parts from eagles, hawks, owls, or other raptors without proper permits</li>
+                        <li><strong>Bird specimens:</strong> No birds, feathers, eggs, nests, or bird parts due to protections under the US Migratory Bird Treaty Act</li>
                       </ul>
                     </div>
                   </div>
