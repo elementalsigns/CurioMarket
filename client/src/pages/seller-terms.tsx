@@ -133,7 +133,7 @@ export default function SellerTerms() {
                   <h3 className="text-lg font-semibold mb-3">Platform Protection</h3>
                   <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
                     <p className="text-sm text-muted-foreground">
-                      By agreeing to these terms, you acknowledge that Curio Market operates as a platform connecting buyers and sellers. 
+                      By agreeing to these terms, you acknowledge that Curiosities Market (also written as curio market) operates as a platform connecting buyers and sellers. 
                       The platform does not take possession of items and is not responsible for verifying the legality of individual listings. 
                       All transactions are between buyers and sellers directly, and all legal responsibilities rest with the respective parties.
                     </p>
