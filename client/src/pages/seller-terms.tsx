@@ -85,7 +85,7 @@ export default function SellerTerms() {
                       <h4 className="font-medium text-amber-400 mb-2">Documentation & Permits:</h4>
                       <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                         <li>If required, you must possess all permits, licenses, and documentation for items you sell</li>
-                        <li>CITES permits required for any regulated species (even if legally obtained)</li>
+                        <li>CITES permits may be required for any regulated species (even if legally obtained)</li>
                         <li>State hunting/trapping licenses and tags where applicable</li>
                         <li>Import/export documentation for international specimens</li>
                         <li>Chain of custody documentation proving legal acquisition</li>
