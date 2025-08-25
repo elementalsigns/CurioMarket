@@ -55,9 +55,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=taxidermy">
+                <Link to="/browse?category=gothic-home-decor">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Taxidermy
+                    Gothic Decor
                   </Button>
                 </Link>
               </li>
