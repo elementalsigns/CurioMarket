@@ -55,6 +55,9 @@ export const verificationTypeEnum = pgEnum('verification_type', ['email', 'phone
 // Review status enum
 export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected']);
 
+// Event status enum
+export const eventStatusEnum = pgEnum('event_status', ['draft', 'published', 'cancelled']);
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -701,3 +704,64 @@ export const shareEvents = pgTable("share_events", {
 
 export type ShareEvent = typeof shareEvents.$inferSelect;
 export type InsertShareEvent = typeof shareEvents.$inferInsert;
+
+// Events table for oddities events
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  location: text("location").notNull(),
+  imageUrl: varchar("image_url"),
+  eventDate: timestamp("event_date").notNull(),
+  endDate: timestamp("end_date"),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  maxAttendees: integer("max_attendees"),
+  currentAttendees: integer("current_attendees").default(0),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  website: varchar("website"),
+  tags: text("tags").array(),
+  status: eventStatusEnum("status").default('draft').notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event attendees table
+export const eventAttendees = pgTable("event_attendees", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => events.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  attendeeEmail: varchar("attendee_email").notNull(),
+  attendeeName: varchar("attendee_name").notNull(),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+// Event relations
+export const eventsRelations = relations(events, ({ one, many }) => ({
+  user: one(users, {
+    fields: [events.userId],
+    references: [users.id],
+  }),
+  attendees: many(eventAttendees),
+}));
+
+export const eventAttendeesRelations = relations(eventAttendees, ({ one }) => ({
+  event: one(events, {
+    fields: [eventAttendees.eventId],
+    references: [events.id],
+  }),
+  user: one(users, {
+    fields: [eventAttendees.userId],
+    references: [users.id],
+  }),
+}));
+
+// Event schemas
+export const insertEventSchema = createInsertSchema(events);
+export const insertEventAttendeeSchema = createInsertSchema(eventAttendees);
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type EventAttendee = typeof eventAttendees.$inferSelect;
+export type InsertEventAttendee = z.infer<typeof insertEventAttendeeSchema>;

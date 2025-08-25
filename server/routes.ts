@@ -1849,6 +1849,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== EVENTS MANAGEMENT ===================
+
+  // Get all events (public endpoint)
+  app.get('/api/events', async (req, res) => {
+    try {
+      const { search, status, page = 1, limit = 100 } = req.query;
+      const events = await storage.getEvents({
+        search: search as string,
+        status: status as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ error: "Failed to fetch events" });
+    }
+  });
+
+  // Get single event (public endpoint)
+  app.get('/api/events/:id', async (req, res) => {
+    try {
+      const event = await storage.getEventById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ error: "Failed to fetch event" });
+    }
+  });
+
+  // Create new event (requires authentication)
+  app.post('/api/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventData = {
+        userId,
+        ...req.body,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const event = await storage.createEvent(eventData);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ error: "Failed to create event" });
+    }
+  });
+
+  // Update event (requires authentication and ownership)
+  app.put('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventId = req.params.id;
+      
+      // Check if user owns the event
+      const existingEvent = await storage.getEventById(eventId);
+      if (!existingEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      
+      if (existingEvent.userId !== userId) {
+        return res.status(403).json({ error: "You can only edit your own events" });
+      }
+      
+      const updatedData = {
+        ...req.body,
+        updatedAt: new Date()
+      };
+      
+      const event = await storage.updateEvent(eventId, updatedData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ error: "Failed to update event" });
+    }
+  });
+
+  // Delete event (requires authentication and ownership)
+  app.delete('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventId = req.params.id;
+      
+      // Check if user owns the event
+      const existingEvent = await storage.getEventById(eventId);
+      if (!existingEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      
+      if (existingEvent.userId !== userId) {
+        return res.status(403).json({ error: "You can only delete your own events" });
+      }
+      
+      await storage.deleteEvent(eventId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ error: "Failed to delete event" });
+    }
+  });
+
+  // Get user's events (requires authentication)
+  app.get('/api/user/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const events = await storage.getUserEvents(userId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching user events:", error);
+      res.status(500).json({ error: "Failed to fetch user events" });
+    }
+  });
+
+  // Register for event (requires authentication)
+  app.post('/api/events/:id/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventId = req.params.id;
+      const { attendeeEmail, attendeeName } = req.body;
+      
+      if (!attendeeEmail || !attendeeName) {
+        return res.status(400).json({ error: "Attendee email and name are required" });
+      }
+      
+      const registration = await storage.registerForEvent(eventId, userId, {
+        attendeeEmail,
+        attendeeName
+      });
+      
+      res.status(201).json(registration);
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      res.status(500).json({ error: "Failed to register for event" });
+    }
+  });
+
+  // Get event attendees (requires authentication and ownership)
+  app.get('/api/events/:id/attendees', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventId = req.params.id;
+      
+      // Check if user owns the event
+      const event = await storage.getEventById(eventId);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      
+      if (event.userId !== userId) {
+        return res.status(403).json({ error: "You can only view attendees for your own events" });
+      }
+      
+      const attendees = await storage.getEventAttendees(eventId);
+      res.json(attendees);
+    } catch (error) {
+      console.error("Error fetching event attendees:", error);
+      res.status(500).json({ error: "Failed to fetch event attendees" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

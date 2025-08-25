@@ -237,6 +237,17 @@ export default function Header() {
               </div>
             )}
 
+            {/* Events Link */}
+            <Link to="/events">
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-red-600 hover:bg-transparent transition-colors font-medium"
+                data-testid="button-events"
+              >
+                Events
+              </Button>
+            </Link>
+
             {/* Shopping Cart - Far Right */}
             <Button 
               variant="ghost" 
@@ -273,6 +284,12 @@ export default function Header() {
                 <Link to="/browse">
                   <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
                     Browse
+                  </Button>
+                </Link>
+                
+                <Link to="/events">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600">
+                    Events
                   </Button>
                 </Link>
 

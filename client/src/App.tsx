@@ -39,6 +39,7 @@ import InventoryManagement from "@/pages/inventory-management";
 import Reviews from "@/pages/reviews";
 import Verification from "@/pages/verification";
 import AdminDashboard from "@/pages/admin-dashboard";
+import Events from "@/pages/events";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -65,6 +66,7 @@ function Router() {
           <Route path="/terms" component={TermsOfServiceStandalone} />
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/cookies" component={CookiesPolicyStandalone} />
+          <Route path="/events" component={Events} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       ) : (
@@ -95,6 +97,7 @@ function Router() {
           <Route path="/verification" component={Verification} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/wishlists" component={Wishlists} />
+          <Route path="/events" component={Events} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       )}

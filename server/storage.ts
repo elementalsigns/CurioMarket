@@ -54,6 +54,12 @@ import {
   type Payout,
   type ShareEvent,
   type InsertShareEvent,
+  events,
+  eventAttendees,
+  type Event,
+  type InsertEvent,
+  type EventAttendee,
+  type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, ilike, or, sql, count, avg } from "drizzle-orm";
@@ -193,6 +199,16 @@ export interface IStorage {
   getAdminActivityLog(params: { page: number; limit: number }): Promise<any[]>;
   getPlatformSettings(): Promise<any>;
   updatePlatformSettings(settings: any, adminId: string): Promise<any>;
+  
+  // Events operations
+  getEvents(filters?: { search?: string; status?: string; page?: number; limit?: number }): Promise<Event[]>;
+  getEventById(id: string): Promise<Event | undefined>;
+  createEvent(event: Partial<InsertEvent>): Promise<Event>;
+  updateEvent(id: string, updates: Partial<InsertEvent>): Promise<Event>;
+  deleteEvent(id: string): Promise<void>;
+  getUserEvents(userId: string): Promise<Event[]>;
+  registerForEvent(eventId: string, userId: string, data: { attendeeEmail: string; attendeeName: string }): Promise<EventAttendee>;
+  getEventAttendees(eventId: string): Promise<EventAttendee[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1456,6 +1472,105 @@ export class DatabaseStorage implements IStorage {
   async updatePlatformSettings(settings: any, adminId: string): Promise<any> {
     // In a real implementation, update settings in database
     return settings;
+  }
+
+  // Events operations
+  async getEvents(filters?: { search?: string; status?: string; page?: number; limit?: number }): Promise<Event[]> {
+    let query = db.select().from(events);
+    
+    if (filters?.search) {
+      query = query.where(
+        or(
+          ilike(events.title, `%${filters.search}%`),
+          ilike(events.description, `%${filters.search}%`),
+          ilike(events.location, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    if (filters?.status) {
+      query = query.where(eq(events.status, filters.status as any));
+    }
+    
+    query = query.orderBy(asc(events.eventDate));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.page && filters?.limit) {
+      const offset = (filters.page - 1) * filters.limit;
+      query = query.offset(offset);
+    }
+    
+    return await query;
+  }
+
+  async getEventById(id: string): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async createEvent(eventData: Partial<InsertEvent>): Promise<Event> {
+    const [event] = await db
+      .insert(events)
+      .values({
+        ...eventData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as InsertEvent)
+      .returning();
+    return event;
+  }
+
+  async updateEvent(id: string, updates: Partial<InsertEvent>): Promise<Event> {
+    const [event] = await db
+      .update(events)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(events.id, id))
+      .returning();
+    return event;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  async getUserEvents(userId: string): Promise<Event[]> {
+    return await db
+      .select()
+      .from(events)
+      .where(eq(events.userId, userId))
+      .orderBy(desc(events.createdAt));
+  }
+
+  async registerForEvent(
+    eventId: string, 
+    userId: string, 
+    data: { attendeeEmail: string; attendeeName: string }
+  ): Promise<EventAttendee> {
+    const [registration] = await db
+      .insert(eventAttendees)
+      .values({
+        eventId,
+        userId,
+        attendeeEmail: data.attendeeEmail,
+        attendeeName: data.attendeeName,
+        registeredAt: new Date(),
+      } as InsertEventAttendee)
+      .returning();
+    return registration;
+  }
+
+  async getEventAttendees(eventId: string): Promise<EventAttendee[]> {
+    return await db
+      .select()
+      .from(eventAttendees)
+      .where(eq(eventAttendees.eventId, eventId))
+      .orderBy(asc(eventAttendees.registeredAt));
   }
 
   async getAllListingsForAdmin(params: { page: number; limit: number; search: string; status: string }): Promise<any[]> {
