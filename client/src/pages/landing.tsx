@@ -76,7 +76,8 @@ export default function Landing() {
                   { name: 'Vintage Medical', slug: 'vintage-medical' },
                   { name: 'Oddities', slug: 'oddities-curiosities' },
                   { name: 'Specimens', slug: 'antique-specimens' },
-                  { name: 'Gothic Decor', slug: 'gothic-home-decor' }
+                  { name: 'Gothic Decor', slug: 'gothic-home-decor' },
+                  { name: 'Murderabilia', slug: 'murderabilia' }
                 ].map((tag) => (
                   <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
                     <Button 
@@ -131,7 +132,8 @@ export default function Landing() {
                 { name: 'Antique Specimens', slug: 'antique-specimens' },
                 { name: 'Victorian Era', slug: 'victorian-era' },
                 { name: 'Macabre Art', slug: 'macabre-art' },
-                { name: 'Scientific Instruments', slug: 'scientific-instruments' }
+                { name: 'Scientific Instruments', slug: 'scientific-instruments' },
+                { name: 'Murderabilia', slug: 'murderabilia' }
               ].map((category) => (
                 <Link key={category.slug} to={`/browse?category=${category.slug}`}>
                   <Button 

@@ -101,6 +101,11 @@ export default function Header() {
                       Victorian Era
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/browse?category=murderabilia" className="flex items-center">
+                      Murderabilia
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/browse" className="flex items-center font-medium">
