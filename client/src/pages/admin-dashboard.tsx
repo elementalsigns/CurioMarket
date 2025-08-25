@@ -56,31 +56,31 @@ export default function AdminDashboard() {
   }) as { data: AdminStats | undefined };
 
   // Fetch verification queue
-  const { data: verificationQueue } = useQuery({
+  const { data: verificationQueue = [] } = useQuery({
     queryKey: ['/api/admin/verification/queue'],
     retry: false,
   });
 
   // Fetch flagged content
-  const { data: flaggedContent } = useQuery({
+  const { data: flaggedContent = [] } = useQuery({
     queryKey: ['/api/admin/flags'],
     retry: false,
   });
 
   // Fetch disputed orders
-  const { data: disputedOrders } = useQuery({
+  const { data: disputedOrders = [] } = useQuery({
     queryKey: ['/api/admin/disputes'],
     retry: false,
   });
 
   // Fetch users for management
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery({
     queryKey: ['/api/admin/users'],
     retry: false,
   });
 
   // Fetch shops/sellers
-  const { data: shops } = useQuery({
+  const { data: shops = [] } = useQuery({
     queryKey: ['/api/admin/shops'],
     retry: false,
   });
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {verificationQueue?.map((item: any) => (
+                  {Array.isArray(verificationQueue) && verificationQueue.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-4 bg-zinc-800 rounded-lg">
                       <div className="space-y-1">
                         <p className="font-medium">{item.businessName}</p>
@@ -308,7 +308,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
-                  {!verificationQueue?.length && (
+                  {(!Array.isArray(verificationQueue) || verificationQueue.length === 0) && (
                     <div className="text-center py-8 text-zinc-400">
                       No pending verifications
                     </div>
