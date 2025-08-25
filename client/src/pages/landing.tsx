@@ -76,7 +76,7 @@ export default function Landing() {
                   { name: 'Vintage Medical', slug: 'vintage-medical' },
                   { name: 'Oddities', slug: 'oddities-curiosities' },
                   { name: 'Specimens', slug: 'antique-specimens' },
-                  { name: 'Gothic Art', slug: 'macabre-art' }
+                  { name: 'Gothic Decor', slug: 'gothic-home-decor' }
                 ].map((tag) => (
                   <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
                     <Button 
