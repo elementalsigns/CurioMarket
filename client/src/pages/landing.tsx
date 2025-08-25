@@ -126,7 +126,7 @@ export default function Landing() {
               {[
                 { name: 'Taxidermy & Bones', slug: 'taxidermy-bones' }, 
                 { name: 'Vintage Medical', slug: 'vintage-medical' }, 
-                { name: 'Gothic Home Decor', slug: 'gothic-home-decor' }, 
+                { name: 'Gothic Decor', slug: 'gothic-home-decor' }, 
                 { name: 'Oddities & Curiosities', slug: 'oddities-curiosities' },
                 { name: 'Antique Specimens', slug: 'antique-specimens' },
                 { name: 'Victorian Era', slug: 'victorian-era' },

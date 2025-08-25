@@ -83,7 +83,7 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/browse?category=gothic-decor" className="flex items-center">
-                      Gothic Home Decor
+                      Gothic Decor
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
