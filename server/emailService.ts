@@ -34,7 +34,7 @@ interface OrderEmailData {
 }
 
 export class EmailService {
-  private readonly fromEmail = 'orders@curiomarket.co';
+  private readonly fromEmail = 'Info@curiosities.market';
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
