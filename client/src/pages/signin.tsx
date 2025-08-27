@@ -100,7 +100,7 @@ export default function SignInPage() {
                 </span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
-                Access your account to explore our macabre marketplace
+                Access your account to explore our marketplace
               </CardDescription>
             </div>
           </CardHeader>
