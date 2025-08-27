@@ -223,30 +223,30 @@ function ProhibitedItemsStandalone() {
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Medical & Scientific Items</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li><strong>Vintage Medical Equipment:</strong> Must be clearly non-functional and for display only</li>
-                        <li><strong>Scientific Specimens:</strong> Require proper preservation and identification</li>
-                        <li><strong>Laboratory Equipment:</strong> Must be cleaned and safe for handling</li>
-                        <li><strong>Anatomical Models:</strong> Vintage and antique models only (no modern reproductions)</li>
+                        <li><strong>Vintage Medical Equipment:</strong> May need to be clearly marked as non-functional and for display only</li>
+                        <li><strong>Scientific Specimens:</strong> May require proper preservation and identification</li>
+                        <li><strong>Laboratory Equipment:</strong> May need to be cleaned and safe for handling</li>
+                        <li><strong>Anatomical Models:</strong> Vintage and antique models preferred (modern reproductions may be restricted)</li>
                       </ul>
                     </div>
 
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Occult & Esoteric Items</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li><strong>Ritual Objects:</strong> Vintage and antique items only</li>
+                        <li><strong>Ritual Objects:</strong> Vintage and antique items preferred</li>
                         <li><strong>Divination Tools:</strong> Historical significance preferred</li>
-                        <li><strong>Grimoires & Texts:</strong> Genuine antique or reproduction clearly marked</li>
-                        <li><strong>Amulets & Talismans:</strong> Must be presented as historical/collectible items</li>
+                        <li><strong>Grimoires & Texts:</strong> Genuine antique or reproduction may need clear marking</li>
+                        <li><strong>Amulets & Talismans:</strong> May need to be presented as historical/collectible items</li>
                       </ul>
                     </div>
 
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Religious & Cultural Items</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li>Items must not be stolen from religious institutions</li>
-                        <li>Cultural artifacts require provenance documentation</li>
-                        <li>Native American items subject to additional federal regulations</li>
-                        <li>Sellers must respect cultural sensitivities in descriptions</li>
+                        <li>Items should not be stolen from religious institutions</li>
+                        <li>Cultural artifacts may require provenance documentation</li>
+                        <li>Native American items may be subject to additional federal regulations</li>
+                        <li>Sellers should respect cultural sensitivities in descriptions</li>
                       </ul>
                     </div>
                   </CardContent>
