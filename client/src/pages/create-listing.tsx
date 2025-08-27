@@ -372,7 +372,43 @@ export default function CreateListing() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="sku">SKU (Stock Keeping Unit)</Label>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="sku">SKU (Stock Keeping Unit)</Label>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="p-1 h-auto text-muted-foreground hover:text-foreground"
+                                data-testid="button-sku-info"
+                              >
+                                <Info className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-900 border-zinc-700">
+                              <DialogHeader>
+                                <DialogTitle>SKU Benefits for Google Shopping</DialogTitle>
+                                <DialogDescription>
+                                  <div className="space-y-3 text-sm">
+                                    <p>
+                                      <strong className="text-red-400">Required for Google Shopping:</strong> SKUs are mandatory for Google Shopping campaigns and help you track inventory across platforms.
+                                    </p>
+                                    <p>
+                                      <strong className="text-red-400">Better Ad Performance:</strong> Products with SKUs get higher priority in Google's algorithm and better approval rates.
+                                    </p>
+                                    <p>
+                                      <strong className="text-red-400">Analytics & Tracking:</strong> SKUs enable detailed performance tracking and inventory management across multiple sales channels.
+                                    </p>
+                                    <p className="text-zinc-400">
+                                      Create a unique identifier like: VIC-OCT-001 (Victorian-Octopus-001)
+                                    </p>
+                                  </div>
+                                </DialogDescription>
+                              </DialogHeader>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         <Input
                           id="sku"
                           {...register("sku")}
@@ -381,12 +417,48 @@ export default function CreateListing() {
                           data-testid="input-sku"
                         />
                         <p className="text-xs text-foreground/60 mt-1">
-                          Your unique identifier for this item
+                          Your unique identifier for this item • <span className="text-red-400">Boosts Google Shopping visibility</span>
                         </p>
                       </div>
 
                       <div>
-                        <Label htmlFor="mpn">MPN (Manufacturer Part Number)</Label>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="mpn">MPN (Manufacturer Part Number)</Label>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="p-1 h-auto text-muted-foreground hover:text-foreground"
+                                data-testid="button-mpn-info"
+                              >
+                                <Info className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-900 border-zinc-700">
+                              <DialogHeader>
+                                <DialogTitle>MPN Benefits for Advertising</DialogTitle>
+                                <DialogDescription>
+                                  <div className="space-y-3 text-sm">
+                                    <p>
+                                      <strong className="text-red-400">Higher Approval Rates:</strong> Products with MPNs have significantly higher approval rates on Google Shopping and Facebook Catalog.
+                                    </p>
+                                    <p>
+                                      <strong className="text-red-400">Better Product Matching:</strong> Advertising platforms use MPNs to match your products with existing catalogs, improving visibility.
+                                    </p>
+                                    <p>
+                                      <strong className="text-red-400">Enhanced Trust:</strong> MPNs signal authenticity and help buyers find exactly what they're looking for.
+                                    </p>
+                                    <p className="text-zinc-400">
+                                      Use original maker codes if available, or create your own: SPEC-8ARM-1885 (Specimen-8Arms-1885)
+                                    </p>
+                                  </div>
+                                </DialogDescription>
+                              </DialogHeader>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                         <Input
                           id="mpn"
                           {...register("mpn")}
@@ -395,7 +467,7 @@ export default function CreateListing() {
                           data-testid="input-mpn"
                         />
                         <p className="text-xs text-foreground/60 mt-1">
-                          Original maker's identifier, if applicable
+                          Original maker's identifier, if applicable • <span className="text-red-400">Improves ad approval rates</span>
                         </p>
                       </div>
                     </div>

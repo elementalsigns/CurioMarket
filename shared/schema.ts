@@ -147,6 +147,7 @@ export const listings = pgTable("listings", {
   stockQuantity: integer("stock_quantity").default(1), // Current inventory
   lowStockThreshold: integer("low_stock_threshold").default(1), // Auto alert threshold
   sku: varchar("sku"),
+  mpn: varchar("mpn"),
   provenance: text("provenance"),
   speciesOrMaterial: varchar("species_or_material"),
   condition: conditionEnum("condition"),

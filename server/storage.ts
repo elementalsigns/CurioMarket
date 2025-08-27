@@ -209,6 +209,10 @@ export interface IStorage {
   getUserEvents(userId: string): Promise<Event[]>;
   registerForEvent(eventId: string, userId: string, data: { attendeeEmail: string; attendeeName: string }): Promise<EventAttendee>;
   getEventAttendees(eventId: string): Promise<EventAttendee[]>;
+
+  // Export operations
+  getListingsForExport(): Promise<any[]>;
+  getExportStats(): Promise<{ withSku: number; withMpn: number; complete: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1233,27 +1237,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async createReview(data: any): Promise<any> {
-    // Normalize photo URLs if they were uploaded
-    const normalizedPhotos = data.photos?.map((photo: string) => {
-      if (photo.startsWith("https://storage.googleapis.com/")) {
-        const ObjectStorageService = require('./objectStorage').ObjectStorageService;
-        const service = new ObjectStorageService();
-        return service.normalizeReviewPhotoPath(photo);
-      }
-      return photo;
-    }) || [];
 
-    const review = {
-      id: crypto.randomUUID(),
-      ...data,
-      photos: normalizedPhotos,
-      verified: true,
-      helpful: 0,
-      createdAt: new Date().toISOString(),
-    };
-    return review;
-  }
 
   async respondToReview(reviewId: string, userId: string, response: string): Promise<any> {
     return {
@@ -1624,6 +1608,52 @@ export class DatabaseStorage implements IStorage {
       .offset(offset);
 
     return results;
+  }
+
+  // Export operations
+  async getListingsForExport(): Promise<any[]> {
+    const results = await db
+      .select({
+        id: listings.id,
+        title: listings.title,
+        slug: listings.slug,
+        description: listings.description,
+        price: listings.price,
+        sku: listings.sku,
+        mpn: listings.mpn,
+        condition: listings.condition,
+        categoryName: categories.name,
+        sellerShopName: sellers.shopName,
+        images: sql<string[]>`COALESCE(
+          (SELECT ARRAY_AGG(${listingImages.url}) FROM ${listingImages} WHERE ${listingImages.listingId} = ${listings.id}),
+          ARRAY[]::text[]
+        )`
+      })
+      .from(listings)
+      .leftJoin(sellers, eq(listings.sellerId, sellers.id))
+      .leftJoin(categories, eq(listings.categoryId, categories.id))
+      .where(eq(listings.state, 'published'))
+      .orderBy(desc(listings.createdAt));
+
+    return results;
+  }
+
+  async getExportStats(): Promise<{ withSku: number; withMpn: number; complete: number }> {
+    const [stats] = await db
+      .select({
+        total: count(),
+        withSku: sql<number>`COUNT(CASE WHEN ${listings.sku} IS NOT NULL AND ${listings.sku} != '' THEN 1 END)`,
+        withMpn: sql<number>`COUNT(CASE WHEN ${listings.mpn} IS NOT NULL AND ${listings.mpn} != '' THEN 1 END)`,
+        complete: sql<number>`COUNT(CASE WHEN (${listings.sku} IS NOT NULL AND ${listings.sku} != '') AND (${listings.mpn} IS NOT NULL AND ${listings.mpn} != '') THEN 1 END)`
+      })
+      .from(listings)
+      .where(eq(listings.state, 'published'));
+
+    return {
+      withSku: Number(stats.withSku || 0),
+      withMpn: Number(stats.withMpn || 0),
+      complete: Number(stats.complete || 0)
+    };
   }
 }
 

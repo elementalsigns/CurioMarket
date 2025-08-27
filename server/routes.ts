@@ -28,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const uploadURL = await objectStorageService.getReviewPhotoUploadURL();
       res.json({ uploadURL });
     } catch (error) {
       console.error("Error getting upload URL:", error);
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: 'usd',
             recurring: { interval: 'month' },
             unit_amount: 1000, // $10.00
-            product: {
+            product_data: {
               name: 'Curio Market Seller Subscription',
               description: 'Monthly seller access to Curio Market platform'
             }
@@ -158,13 +158,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionId: subscription.id
       });
 
-      const latestInvoice = subscription.latest_invoice;
+      const latestInvoice = subscription.latest_invoice as any;
       let clientSecret = null;
-      if (typeof latestInvoice === 'object' && latestInvoice?.payment_intent) {
-        const paymentIntent = latestInvoice.payment_intent;
-        if (typeof paymentIntent === 'object' && paymentIntent?.client_secret) {
-          clientSecret = paymentIntent.client_secret;
-        }
+      if (latestInvoice?.payment_intent?.client_secret) {
+        clientSecret = latestInvoice.payment_intent.client_secret;
       }
       
       res.json({
@@ -1846,6 +1843,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating platform settings:", error);
       res.status(500).json({ error: "Failed to update platform settings" });
+    }
+  });
+
+  // Export product data for advertising platforms
+  app.get('/api/admin/export/products', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { format = 'csv' } = req.query;
+      const listings = await storage.getListingsForExport();
+      
+      if (format === 'csv') {
+        let csvContent = "title,price,sku,mpn,category,condition,url,image_url,description\n";
+        
+        listings.forEach((listing: any) => {
+          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+          const imageUrl = listing.images?.[0] || '';
+          const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
+          const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
+          
+          csvContent += `${escapedTitle},${listing.price || 0},${listing.sku || ''},${listing.mpn || ''},${listing.categoryName || ''},${listing.condition || 'used'},${url},${imageUrl},${escapedDescription}\n`;
+        });
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="curio-market-products-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+      } else if (format === 'facebook') {
+        let fbContent = "id,title,description,availability,condition,price,link,image_link,brand,mpn,sku,product_type\n";
+        
+        listings.forEach((listing: any) => {
+          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+          const imageUrl = listing.images?.[0] || '';
+          const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
+          const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
+          
+          fbContent += `${listing.id},${escapedTitle},${escapedDescription},in stock,${listing.condition || 'used'},${listing.price || 0} USD,${url},${imageUrl},"Curio Market",${listing.mpn || ''},${listing.sku || ''},${listing.categoryName || 'Collectibles'}\n`;
+        });
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="curio-market-facebook-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(fbContent);
+      } else {
+        res.json(listings);
+      }
+    } catch (error) {
+      console.error("Error exporting product data:", error);
+      res.status(500).json({ error: "Failed to export product data" });
+    }
+  });
+
+  // Get export statistics
+  app.get('/api/admin/export/stats', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getExportStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching export stats:", error);
+      res.status(500).json({ error: "Failed to fetch export statistics" });
     }
   });
 

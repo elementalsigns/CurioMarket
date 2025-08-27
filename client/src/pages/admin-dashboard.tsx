@@ -28,7 +28,9 @@ import {
   FileText,
   Settings,
   Package,
-  X
+  X,
+  Download,
+  AlertCircle
 } from "lucide-react";
 
 interface AdminStats {
@@ -88,6 +90,12 @@ export default function AdminDashboard() {
   // Fetch all listings for admin
   const { data: allListings = [] } = useQuery({
     queryKey: ['/api/admin/listings'],
+    retry: false,
+  });
+
+  // Fetch export statistics
+  const { data: exportStats } = useQuery({
+    queryKey: ['/api/admin/export/stats'],
     retry: false,
   });
 
@@ -228,7 +236,7 @@ export default function AdminDashboard() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="verification" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-zinc-900">
+          <TabsList className="grid w-full grid-cols-8 bg-zinc-900">
             <TabsTrigger value="verification" data-testid="tab-verification">Verifications</TabsTrigger>
             <TabsTrigger value="disputes" data-testid="tab-disputes">Disputes</TabsTrigger>
             <TabsTrigger value="moderation" data-testid="tab-moderation">Moderation</TabsTrigger>
@@ -236,6 +244,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
             <TabsTrigger value="shops" data-testid="tab-shops">Shops</TabsTrigger>
             <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="export" data-testid="tab-export">Data Export</TabsTrigger>
           </TabsList>
 
           {/* Verification Management */}
@@ -862,6 +871,138 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Data Export */}
+          <TabsContent value="export">
+            <Card className="bg-zinc-900 border-zinc-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Download className="w-5 h-5" />
+                  Data Export for Advertising
+                </CardTitle>
+                <CardDescription>
+                  Export product data for Google Shopping, Facebook Catalog, and other advertising platforms
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-zinc-800 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Product Feed Export</h3>
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Export all active listings with SKU and MPN data for advertising platforms
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/export/products?format=csv');
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `curio-market-products-${new Date().toISOString().split('T')[0]}.csv`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                        } else {
+                          toast({
+                            title: "Export Failed",
+                            description: "Failed to export product data",
+                            variant: "destructive"
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Export error:', error);
+                        toast({
+                          title: "Export Failed",
+                          description: "An error occurred during export",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
+                    className="bg-red-700 hover:bg-red-600"
+                    data-testid="button-export-csv"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV for Google Shopping
+                  </Button>
+                </div>
+
+                <div className="bg-zinc-800 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Facebook Catalog Format</h3>
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Export in Facebook catalog format with custom fields for gothic collectibles
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/export/products?format=facebook');
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `curio-market-facebook-${new Date().toISOString().split('T')[0]}.csv`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                        } else {
+                          toast({
+                            title: "Export Failed",
+                            description: "Failed to export Facebook catalog",
+                            variant: "destructive"
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Facebook export error:', error);
+                        toast({
+                          title: "Export Failed",
+                          description: "An error occurred during Facebook export",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                    data-testid="button-export-facebook"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Facebook Catalog
+                  </Button>
+                </div>
+
+                <div className="bg-zinc-800 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Export Statistics</h3>
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-500">{exportStats?.withSku || 0}</div>
+                      <div className="text-xs text-zinc-400">With SKU</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-blue-500">{exportStats?.withMpn || 0}</div>
+                      <div className="text-xs text-zinc-400">With MPN</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-500">{exportStats?.complete || 0}</div>
+                      <div className="text-xs text-zinc-400">Complete Data</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-900/20 border border-yellow-600/30 p-4 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-yellow-500">Advertising Platform Requirements</h4>
+                      <ul className="text-sm text-zinc-300 mt-2 space-y-1">
+                        <li>• SKU is required for Google Shopping campaigns</li>
+                        <li>• MPN helps with product matching and approval rates</li>
+                        <li>• Complete product data improves ad performance</li>
+                        <li>• Regular exports ensure data freshness</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
