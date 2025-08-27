@@ -61,43 +61,43 @@ export default function AdminDashboard() {
   const { data: verificationQueue = [] } = useQuery({
     queryKey: ['/api/admin/verification/queue'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch flagged content
   const { data: flaggedContent = [] } = useQuery({
     queryKey: ['/api/admin/flags'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch disputed orders
   const { data: disputedOrders = [] } = useQuery({
     queryKey: ['/api/admin/disputes'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch users for management
   const { data: users = [] } = useQuery({
     queryKey: ['/api/admin/users'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch shops/sellers
   const { data: shops = [] } = useQuery({
     queryKey: ['/api/admin/shops'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch all listings for admin
   const { data: allListings = [] } = useQuery({
     queryKey: ['/api/admin/listings'],
     retry: false,
-  });
+  }) as { data: any[] };
 
   // Fetch export statistics
   const { data: exportStats } = useQuery({
     queryKey: ['/api/admin/export/stats'],
     retry: false,
-  });
+  }) as { data: any };
 
   // Admin actions mutations
   const banUserMutation = useMutation({

@@ -143,10 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: 'usd',
             recurring: { interval: 'month' },
             unit_amount: 1000, // $10.00
-            product_data: {
-              name: 'Curio Market Seller Subscription',
-              description: 'Monthly seller access to Curio Market platform'
-            }
+            product: 'prod_subscription_id' // Use your actual product ID from Stripe
           }
         }],
         payment_behavior: 'default_incomplete',
@@ -1961,6 +1958,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch export statistics" });
     }
   });
+
+  // Demo route for testing admin export functionality (development only)
+  if (process.env.NODE_ENV === 'development') {
+    app.get('/api/demo/admin/export/stats', async (req: any, res) => {
+      try {
+        const stats = await storage.getExportStats();
+        res.json(stats);
+      } catch (error) {
+        console.error("Error fetching export stats:", error);
+        res.status(500).json({ error: "Failed to fetch export statistics" });
+      }
+    });
+
+    app.get('/api/demo/admin/export/products', async (req, res) => {
+      try {
+        const { format } = req.query;
+        const listings = await storage.getAllListingsForAdmin({
+          page: 1,
+          limit: 1000,
+          search: '',
+          status: 'all'
+        });
+
+        if (format === 'google-shopping') {
+          // Google Shopping CSV format
+          let csvContent = 'title,price,sku,mpn,category,condition,link,image_link,description\n';
+          
+          listings.forEach((listing: any) => {
+            const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+            const imageUrl = listing.images?.[0] || '';
+            const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
+            const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
+            
+            csvContent += `${escapedTitle},${listing.price || 0},${listing.sku || ''},${listing.mpn || ''},${listing.categoryName || ''},${listing.condition || 'used'},${url},${imageUrl},${escapedDescription}\n`;
+          });
+          
+          res.setHeader('Content-Type', 'text/csv');
+          res.setHeader('Content-Disposition', `attachment; filename="curio-market-products-${new Date().toISOString().split('T')[0]}.csv"`);
+          res.send(csvContent);
+        } else if (format === 'excel') {
+          // Excel format
+          const workbook = XLSX.utils.book_new();
+          const excelData = listings.map((listing: any) => ({
+            'Product ID': listing.id,
+            'Title': listing.title || '',
+            'Description': listing.description || '',
+            'Price ($)': parseFloat(listing.price) || 0,
+            'Category': listing.categoryName || '',
+            'SKU': listing.sku || '',
+            'MPN': listing.mpn || '',
+            'Quantity': listing.quantity || 0,
+            'Condition': listing.condition || 'used',
+            'Status': listing.state || 'draft',
+            'Images': listing.images?.[0] || '',
+            'Created Date': new Date(listing.createdAt).toLocaleDateString()
+          }));
+          
+          const worksheet = XLSX.utils.json_to_sheet(excelData);
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+          const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+          
+          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          res.setHeader('Content-Disposition', `attachment; filename="curio-market-demo-${new Date().toISOString().split('T')[0]}.xlsx"`);
+          res.send(excelBuffer);
+        } else {
+          res.json(listings);
+        }
+      } catch (error) {
+        console.error("Error in demo export:", error);
+        res.status(500).json({ error: "Failed to export data" });
+      }
+    });
+  }
 
   // =================== EVENTS MANAGEMENT ===================
 
