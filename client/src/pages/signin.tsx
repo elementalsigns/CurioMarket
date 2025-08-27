@@ -89,8 +89,15 @@ export default function SignInPage() {
             </div>
             
             <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold text-zinc-100">
-                Welcome to <span style={{ color: 'hsl(351, 67%, 36%)' }}>Curiosities Market</span>
+              <CardTitle className="text-2xl font-bold text-white">
+                Welcome to <span 
+                  className="transition-colors duration-200 cursor-default"
+                  style={{ color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
+                >
+                  Curiosities Market
+                </span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
                 Access your account to explore our gothic marketplace
