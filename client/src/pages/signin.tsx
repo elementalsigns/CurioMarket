@@ -92,9 +92,9 @@ export default function SignInPage() {
                   backgroundColor: 'transparent'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                  e.currentTarget.style.color = 'black';
-                  e.currentTarget.style.borderColor = 'white';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'hsl(351, 67%, 36%)';
+                  e.currentTarget.style.borderColor = 'hsl(351, 67%, 36%)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
