@@ -61,12 +61,23 @@ export default function SignInPage() {
             <div className="space-y-3">
               <Button 
                 onClick={handleSignIn}
-                className="w-full h-12 text-white font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl"
+                variant="outline"
+                className="w-full h-12 font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl border-2"
                 style={{ 
-                  backgroundColor: 'hsl(351, 67%, 36%)'
+                  borderColor: 'white',
+                  color: 'white',
+                  backgroundColor: 'transparent'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 32%)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 36%)'}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'hsl(351, 67%, 36%)';
+                  e.currentTarget.style.borderColor = 'hsl(351, 67%, 36%)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.borderColor = 'white';
+                }}
                 data-testid="button-signin-main"
               >
                 <Shield className="w-5 h-5 mr-2" />
