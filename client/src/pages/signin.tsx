@@ -90,14 +90,15 @@ export default function SignInPage() {
             
             <div className="space-y-2">
               <CardTitle className="text-2xl font-bold text-white">
-                Welcome to <span 
+                <span 
                   className="transition-colors duration-200 cursor-default"
                   style={{ color: 'white' }}
                   onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
                   onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
                 >
-                  Curiosities Market
+                  Welcome to Curio
                 </span>
+                <span className="text-white">sities Market</span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
                 Access your account to explore our marketplace
