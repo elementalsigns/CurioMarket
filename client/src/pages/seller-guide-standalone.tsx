@@ -292,7 +292,7 @@ function SellerGuideStandalone() {
                     <li>• ~13% per sale</li>
                     <li>• Store subscription costs</li>
                     <li>• High competition</li>
-                    <li className="negative">• Oddities strictly prohibited</li>
+                    <li className="negative">• Many items restricted</li>
                   </ul>
                 </div>
 
@@ -304,7 +304,7 @@ function SellerGuideStandalone() {
                     <li>• 10% selling fee</li>
                     <li>• Withdrawal fees</li>
                     <li>• Protection fees</li>
-                    <li className="negative">• Oddities likely prohibited</li>
+                    <li className="negative">• Many items restricted</li>
                   </ul>
                 </div>
 
