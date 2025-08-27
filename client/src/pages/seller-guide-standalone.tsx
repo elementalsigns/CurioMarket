@@ -325,9 +325,7 @@ function SellerGuideStandalone() {
                       <li className="positive">✓ Direct seller support</li>
                     </ul>
                   </div>
-                  <div className="comparison-highlight">
-                    <strong>Keep $94.50</strong> on every $100 sale vs. $87 on other platforms
-                  </div>
+
                 </div>
               </div>
             </div>
