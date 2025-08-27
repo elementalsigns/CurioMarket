@@ -315,7 +315,7 @@ export default function Header() {
                   className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
                   data-testid="button-sign-up"
                 >
-                  <Link to="/signup">Sign up</Link>
+                  <Link to="/signup">Create</Link>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -323,7 +323,7 @@ export default function Header() {
                   className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
                   data-testid="button-sign-in"
                 >
-                  <Link to="/signin">Sign in</Link>
+                  <Link to="/signin">Sign In</Link>
                 </Button>
               </div>
             )}
@@ -369,7 +369,7 @@ export default function Header() {
                     className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm min-h-[44px]"
                     data-testid="button-sign-up-mobile"
                   >
-                    <Link to="/signup">Sign up</Link>
+                    <Link to="/signup">Create</Link>
                   </Button>
                   <Button 
                     variant="outline" 
@@ -377,7 +377,7 @@ export default function Header() {
                     className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm min-h-[44px]"
                     data-testid="button-sign-in-mobile"
                   >
-                    <Link to="/signin">Sign in</Link>
+                    <Link to="/signin">Sign In</Link>
                   </Button>
                 </div>
               )}
