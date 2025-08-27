@@ -18,39 +18,70 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         <Card className="bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-sm">
           <CardHeader className="text-center space-y-6 pb-8">
-            {/* Custom Gothic Sigil */}
+            {/* Gothic C&M Monogram */}
             <div className="flex justify-center">
               <svg 
-                width="80" 
-                height="80" 
-                viewBox="0 0 100 100" 
+                width="90" 
+                height="90" 
+                viewBox="0 0 120 120" 
                 className="drop-shadow-lg"
                 style={{ filter: 'drop-shadow(0 0 8px hsl(351, 67%, 36%))' }}
               >
-                {/* Gothic C */}
+                {/* Top ornamental flourish */}
                 <path
-                  d="M35 20 Q20 20 20 35 L20 65 Q20 80 35 80 L45 80 Q50 80 50 75 Q50 70 45 70 L35 70 Q30 70 30 65 L30 35 Q30 30 35 30 L45 30 Q50 30 50 25 Q50 20 45 20 Z"
-                  fill="none"
-                  stroke="hsl(351, 67%, 36%)"
-                  strokeWidth="3"
-                  className="gothic-letter"
-                />
-                {/* Gothic M overlapping */}
-                <path
-                  d="M45 25 L45 75 M45 25 Q50 30 55 25 Q60 30 65 25 L65 75 M55 45 L55 60"
-                  fill="none"
-                  stroke="hsl(351, 67%, 36%)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="gothic-letter"
-                />
-                {/* Decorative gothic flourishes */}
-                <path
-                  d="M15 15 Q25 10 35 15 M65 15 Q75 10 85 15 M15 85 Q25 90 35 85 M65 85 Q75 90 85 85"
+                  d="M40 15 Q50 10 60 15 Q70 10 80 15 M45 12 Q50 8 55 12 Q60 8 65 12"
                   fill="none"
                   stroke="hsl(351, 67%, 36%)"
                   strokeWidth="1.5"
+                  strokeLinecap="round"
+                  opacity="0.8"
+                />
+                
+                {/* Sharp Gothic C */}
+                <path
+                  d="M48 35 Q30 35 30 50 Q30 65 48 65 L50 65 M50 40 L45 40 Q35 40 35 50 Q35 60 45 60 L50 60"
+                  fill="none"
+                  stroke="hsl(351, 67%, 36%)"
+                  strokeWidth="4"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                />
+                
+                {/* Sharp Gothic M */}
+                <path
+                  d="M60 35 L60 65 M60 35 L70 50 L80 35 L80 65 M70 45 L70 58"
+                  fill="none"
+                  stroke="hsl(351, 67%, 36%)"
+                  strokeWidth="4"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                />
+                
+                {/* Letter serifs and sharp details */}
+                <path
+                  d="M27 35 L33 35 M27 65 L33 65 M57 35 L63 35 M57 65 L63 65 M77 35 L83 35 M77 65 L83 65"
+                  fill="none"
+                  stroke="hsl(351, 67%, 36%)"
+                  strokeWidth="3"
+                  strokeLinecap="square"
+                />
+                
+                {/* Bottom ornamental flourish */}
+                <path
+                  d="M40 85 Q50 90 60 85 Q70 90 80 85 M45 88 Q50 92 55 88 Q60 92 65 88"
+                  fill="none"
+                  stroke="hsl(351, 67%, 36%)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  opacity="0.8"
+                />
+                
+                {/* Corner flourishes */}
+                <path
+                  d="M20 25 Q25 20 30 25 M90 25 Q95 20 100 25 M20 75 Q25 80 30 75 M90 75 Q95 80 100 75"
+                  fill="none"
+                  stroke="hsl(351, 67%, 36%)"
+                  strokeWidth="1.2"
                   strokeLinecap="round"
                   opacity="0.6"
                 />
