@@ -51,7 +51,7 @@ export default function SignInPage() {
                 </span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
-                Sign in to your account or create a new one to explore our marketplace
+                Create a new account to explore our marketplace
               </CardDescription>
             </div>
           </CardHeader>

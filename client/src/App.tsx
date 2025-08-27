@@ -41,6 +41,7 @@ import Verification from "@/pages/verification";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Events from "@/pages/events";
 import SignIn from "@/pages/signin";
+import SignInOnly from "@/pages/signin-only";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -68,7 +69,8 @@ function Router() {
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/events" component={Events} />
-          <Route path="/signin" component={SignIn} />
+          <Route path="/signin" component={SignInOnly} />
+          <Route path="/signup" component={SignIn} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       ) : (
