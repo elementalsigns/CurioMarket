@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getReviewPhotoUploadURL();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
     } catch (error) {
       console.error("Error getting upload URL:", error);
@@ -224,15 +224,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      // Verify user has active subscription
-      if (!user?.stripeSubscriptionId) {
-        return res.status(403).json({ error: "Active seller subscription required" });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
-
-      if (stripe) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-        if (subscription.status !== 'active') {
+      
+      // Verify user has active subscription (skip in development mode)
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      
+      if (!isDevelopment) {
+        if (!user.stripeSubscriptionId) {
           return res.status(403).json({ error: "Active seller subscription required" });
+        }
+
+        if (stripe) {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status !== 'active') {
+            return res.status(403).json({ error: "Active seller subscription required" });
+          }
         }
       }
 
