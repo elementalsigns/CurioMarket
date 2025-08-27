@@ -55,27 +55,46 @@ html, body {
   }
 }
 
-/* Mobile logo hover and touch effects */
-[data-testid="mobile-logo"] h1 {
-  transform-origin: center;
-  will-change: transform, color, text-shadow;
+/* Mobile logo hover and touch effects - Universal */
+.mobile-logo-text,
+[data-testid="mobile-logo"] h1,
+.mobile-logo-link h1 {
+  transform-origin: center !important;
+  will-change: transform, color, text-shadow !important;
+  transition: all 0.3s ease !important;
 }
 
-/* Touch devices: add active state for mobile logo */
-@media (hover: none) and (pointer: coarse) {
-  [data-testid="mobile-logo"]:active h1,
-  [data-testid="mobile-logo"]:focus h1 {
-    color: #dc2626 !important;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
-    transform: scale(1.05) !important;
-    transition: all 0.15s ease !important;
+/* Force hover effects on ALL devices */
+.mobile-logo-link:hover .mobile-logo-text,
+.mobile-logo-link:hover h1,
+[data-testid="mobile-logo"]:hover h1,
+[data-testid="logo"]:hover h1 {
+  color: #dc2626 !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Touch and active states for mobile devices */
+.mobile-logo-link:active .mobile-logo-text,
+.mobile-logo-link:active h1,
+[data-testid="mobile-logo"]:active h1,
+[data-testid="mobile-logo"]:focus h1 {
+  color: #dc2626 !important;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
+  transform: scale(1.05) !important;
+  transition: all 0.15s ease !important;
+}
+
+/* Ensure touch devices respond to tap */
+@media (pointer: coarse) {
+  .mobile-logo-link,
+  [data-testid="mobile-logo"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-}
-
-/* Desktop hover support */
-@media (hover: hover) and (pointer: fine) {
-  [data-testid="mobile-logo"]:hover h1,
-  [data-testid="logo"]:hover h1 {
+  
+  .mobile-logo-link:active .mobile-logo-text,
+  [data-testid="mobile-logo"]:active h1 {
     color: #dc2626 !important;
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
     transform: scale(1.05) !important;
