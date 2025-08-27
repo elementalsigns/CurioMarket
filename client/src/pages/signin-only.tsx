@@ -69,8 +69,28 @@ export default function SignInOnlyPage() {
           </p>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-zinc-700 my-8"></div>
+        {/* Benefits Section */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-center text-zinc-300">Benefits of signing in:</h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-zinc-300">
+              <div className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0"></div>
+              <span className="text-sm">Browse exclusive curiosities and specimens</span>
+            </div>
+            <div className="flex items-center space-x-3 text-zinc-300">
+              <div className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0"></div>
+              <span className="text-sm">Connect with gothic collectors worldwide</span>
+            </div>
+            <div className="flex items-center space-x-3 text-zinc-300">
+              <div className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0"></div>
+              <span className="text-sm">Save favorites and track your collection</span>
+            </div>
+            <div className="flex items-center space-x-3 text-zinc-300">
+              <div className="w-2 h-2 rounded-full bg-red-600 flex-shrink-0"></div>
+              <span className="text-sm">Sell your own oddities and curios</span>
+            </div>
+          </div>
+        </div>
 
         {/* Security Notice */}
         <div className="bg-zinc-900/60 border border-zinc-700 rounded-lg p-4">
