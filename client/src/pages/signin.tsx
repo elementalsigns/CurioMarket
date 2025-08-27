@@ -6,7 +6,7 @@ import { Shield, Skull, Eye, Users, Star } from "lucide-react";
 
 export default function SignInPage() {
   useEffect(() => {
-    document.title = "Sign In - Curiosities Market";
+    document.title = "Sign In or Create Account - Curiosities Market";
   }, []);
 
   const handleSignIn = () => {
@@ -51,26 +51,64 @@ export default function SignInPage() {
                 </span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
-                Access your account to explore our marketplace
+                Sign in to your account or create a new one to explore our marketplace
               </CardDescription>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Sign In Button */}
-            <Button 
-              onClick={handleSignIn}
-              className="w-full h-12 text-white font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl"
-              style={{ 
-                backgroundColor: 'hsl(351, 67%, 36%)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 32%)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 36%)'}
-              data-testid="button-signin-main"
-            >
-              <Shield className="w-5 h-5 mr-2" />
-              Sign In
-            </Button>
+            {/* Sign In Button - For Existing Users */}
+            <div className="space-y-3">
+              <Button 
+                onClick={handleSignIn}
+                className="w-full h-12 text-white font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl"
+                style={{ 
+                  backgroundColor: 'hsl(351, 67%, 36%)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 32%)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 36%)'}
+                data-testid="button-signin-main"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                Sign In to Your Account
+              </Button>
+              
+              <p className="text-xs text-zinc-500 text-center">
+                Already have an account? Use the button above
+              </p>
+            </div>
+
+            <Separator className="bg-zinc-700" />
+
+            {/* Sign Up Button - For New Users */}
+            <div className="space-y-3">
+              <Button 
+                onClick={handleSignIn}
+                variant="outline"
+                className="w-full h-12 font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl border-2"
+                style={{ 
+                  borderColor: 'hsl(351, 67%, 36%)',
+                  color: 'hsl(351, 67%, 36%)',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'hsl(351, 67%, 36%)';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'hsl(351, 67%, 36%)';
+                }}
+                data-testid="button-signup-main"
+              >
+                <Users className="w-5 h-5 mr-2" />
+                Create New Account
+              </Button>
+              
+              <p className="text-xs text-zinc-500 text-center">
+                New to Curiosities Market? Start here to join our community
+              </p>
+            </div>
 
             <Separator className="bg-zinc-700" />
 
