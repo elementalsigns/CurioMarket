@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Mail, MessageSquare, Shield, Clock, MapPin, Phone } from "lucide-react";
+import { Mail, MessageSquare, Shield, Clock, MapPin, Phone, Search, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ContactUs() {
@@ -18,6 +18,7 @@ export default function ContactUs() {
     category: "",
     message: ""
   });
+  const [sellerSearch, setSellerSearch] = useState("");
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,6 +45,19 @@ export default function ContactUs() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSellerSearch = () => {
+    if (sellerSearch.trim()) {
+      // Navigate to browse page with seller search
+      window.location.href = `/browse?seller=${encodeURIComponent(sellerSearch.trim())}`;
+    } else {
+      toast({
+        title: "Search Required",
+        description: "Please enter a seller or store name to search.",
+        variant: "destructive"
+      });
+    }
   };
 
   const contactMethods = [
@@ -210,6 +224,51 @@ export default function ContactUs() {
 
             {/* Contact Methods & Info */}
             <div className="space-y-8">
+              {/* Purchase Support - Contact Seller First */}
+              <Card className="border-zinc-700 bg-zinc-950">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Store className="w-5 h-5 text-red-600" />
+                    Purchase Support
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                    <h4 className="font-medium text-amber-400 mb-2">For Customer Service on Purchases:</h4>
+                    <p className="text-sm text-zinc-300 leading-relaxed mb-3">
+                      Your first point of contact should be the seller directly. Most purchase-related questions, 
+                      shipping inquiries, and item concerns can be resolved quickly through direct seller communication.
+                    </p>
+                    
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Enter seller or store name..."
+                          value={sellerSearch}
+                          onChange={(e) => setSellerSearch(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSellerSearch()}
+                          className="bg-zinc-900 border-zinc-600 text-white"
+                          data-testid="input-seller-search"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleSellerSearch}
+                        variant="outline"
+                        className="border-zinc-600 hover:border-red-500 text-zinc-300 hover:text-white"
+                        data-testid="button-find-seller"
+                      >
+                        <Search className="w-4 h-4 mr-2" />
+                        Find Seller
+                      </Button>
+                    </div>
+                    
+                    <p className="text-xs text-zinc-500 mt-2">
+                      If you're unable to resolve your issue with the seller, please contact our support team below.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Contact Methods */}
               <Card className="border-zinc-700 bg-zinc-950">
                 <CardHeader>
