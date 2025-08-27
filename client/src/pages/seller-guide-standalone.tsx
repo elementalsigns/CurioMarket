@@ -279,6 +279,7 @@ function SellerGuideStandalone() {
                     <li>• 10% fee per sale</li>
                     <li>• Chargeback risks</li>
                     <li>• Variable restrictions</li>
+                    <li className="negative">• Many items restricted</li>
                     <li className="negative">• Limited seller protection</li>
                   </ul>
                 </div>
