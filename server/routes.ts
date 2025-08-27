@@ -10,6 +10,7 @@ import { insertSellerSchema, insertListingSchema } from "@shared/schema";
 import { verificationService } from "./verificationService";
 import { emailService } from "./emailService";
 import { ObjectStorageService } from "./objectStorage";
+import * as XLSX from 'xlsx';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-07-30.basil",
@@ -1882,6 +1883,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename="curio-market-facebook-${new Date().toISOString().split('T')[0]}.csv"`);
         res.send(fbContent);
+      } else if (format === 'google-sheets') {
+        // Google Sheets friendly format
+        let gsContent = 'Product ID,Title,Description,Price,Category,SKU,MPN,Quantity,Condition,Images,Status,Created Date\n';
+        
+        listings.forEach((listing: any) => {
+          const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
+          const escapedDescription = `"${(listing.description || '').replace(/"/g, '""')}"`;
+          const imageUrl = listing.images?.[0] || '';
+          const createdDate = new Date(listing.createdAt).toLocaleDateString();
+          
+          gsContent += `${listing.id},${escapedTitle},${escapedDescription},${listing.price || 0},${listing.categoryName || ''},${listing.sku || ''},${listing.mpn || ''},${listing.quantity || 0},${listing.condition || 'used'},"${imageUrl}",${listing.state || 'draft'},${createdDate}\n`;
+        });
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="curio-market-google-sheets-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(gsContent);
+      } else if (format === 'excel') {
+        // Create Excel workbook
+        const workbook = XLSX.utils.book_new();
+        
+        // Prepare data for Excel
+        const excelData = listings.map((listing: any) => ({
+          'Product ID': listing.id,
+          'Title': listing.title || '',
+          'Description': listing.description || '',
+          'Price ($)': parseFloat(listing.price) || 0,
+          'Category': listing.categoryName || '',
+          'SKU': listing.sku || '',
+          'MPN': listing.mpn || '',
+          'Quantity': listing.quantity || 0,
+          'Condition': listing.condition || 'used',
+          'Status': listing.state || 'draft',
+          'Images': listing.images?.[0] || '',
+          'Species/Material': listing.speciesOrMaterial || '',
+          'Provenance': listing.provenance || '',
+          'Shipping Cost': parseFloat(listing.shippingCost) || 0,
+          'Views': listing.views || 0,
+          'Created Date': new Date(listing.createdAt).toLocaleDateString(),
+          'Updated Date': new Date(listing.updatedAt).toLocaleDateString()
+        }));
+        
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        
+        // Auto-size columns
+        const colWidths = Object.keys(excelData[0] || {}).map(key => ({
+          wch: Math.max(key.length, 15)
+        }));
+        worksheet['!cols'] = colWidths;
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+        
+        // Generate Excel buffer
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="curio-market-excel-${new Date().toISOString().split('T')[0]}.xlsx"`);
+        res.send(excelBuffer);
       } else {
         res.json(listings);
       }

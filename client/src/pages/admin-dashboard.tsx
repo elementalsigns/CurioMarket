@@ -970,6 +970,98 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="bg-zinc-800 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Google Sheets Export</h3>
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Export formatted data for direct import into Google Sheets
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/export/products?format=google-sheets');
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `curio-market-google-sheets-${new Date().toISOString().split('T')[0]}.csv`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          toast({
+                            title: "Export Complete",
+                            description: "Google Sheets format downloaded successfully",
+                          });
+                        } else {
+                          toast({
+                            title: "Export Failed",
+                            description: "Failed to export Google Sheets format",
+                            variant: "destructive"
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Google Sheets export error:', error);
+                        toast({
+                          title: "Export Failed",
+                          description: "An error occurred during Google Sheets export",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="border-green-600 text-green-500 hover:bg-green-600 hover:text-white"
+                    data-testid="button-export-google-sheets"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export for Google Sheets
+                  </Button>
+                </div>
+
+                <div className="bg-zinc-800 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Excel Export</h3>
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Export as Excel-compatible format with advanced formatting
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/admin/export/products?format=excel');
+                        if (response.ok) {
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `curio-market-excel-${new Date().toISOString().split('T')[0]}.xlsx`;
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          toast({
+                            title: "Export Complete",
+                            description: "Excel file downloaded successfully",
+                          });
+                        } else {
+                          toast({
+                            title: "Export Failed",
+                            description: "Failed to export Excel file",
+                            variant: "destructive"
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Excel export error:', error);
+                        toast({
+                          title: "Export Failed",
+                          description: "An error occurred during Excel export",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="border-blue-600 text-blue-500 hover:bg-blue-600 hover:text-white"
+                    data-testid="button-export-excel"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export to Excel
+                  </Button>
+                </div>
+
+                <div className="bg-zinc-800 p-4 rounded-lg">
                   <h3 className="font-semibold mb-2">Export Statistics</h3>
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     <div className="text-center">
