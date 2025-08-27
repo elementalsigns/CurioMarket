@@ -176,20 +176,20 @@ function ProhibitedItemsStandalone() {
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Antique & Vintage Items</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li><strong>Pre-1900 Animal Specimens:</strong> Require age verification and legal sourcing documentation</li>
-                        <li><strong>Antique Medical Equipment:</strong> Must be clearly marked as non-functional and for display only</li>
-                        <li><strong>Historical Artifacts:</strong> Require provenance documentation and export permits if applicable</li>
-                        <li><strong>Vintage Taxidermy:</strong> Must include species identification and age verification</li>
+                        <li><strong>Pre-1900 Animal Specimens:</strong> May require age verification and legal sourcing documentation</li>
+                        <li><strong>Antique Medical Equipment:</strong> May need to be clearly marked as non-functional and for display only</li>
+                        <li><strong>Historical Artifacts:</strong> May require provenance documentation and export permits if applicable</li>
+                        <li><strong>Vintage Taxidermy:</strong> May require species identification and age verification</li>
                       </ul>
                     </div>
 
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Animal Products & Specimens</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li><strong>Modern Taxidermy:</strong> Require hunting licenses or legal acquisition documentation</li>
-                        <li><strong>Bones & Skulls:</strong> Must be from legally obtained sources with documentation</li>
-                        <li><strong>Wet Specimens:</strong> Require proper preservation and species identification</li>
-                        <li><strong>Insect Collections:</strong> Must comply with CITES regulations for protected species</li>
+                        <li><strong>Modern Taxidermy:</strong> May require hunting licenses or legal acquisition documentation</li>
+                        <li><strong>Bones & Skulls:</strong> May need documentation from legally obtained sources</li>
+                        <li><strong>Wet Specimens:</strong> May require proper preservation and species identification</li>
+                        <li><strong>Insect Collections:</strong> May need to comply with CITES regulations for protected species</li>
                       </ul>
                     </div>
 
