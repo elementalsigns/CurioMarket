@@ -267,7 +267,7 @@ function SellerGuideStandalone() {
                     <li>• 6.5% transaction fee</li>
                     <li>• Extra processing fees</li>
                     <li>• Advertising costs</li>
-                    <li className="negative">• Many items restricted</li>
+                    <li className="negative">• Many curiosities restricted</li>
                   </ul>
                 </div>
 
@@ -280,7 +280,7 @@ function SellerGuideStandalone() {
                     <li>• Chargeback risks</li>
                     <li>• Variable restrictions</li>
                     <li className="negative">• Limited seller protection</li>
-                    <li className="negative">• Many items restricted</li>
+                    <li className="negative">• Many curiosities restricted</li>
                   </ul>
                 </div>
 
@@ -292,7 +292,7 @@ function SellerGuideStandalone() {
                     <li>• ~13% per sale</li>
                     <li>• Store subscription costs</li>
                     <li>• High competition</li>
-                    <li className="negative">• Many items restricted</li>
+                    <li className="negative">• Many curiosities restricted</li>
                   </ul>
                 </div>
 
@@ -304,7 +304,7 @@ function SellerGuideStandalone() {
                     <li>• 10% selling fee</li>
                     <li>• Withdrawal fees</li>
                     <li>• Protection fees</li>
-                    <li className="negative">• Many items restricted</li>
+                    <li className="negative">• Many curiosities restricted</li>
                   </ul>
                 </div>
 
