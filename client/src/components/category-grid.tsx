@@ -5,6 +5,8 @@ import wetSpecimenImage from "@assets/generated_images/Gothic_snake_specimen_jar
 import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
 import taxidermyImage from "@assets/generated_images/Victorian_bird_taxidermy_display_34e4d9b1.png";
 import vintageMedicalImage from "@assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png";
+import jewelryImage from "@assets/generated_images/Gothic_vintage_jewelry_display_86ce4b33.png";
+import occultImage from "@assets/generated_images/Occult_magical_artifacts_display_e0cd536b.png";
 
 // Static category data with images - counts will be fetched dynamically
 const categoryImages = {
@@ -23,6 +25,14 @@ const categoryImages = {
   "vintage-medical": {
     icon: "⚗️",
     image: vintageMedicalImage,
+  },
+  "jewelry": {
+    icon: "💍",
+    image: jewelryImage,
+  },
+  "occult": {
+    icon: "🔮",
+    image: occultImage,
   }
 };
 

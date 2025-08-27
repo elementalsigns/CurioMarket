@@ -77,6 +77,8 @@ export default function Landing() {
                   { name: 'Oddities', slug: 'oddities-curiosities' },
                   { name: 'Specimens', slug: 'antique-specimens' },
                   { name: 'Gothic Decor', slug: 'gothic-home-decor' },
+                  { name: 'Jewelry', slug: 'jewelry' },
+                  { name: 'Occult', slug: 'occult' },
                   { name: 'Murderabilia', slug: 'murderabilia' }
                 ].map((tag) => (
                   <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
@@ -130,6 +132,8 @@ export default function Landing() {
                 { name: 'Gothic Decor', slug: 'gothic-home-decor' }, 
                 { name: 'Oddities & Curiosities', slug: 'oddities-curiosities' },
                 { name: 'Antique Specimens', slug: 'antique-specimens' },
+                { name: 'Jewelry', slug: 'jewelry' },
+                { name: 'Occult', slug: 'occult' },
                 { name: 'Victorian Era', slug: 'victorian-era' },
                 { name: 'Macabre Art', slug: 'macabre-art' },
                 { name: 'Scientific Instruments', slug: 'scientific-instruments' },

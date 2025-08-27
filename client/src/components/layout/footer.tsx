@@ -68,6 +68,20 @@ export default function Footer() {
                   </Button>
                 </Link>
               </li>
+              <li>
+                <Link to="/browse?category=jewelry">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Jewelry
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/browse?category=occult">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Occult
+                  </Button>
+                </Link>
+              </li>
             </ul>
           </div>
 
