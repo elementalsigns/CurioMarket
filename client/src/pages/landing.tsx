@@ -300,38 +300,153 @@ export default function Landing() {
                 </CardContent>
               </Card>
             </div>
-
-            <div className="relative">
-              {/* Artem Mortis YouTube Video */}
-              <div className="rounded-lg overflow-hidden shadow-2xl aspect-video">
-                <iframe 
-                  src="https://www.youtube.com/embed/gpYvMDizBsU" 
-                  title="Cabinet of Curiosities - Vintage Oddities & Specimens"
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  data-testid="video-artem-mortis"
-                />
-              </div>
-              
-              {/* Floating Stats */}
-              <Card className="absolute -top-6 -right-6 glass-effect border border-primary/30 shadow-lg" data-testid="stat-sellers">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-primary">2.3K+</div>
-                  <div className="text-sm text-foreground/80">Active Sellers</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="absolute bottom-6 -left-6 glass-effect border border-accent/30 shadow-lg" data-testid="stat-revenue">
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-accent">$150K+</div>
-                  <div className="text-sm text-foreground/80">Monthly Sales</div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </section>
+
+      {/* Marketplace Fee Comparison Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" data-testid="section-fee-comparison">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-bold mb-4" data-testid="comparison-title">
+              Marketplace Fee Comparison
+            </h2>
+            <p className="text-foreground/70 max-w-2xl mx-auto" data-testid="comparison-subtitle">
+              See why sellers choose Curio Market over other platforms
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Etsy */}
+            <Card className="glass-effect border border-border hover:border-red-600/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-serif font-bold mb-2">Etsy</h3>
+                  <div className="text-2xl font-bold text-red-400">~13%+ fees</div>
+                </div>
+                <ul className="space-y-2 text-sm text-foreground/80">
+                  <li>• $30 setup fee</li>
+                  <li>• $0.20 per listing</li>
+                  <li>• 6.5% transaction fee</li>
+                  <li>• Extra processing fees</li>
+                  <li>• Advertising costs</li>
+                  <li className="text-red-400 font-medium">• Many items restricted</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Facebook Marketplace */}
+            <Card className="glass-effect border border-border hover:border-red-600/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-serif font-bold mb-2">Facebook</h3>
+                  <div className="text-2xl font-bold text-red-400">10% fee</div>
+                </div>
+                <ul className="space-y-2 text-sm text-foreground/80">
+                  <li>• Free to list</li>
+                  <li>• 10% fee per sale</li>
+                  <li>• Chargeback risks</li>
+                  <li>• Variable restrictions</li>
+                  <li className="text-red-400 font-medium">• Limited seller protection</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* eBay */}
+            <Card className="glass-effect border border-border hover:border-red-600/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-serif font-bold mb-2">eBay</h3>
+                  <div className="text-2xl font-bold text-red-400">~13% fees</div>
+                </div>
+                <ul className="space-y-2 text-sm text-foreground/80">
+                  <li>• Free basic account</li>
+                  <li>• ~13% per sale</li>
+                  <li>• Store subscription costs</li>
+                  <li>• High competition</li>
+                  <li className="text-red-400 font-medium">• Oddities strictly prohibited</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Mercari */}
+            <Card className="glass-effect border border-border hover:border-red-600/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-serif font-bold mb-2">Mercari</h3>
+                  <div className="text-2xl font-bold text-red-400">10%+ fees</div>
+                </div>
+                <ul className="space-y-2 text-sm text-foreground/80">
+                  <li>• Free to list</li>
+                  <li>• 10% selling fee</li>
+                  <li>• Withdrawal fees</li>
+                  <li>• Protection fees</li>
+                  <li className="text-red-400 font-medium">• Oddities likely prohibited</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Curio Market - Highlighted */}
+            <Card className="glass-effect border-2 border-primary bg-primary/5 hover:border-primary/80 transition-colors lg:col-span-2">
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-serif font-bold mb-2 text-primary">Curio Market</h3>
+                  <div className="text-3xl font-bold text-primary">5.5% total</div>
+                  <div className="text-sm text-foreground/70">2.6% platform + 2.9% processing</div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <ul className="space-y-2 text-sm text-foreground/80">
+                    <li className="text-green-400">✓ $10/month subscription</li>
+                    <li className="text-green-400">✓ Only 5.5% selling fee</li>
+                    <li className="text-green-400">✓ No hidden costs</li>
+                    <li className="text-green-400">✓ Unlimited listings</li>
+                  </ul>
+                  <ul className="space-y-2 text-sm text-foreground/80">
+                    <li className="text-green-400">✓ Oddities welcomed</li>
+                    <li className="text-green-400">✓ Collector-focused community</li>
+                    <li className="text-green-400">✓ Transparent pricing</li>
+                    <li className="text-green-400">✓ Direct seller support</li>
+                  </ul>
+                </div>
+                <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <p className="text-sm text-center text-foreground/90">
+                    <strong>Keep $94.50</strong> on every $100 sale vs. $87 on other platforms
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Card className="glass-effect border border-primary/30 max-w-2xl mx-auto">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-serif font-bold mb-3 text-primary">Ready to Start Your Gothic Empire?</h3>
+                <p className="text-foreground/80 mb-4">
+                  Join our community of passionate sellers and turn your unique collection into a profitable business.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    className="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    data-testid="button-seller-application"
+                    onClick={() => window.location.href = '/seller/terms'}
+                  >
+                    Begin Seller Application
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="border-primary/30 text-foreground hover:border-primary hover:text-primary px-6 py-2 rounded-lg font-medium transition-colors"
+                    data-testid="button-seller-terms"
+                    onClick={() => window.location.href = '/seller/terms'}
+                  >
+                    Read Seller Terms
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Trust & Safety Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/20" data-testid="section-trust">
         <div className="container mx-auto max-w-7xl text-center">
