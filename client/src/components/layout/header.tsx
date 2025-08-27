@@ -235,19 +235,19 @@ export default function Header() {
               <div className="flex items-center space-x-2">
                 <Button 
                   variant="outline" 
-                  onClick={() => window.location.href = '/api/login'}
+                  asChild
                   className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
                   data-testid="button-sign-up"
                 >
-                  Sign up
+                  <Link to="/signin">Sign up</Link>
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => window.location.href = '/api/login'}
+                  asChild
                   className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
                   data-testid="button-sign-in"
                 >
-                  Sign in
+                  <Link to="/signin">Sign in</Link>
                 </Button>
               </div>
             )}
