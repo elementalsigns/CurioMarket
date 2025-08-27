@@ -55,6 +55,33 @@ html, body {
   }
 }
 
+/* Mobile logo hover and touch effects */
+[data-testid="mobile-logo"] h1 {
+  transform-origin: center;
+  will-change: transform, color, text-shadow;
+}
+
+/* Touch devices: add active state for mobile logo */
+@media (hover: none) and (pointer: coarse) {
+  [data-testid="mobile-logo"]:active h1,
+  [data-testid="mobile-logo"]:focus h1 {
+    color: #dc2626 !important;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
+    transform: scale(1.05) !important;
+    transition: all 0.15s ease !important;
+  }
+}
+
+/* Desktop hover support */
+@media (hover: hover) and (pointer: fine) {
+  [data-testid="mobile-logo"]:hover h1,
+  [data-testid="logo"]:hover h1 {
+    color: #dc2626 !important;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8) !important;
+    transform: scale(1.05) !important;
+  }
+}
+
 /* Ensure all main containers use black background */
 #root {
   background-color: hsl(212, 5%, 5%) !important;
