@@ -96,7 +96,14 @@ export default function SignInPage() {
                   onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
                   onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
                 >
-                  Curio Market
+                  Curio
+                </span>sities <span 
+                  className="transition-colors duration-200 cursor-default"
+                  style={{ color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
+                >
+                  Market
                 </span>
               </CardTitle>
               <CardDescription className="text-zinc-400 text-base">
