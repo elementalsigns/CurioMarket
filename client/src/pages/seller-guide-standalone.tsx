@@ -89,6 +89,41 @@ function SellerGuideStandalone() {
         .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
         .btn-large { padding: 0.75rem 2rem; font-size: 1.125rem; font-weight: 500; border-radius: 6px; cursor: pointer; }
         
+        /* Comparison Section Styles */
+        .comparison-section { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 2.5rem; margin-bottom: 4rem; }
+        .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .comparison-card { background: #0a0a0a; border: 1px solid #27272a; border-radius: 8px; padding: 1.5rem; transition: border-color 0.3s; }
+        .comparison-card.competitor:hover { border-color: rgba(185, 28, 28, 0.3); }
+        .comparison-card.curio-highlight { 
+          background: rgba(220, 38, 38, 0.05); 
+          border: 2px solid hsl(0, 77%, 26%); 
+          grid-column: span 2; 
+          display: grid; 
+          grid-template-columns: 1fr 1fr; 
+          gap: 2rem; 
+          align-items: start; 
+        }
+        .comparison-title { font-size: 1.25rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; color: white; }
+        .comparison-fee { font-size: 1.75rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; color: #dc2626; }
+        .comparison-card.curio-highlight .comparison-fee { color: hsl(0, 77%, 26%); font-size: 2.25rem; }
+        .comparison-subfee { text-align: center; font-size: 0.875rem; color: #a1a1aa; margin-bottom: 1rem; }
+        .comparison-features { list-style: none; padding: 0; margin: 0; font-size: 0.875rem; }
+        .comparison-features li { margin-bottom: 0.5rem; color: #d4d4d8; }
+        .comparison-features li.negative { color: #dc2626; font-weight: 500; }
+        .comparison-features li.positive { color: #10b981; font-weight: 500; }
+        .comparison-features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; grid-column: span 2; }
+        .comparison-highlight { 
+          background: rgba(220, 38, 38, 0.1); 
+          border: 1px solid rgba(220, 38, 38, 0.2); 
+          border-radius: 6px; 
+          padding: 0.75rem; 
+          text-align: center; 
+          font-size: 0.875rem; 
+          color: #d4d4d8; 
+          grid-column: span 2; 
+          margin-top: 1rem; 
+        }
+        
         /* Footer Styles - Match home page exactly */
         .footer { background: #0a0a0a; border-top: 3px solid white; padding: 4rem 1rem; margin-top: 4rem; flex-shrink: 0; }
         .footer-container { max-width: 80rem; margin: 0 auto; }
@@ -214,6 +249,85 @@ function SellerGuideStandalone() {
                   <div className="price">5.5%</div>
                   <div className="price-label">Total Fees</div>
                   <div className="price-desc">2.6% platform + 2.9% Stripe processing</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="comparison-section">
+              <h2 className="section-title">Marketplace Fee Comparison</h2>
+              <p className="section-subtitle">See why sellers choose Curio Market over other platforms</p>
+              
+              <div className="comparison-grid">
+                <div className="comparison-card competitor">
+                  <h3 className="comparison-title">Etsy</h3>
+                  <div className="comparison-fee">~13%+ fees</div>
+                  <ul className="comparison-features">
+                    <li>• $30 setup fee</li>
+                    <li>• $0.20 per listing</li>
+                    <li>• 6.5% transaction fee</li>
+                    <li>• Extra processing fees</li>
+                    <li>• Advertising costs</li>
+                    <li className="negative">• Many items restricted</li>
+                  </ul>
+                </div>
+
+                <div className="comparison-card competitor">
+                  <h3 className="comparison-title">Facebook</h3>
+                  <div className="comparison-fee">10% fee</div>
+                  <ul className="comparison-features">
+                    <li>• Free to list</li>
+                    <li>• 10% fee per sale</li>
+                    <li>• Chargeback risks</li>
+                    <li>• Variable restrictions</li>
+                    <li className="negative">• Limited seller protection</li>
+                  </ul>
+                </div>
+
+                <div className="comparison-card competitor">
+                  <h3 className="comparison-title">eBay</h3>
+                  <div className="comparison-fee">~13% fees</div>
+                  <ul className="comparison-features">
+                    <li>• Free basic account</li>
+                    <li>• ~13% per sale</li>
+                    <li>• Store subscription costs</li>
+                    <li>• High competition</li>
+                    <li className="negative">• Oddities strictly prohibited</li>
+                  </ul>
+                </div>
+
+                <div className="comparison-card competitor">
+                  <h3 className="comparison-title">Mercari</h3>
+                  <div className="comparison-fee">10%+ fees</div>
+                  <ul className="comparison-features">
+                    <li>• Free to list</li>
+                    <li>• 10% selling fee</li>
+                    <li>• Withdrawal fees</li>
+                    <li>• Protection fees</li>
+                    <li className="negative">• Oddities likely prohibited</li>
+                  </ul>
+                </div>
+
+                <div className="comparison-card curio-highlight">
+                  <h3 className="comparison-title">Curio Market</h3>
+                  <div className="comparison-fee">5.5% total</div>
+                  <div className="comparison-subfee">2.6% platform + 2.9% processing</div>
+                  <div className="comparison-features-grid">
+                    <ul className="comparison-features">
+                      <li className="positive">✓ $10/month subscription</li>
+                      <li className="positive">✓ Only 5.5% selling fee</li>
+                      <li className="positive">✓ No hidden costs</li>
+                      <li className="positive">✓ Unlimited listings</li>
+                    </ul>
+                    <ul className="comparison-features">
+                      <li className="positive">✓ Oddities welcomed</li>
+                      <li className="positive">✓ Collector-focused community</li>
+                      <li className="positive">✓ Transparent pricing</li>
+                      <li className="positive">✓ Direct seller support</li>
+                    </ul>
+                  </div>
+                  <div className="comparison-highlight">
+                    <strong>Keep $94.50</strong> on every $100 sale vs. $87 on other platforms
+                  </div>
                 </div>
               </div>
             </div>
