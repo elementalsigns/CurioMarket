@@ -161,7 +161,7 @@ function ProhibitedItemsStandalone() {
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <Gavel className="w-5 h-5 text-red-600" />
-                      Regulated Items Requiring Documentation
+                      Regulated Items that may Require Documentation
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
