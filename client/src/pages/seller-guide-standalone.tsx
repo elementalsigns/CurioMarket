@@ -104,12 +104,13 @@ function SellerGuideStandalone() {
           align-items: start; 
         }
         .comparison-title { font-size: 1.25rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; color: white; }
-        .comparison-fee { font-size: 1.75rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; color: #dc2626; }
+        .comparison-fee { font-size: 1.75rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; color: hsl(0, 77%, 26%); }
         .comparison-card.curio-highlight .comparison-fee { color: hsl(0, 77%, 26%); font-size: 2.25rem; }
         .comparison-subfee { text-align: center; font-size: 0.875rem; color: #a1a1aa; margin-bottom: 1rem; }
+        .comparison-card.curio-highlight .comparison-subfee { color: hsl(0, 0%, 100%); }
         .comparison-features { list-style: none; padding: 0; margin: 0; font-size: 0.875rem; }
         .comparison-features li { margin-bottom: 0.5rem; color: #d4d4d8; }
-        .comparison-features li.negative { color: #dc2626; font-weight: 500; }
+        .comparison-features li.negative { color: hsl(0, 77%, 26%); font-weight: 500; }
         .comparison-features li.positive { color: #10b981; font-weight: 500; }
         .comparison-features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; grid-column: span 2; }
         .comparison-highlight { 
@@ -151,7 +152,7 @@ function SellerGuideStandalone() {
           line-height: 1.25rem;
           height: auto;
         }
-        .footer-link:hover { color: rgb(220, 38, 38); background: transparent; }
+        .footer-link:hover { color: hsl(0, 77%, 26%); background: transparent; }
         .footer-bottom { border-top: 2px solid white; padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .footer-copyright { color: rgba(113, 113, 122, 1); font-size: 0.875rem; margin-bottom: 1rem; }
         .footer-legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
