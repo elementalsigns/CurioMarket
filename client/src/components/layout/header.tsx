@@ -58,8 +58,8 @@ export default function Header() {
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50" data-testid="nav-header">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-3">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-2 sm:py-3">
           
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center space-x-6 flex-1">
@@ -153,20 +153,20 @@ export default function Header() {
           </div>
 
           {/* Mobile Layout */}
-          <div className="md:hidden flex items-center justify-between w-full">
+          <div className="md:hidden flex items-center justify-between w-full min-h-[44px]">
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
-              className="text-foreground p-1.5"
+              className="text-foreground p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
-              <Menu size={20} />
+              <Menu size={18} className="sm:w-5 sm:h-5" />
             </Button>
 
             {/* Mobile Logo */}
-            <Link to="/" className="flex items-center flex-1 justify-center" data-testid="mobile-logo">
-              <h1 className="text-lg curio-logo font-bold text-white">
+            <Link to="/" className="flex items-center flex-1 justify-center px-2" data-testid="mobile-logo">
+              <h1 className="text-base sm:text-lg curio-logo font-bold text-white whitespace-nowrap">
                 <span>
                   <span className="script-initial">C</span>urio
                 </span> <span>
@@ -178,14 +178,14 @@ export default function Header() {
             {/* Mobile Cart */}
             <Button 
               variant="ghost" 
-              className="text-foreground hover:text-red-600 hover:bg-transparent p-1.5 relative transition-colors"
+              className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               onClick={() => setCartOpen(true)}
               data-testid="button-cart-mobile"
             >
-              <ShoppingCart size={20} />
+              <ShoppingCart size={18} className="sm:w-5 sm:h-5" />
               {isAuthenticated && cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px]" data-testid="cart-count-mobile">
-                  {cartItemCount}
+                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium" data-testid="cart-count-mobile">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               )}
             </Button>
@@ -316,15 +316,15 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border" data-testid="mobile-menu">
-            <div className="space-y-3">
+          <div className="md:hidden py-4 border-t border-border bg-background" data-testid="mobile-menu">
+            <div className="space-y-3 px-2">
               {/* Auth Buttons for Mobile */}
               {!isAuthenticated && (
-                <div className="flex space-x-2 mb-4">
+                <div className="flex space-x-3 mb-4">
                   <Button 
                     variant="outline" 
                     asChild
-                    className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm"
+                    className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm min-h-[44px]"
                     data-testid="button-sign-up-mobile"
                   >
                     <Link to="/signin">Sign up</Link>
@@ -332,7 +332,7 @@ export default function Header() {
                   <Button 
                     variant="outline" 
                     asChild
-                    className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm"
+                    className="flex-1 text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors text-sm min-h-[44px]"
                     data-testid="button-sign-in-mobile"
                   >
                     <Link to="/signin">Sign in</Link>
@@ -341,15 +341,15 @@ export default function Header() {
               )}
 
               {/* Mobile Navigation Links */}
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-1">
                 <Link to="/browse" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
                     Browse All Categories
                   </Button>
                 </Link>
                 
                 <Link to="/events" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
                     Events
                   </Button>
                 </Link>
@@ -357,8 +357,8 @@ export default function Header() {
                 {isAuthenticated && (
                   <>
                     <Link to="/wishlists" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                        <Heart className="mr-2" size={16} />
+                      <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                        <Heart className="mr-3" size={18} />
                         Favorites
                       </Button>
                     </Link>
@@ -366,20 +366,20 @@ export default function Header() {
                     {sellerData ? (
                       <>
                         <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                            <Store className="mr-2" size={16} />
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <Store className="mr-3" size={18} />
                             Shop Manager
                           </Button>
                         </Link>
                         <Link to="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                            <Settings className="mr-2" size={16} />
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <Settings className="mr-3" size={18} />
                             Shop Settings
                           </Button>
                         </Link>
                         <Link to="/seller/listings/create" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                            <Plus className="mr-2" size={16} />
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <Plus className="mr-3" size={18} />
                             Add Listing
                           </Button>
                         </Link>
@@ -387,19 +387,21 @@ export default function Header() {
                     ) : (
                       <>
                         <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                            <User className="mr-2" size={16} />
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <User className="mr-3" size={18} />
                             Your Account
                           </Button>
                         </Link>
                         <Link to="/seller/terms" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors">
-                            <Store className="mr-2" size={16} />
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <Store className="mr-3" size={18} />
                             Sell on Curio Market
                           </Button>
                         </Link>
                       </>
                     )}
+                    
+                    <div className="border-t border-border my-2"></div>
                     
                     <Button 
                       variant="ghost" 
@@ -407,9 +409,9 @@ export default function Header() {
                         handleLogout();
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full justify-start text-red-500 hover:text-red-400 hover:bg-transparent transition-colors"
+                      className="w-full justify-start text-red-500 hover:text-red-400 hover:bg-transparent transition-colors min-h-[44px] text-base"
                     >
-                      <LogOut className="mr-2" size={16} />
+                      <LogOut className="mr-3" size={18} />
                       Sign Out
                     </Button>
                   </>
