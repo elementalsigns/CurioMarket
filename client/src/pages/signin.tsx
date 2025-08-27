@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Separator } from "@/components/ui/separator";
 import { Shield, Skull, Eye, Users, Star } from "lucide-react";
 
@@ -15,48 +15,32 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <Card className="bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-sm">
-          <CardHeader className="text-center space-y-6 pb-8">
-            {/* Simple C.M Logo */}
-            <div className="flex justify-center">
-              <div 
-                className="text-6xl drop-shadow-lg"
-                style={{ 
-                  fontFamily: 'Amaranth, cursive',
-                  color: 'hsl(351, 67%, 36%)',
-                  filter: 'drop-shadow(0 0 8px hsl(351, 67%, 36%))'
-                }}
-              >
-                CM
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold text-white">
-                Welcome to <span 
-                  className="transition-colors duration-200 cursor-default"
-                  style={{ color: 'white' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
-                >
-                  Curio
-                </span>sities <span 
-                  className="transition-colors duration-200 cursor-default"
-                  style={{ color: 'white' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(351, 67%, 36%)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'white'}
-                >
-                  Market
-                </span>
-              </CardTitle>
-              <CardDescription className="text-zinc-400 text-base">
-                Create a new account to explore our marketplace
-              </CardDescription>
-            </div>
-          </CardHeader>
+      <div className="w-full max-w-lg space-y-8">
+        {/* Logo */}
+        <div className="text-center">
+          <div 
+            className="text-8xl font-bold drop-shadow-lg"
+            style={{ 
+              fontFamily: 'Amaranth, cursive',
+              color: 'hsl(351, 67%, 36%)',
+              filter: 'drop-shadow(0 0 12px hsl(351, 67%, 36%))'
+            }}
+          >
+            CM
+          </div>
+        </div>
 
-          <CardContent className="space-y-6">
+        {/* Welcome Section */}
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-bold text-white">
+            Welcome to Curiosities Market
+          </h1>
+          <p className="text-zinc-400 text-base">
+            Create a new account to explore our marketplace
+          </p>
+        </div>
+
+        <div className="space-y-6">
             {/* Sign Up Button - For New Users */}
             <div className="space-y-3">
               <Button 
@@ -158,8 +142,7 @@ export default function SignInPage() {
                 We'll only access your basic profile information to personalize your experience.
               </p>
             </div>
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Footer Links */}
         <div className="mt-6 text-center space-x-4 text-sm">
