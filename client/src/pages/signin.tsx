@@ -57,40 +57,6 @@ export default function SignInPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Sign In Button - For Existing Users */}
-            <div className="space-y-3">
-              <Button 
-                onClick={handleSignIn}
-                variant="outline"
-                className="w-full h-12 font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl border-2"
-                style={{ 
-                  borderColor: 'white',
-                  color: 'white',
-                  backgroundColor: 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'hsl(351, 67%, 36%)';
-                  e.currentTarget.style.borderColor = 'hsl(351, 67%, 36%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.borderColor = 'white';
-                }}
-                data-testid="button-signin-main"
-              >
-                <Shield className="w-5 h-5 mr-2" />
-                Sign In to Your Account
-              </Button>
-              
-              <p className="text-xs text-zinc-500 text-center">
-                Already have an account? Use the button above
-              </p>
-            </div>
-
-            <Separator className="bg-zinc-700" />
-
             {/* Sign Up Button - For New Users */}
             <div className="space-y-3">
               <Button 
@@ -120,6 +86,40 @@ export default function SignInPage() {
               
               <p className="text-xs text-zinc-500 text-center">
                 New to Curiosities Market? Start here to join our community
+              </p>
+            </div>
+
+            <Separator className="bg-zinc-700" />
+
+            {/* Sign In Button - For Existing Users */}
+            <div className="space-y-3">
+              <Button 
+                onClick={handleSignIn}
+                variant="outline"
+                className="w-full h-12 font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl border-2"
+                style={{ 
+                  borderColor: 'white',
+                  color: 'white',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'hsl(351, 67%, 36%)';
+                  e.currentTarget.style.borderColor = 'hsl(351, 67%, 36%)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.borderColor = 'white';
+                }}
+                data-testid="button-signin-main"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                Sign In to Your Account
+              </Button>
+              
+              <p className="text-xs text-zinc-500 text-center">
+                Already have an account? Use the button above
               </p>
             </div>
 
