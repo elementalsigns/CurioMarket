@@ -170,7 +170,7 @@ function SellerGuideStandalone() {
         <nav className="nav-bar">
           <div className="nav-content">
             <a href="/" className="logo">
-              <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+              <span className="script-initial">C</span>uriosities <em><span className="script-initial">M</span>arket</em>
             </a>
             <div className="nav-buttons">
               <button className="btn-primary" onClick={() => window.location.href = '/api/login'}>Sign up</button>
@@ -308,7 +308,7 @@ function SellerGuideStandalone() {
                 </div>
 
                 <div className="comparison-card curio-highlight">
-                  <h3 className="comparison-title">Curio Market</h3>
+                  <h3 className="comparison-title">Curiosities Market</h3>
                   <div className="comparison-fee">5.5% total</div>
                   <div className="comparison-subfee">2.6% platform + 2.9% processing</div>
                   <div className="comparison-features-grid">
@@ -346,7 +346,7 @@ function SellerGuideStandalone() {
             <div className="footer-grid">
               <div className="footer-brand">
                 <div className="logo">
-                  <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
+                  <span className="script-initial">C</span>uriosities <em><span className="script-initial">M</span>arket</em>
                 </div>
                 <p className="footer-description">
                   The premier marketplace for oddities, curios, and specimens. Connecting collectors 
