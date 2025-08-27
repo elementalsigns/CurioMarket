@@ -168,8 +168,8 @@ function ProhibitedItemsStandalone() {
                     <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
                       <h4 className="font-medium text-amber-400 mb-2">Important:</h4>
                       <p className="text-zinc-300 text-sm">
-                        These items may be listed only with proper documentation and compliance 
-                        with applicable laws. Sellers are responsible for obtaining all necessary permits.
+                        If documentation or permits are required for these items, sellers are responsible 
+                        for obtaining and maintaining all necessary documents and legal compliance.
                       </p>
                     </div>
 
