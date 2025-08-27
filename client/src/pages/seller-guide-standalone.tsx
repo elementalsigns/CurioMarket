@@ -96,12 +96,16 @@ function SellerGuideStandalone() {
         .comparison-card.competitor:hover { border-color: rgba(185, 28, 28, 0.3); }
         .comparison-card.curio-highlight { 
           background: rgba(220, 38, 38, 0.05); 
-          border: 2px solid hsl(0, 77%, 26%); 
+          border: 2px solid white; 
           grid-column: span 2; 
           display: grid; 
           grid-template-columns: 1fr 1fr; 
           gap: 2rem; 
-          align-items: start; 
+          align-items: start;
+          transition: border-color 0.3s; 
+        }
+        .comparison-card.curio-highlight:hover {
+          border-color: hsl(0, 77%, 26%);
         }
         .comparison-title { font-size: 1.25rem; font-weight: bold; text-align: center; margin-bottom: 0.75rem; color: white; }
         .comparison-fee { font-size: 1.75rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; color: hsl(0, 77%, 26%); }
