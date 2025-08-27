@@ -155,6 +155,7 @@ export default function SellerTerms() {
                 id="terms"
                 checked={agreements.terms}
                 onCheckedChange={() => handleAgreementChange('terms')}
+                className="border-yellow-500 data-[state=checked]:bg-yellow-600 data-[state=checked]:border-yellow-600 focus-visible:ring-yellow-500"
                 data-testid="checkbox-terms"
               />
               <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -167,6 +168,7 @@ export default function SellerTerms() {
                 id="prohibited"
                 checked={agreements.prohibited}
                 onCheckedChange={() => handleAgreementChange('prohibited')}
+                className="border-yellow-500 data-[state=checked]:bg-yellow-600 data-[state=checked]:border-yellow-600 focus-visible:ring-yellow-500"
                 data-testid="checkbox-prohibited"
               />
               <label htmlFor="prohibited" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -179,6 +181,7 @@ export default function SellerTerms() {
                 id="compliance"
                 checked={agreements.compliance}
                 onCheckedChange={() => handleAgreementChange('compliance')}
+                className="border-yellow-500 data-[state=checked]:bg-yellow-600 data-[state=checked]:border-yellow-600 focus-visible:ring-yellow-500"
                 data-testid="checkbox-compliance"
               />
               <label htmlFor="compliance" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -191,6 +194,7 @@ export default function SellerTerms() {
                 id="responsibility"
                 checked={agreements.responsibility}
                 onCheckedChange={() => handleAgreementChange('responsibility')}
+                className="border-yellow-500 data-[state=checked]:bg-yellow-600 data-[state=checked]:border-yellow-600 focus-visible:ring-yellow-500"
                 data-testid="checkbox-responsibility"
               />
               <label htmlFor="responsibility" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
