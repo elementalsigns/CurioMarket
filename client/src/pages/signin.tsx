@@ -139,6 +139,7 @@ export default function SignInPage() {
             <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
               <p className="text-xs text-zinc-500 text-center leading-relaxed">
                 Your account is secured through Replit's authentication system. 
+                You'll be redirected to Replit's secure login page to create or access your account.
                 We'll only access your basic profile information to personalize your experience.
               </p>
             </div>
