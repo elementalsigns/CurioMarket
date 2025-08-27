@@ -1,405 +1,342 @@
-// Privacy Policy page with embedded CSS to avoid React error boundaries
-import { Link } from "wouter";
+import { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+import { Shield, Eye, Lock, Database, Cookie, Mail, Clock, AlertTriangle, FileText } from "lucide-react";
 
 function PrivacyPolicyStandalone() {
+  useEffect(() => {
+    document.title = "Privacy Policy - Curiosities Market";
+  }, []);
+
+  const sections = [
+    {
+      id: "collection",
+      title: "Information Collection",
+      icon: Database,
+      content: "We collect information you provide directly and automatically when you use our platform."
+    },
+    {
+      id: "usage", 
+      title: "How We Use Information",
+      icon: Eye,
+      content: "Your information helps us provide, maintain, and improve our marketplace services."
+    },
+    {
+      id: "sharing",
+      title: "Information Sharing",
+      icon: Shield,
+      content: "We share information only as necessary to provide our services and as required by law."
+    },
+    {
+      id: "security",
+      title: "Data Security",
+      icon: Lock,
+      content: "We implement appropriate security measures to protect your personal information."
+    }
+  ];
+
   return (
-    <div>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Great+Vibes&family=EB+Garamond:wght@400;500;600;700&display=swap");
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a !important; color: white !important; font-family: Georgia, serif !important; }
-        .privacy-container { min-height: 100vh; background: #0a0a0a; color: white; font-family: Georgia, serif; }
-        .nav-bar { background: #0a0a0a; border-bottom: 1px solid #27272a; padding: 1rem 0; }
-        .nav-content { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .logo { 
-          font-size: 1.75rem; 
-          color: white; 
-          font-family: 'EB Garamond', serif;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          font-variant: small-caps;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
-          position: relative;
-          transition: all 0.3s ease;
-          display: inline-block;
-        }
-        .logo:hover {
-          color: hsl(0, 77%, 26%);
-          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5);
-          transform: scale(1.02);
-        }
-        .logo::after {
-          content: '';
-          position: absolute;
-          bottom: -8px;
-          left: -10%;
-          width: 120%;
-          height: 3px;
-          background: linear-gradient(90deg, transparent 0%, hsl(0, 77%, 26%) 15%, hsl(0, 77%, 26%) 85%, transparent 100%);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        .logo:hover::after {
-          opacity: 0.8;
-        }
-        .script-initial {
-          font-family: 'Great Vibes', cursive;
-          font-size: 1.3em;
-          font-weight: normal;
-          position: relative;
-          display: inline-block;
-          margin-right: -0.05em;
-          transform: translateY(-0.05em);
-          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(106, 27, 27, 0.4);
-          transition: all 0.3s ease;
-        }
-        .logo:hover .script-initial {
-          transform: translateY(-0.08em) scale(1.05);
-          text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
-        }
-        .nav-buttons { display: flex; gap: 1rem; }
-        .btn-primary { background: hsl(0, 77%, 26%); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-secondary { background: transparent; color: white; padding: 0.5rem 1rem; border: 1px solid #52525b; border-radius: 4px; cursor: pointer; }
-        .main-content { padding: 3rem 1rem; }
-        .content-wrapper { max-width: 1000px; margin: 0 auto; }
-        .hero { text-align: center; margin-bottom: 4rem; }
-        .hero h1 { font-size: 3.5rem; font-weight: bold; margin: 0 0 1.5rem 0; color: white; }
-        .hero .accent { color: hsl(0, 77%, 26%); }
-        .hero p { font-size: 1.25rem; color: #a1a1aa; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-        .section { margin-bottom: 3rem; }
-        .section h2 { font-size: 2rem; font-weight: 600; margin-bottom: 1.5rem; color: white; }
-        .section h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: white; margin-top: 2rem; }
-        .section p { color: #d4d4d8; line-height: 1.6; margin-bottom: 1.5rem; }
-        .section ul { color: #d4d4d8; line-height: 1.6; margin-bottom: 1.5rem; padding-left: 2rem; }
-        .section li { margin-bottom: 0.5rem; }
-        .contact-info { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 2rem; margin-top: 2rem; }
-        .contact-info h3 { margin-top: 0; }
-        .notice { background: #18181b; border: 2px solid hsl(0, 77%, 26%); border-radius: 8px; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; margin: 2rem 0; }
-        .notice-label { color: hsl(0, 77%, 26%); font-weight: 500; }
-        .notice-text { color: #d4d4d8; }
-        
-        /* Footer Styles - Match home page exactly */
-        .footer { 
-          background: hsl(212, 5%, 5%); 
-          border-top: 1px solid rgba(106, 27, 27, 0.2); 
-          padding: 4rem 1rem; 
-          flex-shrink: 0; 
-        }
-        .footer-container { 
-          max-width: 80rem; 
-          margin: 0 auto; 
-        }
-        .footer-grid { 
-          display: grid; 
-          grid-template-columns: 2fr 1fr 1fr; 
-          gap: 4rem; 
-          margin-bottom: 3rem; 
-        }
-        .footer-brand { 
-          grid-column: span 1; 
-        }
-        .footer-logo { 
-          display: flex; 
-          align-items: center; 
-          margin-bottom: 1rem; 
-        }
-        .curio-logo {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-          font-family: 'EB Garamond', serif;
-        }
-        .slow-letter {
-          transition: color 0.3s ease;
-        }
-        .curio-logo:hover .slow-letter {
-          color: hsl(0, 77%, 26%);
-        }
-        .footer-description { 
-          color: rgba(161, 161, 170, 1); 
-          margin-bottom: 1.5rem; 
-          max-width: 28rem; 
-          line-height: 1.6; 
-        }
-        .footer-section h4 { 
-          color: white; 
-          font-size: 1.125rem; 
-          font-family: Georgia, serif; 
-          font-weight: bold; 
-          margin-bottom: 1rem; 
-        }
-        .footer-links { 
-          list-style: none; 
-          margin: 0;
-          padding: 0;
-        }
-        .footer-links li { 
-          margin-bottom: 0.5rem; 
-        }
-        .footer-link { 
-          color: rgba(161, 161, 170, 1); 
-          text-decoration: none; 
-          transition: color 0.3s, background-color 0.3s; 
-          cursor: pointer; 
-          padding: 0;
-          background: transparent;
-          border: none;
-          font-size: 0.875rem;
-          line-height: 1.25rem;
-          height: auto;
-          display: inline-block;
-        }
-        .footer-link:hover { 
-          color: rgb(220, 38, 38); 
-          background: transparent; 
-        }
-        .footer-bottom { 
-          border-top: 1px solid rgba(106, 27, 27, 0.2); 
-          padding-top: 2rem; 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          flex-wrap: wrap; 
-        }
-        .footer-copyright { 
-          color: rgba(113, 113, 122, 1); 
-          font-size: 0.875rem; 
-          margin-bottom: 1rem; 
-        }
-        .footer-legal { 
-          display: flex; 
-          gap: 1.5rem; 
-          flex-wrap: wrap; 
-        }
-        .footer-legal .footer-link { 
-          color: rgba(113, 113, 122, 1);
-          font-size: 0.875rem; 
-        }
-        .footer-legal .footer-link:hover { 
-          color: rgb(220, 38, 38); 
-        }
-        
-        @media (max-width: 768px) {
-          .footer-grid { 
-            grid-template-columns: 1fr; 
-            gap: 2rem;
-          }
-          .footer-brand { 
-            grid-column: span 1; 
-          }
-          .footer-bottom { 
-            flex-direction: column; 
-            text-align: center; 
-          }
-          .footer-legal { 
-            justify-content: center; 
-          }
-          .footer-copyright { 
-            margin-bottom: 1rem; 
-          }
-        }
-      `}</style>
+    <div className="min-h-screen flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+      <Header />
       
-      <div className="privacy-container">
-        <nav className="nav-bar">
-          <div className="nav-content">
-            <Link to="/" className="logo">
-              <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
-            </Link>
-            <div className="nav-buttons">
-              <button className="btn-primary" onClick={() => window.location.href = '/api/login'}>Sign up</button>
-              <button className="btn-secondary" onClick={() => window.location.href = '/api/login'}>Sign in</button>
+      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+        <div className="container mx-auto max-w-6xl">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center mb-6">
+              <Shield className="w-12 h-12 text-red-600 mr-4" />
+              <h1 className="text-5xl font-serif font-bold text-white">
+                Privacy Policy
+              </h1>
             </div>
+            <p className="text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+              Your privacy matters to us. This policy explains how we collect, use, and protect 
+              your personal information when you use Curio Market.
+            </p>
           </div>
-        </nav>
 
-        <main className="main-content">
-          <div className="content-wrapper">
-            <div className="hero">
-              <h1>Privacy Policy</h1>
-              <p>Protecting your personal information and maintaining your privacy is fundamental to our mission at Curio Market.</p>
-            </div>
-
-            <div className="notice">
-              <span className="notice-label">Notice:</span>
-              <span className="notice-text">This Privacy Policy was last updated on August 20, 2025. We will notify users of any material changes.</span>
-            </div>
-
-            <div className="section">
-              <h2>Information We Collect</h2>
-              <h3>Personal Information</h3>
-              <p>When you create an account or make purchases on Curio Market, we collect:</p>
-              <ul>
-                <li>Name, email address, and contact information</li>
-                <li>Billing and shipping addresses</li>
-                <li>Payment information (processed securely through Stripe)</li>
-                <li>Profile information and preferences</li>
-                <li>Communication history with our support team</li>
-              </ul>
-
-              <h3>Marketplace Activity</h3>
-              <p>We collect information about your activity on our platform:</p>
-              <ul>
-                <li>Listings viewed, searched, and purchased</li>
-                <li>Seller performance metrics and sales data</li>
-                <li>Reviews and ratings you provide</li>
-                <li>Messages exchanged with other users</li>
-                <li>Favorites and watchlists</li>
-              </ul>
-
-              <h3>Technical Information</h3>
-              <p>We automatically collect certain technical data:</p>
-              <ul>
-                <li>IP address and device information</li>
-                <li>Browser type and operating system</li>
-                <li>Pages visited and time spent on our platform</li>
-                <li>Referral sources and search terms</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>How We Use Your Information</h2>
-              <p>We use collected information to:</p>
-              <ul>
-                <li>Provide and improve our marketplace services</li>
-                <li>Process transactions and manage seller subscriptions</li>
-                <li>Communicate about orders, account updates, and platform news</li>
-                <li>Prevent fraud and ensure marketplace safety</li>
-                <li>Personalize your browsing and shopping experience</li>
-                <li>Comply with legal obligations and resolve disputes</li>
-                <li>Conduct research and analytics to improve our platform</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Information Sharing</h2>
-              <p>We may share your information in the following circumstances:</p>
-              <ul>
-                <li><strong>With Sellers:</strong> Purchase information is shared with sellers to fulfill orders</li>
-                <li><strong>Service Providers:</strong> Third-party services like Stripe for payment processing</li>
-                <li><strong>Legal Requirements:</strong> When required by law or to protect our platform</li>
-                <li><strong>Business Transfers:</strong> In case of merger, acquisition, or sale of assets</li>
-                <li><strong>Consent:</strong> When you explicitly authorize us to share information</li>
-              </ul>
-              <p>We never sell your personal information to third parties for marketing purposes.</p>
-            </div>
-
-            <div className="section">
-              <h2>Data Security</h2>
-              <p>We implement industry-standard security measures to protect your information:</p>
-              <ul>
-                <li>Encryption of sensitive data in transit and at rest</li>
-                <li>Secure payment processing through Stripe</li>
-                <li>Regular security audits and vulnerability assessments</li>
-                <li>Access controls and employee training</li>
-                <li>Incident response procedures for data breaches</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Your Rights</h2>
-              <p>You have the following rights regarding your personal information:</p>
-              <ul>
-                <li><strong>Access:</strong> Request a copy of your personal data</li>
-                <li><strong>Correction:</strong> Update or correct inaccurate information</li>
-                <li><strong>Deletion:</strong> Request deletion of your account and data</li>
-                <li><strong>Portability:</strong> Export your data in a common format</li>
-                <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Cookies and Tracking</h2>
-              <p>We use cookies and similar technologies to:</p>
-              <ul>
-                <li>Remember your login status and preferences</li>
-                <li>Analyze site usage and improve performance</li>
-                <li>Provide personalized content and recommendations</li>
-                <li>Prevent fraud and ensure security</li>
-              </ul>
-              <p>You can control cookie settings through your browser preferences.</p>
-            </div>
-
-            <div className="section">
-              <h2>Data Retention</h2>
-              <p>We retain your information for as long as necessary to:</p>
-              <ul>
-                <li>Provide our services and support your account</li>
-                <li>Comply with legal and regulatory requirements</li>
-                <li>Resolve disputes and enforce our agreements</li>
-                <li>Maintain transaction records for tax and audit purposes</li>
-              </ul>
-              <p>You may request account deletion at any time through your account settings.</p>
-            </div>
-
-            <div className="contact-info">
-              <h3>Contact Us</h3>
-              <p>If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:</p>
-              <ul>
-                <li>Email: Info@curiosities.market</li>
-              </ul>
-            </div>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-container">
-            <div className="footer-grid">
-              {/* Brand */}
-              <div className="footer-brand">
-                <div className="footer-logo">
-                  <h3 className="curio-logo">
-                    <span>
-                      <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
-                    </span> <span>
-                      <span className="script-initial">M</span>arket
+          {/* Notice Box */}
+          <div className="mb-12">
+            <Card className="border-red-600/30 bg-red-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="text-red-400 font-medium">Notice: </span>
+                    <span className="text-zinc-300">
+                      This Privacy Policy was last updated on August 20, 2025. We may update this policy periodically.
                     </span>
-                  </h3>
+                  </div>
                 </div>
-                <p className="footer-description">
-                  The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
-                </p>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Shop */}
-              <div className="footer-section">
-                <h4>Shop</h4>
-                <ul className="footer-links">
-                  <li><Link to="/browse"><button className="footer-link">All Categories</button></Link></li>
-                  <li><Link to="/browse?category=wet-specimens"><button className="footer-link">Wet Specimens</button></Link></li>
-                  <li><Link to="/browse?category=taxidermy"><button className="footer-link">Taxidermy</button></Link></li>
-                  <li><Link to="/browse?category=bones-skulls"><button className="footer-link">Bones & Skulls</button></Link></li>
-                  <li><Link to="/browse?category=occult-art"><button className="footer-link">Occult Art</button></Link></li>
-                </ul>
-              </div>
-
-              {/* Support */}
-              <div className="footer-section">
-                <h4>Support</h4>
-                <ul className="footer-links">
-                  <li><Link to="/help"><button className="footer-link">Help Center</button></Link></li>
-                  <li><Link to="/seller/guide"><button className="footer-link">Seller Guide</button></Link></li>
-                  <li><Link to="/safety"><button className="footer-link">Safety Guidelines</button></Link></li>
-                  <li><Link to="/contact"><button className="footer-link">Contact Us</button></Link></li>
-                </ul>
-              </div>
+          {/* Main Content Grid */}
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Sidebar Navigation */}
+            <div className="lg:col-span-1">
+              <Card className="border-zinc-700 bg-zinc-950 sticky top-8">
+                <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-red-600" />
+                    Quick Navigation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {sections.map((section) => (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className="flex items-center gap-2 p-2 rounded-md text-sm text-zinc-400 hover:text-red-400 hover:bg-zinc-800/50 transition-colors"
+                      data-testid={`nav-${section.id}`}
+                    >
+                      <section.icon className="w-4 h-4" />
+                      {section.title}
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Bottom Footer */}
-            <div className="footer-bottom">
-              <p className="footer-copyright">
-                © 2024 Curio Market. All rights reserved.
-              </p>
-              <div className="footer-legal">
-                <Link to="/privacy"><button className="footer-link">Privacy Policy</button></Link>
-                <Link to="/terms"><button className="footer-link">Terms of Service</button></Link>
-                <Link to="/prohibited"><button className="footer-link">Prohibited Items</button></Link>
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-8">
+              
+              {/* Information We Collect */}
+              <section id="collection">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Database className="w-5 h-5 text-red-600" />
+                      Information We Collect
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Information You Provide</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li>Account registration details (username, email)</li>
+                        <li>Profile information and seller details</li>
+                        <li>Payment and billing information</li>
+                        <li>Product listings and descriptions</li>
+                        <li>Messages and communications</li>
+                        <li>Reviews and ratings</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Information We Collect Automatically</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li>Device information and browser data</li>
+                        <li>IP addresses and location data</li>
+                        <li>Usage patterns and site interactions</li>
+                        <li>Cookies and similar technologies</li>
+                        <li>Performance metrics and error logs</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* How We Use Information */}
+              <section id="usage">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Eye className="w-5 h-5 text-red-600" />
+                      How We Use Your Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-zinc-300 leading-relaxed">
+                      We use the information we collect to provide and improve our marketplace services:
+                    </p>
+                    <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                      <li>Create and maintain your account</li>
+                      <li>Process transactions and payments</li>
+                      <li>Facilitate communication between users</li>
+                      <li>Provide customer support and resolve disputes</li>
+                      <li>Detect and prevent fraud and abuse</li>
+                      <li>Analyze usage patterns to improve our platform</li>
+                      <li>Send important service notifications</li>
+                      <li>Comply with legal obligations</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Information Sharing */}
+              <section id="sharing">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-red-600" />
+                      Information Sharing & Disclosure
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">We Share Information With:</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>Other Users:</strong> Public profile information, listings, and reviews</li>
+                        <li><strong>Service Providers:</strong> Payment processors (Stripe), hosting services</li>
+                        <li><strong>Legal Authorities:</strong> When required by law or to protect rights</li>
+                        <li><strong>Business Transfers:</strong> In case of merger or acquisition</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                      <h4 className="font-medium text-amber-400 mb-2">Important:</h4>
+                      <p className="text-zinc-300 text-sm">
+                        We never sell your personal information to third parties or use it for advertising 
+                        purposes outside of our platform.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Data Security */}
+              <section id="security">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-red-600" />
+                      Data Security & Protection
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-zinc-300 leading-relaxed">
+                      We implement industry-standard security measures to protect your information:
+                    </p>
+                    <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                      <li>SSL/TLS encryption for data transmission</li>
+                      <li>Secure payment processing through Stripe</li>
+                      <li>Regular security audits and monitoring</li>
+                      <li>Access controls and authentication</li>
+                      <li>Data backup and recovery systems</li>
+                    </ul>
+                    
+                    <div className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-4">
+                      <p className="text-zinc-300 text-sm">
+                        <strong>Note:</strong> While we strive to protect your information, no method of 
+                        transmission over the internet is 100% secure. Please contact us immediately 
+                        if you suspect any security breach.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Additional Sections Grid */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Cookie className="w-5 h-5 text-red-600" />
+                      Cookies & Tracking
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed mb-3">
+                      We use cookies and similar technologies to enhance your experience:
+                    </p>
+                    <ul className="text-zinc-300 text-xs space-y-1 list-disc list-inside">
+                      <li>Session management and authentication</li>
+                      <li>User preferences and settings</li>
+                      <li>Analytics and performance monitoring</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-red-600" />
+                      Your Rights
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed mb-3">
+                      You have the right to:
+                    </p>
+                    <ul className="text-zinc-300 text-xs space-y-1 list-disc list-inside">
+                      <li>Access and update your information</li>
+                      <li>Delete your account and data</li>
+                      <li>Opt-out of marketing communications</li>
+                      <li>Request data portability</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Database className="w-5 h-5 text-red-600" />
+                      Data Retention
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed">
+                      We retain your information only as long as necessary to provide our services 
+                      and comply with legal obligations. Account data is typically deleted within 
+                      30 days of account closure.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-red-600" />
+                      Policy Updates
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed">
+                      We may update this policy periodically. Significant changes will be communicated 
+                      via email or platform notifications. Continued use constitutes acceptance of updates.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
+
+              {/* Contact Information */}
+              <Card className="border-zinc-700 bg-zinc-950">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-red-600" />
+                    Privacy Questions & Concerns
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-zinc-300 mb-4">
+                    If you have questions about this Privacy Policy or how we handle your information:
+                  </p>
+                  <div className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-4">
+                    <div className="space-y-2">
+                      <p className="text-zinc-300">
+                        <span className="text-red-400 font-medium">Email:</span> Info@curiosities.market
+                      </p>
+                      <p className="text-zinc-300">
+                        <span className="text-red-400 font-medium">Subject:</span> Privacy Policy Inquiry
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="mt-3 border-zinc-600 text-zinc-400">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Response within 48 hours
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

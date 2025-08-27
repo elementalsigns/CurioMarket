@@ -1,462 +1,381 @@
-// Prohibited Items page with embedded CSS to avoid React error boundaries
-import { Link } from "wouter";
+import { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+import { AlertTriangle, Ban, Shield, Gavel, FileText, Clock, Mail, AlertCircle } from "lucide-react";
 
 function ProhibitedItemsStandalone() {
+  useEffect(() => {
+    document.title = "Prohibited Items Policy - Curiosities Market";
+  }, []);
+
+  const sections = [
+    {
+      id: "strictly-forbidden",
+      title: "Strictly Forbidden Items",
+      icon: Ban,
+      content: "Items that are completely prohibited on our platform under any circumstances."
+    },
+    {
+      id: "regulated",
+      title: "Regulated Items", 
+      icon: Gavel,
+      content: "Items requiring special permits, documentation, or compliance with regulations."
+    },
+    {
+      id: "restricted",
+      title: "Restricted Categories",
+      icon: Shield,
+      content: "Categories with specific limitations and requirements for listing."
+    },
+    {
+      id: "enforcement",
+      title: "Policy Enforcement",
+      icon: AlertTriangle,
+      content: "How we enforce these policies and consequences for violations."
+    }
+  ];
+
   return (
-    <div>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Great+Vibes&family=EB+Garamond:wght@400;500;600;700&display=swap");
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a !important; color: white !important; font-family: Georgia, serif !important; }
-        .prohibited-container { min-height: 100vh; background: #0a0a0a; color: white; font-family: Georgia, serif; }
-        .nav-bar { background: #0a0a0a; border-bottom: 1px solid #27272a; padding: 1rem 0; }
-        .nav-content { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .logo { 
-          font-size: 1.75rem; 
-          color: white; 
-          font-family: 'EB Garamond', serif;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          font-variant: small-caps;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
-          position: relative;
-          transition: all 0.3s ease;
-          display: inline-block;
-        }
-        .logo:hover {
-          color: hsl(0, 77%, 26%);
-          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(106, 27, 27, 0.5);
-          transform: scale(1.02);
-        }
-        .logo::after {
-          content: '';
-          position: absolute;
-          bottom: -8px;
-          left: -10%;
-          width: 120%;
-          height: 3px;
-          background: linear-gradient(90deg, transparent 0%, hsl(0, 77%, 26%) 15%, hsl(0, 77%, 26%) 85%, transparent 100%);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        .logo:hover::after {
-          opacity: 0.8;
-        }
-        .script-initial {
-          font-family: 'Great Vibes', cursive;
-          font-size: 1.3em;
-          font-weight: normal;
-          position: relative;
-          display: inline-block;
-          margin-right: -0.05em;
-          transform: translateY(-0.05em);
-          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(106, 27, 27, 0.4);
-          transition: all 0.3s ease;
-        }
-        .logo:hover .script-initial {
-          transform: translateY(-0.08em) scale(1.05);
-          text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(106, 27, 27, 0.6);
-        }
-        .nav-buttons { display: flex; gap: 1rem; }
-        .btn-primary { background: hsl(0, 77%, 26%); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-secondary { background: transparent; color: white; padding: 0.5rem 1rem; border: 1px solid #52525b; border-radius: 4px; cursor: pointer; }
-        .main-content { padding: 3rem 1rem; }
-        .content-wrapper { max-width: 1000px; margin: 0 auto; }
-        .hero { text-align: center; margin-bottom: 4rem; }
-        .hero h1 { font-size: 3.5rem; font-weight: bold; margin: 0 0 1.5rem 0; color: white; }
-        .hero .accent { color: hsl(0, 77%, 26%); }
-        .hero p { font-size: 1.25rem; color: #a1a1aa; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-        .section { margin-bottom: 3rem; }
-        .section h2 { font-size: 2rem; font-weight: 600; margin-bottom: 1.5rem; color: white; }
-        .section h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: white; margin-top: 2rem; }
-        .section p { color: #d4d4d8; line-height: 1.6; margin-bottom: 1.5rem; }
-        .section ul { color: #d4d4d8; line-height: 1.6; margin-bottom: 1.5rem; padding-left: 2rem; }
-        .section li { margin-bottom: 0.5rem; }
-        .contact-info { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 2rem; margin-top: 2rem; }
-        .contact-info h3 { margin-top: 0; }
-        .notice { background: #18181b; border: 2px solid hsl(0, 77%, 26%); border-radius: 8px; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; margin: 2rem 0; }
-        .notice-label { color: hsl(0, 77%, 26%); font-weight: 500; }
-        .notice-text { color: #d4d4d8; }
-        .warning { background: #18181b; border: 2px solid #dc2626; border-radius: 8px; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; margin: 2rem 0; }
-        .warning-label { color: #dc2626; font-weight: 500; }
-        .warning-text { color: #d4d4d8; }
-        .category-box { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
-        .category-box h3 { margin-top: 0; color: hsl(0, 77%, 26%); }
-        
-        /* Footer Styles - Match home page exactly */
-        .footer { 
-          background: hsl(212, 5%, 5%); 
-          border-top: 1px solid rgba(106, 27, 27, 0.2); 
-          padding: 4rem 1rem; 
-          flex-shrink: 0; 
-        }
-        .footer-container { 
-          max-width: 80rem; 
-          margin: 0 auto; 
-        }
-        .footer-grid { 
-          display: grid; 
-          grid-template-columns: 2fr 1fr 1fr; 
-          gap: 4rem; 
-          margin-bottom: 3rem; 
-        }
-        .footer-brand { 
-          grid-column: span 1; 
-        }
-        .footer-logo { 
-          display: flex; 
-          align-items: center; 
-          margin-bottom: 1rem; 
-        }
-        .curio-logo {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-          font-family: 'EB Garamond', serif;
-        }
-        .slow-letter {
-          transition: color 0.3s ease;
-        }
-        .curio-logo:hover .slow-letter {
-          color: hsl(0, 77%, 26%);
-        }
-        .footer-description { 
-          color: rgba(161, 161, 170, 1); 
-          margin-bottom: 1.5rem; 
-          max-width: 28rem; 
-          line-height: 1.6; 
-        }
-        .footer-section h4 { 
-          color: white; 
-          font-size: 1.125rem; 
-          font-family: Georgia, serif; 
-          font-weight: bold; 
-          margin-bottom: 1rem; 
-        }
-        .footer-links { 
-          list-style: none; 
-          margin: 0;
-          padding: 0;
-        }
-        .footer-links li { 
-          margin-bottom: 0.5rem; 
-        }
-        .footer-link { 
-          color: rgba(161, 161, 170, 1); 
-          text-decoration: none; 
-          transition: color 0.3s, background-color 0.3s; 
-          cursor: pointer; 
-          padding: 0;
-          background: transparent;
-          border: none;
-          font-size: 0.875rem;
-          line-height: 1.25rem;
-          height: auto;
-          display: inline-block;
-        }
-        .footer-link:hover { 
-          color: rgb(220, 38, 38); 
-          background: transparent; 
-        }
-        .footer-bottom { 
-          border-top: 1px solid rgba(106, 27, 27, 0.2); 
-          padding-top: 2rem; 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          flex-wrap: wrap; 
-        }
-        .footer-copyright { 
-          color: rgba(113, 113, 122, 1); 
-          font-size: 0.875rem; 
-          margin-bottom: 1rem; 
-        }
-        .footer-legal { 
-          display: flex; 
-          gap: 1.5rem; 
-          flex-wrap: wrap; 
-        }
-        .footer-legal .footer-link { 
-          color: rgba(113, 113, 122, 1);
-          font-size: 0.875rem; 
-        }
-        .footer-legal .footer-link:hover { 
-          color: rgb(220, 38, 38); 
-        }
-        
-        @media (max-width: 768px) {
-          .footer-grid { 
-            grid-template-columns: 1fr; 
-            gap: 2rem;
-          }
-          .footer-brand { 
-            grid-column: span 1; 
-          }
-          .footer-bottom { 
-            flex-direction: column; 
-            text-align: center; 
-          }
-          .footer-legal { 
-            justify-content: center; 
-          }
-          .footer-copyright { 
-            margin-bottom: 1rem; 
-          }
-        }
-      `}</style>
+    <div className="min-h-screen flex flex-col" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+      <Header />
       
-      <div className="prohibited-container">
-        <nav className="nav-bar">
-          <div className="nav-content">
-            <Link to="/" className="logo">
-              <span className="script-initial">C</span>urio <em><span className="script-initial">M</span>arket</em>
-            </Link>
-            <div className="nav-buttons">
-              <button className="btn-primary" onClick={() => window.location.href = '/api/login'}>Sign up</button>
-              <button className="btn-secondary" onClick={() => window.location.href = '/api/login'}>Sign in</button>
+      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8" style={{backgroundColor: 'hsl(212, 5%, 5%)'}}>
+        <div className="container mx-auto max-w-6xl">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center mb-6">
+              <Ban className="w-12 h-12 text-red-600 mr-4" />
+              <h1 className="text-5xl font-serif font-bold text-white">
+                Prohibited Items Policy
+              </h1>
             </div>
+            <p className="text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+              To ensure safety and legal compliance, certain items are prohibited or restricted 
+              on Curio Market. Please review these guidelines before listing.
+            </p>
           </div>
-        </nav>
 
-        <main className="main-content">
-          <div className="content-wrapper">
-            <div className="hero">
-              <h1>Prohibited Items</h1>
-              <p>Maintaining ethical standards and legal compliance is essential to preserving the integrity of our marketplace and protecting our community.</p>
-            </div>
-
-            <div className="warning">
-              <span className="warning-label">Warning:</span>
-              <span className="warning-text">Listing prohibited items may result in immediate account suspension, legal action, and reporting to appropriate authorities.</span>
-            </div>
-
-            <div className="section">
-              <h2>Enforcement Policy</h2>
-              <p>Curio Market maintains strict policies regarding prohibited items to ensure legal compliance, ethical standards, and community safety. All listings are subject to review, and violations will result in immediate action including but not limited to:</p>
-              <ul>
-                <li>Immediate listing removal</li>
-                <li>Account suspension or permanent ban</li>
-                <li>Forfeiture of seller fees and earnings</li>
-                <li>Reporting to law enforcement agencies</li>
-                <li>Legal action for damages or violations</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Strictly Prohibited Categories</h2>
-
-              <div className="category-box">
-                <h3>Human Remains and Artifacts</h3>
-                <p><strong>Prohibited items include:</strong></p>
-                <ul>
-                  <li>Human remains, bones, skulls, or any body parts (except teeth and hair)</li>
-                  <li>Funeral artifacts containing human remains</li>
-                  <li>Medical specimens derived from human sources (except teeth and hair)</li>
-                  <li>Items crafted from human materials (except teeth and hair)</li>
-                  <li>Photographs or documentation of human remains</li>
-                  <li>Replicas or casts claiming to be from human sources</li>
-                </ul>
-                <p><strong>Permitted exceptions:</strong></p>
-                <ul>
-                  <li>Human teeth (properly documented and ethically sourced)</li>
-                  <li>Human hair (properly documented and ethically sourced)</li>
-                </ul>
-                <div className="notice">
-                  <span className="notice-label">Notice:</span>
-                  <span className="notice-text">All human specimens and bones are prohibited except for teeth and hair, which must be properly documented and ethically sourced. This policy applies to historical, archaeological, medical, or educational specimens regardless of age or origin.</span>
-                </div>
-              </div>
-
-              <div className="category-box">
-                <h3>Protected and Threatened Species</h3>
-                <p><strong>Items from species protected under CITES, ESA, or local wildlife laws:</strong></p>
-                <ul>
-                  <li>Specimens from endangered or threatened species</li>
-                  <li>Parts, products, or derivatives from protected animals</li>
-                  <li>Ivory, rhino horn, or other restricted materials</li>
-                  <li>Marine mammal parts (whales, dolphins, seals)</li>
-                  <li>Birds of prey or migratory bird specimens</li>
-                  <li>Big cat parts (tigers, leopards, jaguars)</li>
-                  <li>Pangolin scales or other pangolin products</li>
-                  <li>Turtle shells from protected species</li>
-                  <li>Coral specimens from protected reefs</li>
-                </ul>
-                <div className="notice">
-                  <span className="notice-label">Notice:</span>
-                  <span className="notice-text">Valid documentation and permits are required for any wildlife specimens. When in doubt, contact authorities before listing.</span>
-                </div>
-              </div>
-
-              <div className="category-box">
-                <h3>Illegal Wildlife Trade</h3>
-                <p><strong>Items supporting illegal poaching or trafficking:</strong></p>
-                <ul>
-                  <li>Recently poached or illegally obtained specimens</li>
-                  <li>Items without proper provenance documentation</li>
-                  <li>Specimens from protected habitats or reserves</li>
-                  <li>Parts from animals killed illegally</li>
-                  <li>Items that encourage harmful collection practices</li>
-                </ul>
-              </div>
-
-              <div className="category-box">
-                <h3>Hazardous and Toxic Materials</h3>
-                <p><strong>Items posing health or safety risks:</strong></p>
-                <ul>
-                  <li>Radioactive materials or specimens</li>
-                  <li>Toxic or poisonous substances</li>
-                  <li>Biological pathogens or disease vectors</li>
-                  <li>Asbestos-containing materials</li>
-                  <li>Lead-based paints or toxic chemicals</li>
-                  <li>Improperly preserved specimens with bacterial risks</li>
-                </ul>
-              </div>
-
-              <div className="category-box">
-                <h3>Stolen or Misappropriated Items</h3>
-                <p><strong>Items obtained through illegal means:</strong></p>
-                <ul>
-                  <li>Stolen artifacts or specimens</li>
-                  <li>Items removed from museums or collections without permission</li>
-                  <li>Archaeological artifacts obtained illegally</li>
-                  <li>Items violating cultural patrimony laws</li>
-                  <li>Specimens taken from protected areas without permits</li>
-                </ul>
-              </div>
-
-              <div className="category-box">
-                <h3>Weapons and Dangerous Items</h3>
-                <p><strong>Items that could cause harm:</strong></p>
-                <ul>
-                  <li>Firearms, ammunition, or weapon components</li>
-                  <li>Explosives or incendiary devices</li>
-                  <li>Chemical weapons or biological agents</li>
-                  <li>Items designed primarily to cause harm</li>
-                </ul>
-              </div>
-
-              <div className="category-box">
-                <h3>Inappropriate Content</h3>
-                <p><strong>Items violating community standards:</strong></p>
-                <ul>
-                  <li>Pornographic or sexually explicit materials</li>
-                  <li>Items promoting violence or hatred</li>
-                  <li>Offensive or discriminatory content</li>
-                  <li>Items violating intellectual property rights</li>
-                  <li>Counterfeit or fraudulent specimens</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="section">
-              <h2>Documentation Requirements</h2>
-              <p>For items in gray areas or requiring special permits, sellers must provide:</p>
-              <ul>
-                <li>Certificates of legal acquisition</li>
-                <li>CITES permits for protected species</li>
-                <li>Provenance documentation showing legal chain of custody</li>
-                <li>Import/export permits where applicable</li>
-                <li>Laboratory testing results for safety verification</li>
-                <li>Authentication certificates from recognized authorities</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Reporting Violations</h2>
-              <p>If you encounter prohibited items or suspicious listings:</p>
-              <ul>
-                <li>Report immediately through our reporting system</li>
-                <li>Do not purchase or promote questionable items</li>
-                <li>Contact law enforcement for serious violations</li>
-                <li>Provide detailed information and evidence</li>
-              </ul>
-            </div>
-
-            <div className="section">
-              <h2>Seller Responsibilities</h2>
-              <p>All sellers are responsible for:</p>
-              <ul>
-                <li>Verifying the legality of all listed items</li>
-                <li>Obtaining necessary permits and documentation</li>
-                <li>Understanding applicable local, national, and international laws</li>
-                <li>Maintaining ethical collection and sales practices</li>
-                <li>Cooperating with marketplace investigations</li>
-              </ul>
-            </div>
-
-            <div className="notice">
-              <span className="notice-label">Notice:</span>
-              <span className="notice-text">This list is not exhaustive. When in doubt, contact our compliance team before listing any questionable items. Ignorance of laws or regulations is not a valid defense.</span>
-            </div>
-
-            <div className="contact-info">
-              <h3>Compliance Contact</h3>
-              <p>For questions about prohibited items or to report violations:</p>
-              <ul>
-                <li>Email: Info@curiosities.market</li>
-              </ul>
-            </div>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-container">
-            <div className="footer-grid">
-              {/* Brand */}
-              <div className="footer-brand">
-                <div className="footer-logo">
-                  <h3 className="curio-logo">
-                    <span>
-                      <span className="script-initial">C</span><span className="slow-letter">u</span>r<span className="slow-letter">i</span>o
-                    </span> <span>
-                      <span className="script-initial">M</span>arket
+          {/* Notice Box */}
+          <div className="mb-12">
+            <Card className="border-red-600/30 bg-red-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="text-red-400 font-medium">Notice: </span>
+                    <span className="text-zinc-300">
+                      This policy was last updated on August 20, 2025. Sellers are responsible for 
+                      ensuring compliance with all applicable laws and regulations.
                     </span>
-                  </h3>
+                  </div>
                 </div>
-                <p className="footer-description">
-                  The independent marketplace for oddities, curios, and specimens. Built by collectors, for collectors.
-                </p>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Shop */}
-              <div className="footer-section">
-                <h4>Shop</h4>
-                <ul className="footer-links">
-                  <li><Link to="/browse"><button className="footer-link">All Categories</button></Link></li>
-                  <li><Link to="/browse?category=wet-specimens"><button className="footer-link">Wet Specimens</button></Link></li>
-                  <li><Link to="/browse?category=taxidermy"><button className="footer-link">Taxidermy</button></Link></li>
-                  <li><Link to="/browse?category=bones-skulls"><button className="footer-link">Bones & Skulls</button></Link></li>
-                  <li><Link to="/browse?category=occult-art"><button className="footer-link">Occult Art</button></Link></li>
-                </ul>
-              </div>
-
-              {/* Support */}
-              <div className="footer-section">
-                <h4>Support</h4>
-                <ul className="footer-links">
-                  <li><Link to="/help"><button className="footer-link">Help Center</button></Link></li>
-                  <li><Link to="/seller/guide"><button className="footer-link">Seller Guide</button></Link></li>
-                  <li><Link to="/safety"><button className="footer-link">Safety Guidelines</button></Link></li>
-                  <li><Link to="/contact"><button className="footer-link">Contact Us</button></Link></li>
-                </ul>
-              </div>
+          {/* Main Content Grid */}
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Sidebar Navigation */}
+            <div className="lg:col-span-1">
+              <Card className="border-zinc-700 bg-zinc-950 sticky top-8">
+                <CardHeader>
+                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-red-600" />
+                    Policy Sections
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {sections.map((section) => (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className="flex items-center gap-2 p-2 rounded-md text-sm text-zinc-400 hover:text-red-400 hover:bg-zinc-800/50 transition-colors"
+                      data-testid={`nav-${section.id}`}
+                    >
+                      <section.icon className="w-4 h-4" />
+                      {section.title}
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Bottom Footer */}
-            <div className="footer-bottom">
-              <p className="footer-copyright">
-                © 2024 Curio Market. All rights reserved.
-              </p>
-              <div className="footer-legal">
-                <Link to="/privacy"><button className="footer-link">Privacy Policy</button></Link>
-                <Link to="/terms"><button className="footer-link">Terms of Service</button></Link>
-                <Link to="/prohibited"><button className="footer-link">Prohibited Items</button></Link>
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-8">
+              
+              {/* Strictly Forbidden Items */}
+              <section id="strictly-forbidden">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Ban className="w-5 h-5 text-red-600" />
+                      Strictly Forbidden Items
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <p className="text-zinc-300 leading-relaxed">
+                      The following items are completely prohibited and will result in immediate 
+                      listing removal and potential account suspension:
+                    </p>
+                    
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Living Animals & Plants</h3>
+                      <ul className="text-zinc-300 space-y-1 list-disc list-inside">
+                        <li>Live animals of any kind</li>
+                        <li>Living plants (including endangered species)</li>
+                        <li>Fertilized eggs or embryos</li>
+                        <li>Living insects or arthropods</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Human Remains & Body Parts</h3>
+                      <ul className="text-zinc-300 space-y-1 list-disc list-inside">
+                        <li>Human bones, skulls, or skeletal remains</li>
+                        <li>Human organs, tissues, or body parts</li>
+                        <li>Human hair or teeth (with exceptions for antique jewelry)</li>
+                        <li>Medical specimens containing human material</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Dangerous & Illegal Items</h3>
+                      <ul className="text-zinc-300 space-y-1 list-disc list-inside">
+                        <li>Weapons of any kind (guns, knives, explosives)</li>
+                        <li>Hazardous chemicals or toxic substances</li>
+                        <li>Radioactive materials</li>
+                        <li>Items made from endangered species (see CITES regulations)</li>
+                        <li>Stolen or illegally obtained items</li>
+                        <li>Counterfeit or replica items misrepresented as authentic</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Regulated Items */}
+              <section id="regulated">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Gavel className="w-5 h-5 text-red-600" />
+                      Regulated Items Requiring Documentation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                      <h4 className="font-medium text-amber-400 mb-2">Important:</h4>
+                      <p className="text-zinc-300 text-sm">
+                        These items may be listed only with proper documentation and compliance 
+                        with applicable laws. Sellers are responsible for obtaining all necessary permits.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Antique & Vintage Items</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>Pre-1900 Animal Specimens:</strong> Require age verification and legal sourcing documentation</li>
+                        <li><strong>Antique Medical Equipment:</strong> Must be clearly marked as non-functional and for display only</li>
+                        <li><strong>Historical Artifacts:</strong> Require provenance documentation and export permits if applicable</li>
+                        <li><strong>Vintage Taxidermy:</strong> Must include species identification and age verification</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Animal Products & Specimens</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>Modern Taxidermy:</strong> Require hunting licenses or legal acquisition documentation</li>
+                        <li><strong>Bones & Skulls:</strong> Must be from legally obtained sources with documentation</li>
+                        <li><strong>Wet Specimens:</strong> Require proper preservation and species identification</li>
+                        <li><strong>Insect Collections:</strong> Must comply with CITES regulations for protected species</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">International Shipping Restrictions</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li>Items subject to CITES regulations require proper permits</li>
+                        <li>Certain countries prohibit import/export of specific materials</li>
+                        <li>Sellers must research destination country requirements</li>
+                        <li>Customs declarations must be accurate and complete</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Restricted Categories */}
+              <section id="restricted">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-red-600" />
+                      Restricted Categories
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <p className="text-zinc-300 leading-relaxed">
+                      These categories have specific restrictions and requirements:
+                    </p>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Medical & Scientific Items</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>Vintage Medical Equipment:</strong> Must be clearly non-functional and for display only</li>
+                        <li><strong>Scientific Specimens:</strong> Require proper preservation and identification</li>
+                        <li><strong>Laboratory Equipment:</strong> Must be cleaned and safe for handling</li>
+                        <li><strong>Anatomical Models:</strong> Vintage and antique models only (no modern reproductions)</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Occult & Esoteric Items</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>Ritual Objects:</strong> Vintage and antique items only</li>
+                        <li><strong>Divination Tools:</strong> Historical significance preferred</li>
+                        <li><strong>Grimoires & Texts:</strong> Genuine antique or reproduction clearly marked</li>
+                        <li><strong>Amulets & Talismans:</strong> Must be presented as historical/collectible items</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Religious & Cultural Items</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li>Items must not be stolen from religious institutions</li>
+                        <li>Cultural artifacts require provenance documentation</li>
+                        <li>Native American items subject to additional federal regulations</li>
+                        <li>Sellers must respect cultural sensitivities in descriptions</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Policy Enforcement */}
+              <section id="enforcement">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                      Policy Enforcement & Consequences
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Violation Consequences</h3>
+                      <ul className="text-zinc-300 space-y-2 list-disc list-inside">
+                        <li><strong>First Offense:</strong> Listing removal and warning notification</li>
+                        <li><strong>Repeat Violations:</strong> Temporary account suspension (7-30 days)</li>
+                        <li><strong>Serious Violations:</strong> Permanent account termination</li>
+                        <li><strong>Legal Issues:</strong> Cooperation with law enforcement as required</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3">Reporting Violations</h3>
+                      <p className="text-zinc-300 mb-3">
+                        Users can report policy violations through:
+                      </p>
+                      <ul className="text-zinc-300 space-y-1 list-disc list-inside">
+                        <li>Listing report buttons</li>
+                        <li>Email to our moderation team</li>
+                        <li>Contact form with violation details</li>
+                        <li>Anonymous tip system</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-4">
+                      <h4 className="text-white font-medium mb-2">Seller Responsibility</h4>
+                      <p className="text-zinc-300 text-sm">
+                        Sellers are solely responsible for ensuring their items comply with all 
+                        applicable laws, regulations, and platform policies. When in doubt, 
+                        contact our team before listing.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Additional Guidelines Grid */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-red-600" />
+                      Documentation Requirements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed mb-3">
+                      Required documentation may include:
+                    </p>
+                    <ul className="text-zinc-300 text-xs space-y-1 list-disc list-inside">
+                      <li>Proof of legal acquisition</li>
+                      <li>Age verification certificates</li>
+                      <li>Import/export permits</li>
+                      <li>Species identification documentation</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-zinc-700 bg-zinc-950">
+                  <CardHeader>
+                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-red-600" />
+                      Best Practices
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-zinc-300 text-sm leading-relaxed mb-3">
+                      To ensure compliance:
+                    </p>
+                    <ul className="text-zinc-300 text-xs space-y-1 list-disc list-inside">
+                      <li>Research all applicable laws</li>
+                      <li>Maintain detailed records</li>
+                      <li>Use accurate, honest descriptions</li>
+                      <li>Contact support when uncertain</li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
+
+              {/* Contact Information */}
+              <Card className="border-zinc-700 bg-zinc-950">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-red-600" />
+                    Policy Questions & Clarifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-zinc-300 mb-4">
+                    If you have questions about our prohibited items policy or need clarification 
+                    on whether an item can be listed:
+                  </p>
+                  <div className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-4">
+                    <div className="space-y-2">
+                      <p className="text-zinc-300">
+                        <span className="text-red-400 font-medium">Email:</span> Info@curiosities.market
+                      </p>
+                      <p className="text-zinc-300">
+                        <span className="text-red-400 font-medium">Subject:</span> Prohibited Items Policy Question
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="mt-3 border-zinc-600 text-zinc-400">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Response within 24 hours
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
