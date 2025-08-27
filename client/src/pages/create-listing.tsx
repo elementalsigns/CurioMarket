@@ -16,7 +16,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Upload, X, Eye } from "lucide-react";
+import { Upload, X, Eye, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const createListingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -28,6 +36,8 @@ const createListingSchema = z.object({
   provenance: z.string().optional(),
   shippingCost: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, "Shipping cost must be a valid number"),
   tags: z.string().optional(),
+  sku: z.string().optional(),
+  mpn: z.string().optional(),
 });
 
 type CreateListingForm = z.infer<typeof createListingSchema>;
@@ -316,6 +326,127 @@ export default function CreateListing() {
                         className="mt-1"
                         data-testid="input-tags"
                       />
+                    </div>
+                  </div>
+
+                  {/* Product Identifiers */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-lg font-serif font-bold">Product Identifiers</h3>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="p-1 h-auto text-foreground/60 hover:text-foreground">
+                            <Info size={16} />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="font-serif">Why are SKU and MPN Important?</DialogTitle>
+                            <DialogDescription className="space-y-3 text-left">
+                              <p>
+                                <strong>SKU (Stock Keeping Unit)</strong> and <strong>MPN (Manufacturer Part Number)</strong> 
+                                are product identifiers that significantly improve your listing's visibility and performance.
+                              </p>
+                              <p>
+                                <strong>Benefits for Google Shopping:</strong>
+                              </p>
+                              <ul className="list-disc list-inside space-y-1 text-sm">
+                                <li>Enhanced product matching and categorization</li>
+                                <li>Improved search ranking and visibility</li>
+                                <li>Better product comparison functionality</li>
+                                <li>Increased click-through rates from Google Shopping ads</li>
+                              </ul>
+                              <p>
+                                <strong>These identifiers are completely free to use</strong> and can be created by you 
+                                for unique items. For manufactured goods, use the actual MPN when available.
+                              </p>
+                              <p className="text-sm font-medium">
+                                Adding these identifiers helps Google better understand and promote your unique curiosities 
+                                to interested collectors and enthusiasts.
+                              </p>
+                            </DialogDescription>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sku">SKU (Stock Keeping Unit)</Label>
+                        <Input
+                          id="sku"
+                          {...register("sku")}
+                          placeholder="e.g., VIC-OCT-001"
+                          className="mt-1"
+                          data-testid="input-sku"
+                        />
+                        <p className="text-xs text-foreground/60 mt-1">
+                          Your unique identifier for this item
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="mpn">MPN (Manufacturer Part Number)</Label>
+                        <Input
+                          id="mpn"
+                          {...register("mpn")}
+                          placeholder="e.g., SPEC-8ARM-1885"
+                          className="mt-1"
+                          data-testid="input-mpn"
+                        />
+                        <p className="text-xs text-foreground/60 mt-1">
+                          Original maker's identifier, if applicable
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="link" className="text-sm text-foreground/70 hover:text-foreground underline p-0 h-auto">
+                            Why is this important?
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-lg">
+                          <DialogHeader>
+                            <DialogTitle className="font-serif">Boost Your Visibility with Product Identifiers</DialogTitle>
+                            <DialogDescription className="space-y-4 text-left">
+                              <div>
+                                <h4 className="font-medium text-foreground mb-2">Google Shopping Advantages</h4>
+                                <p className="text-sm">
+                                  Product identifiers like SKU and MPN help Google Shopping algorithms better understand, 
+                                  categorize, and promote your unique items to the right audience.
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <h4 className="font-medium text-foreground mb-2">Key Benefits</h4>
+                                <ul className="text-sm space-y-1">
+                                  <li>• <strong>Improved Search Rankings:</strong> Better visibility in Google Shopping results</li>
+                                  <li>• <strong>Enhanced Product Matching:</strong> More accurate categorization of your items</li>
+                                  <li>• <strong>Professional Appearance:</strong> Shows attention to detail and professionalism</li>
+                                  <li>• <strong>Inventory Management:</strong> Easier tracking of your unique items</li>
+                                </ul>
+                              </div>
+                              
+                              <div>
+                                <h4 className="font-medium text-foreground mb-2">Completely Free</h4>
+                                <p className="text-sm">
+                                  These identifiers cost nothing to implement. For unique curiosities, you can create your own 
+                                  SKU system (e.g., "SKULL-RAVEN-001"). For items with existing manufacturer numbers, use those when available.
+                                </p>
+                              </div>
+                              
+                              <div className="bg-muted/30 p-3 rounded-lg">
+                                <p className="text-sm font-medium">
+                                  Adding SKU and MPN helps Google connect serious collectors and enthusiasts with your unique items, 
+                                  potentially increasing both visibility and sales.
+                                </p>
+                              </div>
+                            </DialogDescription>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
 
