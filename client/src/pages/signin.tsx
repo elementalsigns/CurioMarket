@@ -28,7 +28,7 @@ export default function SignInPage() {
                   filter: 'drop-shadow(0 0 8px hsl(351, 67%, 36%))'
                 }}
               >
-                C.M
+                CM
               </div>
             </div>
             
