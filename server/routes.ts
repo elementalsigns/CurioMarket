@@ -228,10 +228,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Verify user has active subscription (skip in development mode)
+      // Verify user has active subscription (skip in development mode or testing mode)
       const isDevelopment = process.env.NODE_ENV === 'development';
+      const isTestingMode = process.env.BYPASS_SUBSCRIPTION_FOR_TESTING === 'true';
       
-      if (!isDevelopment) {
+      if (!isDevelopment && !isTestingMode) {
         if (!user.stripeSubscriptionId) {
           return res.status(403).json({ error: "Active seller subscription required" });
         }
