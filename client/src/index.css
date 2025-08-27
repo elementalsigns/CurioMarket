@@ -18,6 +18,43 @@ html, body {
   color: hsl(0, 0%, 100%) !important;
 }
 
+/* Mobile viewport optimizations for iPhone 16 and similar devices */
+@media screen and (max-width: 430px) {
+  .curio-logo {
+    font-size: 0.875rem !important; /* 14px */
+  }
+  
+  /* Ensure proper spacing on small screens */
+  [data-testid="mobile-logo"] h1 {
+    letter-spacing: -0.025em;
+  }
+  
+  /* Optimize button sizes for smaller screens */
+  [data-testid="button-mobile-menu"],
+  [data-testid="button-cart-mobile"] {
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0.375rem !important;
+  }
+  
+  /* Reduce header padding on very small screens */
+  nav [class*="container"] {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* iPhone 16 specific optimizations (393px width) */
+@media screen and (max-width: 393px) {
+  .curio-logo {
+    font-size: 0.8125rem !important; /* 13px */
+  }
+  
+  [data-testid="mobile-logo"] {
+    max-width: 160px !important;
+  }
+}
+
 /* Ensure all main containers use black background */
 #root {
   background-color: hsl(212, 5%, 5%) !important;

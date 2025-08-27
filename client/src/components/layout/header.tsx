@@ -153,20 +153,20 @@ export default function Header() {
           </div>
 
           {/* Mobile Layout */}
-          <div className="md:hidden flex items-center justify-between w-full min-h-[44px]">
+          <div className="md:hidden flex items-center justify-between w-full min-h-[48px]">
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
-              className="text-foreground p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="text-foreground p-1.5 min-w-[40px] min-h-[40px] flex items-center justify-center"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
-              <Menu size={18} className="sm:w-5 sm:h-5" />
+              <Menu size={20} />
             </Button>
 
             {/* Mobile Logo */}
-            <Link to="/" className="flex items-center flex-1 justify-center px-2" data-testid="mobile-logo">
-              <h1 className="text-base sm:text-lg curio-logo font-bold text-white whitespace-nowrap">
+            <Link to="/" className="flex items-center flex-1 justify-center px-1" data-testid="mobile-logo">
+              <h1 className="text-sm xs:text-base sm:text-lg curio-logo font-bold text-white whitespace-nowrap max-w-[200px] text-center">
                 <span>
                   <span className="script-initial">C</span>urio
                 </span> <span>
@@ -178,11 +178,11 @@ export default function Header() {
             {/* Mobile Cart */}
             <Button 
               variant="ghost" 
-              className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="text-foreground hover:text-red-600 hover:bg-transparent p-1.5 relative transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
               onClick={() => setCartOpen(true)}
               data-testid="button-cart-mobile"
             >
-              <ShoppingCart size={18} className="sm:w-5 sm:h-5" />
+              <ShoppingCart size={20} />
               {isAuthenticated && cartItemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium" data-testid="cart-count-mobile">
                   {cartItemCount > 99 ? '99+' : cartItemCount}
