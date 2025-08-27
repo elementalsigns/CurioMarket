@@ -223,7 +223,7 @@ function ProhibitedItemsStandalone() {
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-3">Medical & Scientific Items</h3>
                       <ul className="text-zinc-300 space-y-2 list-disc list-inside">
-                        <li><strong>Vintage Medical Equipment:</strong> May need to be clearly marked as non-functional and for display only</li>
+                        <li><strong>Vintage Medical Equipment:</strong> Needs to be clearly marked as non-functional and for display only</li>
                         <li><strong>Scientific Specimens:</strong> May require proper preservation and identification</li>
                         <li><strong>Laboratory Equipment:</strong> May need to be cleaned and safe for handling</li>
                         <li><strong>Anatomical Models:</strong> Vintage and antique models preferred (modern reproductions may be restricted)</li>
