@@ -471,14 +471,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (stripe) {
         try {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          console.log(`[ONBOARD] Subscription status for user ${userId}:`, {
+            id: subscription.id,
+            status: subscription.status,
+            current_period_end: new Date(subscription.current_period_end * 1000),
+            cancel_at_period_end: subscription.cancel_at_period_end
+          });
+          
           if (subscription.status !== 'active') {
-            return res.status(403).json({ error: "Active subscription required" });
+            console.log(`[ONBOARD] Subscription not active for user ${userId}, status: ${subscription.status}`);
+            return res.status(403).json({ error: `Active subscription required. Current status: ${subscription.status}` });
           }
           console.log(`[ONBOARD] User ${userId} has active subscription, proceeding with onboard`);
         } catch (error) {
           console.error(`[ONBOARD] Error verifying subscription for user ${userId}:`, error);
-          return res.status(403).json({ error: "Unable to verify subscription" });
+          return res.status(403).json({ error: "Unable to verify subscription - Stripe API error" });
         }
+      } else {
+        console.log(`[ONBOARD] Stripe not configured, skipping subscription verification for user ${userId}`);
       }
 
       const sellerData = insertSellerSchema.parse({
