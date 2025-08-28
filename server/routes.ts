@@ -357,16 +357,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User email required" });
       }
 
+      // Check if user already has seller role (indicates active subscription)
+      if (user.role === 'seller') {
+        return res.json({ 
+          subscriptionId: user.stripeSubscriptionId || 'seller-role-active',
+          clientSecret: null,
+          status: 'active',
+          success: true
+        });
+      }
+
       // Check if user already has a subscription
       if (user.stripeSubscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-        if (subscription.status === 'active') {
-          return res.json({ 
-            subscriptionId: subscription.id,
-            clientSecret: null,
-            status: 'active',
-            success: true
-          });
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status === 'active') {
+            // Update user role to seller if not already
+            await storage.upsertUser({
+              ...user,
+              role: 'seller' as const
+            });
+            return res.json({ 
+              subscriptionId: subscription.id,
+              clientSecret: null,
+              status: 'active',
+              success: true
+            });
+          }
+        } catch (error) {
+          console.log("Error retrieving existing subscription, creating new one");
         }
       }
 

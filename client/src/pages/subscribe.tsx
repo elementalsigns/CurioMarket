@@ -81,6 +81,7 @@ export default function Subscribe() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [clientSecret, setClientSecret] = useState("");
+  const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -97,60 +98,41 @@ export default function Subscribe() {
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (user) {
-      // First check if user already has active subscription
-      apiRequest("GET", "/api/subscription/status")
-        .then((statusData: any) => {
-          if (statusData.hasActiveSubscription) {
-            // Already has active subscription - redirect immediately
-            window.location.href = "/seller/onboarding";
-            return;
-          }
+    if (user && !isCreatingSubscription && !clientSecret) {
+      // Simple check: if user is already a seller, redirect to onboarding
+      if (user.role === 'seller') {
+        window.location.href = "/seller/onboarding";
+        return;
+      }
 
-          // Need to create subscription
-          apiRequest("POST", "/api/subscription/create")
-            .then((data: any) => {
-              console.log("Subscription response:", data);
-              if (data.clientSecret) {
-                setClientSecret(data.clientSecret);
-              } else if (data.success && !data.clientSecret) {
-                // Already has active subscription - redirect
-                window.location.href = "/seller/onboarding";
-              } else {
-                throw new Error("No client secret received");
-              }
-            })
-            .catch((error) => {
-              console.error("Subscription creation error:", error);
-              toast({
-                title: "Error",
-                description: "Failed to initialize subscription. Please try again.",
-                variant: "destructive",
-              });
-            });
+      setIsCreatingSubscription(true);
+      
+      // Create subscription for non-seller users
+      apiRequest("POST", "/api/subscription/create")
+        .then((data: any) => {
+          console.log("Subscription response:", data);
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret);
+          } else if (data.success && !data.clientSecret) {
+            // Already has active subscription - redirect
+            window.location.href = "/seller/onboarding";
+          } else {
+            throw new Error("No client secret received");
+          }
         })
         .catch((error) => {
-          console.error("Subscription status check error:", error);
-          // Fallback to creating subscription
-          apiRequest("POST", "/api/subscription/create")
-            .then((data: any) => {
-              if (data.clientSecret) {
-                setClientSecret(data.clientSecret);
-              } else {
-                throw new Error("No client secret received");
-              }
-            })
-            .catch((createError) => {
-              console.error("Subscription creation error:", createError);
-              toast({
-                title: "Error",
-                description: "Failed to initialize subscription. Please try again.",
-                variant: "destructive",
-              });
-            });
+          console.error("Subscription creation error:", error);
+          toast({
+            title: "Error",
+            description: "Failed to initialize subscription. Please try again.",
+            variant: "destructive",
+          });
+        })
+        .finally(() => {
+          setIsCreatingSubscription(false);
         });
     }
-  }, [user, toast]);
+  }, [user, toast, isCreatingSubscription, clientSecret]);
 
   const handleSuccess = () => {
     toast({

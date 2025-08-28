@@ -62,29 +62,21 @@ export default function SellerOnboarding() {
   // Check subscription status when user is available
   useEffect(() => {
     if (user && hasSubscription === null) {
-      // Check subscription status with dedicated endpoint
-      apiRequest("GET", "/api/subscription/status")
-        .then((data: any) => {
-          if (data.hasActiveSubscription) {
-            // Already has active subscription
-            setHasSubscription(true);
-          } else {
-            // Needs subscription
-            setHasSubscription(false);
-            toast({
-              title: "Subscription Required - Step 1",
-              description: "Please complete your seller subscription first, then return to create your shop.",
-              variant: "destructive",
-            });
-            setTimeout(() => {
-              navigate("/subscribe");
-            }, 1500);
-          }
-        })
-        .catch(() => {
-          setHasSubscription(false);
-          navigate("/subscribe");
+      // Simple check: if user has role 'seller', they have active subscription
+      if (user.role === 'seller') {
+        setHasSubscription(true);
+      } else {
+        // Needs subscription
+        setHasSubscription(false);
+        toast({
+          title: "Subscription Required - Step 1",
+          description: "Please complete your seller subscription first, then return to create your shop.",
+          variant: "destructive",
         });
+        setTimeout(() => {
+          navigate("/subscribe");
+        }, 1500);
+      }
     }
   }, [user, hasSubscription, toast, navigate]);
 
