@@ -156,6 +156,15 @@ export default function Subscribe() {
           description: "Please complete your payment information below.",
           variant: "default",
         });
+      } else if (data.status === 'active') {
+        // User already has an active subscription, redirect to onboarding
+        toast({
+          title: "Subscription Already Active",
+          description: "Great! Your subscription is active. Let's set up your seller profile.",
+        });
+        setTimeout(() => {
+          window.location.href = "/seller/onboarding";
+        }, 1500);
       } else {
         console.error("No client secret in response:", data);
         console.error("Full response data:", JSON.stringify(data, null, 2));
