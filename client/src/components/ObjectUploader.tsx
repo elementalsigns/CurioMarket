@@ -101,7 +101,6 @@ export function ObjectUploader({
           setShowModal(false);
         }}
         proudlyDisplayPoweredByUppy={false}
-        autoOpenFileEditor={false}
         showProgressDetails={true}
       />
     </div>
