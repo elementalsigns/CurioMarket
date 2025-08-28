@@ -74,6 +74,39 @@ html, body {
   transform: scale(1.05) !important;
 }
 
+/* Fix Uppy modal positioning */
+.uppy-Dashboard--modal .uppy-Dashboard-inner {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: 90vh !important;
+  max-width: 90vw !important;
+  z-index: 9999 !important;
+}
+
+.uppy-Dashboard--modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9998 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Ensure modal backdrop covers full screen */
+.uppy-Dashboard--modal .uppy-Dashboard-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 9997 !important;
+}
+
 /* Touch and active states for mobile devices */
 .mobile-logo-link:active .mobile-logo-text,
 .mobile-logo-link:active h1,
