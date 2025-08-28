@@ -125,14 +125,46 @@ export async function setupAuth(app: Express) {
     passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
     app.get("/api/login", (req, res, next) => {
-      passport.authenticate(`replitauth:${req.hostname}`, {
+      const hostname = req.hostname;
+      console.log("Login attempt for hostname:", hostname);
+      console.log("Available strategies:", Object.keys(passport._strategies || {}));
+      
+      // Find matching strategy
+      const strategyName = Object.keys(passport._strategies || {}).find(key => 
+        key.startsWith('replitauth:') && (
+          key.includes(hostname) || 
+          (hostname === '127.0.0.1' && key.includes('.replit.dev'))
+        )
+      );
+      
+      if (!strategyName) {
+        console.error("No matching auth strategy found for hostname:", hostname);
+        return res.status(500).json({ error: "Authentication strategy not found" });
+      }
+      
+      passport.authenticate(strategyName, {
         prompt: "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
       })(req, res, next);
     });
 
     app.get("/api/callback", (req, res, next) => {
-      passport.authenticate(`replitauth:${req.hostname}`, {
+      const hostname = req.hostname;
+      
+      // Find matching strategy
+      const strategyName = Object.keys(passport._strategies || {}).find(key => 
+        key.startsWith('replitauth:') && (
+          key.includes(hostname) || 
+          (hostname === '127.0.0.1' && key.includes('.replit.dev'))
+        )
+      );
+      
+      if (!strategyName) {
+        console.error("No matching auth strategy found for callback:", hostname);
+        return res.redirect("/api/login");
+      }
+      
+      passport.authenticate(strategyName, {
         successReturnToOrRedirect: "/",
         failureRedirect: "/api/login",
       })(req, res, next);

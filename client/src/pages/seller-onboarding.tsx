@@ -198,6 +198,28 @@ export default function SellerOnboarding() {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Subscription Requirement Notice - Top Priority */}
+          <Card className="mb-8 bg-gothic-red/10 border-2 border-gothic-red" data-testid="subscription-required-notice">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-serif text-gothic-red text-center">
+                Important: Subscription Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-foreground/80">
+                Before creating your shop, you'll need to complete your seller subscription ($10/month). 
+                This gives you access to unlimited listings and seller tools.
+              </p>
+              <Button 
+                onClick={() => navigate("/subscribe")}
+                className="w-full max-w-md bg-gothic-red hover:bg-gothic-red/80"
+                data-testid="button-start-subscription"
+              >
+                Start Subscription Setup
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Header */}
           <div className="text-center mb-12" data-testid="onboarding-header">
             <div className="inline-flex items-center mb-6 space-x-4 text-sm text-foreground/60">
