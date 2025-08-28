@@ -128,11 +128,12 @@ export default function Subscribe() {
     
     try {
       const response = await apiRequest("POST", "/api/subscription/create");
-      console.log("Subscription response:", response);
+      const data = await response.json();
+      console.log("Subscription response:", data);
       
-      if (response.clientSecret) {
-        setClientSecret(response.clientSecret);
-        console.log("Client secret set:", response.clientSecret);
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+        console.log("Client secret set:", data.clientSecret);
         
         toast({
           title: "Subscription Setup Ready",
@@ -140,7 +141,7 @@ export default function Subscribe() {
           variant: "default",
         });
       } else {
-        console.error("No client secret in response:", response);
+        console.error("No client secret in response:", data);
         toast({
           title: "Setup Error",
           description: "No payment information received. Please try again.",
