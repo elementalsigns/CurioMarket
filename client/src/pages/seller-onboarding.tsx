@@ -515,29 +515,13 @@ export default function SellerOnboarding() {
           <Card className="glass-effect mt-8" data-testid="next-steps">
             <CardContent className="p-6">
               <h3 className="text-lg font-serif font-bold mb-4">What Happens Next?</h3>
-              <div className="space-y-4">
-                <div className="bg-gothic-red/10 border border-gothic-red/30 rounded-lg p-4">
-                  <h4 className="font-medium text-gothic-red mb-2">Important: Subscription Required</h4>
-                  <p className="text-sm text-foreground/80 mb-3">
-                    Before creating your shop, you'll need to complete your seller subscription ($10/month). 
-                    This gives you access to unlimited listings and seller tools.
-                  </p>
-                  <Button
-                    onClick={() => navigate("/subscribe")}
-                    className="bg-gothic-red hover:bg-gothic-red/80 text-white"
-                    data-testid="button-start-subscription"
-                  >
-                    Start Subscription Setup
-                  </Button>
-                </div>
-                <ol className="space-y-2 text-foreground/80">
-                  <li>1. Complete your seller subscription ($10/month)</li>
-                  <li>2. Set up your shop profile (this form)</li>
-                  <li>3. Create your first listing</li>
-                  <li>4. Start selling to collectors worldwide</li>
-                  <li>5. Track your progress with our analytics dashboard</li>
-                </ol>
-              </div>
+              <ol className="space-y-2 text-foreground/80">
+                <li>1. Complete your seller subscription ($10/month)</li>
+                <li>2. Set up your shop profile (this form)</li>
+                <li>3. Create your first listing</li>
+                <li>4. Start selling to collectors worldwide</li>
+                <li>5. Track your progress with our analytics dashboard</li>
+              </ol>
             </CardContent>
           </Card>
         </div>
