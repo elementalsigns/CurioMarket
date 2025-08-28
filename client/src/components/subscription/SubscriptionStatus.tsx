@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CreditCard, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreditCard, AlertTriangle, CheckCircle, XCircle, RefreshCw, Download, Calendar, Shield } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { format } from "date-fns";
 
 interface SubscriptionStatusProps {
   onManageSubscription?: () => void;
@@ -14,6 +16,59 @@ interface SubscriptionStatusProps {
 export default function SubscriptionStatus({ onManageSubscription }: SubscriptionStatusProps) {
   const { data: user, isLoading } = useQuery({
     queryKey: ['/api/auth/user'],
+  });
+  
+  const { data: subscriptionStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['/api/subscription/status'],
+    enabled: !!user,
+  });
+  
+  const { data: billingHistory, isLoading: billingLoading } = useQuery({
+    queryKey: ['/api/subscription/billing-history'],
+    enabled: !!user,
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/seller/subscription/cancel');
+    },
+    onSuccess: () => {
+      toast({
+        title: "Subscription Canceled",
+        description: "Your subscription will end at the current billing period.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription/status'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel subscription",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const reactivateMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/subscription/reactivate');
+    },
+    onSuccess: () => {
+      toast({
+        title: "Subscription Reactivated",
+        description: "Your subscription has been reactivated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription/status'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reactivate subscription",
+        variant: "destructive",
+      });
+    },
   });
 
   const getStatusBadge = (status: string) => {
@@ -32,20 +87,17 @@ export default function SubscriptionStatus({ onManageSubscription }: Subscriptio
   };
 
   const handleCancelSubscription = async () => {
-    if (!confirm('Are you sure you want to cancel your seller subscription? This will remove your ability to create new listings.')) {
+    if (!confirm('Are you sure you want to cancel your seller subscription? This will remove your ability to create new listings at the end of your current billing period.')) {
       return;
     }
+    cancelMutation.mutate();
+  };
 
-    try {
-      await apiRequest('/api/seller/subscription/cancel', {
-        method: 'POST'
-      }) as any;
-      
-      // Refresh user data
-      location.reload();
-    } catch (error) {
-      console.error('Failed to cancel subscription:', error);
+  const handleReactivateSubscription = async () => {
+    if (!confirm('Reactivate your subscription? You will continue to be charged monthly.')) {
+      return;
     }
+    reactivateMutation.mutate();
   };
 
   if (isLoading) {

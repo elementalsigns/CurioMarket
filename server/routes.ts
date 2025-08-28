@@ -654,6 +654,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get detailed subscription status
+  app.get('/api/subscription/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeSubscriptionId || !stripe) {
+        return res.json({ 
+          hasActiveSubscription: false,
+          status: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          paymentMethodLast4: null
+        });
+      }
+
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+        expand: ['default_payment_method']
+      });
+
+      const paymentMethod = subscription.default_payment_method as Stripe.PaymentMethod;
+      
+      res.json({
+        hasActiveSubscription: subscription.status === 'active',
+        status: subscription.status,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        paymentMethodLast4: paymentMethod?.card?.last4 || null,
+        priceId: subscription.items.data[0]?.price.id
+      });
+    } catch (error) {
+      console.error('Error fetching subscription status:', error);
+      res.status(500).json({ error: 'Failed to fetch subscription status' });
+    }
+  });
+
   // Cancel seller subscription
   app.post('/api/seller/subscription/cancel', isAuthenticated, async (req: any, res) => {
     if (!stripe) {
@@ -675,11 +711,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         message: "Subscription will be canceled at the end of the current billing period",
-        cancelAt: new Date(subscription.cancel_at! * 1000)
+        cancelAt: new Date(subscription.cancel_at! * 1000),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
       });
     } catch (error: any) {
       console.error("Error canceling subscription:", error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Reactivate subscription (undo cancellation)
+  app.post('/api/subscription/reactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeSubscriptionId || !stripe) {
+        return res.status(404).json({ error: 'No subscription found' });
+      }
+
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: false
+      });
+
+      res.json({
+        message: 'Subscription reactivated successfully',
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        status: subscription.status
+      });
+    } catch (error) {
+      console.error('Error reactivating subscription:', error);
+      res.status(500).json({ error: 'Failed to reactivate subscription' });
+    }
+  });
+
+  // Get billing history
+  app.get('/api/subscription/billing-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeCustomerId || !stripe) {
+        return res.json({ invoices: [] });
+      }
+
+      const invoices = await stripe.invoices.list({
+        customer: user.stripeCustomerId,
+        limit: 12 // Last 12 invoices
+      });
+
+      const formattedInvoices = invoices.data.map(invoice => ({
+        id: invoice.id,
+        amount: invoice.amount_paid,
+        currency: invoice.currency,
+        status: invoice.status,
+        created: new Date(invoice.created * 1000).toISOString(),
+        periodStart: new Date(invoice.period_start * 1000).toISOString(),
+        periodEnd: new Date(invoice.period_end * 1000).toISOString(),
+        hostedInvoiceUrl: invoice.hosted_invoice_url,
+        invoicePdf: invoice.invoice_pdf
+      }));
+
+      res.json({ invoices: formattedInvoices });
+    } catch (error) {
+      console.error('Error fetching billing history:', error);
+      res.status(500).json({ error: 'Failed to fetch billing history' });
+    }
+  });
+
+  // Create setup intent for payment method update
+  app.post('/api/subscription/setup-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeCustomerId || !stripe) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      const setupIntent = await stripe.setupIntents.create({
+        customer: user.stripeCustomerId,
+        usage: 'off_session' // For future payments
+      });
+
+      res.json({ clientSecret: setupIntent.client_secret });
+    } catch (error) {
+      console.error('Error creating setup intent:', error);
+      res.status(500).json({ error: 'Failed to create setup intent' });
+    }
+  });
+
+  // Update payment method
+  app.post('/api/subscription/update-payment-method', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { paymentMethodId } = req.body;
+      
+      if (!paymentMethodId) {
+        return res.status(400).json({ error: 'Payment method ID is required' });
+      }
+
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeCustomerId || !user.stripeSubscriptionId || !stripe) {
+        return res.status(404).json({ error: 'No subscription found' });
+      }
+
+      // Attach payment method to customer
+      await stripe.paymentMethods.attach(paymentMethodId, {
+        customer: user.stripeCustomerId
+      });
+
+      // Set as default payment method for customer
+      await stripe.customers.update(user.stripeCustomerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId
+        }
+      });
+
+      // Update subscription to use new payment method
+      await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        default_payment_method: paymentMethodId
+      });
+
+      res.json({ message: 'Payment method updated successfully' });
+    } catch (error) {
+      console.error('Error updating payment method:', error);
+      res.status(500).json({ error: 'Failed to update payment method' });
     }
   });
 
