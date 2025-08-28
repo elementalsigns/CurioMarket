@@ -222,10 +222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bio: req.body.bio || seller.bio,
         location: req.body.location || seller.location,
         policies: req.body.policies || seller.policies,
-        shippingInfo: req.body.shippingInfo || seller.shippingInfo,
-        returnPolicy: req.body.returnPolicy || seller.returnPolicy,
-        bannerImageUrl: req.body.bannerImageUrl || seller.bannerImageUrl,
-        avatarImageUrl: req.body.avatarImageUrl || seller.avatarImageUrl,
+        banner: req.body.banner || req.body.bannerImageUrl || seller.banner,
+        avatar: req.body.avatar || req.body.avatarImageUrl || seller.avatar,
       };
 
       const updatedSeller = await storage.updateSeller(seller.id, updateData);
@@ -807,6 +805,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error creating seller profile:", error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create seller profile" });
+    }
+  });
+
+  // Seller onboarding route (matches frontend expectation)
+  app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      console.log(`[ONBOARD] User ${userId} attempting onboard, role: ${user?.role}, subscriptionId: ${user?.stripeSubscriptionId}`);
+      
+      // Verify user has active subscription
+      if (!user.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active subscription required" });
+      }
+
+      if (stripe) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          console.log(`[ONBOARD] Subscription status for user ${userId}:`, {
+            id: subscription.id,
+            status: subscription.status,
+            current_period_end: new Date((subscription as any).current_period_end * 1000),
+            cancel_at_period_end: subscription.cancel_at_period_end
+          });
+          
+          if (subscription.status !== 'active') {
+            console.log(`[ONBOARD] Subscription not active for user ${userId}, status: ${subscription.status}`);
+            return res.status(403).json({ error: `Active subscription required. Current status: ${subscription.status}` });
+          }
+          console.log(`[ONBOARD] User ${userId} has active subscription, proceeding with onboard`);
+        } catch (error) {
+          console.error(`[ONBOARD] Error verifying subscription for user ${userId}:`, error);
+          return res.status(403).json({ error: "Unable to verify subscription - Stripe API error" });
+        }
+      } else {
+        console.log(`[ONBOARD] Stripe not configured, skipping subscription verification for user ${userId}`);
+      }
+
+      // Map frontend fields to backend schema
+      const sellerData = insertSellerSchema.parse({
+        userId,
+        shopName: req.body.shopName,
+        bio: req.body.bio,
+        location: req.body.location,
+        policies: req.body.policies,
+        banner: req.body.banner || req.body.bannerImageUrl,
+        avatar: req.body.avatar || req.body.avatarImageUrl,
+      });
+
+      const seller = await storage.createSeller(sellerData);
+      
+      // Update user role to seller
+      await storage.upsertUser({ 
+        id: userId, 
+        role: 'seller' as const,
+        email: user.email || '',
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        stripeCustomerId: user.stripeCustomerId,
+        stripeSubscriptionId: user.stripeSubscriptionId
+      });
+
+      console.log(`[ONBOARD] Successfully created seller profile for user ${userId}`);
+      res.json(seller);
+    } catch (error: any) {
+      console.error("Error creating seller profile:", error);
+      if (error.name === 'ZodError') {
+        console.error("Zod validation errors:", error.errors);
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create seller profile" });
     }
