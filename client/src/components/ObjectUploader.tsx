@@ -82,15 +82,27 @@ export function ObjectUploader({
 
   return (
     <div>
-      <Button onClick={() => setShowModal(true)} className={buttonClassName}>
+      <Button 
+        onClick={() => {
+          console.log('Upload button clicked');
+          setShowModal(true);
+        }} 
+        className={buttonClassName}
+        type="button"
+      >
         {children}
       </Button>
 
       <DashboardModal
         uppy={uppy}
         open={showModal}
-        onRequestClose={() => setShowModal(false)}
+        onRequestClose={() => {
+          console.log('Modal close requested');
+          setShowModal(false);
+        }}
         proudlyDisplayPoweredByUppy={false}
+        autoOpenFileEditor={false}
+        showProgressDetails={true}
       />
     </div>
   );

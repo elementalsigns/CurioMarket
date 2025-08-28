@@ -112,6 +112,15 @@ html, body {
   display: none !important;
 }
 
+/* Fix for initial modal state */
+.uppy-Dashboard--modal {
+  visibility: hidden;
+}
+
+.uppy-Dashboard--modal.uppy-Dashboard--isOpen {
+  visibility: visible !important;
+}
+
 /* Touch and active states for mobile devices */
 .mobile-logo-link:active .mobile-logo-text,
 .mobile-logo-link:active h1,
