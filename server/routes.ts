@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all seller data
       const [listingsResult, orders, stats] = await Promise.all([
         storage.getListings({ sellerId: seller.id }),
-        storage.getOrdersBySellerId(seller.id),
+        storage.getSellerOrders(seller.id),
         storage.getSellerStats(seller.id)
       ]);
 
