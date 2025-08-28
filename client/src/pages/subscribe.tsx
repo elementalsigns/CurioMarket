@@ -142,9 +142,10 @@ export default function Subscribe() {
         });
       } else {
         console.error("No client secret in response:", data);
+        console.error("Full response data:", JSON.stringify(data, null, 2));
         toast({
-          title: "Setup Error",
-          description: "No payment information received. Please try again.",
+          title: "Setup Error", 
+          description: `No payment information received. Status: ${data.status || 'unknown'}. Please try again.`,
           variant: "destructive",
         });
       }
