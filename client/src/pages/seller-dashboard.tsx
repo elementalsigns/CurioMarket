@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -711,10 +712,31 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         className="w-64"
                         data-testid="input-banner-url"
                       />
-                      <Button type="button" variant="outline" size="sm">
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        maxFileSize={10485760}
+                        allowedFileTypes={['image/*']}
+                        onGetUploadParameters={async () => {
+                          const response = await apiRequest("POST", "/api/objects/upload");
+                          return {
+                            method: "PUT" as const,
+                            url: response.uploadURL,
+                          };
+                        }}
+                        onComplete={(result) => {
+                          if (result.successful && result.successful[0]) {
+                            setBannerUrl(result.successful[0].uploadURL);
+                            toast({
+                              title: "Banner Uploaded",
+                              description: "Your shop banner has been uploaded successfully.",
+                            });
+                          }
+                        }}
+                        buttonClassName="text-sm h-8"
+                      >
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </Button>
+                        Upload Banner
+                      </ObjectUploader>
                     </div>
                   </div>
                 </div>
@@ -735,10 +757,31 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         className="w-64"
                         data-testid="input-avatar-url"
                       />
-                      <Button type="button" variant="outline" size="sm">
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        maxFileSize={5242880}
+                        allowedFileTypes={['image/*']}
+                        onGetUploadParameters={async () => {
+                          const response = await apiRequest("POST", "/api/objects/upload");
+                          return {
+                            method: "PUT" as const,
+                            url: response.uploadURL,
+                          };
+                        }}
+                        onComplete={(result) => {
+                          if (result.successful && result.successful[0]) {
+                            setAvatarUrl(result.successful[0].uploadURL);
+                            toast({
+                              title: "Avatar Uploaded",
+                              description: "Your shop avatar has been uploaded successfully.",
+                            });
+                          }
+                        }}
+                        buttonClassName="text-sm h-8"
+                      >
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload
-                      </Button>
+                        Upload Avatar
+                      </ObjectUploader>
                     </div>
                   </div>
                 </div>
