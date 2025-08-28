@@ -152,20 +152,30 @@ export default function Subscribe() {
     );
   }
 
-  const handleCreateSubscription = () => {
+  const handleCreateSubscription = async () => {
     if (isCreatingSubscription) return;
     
-    // TEMPORARILY: Just redirect to seller onboarding
-    // TODO: Fix Stripe subscription creation
-    toast({
-      title: "Subscription Setup",
-      description: "Redirecting to seller onboarding (subscription requirements temporarily disabled)",
-      variant: "default",
-    });
+    setIsCreatingSubscription(true);
     
-    setTimeout(() => {
-      window.location.href = "/seller/onboarding";
-    }, 1500);
+    try {
+      const response = await apiRequest("POST", "/api/subscription/create");
+      setClientSecret(response.clientSecret);
+      
+      toast({
+        title: "Subscription Setup Ready",
+        description: "Please complete your payment information below.",
+        variant: "default",
+      });
+    } catch (error: any) {
+      console.error("Error creating subscription:", error);
+      toast({
+        title: "Setup Error",
+        description: error.message || "Failed to set up subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingSubscription(false);
+    }
   };
 
   if (!clientSecret) {
