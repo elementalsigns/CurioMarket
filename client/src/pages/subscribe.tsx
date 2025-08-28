@@ -100,23 +100,26 @@ export default function Subscribe() {
     if (user) {
       // Create subscription when user is loaded
       apiRequest("POST", "/api/subscription/create")
-        .then((res) => res.json())
         .then((data) => {
+          console.log("Subscription response:", data);
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
-          } else {
+          } else if (data.success && !data.clientSecret) {
             // Already has active subscription
             toast({
               title: "Already Subscribed",
               description: "You already have an active subscription",
             });
             window.location.href = "/seller/dashboard";
+          } else {
+            throw new Error("No client secret received");
           }
         })
         .catch((error) => {
+          console.error("Subscription creation error:", error);
           toast({
             title: "Error",
-            description: "Failed to initialize subscription",
+            description: "Failed to initialize subscription. Please try again.",
             variant: "destructive",
           });
         });

@@ -304,6 +304,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create subscription endpoint (alias for frontend compatibility)
+  app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ error: "User email required" });
+      }
+
+      // Check if user already has a subscription
+      if (user.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status === 'active') {
+          return res.json({ 
+            subscriptionId: subscription.id,
+            clientSecret: null,
+            status: 'active',
+            success: true
+          });
+        }
+      }
+
+      // Create Stripe customer if needed
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        });
+        customerId = customer.id;
+      }
+
+      // Create or get the seller subscription price
+      const SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID || await createSellerSubscriptionPrice(stripe);
+
+      // Create subscription
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{
+          price: SELLER_SUBSCRIPTION_PRICE_ID,
+        }],
+        payment_behavior: 'default_incomplete',
+        expand: ['latest_invoice.payment_intent'],
+        metadata: {
+          userId: userId,
+          type: 'seller_subscription'
+        }
+      });
+
+      // Update user with Stripe info
+      await storage.updateUserStripeInfo(userId, {
+        customerId,
+        subscriptionId: subscription.id
+      });
+
+      const latestInvoice = subscription.latest_invoice as any;
+      let clientSecret = null;
+      if (latestInvoice?.payment_intent?.client_secret) {
+        clientSecret = latestInvoice.payment_intent.client_secret;
+      }
+      
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret,
+        status: subscription.status
+      });
+    } catch (error: any) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Seller onboarding route
   app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
     try {
