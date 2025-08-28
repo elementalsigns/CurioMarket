@@ -294,7 +294,7 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/seller/subscription" className="flex items-center">
+                        <Link to="/subscribe" className="flex items-center">
                           <CreditCard className="mr-2" size={16} />
                           Become a Seller
                         </Link>
