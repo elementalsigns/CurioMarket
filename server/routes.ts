@@ -408,11 +408,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Create subscription
+      // Create subscription with proper price
       try {
+        let priceId = process.env.STRIPE_SELLER_PRICE_ID;
+        
+        // If price ID doesn't exist or is invalid, create a new one
+        if (!priceId || priceId.startsWith('prod_')) {
+          console.log(`[SUBSCRIPTION] Creating new price for $10/month subscription`);
+          
+          // First, ensure we have a product
+          let productId = process.env.STRIPE_SELLER_PRICE_ID;
+          if (!productId || !productId.startsWith('prod_')) {
+            const product = await stripe.products.create({
+              name: 'Curio Market Seller Subscription',
+              description: 'Monthly subscription for sellers on Curio Market',
+            });
+            productId = product.id;
+            console.log(`[SUBSCRIPTION] Created product: ${productId}`);
+          }
+          
+          // Create the recurring price
+          const price = await stripe.prices.create({
+            product: productId,
+            unit_amount: 1000, // $10.00 in cents
+            currency: 'usd',
+            recurring: {
+              interval: 'month',
+            },
+            metadata: {
+              type: 'seller_subscription',
+            },
+          });
+          priceId = price.id;
+          console.log(`[SUBSCRIPTION] Created price: ${priceId} for $10/month`);
+        }
+
         const subscription = await stripe.subscriptions.create({
           customer: customerId,
-          items: [{ price: process.env.STRIPE_SELLER_PRICE_ID }],
+          items: [{ price: priceId }],
           payment_behavior: 'default_incomplete',
           payment_settings: { save_default_payment_method: 'on_subscription' },
           expand: ['latest_invoice.payment_intent'],
