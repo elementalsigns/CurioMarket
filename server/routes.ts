@@ -457,6 +457,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           payment_behavior: 'default_incomplete',
           payment_settings: { save_default_payment_method: 'on_subscription' },
           expand: ['latest_invoice.payment_intent'],
+          metadata: {
+            userId: userId,
+          },
         });
 
         console.log(`[SUBSCRIPTION] Created subscription ${subscription.id} for user ${userId}`);
@@ -486,15 +489,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           clientSecret: paymentIntent?.client_secret ? `pi_${paymentIntent.client_secret.substring(3, 8)}...` : 'MISSING'
         });
 
-        // If no client secret, try to retrieve the payment intent separately
+        // If no client secret, create a setup intent for future payments
         let clientSecret = paymentIntent?.client_secret;
-        if (!clientSecret && paymentIntent?.id) {
+        if (!clientSecret) {
           try {
-            const pi = await stripe.paymentIntents.retrieve(paymentIntent.id);
-            clientSecret = pi.client_secret;
-            console.log(`[SUBSCRIPTION] Retrieved client secret separately: ${clientSecret ? 'present' : 'still missing'}`);
-          } catch (piError) {
-            console.error(`[SUBSCRIPTION] Failed to retrieve payment intent:`, piError);
+            console.log(`[SUBSCRIPTION] No payment intent found, creating setup intent for customer ${customerId}`);
+            const setupIntent = await stripe.setupIntents.create({
+              customer: customerId,
+              payment_method_types: ['card'],
+              usage: 'off_session',
+              metadata: {
+                subscription_id: subscription.id,
+                user_id: userId,
+              },
+            });
+            clientSecret = setupIntent.client_secret;
+            console.log(`[SUBSCRIPTION] Created setup intent with client secret: ${clientSecret ? 'present' : 'failed'}`);
+          } catch (setupError) {
+            console.error(`[SUBSCRIPTION] Failed to create setup intent:`, setupError);
           }
         }
 
