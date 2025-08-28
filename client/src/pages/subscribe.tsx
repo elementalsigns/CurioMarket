@@ -137,6 +137,20 @@ export default function Subscribe() {
       });
     } catch (error: any) {
       console.error("Error creating subscription:", error);
+      
+      // Handle authentication errors
+      if (error.status === 401) {
+        toast({
+          title: "Please Log In",
+          description: "You need to log in to create a subscription. Redirecting...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1500);
+        return;
+      }
+      
       toast({
         title: "Setup Error",
         description: error.message || "Failed to set up subscription. Please try again.",
