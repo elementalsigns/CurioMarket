@@ -315,6 +315,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check subscription status endpoint
+  app.get('/api/subscription/status', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.json({ hasActiveSubscription: false });
+    }
+
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.stripeSubscriptionId) {
+        return res.json({ hasActiveSubscription: false });
+      }
+
+      // Check if subscription is actually active
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const isActive = subscription.status === 'active';
+      
+      res.json({ 
+        hasActiveSubscription: isActive,
+        subscriptionStatus: subscription.status 
+      });
+    } catch (error) {
+      console.error("Error checking subscription status:", error);
+      res.json({ hasActiveSubscription: false });
+    }
+  });
+
   // Create subscription endpoint (alias that frontend calls)
   app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
     if (!stripe) {

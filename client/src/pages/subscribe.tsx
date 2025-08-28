@@ -98,26 +98,56 @@ export default function Subscribe() {
 
   useEffect(() => {
     if (user) {
-      // Create subscription when user is loaded
-      apiRequest("POST", "/api/subscription/create")
-        .then((data: any) => {
-          console.log("Subscription response:", data);
-          if (data.clientSecret) {
-            setClientSecret(data.clientSecret);
-          } else if (data.success && !data.clientSecret) {
-            // Already has active subscription - redirect to onboarding immediately
+      // First check if user already has active subscription
+      apiRequest("GET", "/api/subscription/status")
+        .then((statusData: any) => {
+          if (statusData.hasActiveSubscription) {
+            // Already has active subscription - redirect immediately
             window.location.href = "/seller/onboarding";
-          } else {
-            throw new Error("No client secret received");
+            return;
           }
+
+          // Need to create subscription
+          apiRequest("POST", "/api/subscription/create")
+            .then((data: any) => {
+              console.log("Subscription response:", data);
+              if (data.clientSecret) {
+                setClientSecret(data.clientSecret);
+              } else if (data.success && !data.clientSecret) {
+                // Already has active subscription - redirect
+                window.location.href = "/seller/onboarding";
+              } else {
+                throw new Error("No client secret received");
+              }
+            })
+            .catch((error) => {
+              console.error("Subscription creation error:", error);
+              toast({
+                title: "Error",
+                description: "Failed to initialize subscription. Please try again.",
+                variant: "destructive",
+              });
+            });
         })
         .catch((error) => {
-          console.error("Subscription creation error:", error);
-          toast({
-            title: "Error",
-            description: "Failed to initialize subscription. Please try again.",
-            variant: "destructive",
-          });
+          console.error("Subscription status check error:", error);
+          // Fallback to creating subscription
+          apiRequest("POST", "/api/subscription/create")
+            .then((data: any) => {
+              if (data.clientSecret) {
+                setClientSecret(data.clientSecret);
+              } else {
+                throw new Error("No client secret received");
+              }
+            })
+            .catch((createError) => {
+              console.error("Subscription creation error:", createError);
+              toast({
+                title: "Error",
+                description: "Failed to initialize subscription. Please try again.",
+                variant: "destructive",
+              });
+            });
         });
     }
   }, [user, toast]);
