@@ -146,8 +146,19 @@ export default function Subscribe() {
       const response = await apiRequest("POST", "/api/subscription/create");
       const data = await response.json();
       console.log("Subscription response:", data);
+      console.log("Checking conditions: clientSecret exists =", !!data.clientSecret, "status =", data.status);
       
-      if (data.clientSecret) {
+      if (data.status === 'active') {
+        // User already has an active subscription, redirect to onboarding
+        console.log("Active subscription detected, redirecting to onboarding");
+        toast({
+          title: "Subscription Already Active!",
+          description: "Great! Your subscription is active. Setting up your seller profile...",
+        });
+        setTimeout(() => {
+          window.location.href = "/seller/onboarding";
+        }, 2000);
+      } else if (data.clientSecret) {
         setClientSecret(data.clientSecret);
         console.log("Client secret set:", data.clientSecret);
         
@@ -156,15 +167,6 @@ export default function Subscribe() {
           description: "Please complete your payment information below.",
           variant: "default",
         });
-      } else if (data.status === 'active') {
-        // User already has an active subscription, redirect to onboarding
-        toast({
-          title: "Subscription Already Active",
-          description: "Great! Your subscription is active. Let's set up your seller profile.",
-        });
-        setTimeout(() => {
-          window.location.href = "/seller/onboarding";
-        }, 1500);
       } else {
         console.error("No client secret in response:", data);
         console.error("Full response data:", JSON.stringify(data, null, 2));
