@@ -98,41 +98,17 @@ export default function Subscribe() {
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (user && !isCreatingSubscription && !clientSecret) {
-      // Simple check: if user is already a seller, redirect to onboarding
+    if (user) {
+      // STOP AUTOMATIC SUBSCRIPTION CREATION - Let user manually trigger it
       if (user.role === 'seller') {
         window.location.href = "/seller/onboarding";
         return;
       }
-
-      setIsCreatingSubscription(true);
       
-      // Create subscription for non-seller users
-      apiRequest("POST", "/api/subscription/create")
-        .then((data: any) => {
-          console.log("Subscription response:", data);
-          if (data.clientSecret) {
-            setClientSecret(data.clientSecret);
-          } else if (data.success && !data.clientSecret) {
-            // Already has active subscription - redirect
-            window.location.href = "/seller/onboarding";
-          } else {
-            throw new Error("No client secret received");
-          }
-        })
-        .catch((error) => {
-          console.error("Subscription creation error:", error);
-          toast({
-            title: "Error",
-            description: "Failed to initialize subscription. Please try again.",
-            variant: "destructive",
-          });
-        })
-        .finally(() => {
-          setIsCreatingSubscription(false);
-        });
+      // Show UI but don't auto-create subscription
+      console.log("User ready for manual subscription creation");
     }
-  }, [user, toast, isCreatingSubscription, clientSecret]);
+  }, [user]);
 
   const handleSuccess = () => {
     toast({
@@ -156,12 +132,56 @@ export default function Subscribe() {
     );
   }
 
+  const handleCreateSubscription = () => {
+    if (isCreatingSubscription) return;
+    
+    setIsCreatingSubscription(true);
+    
+    apiRequest("POST", "/api/subscription/create")
+      .then((data: any) => {
+        console.log("Subscription response:", data);
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+        } else if (data.success && !data.clientSecret) {
+          // Already has active subscription - redirect
+          window.location.href = "/seller/onboarding";
+        } else {
+          throw new Error("No client secret received");
+        }
+      })
+      .catch((error) => {
+        console.error("Subscription creation error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize subscription. Please try again.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsCreatingSubscription(false);
+      });
+  };
+
   if (!clientSecret) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="flex items-center justify-center py-20" data-testid="subscription-loading">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-md mx-auto text-center">
+            <Crown className="mx-auto mb-6 text-gothic-purple" size={64} />
+            <h1 className="text-3xl font-serif font-bold mb-4">Start Subscription</h1>
+            <p className="text-foreground/70 mb-8">
+              Ready to become a seller? Click below to set up your $10/month subscription.
+            </p>
+            <Button
+              onClick={handleCreateSubscription}
+              disabled={isCreatingSubscription}
+              className="w-full bg-gothic-red hover:bg-gothic-red/80 text-white py-3 rounded-2xl font-medium text-lg"
+              data-testid="button-create-subscription"
+            >
+              {isCreatingSubscription ? "Setting up subscription..." : "Start Subscription Setup"}
+            </Button>
+          </div>
         </div>
         <Footer />
       </div>

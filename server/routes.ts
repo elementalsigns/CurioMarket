@@ -357,8 +357,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User email required" });
       }
 
+      console.log(`[SUBSCRIPTION] Create request for user ${userId}, current role: ${user.role}`);
+
       // Check if user already has seller role (indicates active subscription)
       if (user.role === 'seller') {
+        console.log(`[SUBSCRIPTION] User ${userId} already has seller role, returning success`);
         return res.json({ 
           subscriptionId: user.stripeSubscriptionId || 'seller-role-active',
           clientSecret: null,
@@ -370,8 +373,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already has a subscription
       if (user.stripeSubscriptionId) {
         try {
+          console.log(`[SUBSCRIPTION] Checking existing subscription ${user.stripeSubscriptionId} for user ${userId}`);
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           if (subscription.status === 'active') {
+            console.log(`[SUBSCRIPTION] Found active subscription for user ${userId}, updating role to seller`);
             // Update user role to seller if not already
             await storage.upsertUser({
               ...user,
@@ -383,9 +388,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
               status: 'active',
               success: true
             });
+          } else {
+            console.log(`[SUBSCRIPTION] Existing subscription ${user.stripeSubscriptionId} is not active (${subscription.status}), will create new one`);
           }
         } catch (error) {
-          console.log("Error retrieving existing subscription, creating new one");
+          console.log(`[SUBSCRIPTION] Error retrieving existing subscription for user ${userId}:`, error);
+        }
+      }
+
+      console.log(`[SUBSCRIPTION] Creating new subscription for user ${userId}`);
+
+      // PREVENT MULTIPLE SUBSCRIPTIONS - Check if we just created one in the last 30 seconds
+      const recentSubscriptions = await stripe.subscriptions.list({
+        customer: user.email,
+        limit: 5,
+        created: {
+          gte: Math.floor((Date.now() - 30000) / 1000) // 30 seconds ago
+        }
+      });
+
+      if (recentSubscriptions.data.length > 0) {
+        const recentSub = recentSubscriptions.data[0];
+        console.log(`[SUBSCRIPTION] Found recent subscription ${recentSub.id} for user ${userId}, using that instead`);
+        
+        // Update user with this subscription
+        await storage.upsertUser({
+          ...user,
+          stripeSubscriptionId: recentSub.id
+        });
+
+        if (recentSub.status === 'active') {
+          await storage.upsertUser({
+            ...user,
+            stripeSubscriptionId: recentSub.id,
+            role: 'seller' as const
+          });
+          return res.json({ 
+            subscriptionId: recentSub.id,
+            clientSecret: null,
+            status: 'active',
+            success: true
+          });
+        } else {
+          return res.json({ 
+            subscriptionId: recentSub.id,
+            clientSecret: recentSub.latest_invoice?.payment_intent?.client_secret || null,
+            status: recentSub.status,
+            success: true
+          });
         }
       }
 
