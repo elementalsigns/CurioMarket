@@ -129,11 +129,12 @@ export async function setupAuth(app: Express) {
       console.log("Login attempt for hostname:", hostname);
       console.log("Available strategies:", Object.keys(passport._strategies || {}));
       
-      // Find matching strategy
+      // Find matching strategy - include localhost for development
       const strategyName = Object.keys(passport._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
-          (hostname === '127.0.0.1' && key.includes('.replit.dev'))
+          (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
+          (hostname === 'localhost' && key.includes('.replit.dev'))
         )
       );
       
@@ -151,11 +152,12 @@ export async function setupAuth(app: Express) {
     app.get("/api/callback", (req, res, next) => {
       const hostname = req.hostname;
       
-      // Find matching strategy
+      // Find matching strategy - include localhost for development
       const strategyName = Object.keys(passport._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
-          (hostname === '127.0.0.1' && key.includes('.replit.dev'))
+          (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
+          (hostname === 'localhost' && key.includes('.replit.dev'))
         )
       );
       

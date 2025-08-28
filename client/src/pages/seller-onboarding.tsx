@@ -62,20 +62,16 @@ export default function SellerOnboarding() {
   // Check subscription status when user is available
   useEffect(() => {
     if (user && hasSubscription === null) {
-      // Proper subscription flow: Check if user has seller role (indicates active subscription)
-      if (user.role === 'seller') {
-        setHasSubscription(true);
-      } else {
-        // Redirect to Step 1: Subscribe
-        setHasSubscription(false);
+      // TEMPORARILY: Allow all users to proceed regardless of subscription status
+      // This allows testing while fixing the Stripe subscription issues
+      setHasSubscription(true);
+      
+      if (user.role !== 'seller') {
         toast({
-          title: "Subscription Required - Step 1",
-          description: "Please complete your seller subscription first, then return to create your shop.",
-          variant: "destructive",
+          title: "Temporary Access",
+          description: "Subscription requirements disabled for testing. You can create your shop profile now.",
+          variant: "default",
         });
-        setTimeout(() => {
-          navigate("/subscribe");
-        }, 1500);
       }
     }
   }, [user, hasSubscription, toast, navigate]);

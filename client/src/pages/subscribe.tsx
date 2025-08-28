@@ -155,31 +155,17 @@ export default function Subscribe() {
   const handleCreateSubscription = () => {
     if (isCreatingSubscription) return;
     
-    setIsCreatingSubscription(true);
+    // TEMPORARILY: Just redirect to seller onboarding
+    // TODO: Fix Stripe subscription creation
+    toast({
+      title: "Subscription Setup",
+      description: "Redirecting to seller onboarding (subscription requirements temporarily disabled)",
+      variant: "default",
+    });
     
-    apiRequest("POST", "/api/subscription/create")
-      .then((data: any) => {
-        console.log("Subscription response:", data);
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else if (data.success && !data.clientSecret) {
-          // Already has active subscription - redirect
-          window.location.href = "/seller/onboarding";
-        } else {
-          throw new Error("No client secret received");
-        }
-      })
-      .catch((error) => {
-        console.error("Subscription creation error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to initialize subscription. Please try again.",
-          variant: "destructive",
-        });
-      })
-      .finally(() => {
-        setIsCreatingSubscription(false);
-      });
+    setTimeout(() => {
+      window.location.href = "/seller/onboarding";
+    }, 1500);
   };
 
   if (!clientSecret) {
