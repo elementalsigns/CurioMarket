@@ -386,6 +386,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct seller redirect for users with active subscriptions
+  app.get('/api/seller/redirect', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.redirect('/subscribe');
+    }
+
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Check if user has active subscription
+      if (user?.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status === 'active') {
+          // Check if seller profile exists
+          try {
+            const seller = await storage.getSellerByUserId(userId);
+            if (seller) {
+              return res.redirect('/seller/dashboard');
+            } else {
+              return res.redirect('/seller/onboarding');
+            }
+          } catch {
+            return res.redirect('/seller/onboarding');
+          }
+        }
+      }
+      
+      // No active subscription, redirect to subscribe
+      res.redirect('/subscribe');
+    } catch (error) {
+      console.error("Error in seller redirect:", error);
+      res.redirect('/subscribe');
+    }
+  });
+
   // Create subscription endpoint
   app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
     if (!stripe) {
