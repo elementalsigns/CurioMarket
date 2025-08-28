@@ -70,6 +70,7 @@ function Router() {
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/events" component={Events} />
+          <Route path="/seller/subscription" component={SellerSubscription} />
           <Route path="/signin" component={SignInOnly} />
           <Route path="/signup" component={SignIn} />
           <Route path="/account-demo" component={DemoSimple} />
