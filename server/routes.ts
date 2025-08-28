@@ -86,7 +86,7 @@ async function handleSubscriptionCancellation(subscription: Stripe.Subscription)
     if (user) {
       await storage.updateUserStripeInfo(userId, {
         customerId: subscription.customer as string,
-        subscriptionId: undefined
+        subscriptionId: null
       });
       
       // Downgrade user role back to buyer
@@ -264,8 +264,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId = customer.id;
       }
 
-      // Create or get the seller subscription price
-      const SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID || await createSellerSubscriptionPrice(stripe);
+      // Create or get the seller subscription price - validate existing price ID
+      let SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID;
+      
+      if (SELLER_SUBSCRIPTION_PRICE_ID) {
+        try {
+          await stripe.prices.retrieve(SELLER_SUBSCRIPTION_PRICE_ID);
+        } catch (error: any) {
+          console.log(`Price ID ${SELLER_SUBSCRIPTION_PRICE_ID} not found, creating new price...`);
+          SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
+        }
+      } else {
+        SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
+      }
 
       // Create subscription
       const subscription = await stripe.subscriptions.create({
@@ -304,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create subscription endpoint (alias for frontend compatibility)
+  // Create subscription endpoint (alias that frontend calls)
   app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
@@ -325,8 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ 
             subscriptionId: subscription.id,
             clientSecret: null,
-            status: 'active',
-            success: true
+            status: 'active'
           });
         }
       }
@@ -341,8 +351,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId = customer.id;
       }
 
-      // Create or get the seller subscription price
-      const SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID || await createSellerSubscriptionPrice(stripe);
+      // Create or get the seller subscription price - validate existing price ID
+      let SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID;
+      
+      if (SELLER_SUBSCRIPTION_PRICE_ID) {
+        try {
+          await stripe.prices.retrieve(SELLER_SUBSCRIPTION_PRICE_ID);
+        } catch (error: any) {
+          console.log(`Price ID ${SELLER_SUBSCRIPTION_PRICE_ID} not found, creating new price...`);
+          SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
+        }
+      } else {
+        SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
+      }
 
       // Create subscription
       const subscription = await stripe.subscriptions.create({
