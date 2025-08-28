@@ -256,7 +256,7 @@ export default function SellerOnboarding() {
                               maxFileSize={10485760}
                               allowedFileTypes={['image/*']}
                               onGetUploadParameters={async () => {
-                                const response = await apiRequest("POST", "/api/objects/upload");
+                                const response = await apiRequest("POST", "/api/objects/upload") as any;
                                 return { method: "PUT" as const, url: response.uploadURL };
                               }}
                               onComplete={(result) => {
@@ -285,7 +285,7 @@ export default function SellerOnboarding() {
                         maxFileSize={10485760}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload");
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
                           return { method: "PUT" as const, url: response.uploadURL };
                         }}
                         onComplete={(result) => {
@@ -345,7 +345,7 @@ export default function SellerOnboarding() {
                         maxFileSize={5242880}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload");
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
                           return { method: "PUT" as const, url: response.uploadURL };
                         }}
                         onComplete={(result) => {
