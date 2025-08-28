@@ -121,7 +121,7 @@ export default function Subscribe() {
       description: "Welcome to Curio Market! Now let's set up your shop.",
     });
     setTimeout(() => {
-      window.location.href = "/seller/onboarding";
+      window.location.href = "/seller/dashboard";
     }, 1500);
   };
 
