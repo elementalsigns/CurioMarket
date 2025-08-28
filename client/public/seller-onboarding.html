@@ -150,7 +150,7 @@
         </div>
         
         <div class="status" id="statusMessage">
-            <p>✓ Subscription Active: Your payment has been processed</p>
+            <p>Loading user status...</p>
         </div>
         
         <div class="card">
@@ -211,6 +211,33 @@
     </div>
 
     <script>
+        // Check authentication status on page load
+        window.addEventListener('load', async function() {
+            try {
+                const authResponse = await fetch('/api/auth/user', {
+                    credentials: 'include'
+                });
+                
+                if (authResponse.ok) {
+                    const user = await authResponse.json();
+                    document.getElementById('statusMessage').innerHTML = 
+                        `<p>✓ Logged in as: ${user.email || 'User'} | Subscription Active</p>`;
+                } else {
+                    document.getElementById('statusMessage').innerHTML = 
+                        '<p style="color: #ff6b6b;">Please log in to continue</p>';
+                    setTimeout(() => {
+                        window.location.href = '/api/login';
+                    }, 2000);
+                }
+            } catch (error) {
+                document.getElementById('statusMessage').innerHTML = 
+                    '<p style="color: #ff6b6b;">Authentication error - please log in</p>';
+                setTimeout(() => {
+                    window.location.href = '/api/login';
+                }, 2000);
+            }
+        });
+
         // Character counters
         document.getElementById('bio').addEventListener('input', function(e) {
             const count = e.target.value.length;
@@ -296,7 +323,24 @@
             submitBtn.textContent = 'Creating Shop...';
             
             try {
-                // First create the seller profile
+                // Check if user is authenticated first
+                const authCheck = await fetch('/api/auth/user', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!authCheck.ok) {
+                    document.getElementById('statusMessage').innerHTML = 
+                        '<p style="color: #ff6b6b;">Please log in first to create your shop profile.</p>';
+                    setTimeout(() => {
+                        window.location.href = '/api/login';
+                    }, 2000);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Shop';
+                    return;
+                }
+                
+                // Create the seller profile
                 const response = await fetch('/api/seller/profile', {
                     method: 'POST',
                     headers: {
