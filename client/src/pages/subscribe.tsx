@@ -30,25 +30,41 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
       return;
     }
 
-    const { error } = await stripe.confirmSetup({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/seller/dashboard`,
-      },
-    });
+    try {
+      // Confirm the setup intent with payment method
+      const { error: confirmError, setupIntent } = await stripe.confirmSetup({
+        elements,
+        redirect: 'if_required'
+      });
 
-    if (error) {
+      if (confirmError) {
+        throw confirmError;
+      }
+
+      if (setupIntent && setupIntent.status === 'succeeded') {
+        // Now activate the subscription on the server
+        const response = await apiRequest('POST', '/api/subscription/activate', {
+          setupIntentId: setupIntent.id
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          toast({
+            title: "Subscription Activated",
+            description: "Welcome to Curio Market! Your seller account is now active.",
+          });
+          onSuccess();
+        } else {
+          throw new Error('Failed to activate subscription');
+        }
+      }
+    } catch (error: any) {
+      console.error('Subscription error:', error);
       toast({
         title: "Payment Failed",
-        description: error.message,
+        description: error.message || 'Failed to process subscription',
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Subscription Activated",
-        description: "Welcome to Curio Market! Your seller account is now active.",
-      });
-      onSuccess();
     }
 
     setIsProcessing(false);

@@ -13,7 +13,7 @@ import { ObjectStorageService } from "./objectStorage";
 import * as XLSX from 'xlsx';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-07-30.basil",
+  apiVersion: "2025-08-27.basil",
 }) : null;
 
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "2.6");
@@ -577,6 +577,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error(`[SUBSCRIPTION] Error in subscription endpoint for user:`, error);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Activate subscription after setup intent confirmation
+  app.post('/api/subscription/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { setupIntentId } = req.body;
+      
+      if (!setupIntentId) {
+        return res.status(400).json({ error: 'Setup intent ID required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId || !stripe) {
+        return res.status(404).json({ error: 'User or subscription not found' });
+      }
+
+      console.log(`[SUBSCRIPTION] Activating subscription for user ${userId}, setupIntent: ${setupIntentId}`);
+
+      // Get the setup intent and payment method
+      const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+      
+      if (!setupIntent.payment_method) {
+        return res.status(400).json({ error: 'No payment method attached to setup intent' });
+      }
+
+      // Attach the payment method to the customer and set as default
+      await stripe.paymentMethods.attach(setupIntent.payment_method.toString(), {
+        customer: user.stripeCustomerId!
+      });
+
+      await stripe.customers.update(user.stripeCustomerId!, {
+        invoice_settings: {
+          default_payment_method: setupIntent.payment_method.toString()
+        }
+      });
+
+      // Update the subscription with the payment method
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        default_payment_method: setupIntent.payment_method.toString()
+      });
+
+      // Try to pay any outstanding invoices
+      if (user.stripeCustomerId) {
+        const invoices = await stripe.invoices.list({
+          customer: user.stripeCustomerId,
+          subscription: user.stripeSubscriptionId,
+          status: 'open'
+        });
+
+        for (const invoice of invoices.data) {
+          try {
+            if (invoice.id) {
+              await stripe.invoices.pay(invoice.id);
+              console.log(`[SUBSCRIPTION] Paid invoice ${invoice.id} for user ${userId}`);
+            }
+          } catch (error) {
+            console.error(`[SUBSCRIPTION] Failed to pay invoice ${invoice.id}:`, error);
+          }
+        }
+      }
+
+      console.log(`[SUBSCRIPTION] Subscription activated successfully for user ${userId}`);
+      
+      res.json({
+        message: 'Subscription activated successfully',
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        success: true
+      });
+    } catch (error: any) {
+      console.error('[SUBSCRIPTION] Error activating subscription:', error);
+      res.status(500).json({ error: 'Failed to activate subscription' });
     }
   });
 
