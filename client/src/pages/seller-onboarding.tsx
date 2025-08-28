@@ -197,7 +197,7 @@ export default function SellerOnboarding() {
 
           {/* Subscription Info Notice */}
           <div className="mb-8" data-testid="subscription-notice">
-            <Card className="border-gothic-red/50 bg-gothic-red/10">
+            <Card className="border-white/50 bg-gothic-red/10">
               <CardContent className="p-6">
                 <div className="text-center">
                   <h2 className="text-xl font-serif font-bold mb-4 text-gothic-red">
