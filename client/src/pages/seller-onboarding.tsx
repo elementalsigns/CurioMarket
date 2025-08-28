@@ -35,6 +35,7 @@ export default function SellerOnboarding() {
   const [, navigate] = useLocation();
   const [bannerUrl, setBannerUrl] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
 
   const {
     register,
@@ -57,6 +58,35 @@ export default function SellerOnboarding() {
       return;
     }
   }, [user, authLoading, toast]);
+
+  // Check subscription status when user is available
+  useEffect(() => {
+    if (user && hasSubscription === null) {
+      // Check if user has an active subscription
+      fetch('/api/auth/user')
+        .then(res => res.json())
+        .then(userData => {
+          if (userData.stripeSubscriptionId) {
+            setHasSubscription(true);
+          } else {
+            setHasSubscription(false);
+            // Show clear message about subscription requirement
+            toast({
+              title: "Seller Subscription Required",
+              description: "You need an active subscription to create your shop. Redirecting you to subscribe...",
+              variant: "destructive",
+            });
+            setTimeout(() => {
+              navigate("/subscribe");
+            }, 2000);
+          }
+        })
+        .catch(() => {
+          setHasSubscription(false);
+          navigate("/subscribe");
+        });
+    }
+  }, [user, hasSubscription, toast, navigate]);
 
   const createSellerMutation = useMutation({
     mutationFn: async (data: SellerOnboardingForm) => {
@@ -108,10 +138,55 @@ export default function SellerOnboarding() {
     createSellerMutation.mutate(submissionData);
   };
 
-  if (authLoading) {
+  if (authLoading || hasSubscription === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          <p className="text-foreground/70">
+            {authLoading ? "Loading..." : "Checking subscription status..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user doesn't have subscription, show a clear message before redirecting
+  if (hasSubscription === false) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <Card className="max-w-lg mx-auto glass-effect border border-gothic-red/30">
+            <CardHeader>
+              <CardTitle className="font-serif text-center text-gothic-red">
+                Seller Subscription Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-foreground/70">
+                To become a seller on Curio Market, you need an active subscription.
+              </p>
+              <div className="bg-gothic-red/10 border border-gothic-red/30 rounded-lg p-4">
+                <p className="text-sm font-medium mb-2">Seller Subscription Benefits:</p>
+                <ul className="text-sm text-left space-y-1">
+                  <li>• Unlimited product listings</li>
+                  <li>• Professional seller dashboard</li>
+                  <li>• Direct customer messaging</li>
+                  <li>• Sales analytics and reporting</li>
+                </ul>
+              </div>
+              <p className="text-lg font-semibold">Only $10/month</p>
+              <Button 
+                onClick={() => navigate("/subscribe")}
+                className="w-full bg-gothic-red hover:bg-gothic-red/80"
+              >
+                Start Your Subscription
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -124,11 +199,22 @@ export default function SellerOnboarding() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12" data-testid="onboarding-header">
+            <div className="inline-flex items-center mb-6 space-x-4 text-sm text-foreground/60">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gothic-red rounded-full flex items-center justify-center text-white font-bold">✓</div>
+                <span>Step 1: Subscription Active</span>
+              </div>
+              <div className="w-12 h-px bg-gothic-red/30"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gothic-red rounded-full flex items-center justify-center text-white font-bold">2</div>
+                <span className="text-gothic-red font-medium">Step 2: Create Your Shop</span>
+              </div>
+            </div>
             <h1 className="text-4xl font-serif font-bold mb-4 text-white hover:text-gothic-red transition-colors cursor-default">
-              Become a Curiosities Market Seller
+              Create Your Curiosities Shop
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-              Join thousands of collectors sharing their unique oddities with the world. Set up your shop in minutes.
+              Your subscription is active! Now set up your shop profile and start selling your unique oddities to collectors worldwide.
             </p>
           </div>
 

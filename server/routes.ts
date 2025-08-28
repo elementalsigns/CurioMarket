@@ -86,7 +86,7 @@ async function handleSubscriptionCancellation(subscription: Stripe.Subscription)
     if (user) {
       await storage.updateUserStripeInfo(userId, {
         customerId: subscription.customer as string,
-        subscriptionId: null
+        subscriptionId: ""
       });
       
       // Downgrade user role back to buyer
@@ -104,7 +104,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription.toString());
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -123,7 +123,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!invoice.subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription.toString());
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -336,7 +336,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ 
             subscriptionId: subscription.id,
             clientSecret: null,
-            status: 'active'
+            status: 'active',
+            success: true
           });
         }
       }

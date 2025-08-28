@@ -100,7 +100,7 @@ export default function Subscribe() {
     if (user) {
       // Create subscription when user is loaded
       apiRequest("POST", "/api/subscription/create")
-        .then((data) => {
+        .then((data: any) => {
           console.log("Subscription response:", data);
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
@@ -162,12 +162,23 @@ export default function Subscribe() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12" data-testid="subscribe-header">
+            <div className="inline-flex items-center mb-6 space-x-4 text-sm text-foreground/60">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gothic-red rounded-full flex items-center justify-center text-white font-bold">1</div>
+                <span className="text-gothic-red font-medium">Step 1: Start Subscription</span>
+              </div>
+              <div className="w-12 h-px bg-gothic-red/30"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 border-2 border-gothic-red/30 rounded-full flex items-center justify-center text-gothic-red/30 font-bold">2</div>
+                <span>Step 2: Create Your Shop</span>
+              </div>
+            </div>
             <Crown className="mx-auto mb-6 text-gothic-purple" size={64} />
             <h1 className="text-4xl font-serif font-bold mb-4">
-              Activate Your <span className="text-gothic-purple">Seller</span> Account
+              Start Your <span className="text-gothic-purple">Seller</span> Subscription
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-              Start selling your oddities to collectors worldwide with our comprehensive seller platform.
+              Join our marketplace with a $10/month subscription. Once active, you'll create your shop profile and start selling your oddities to collectors worldwide.
             </p>
           </div>
 
