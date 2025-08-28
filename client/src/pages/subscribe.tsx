@@ -307,6 +307,19 @@ export default function Subscribe() {
                 </CardContent>
               </Card>
 
+              {/* Compliance & Security Info */}
+              <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-reminder">
+                <CardContent className="p-4">
+                  <h4 className="font-serif font-bold mb-2">Compliance Reminder</h4>
+                  <p className="text-sm text-foreground/80 mb-3">
+                    By subscribing, you agree to comply with all local, state, and federal laws regarding 
+                    the sale of oddities and specimens. Review our prohibited items list and seller guidelines.
+                  </p>
+                  <p className="text-xs text-foreground/60 text-center">
+                    Secure payment processing by Stripe. Cancel anytime from your dashboard.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Right Column - Next Steps & Payment */}
@@ -345,20 +358,6 @@ export default function Subscribe() {
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <SubscribeForm onSuccess={handleSuccess} />
               </Elements>
-
-              {/* Compliance & Security Info */}
-              <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-reminder">
-                <CardContent className="p-4">
-                  <h4 className="font-serif font-bold mb-2">Compliance Reminder</h4>
-                  <p className="text-sm text-foreground/80 mb-3">
-                    By subscribing, you agree to comply with all local, state, and federal laws regarding 
-                    the sale of oddities and specimens. Review our prohibited items list and seller guidelines.
-                  </p>
-                  <p className="text-xs text-foreground/60 text-center">
-                    Secure payment processing by Stripe. Cancel anytime from your dashboard.
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
