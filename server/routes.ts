@@ -145,6 +145,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Serve Stripe publishable key to frontend
+  app.get('/api/config/stripe', (req, res) => {
+    res.json({
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || ''
+    });
+  });
+
   // Object storage routes
   app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
     try {

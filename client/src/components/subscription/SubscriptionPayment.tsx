@@ -8,7 +8,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+let stripePromise: Promise<any> | null = null;
+
+const getStripe = async () => {
+  if (!stripePromise) {
+    try {
+      const config = await fetch('/api/config/stripe').then(res => res.json());
+      stripePromise = loadStripe(config.publishableKey);
+    } catch (error) {
+      console.error('Failed to load Stripe config:', error);
+      stripePromise = loadStripe('');
+    }
+  }
+  return stripePromise;
+};
 
 interface SubscriptionPaymentProps {
   onSuccess: () => void;
@@ -26,9 +39,7 @@ function PaymentForm({ onSuccess, onCancel }: SubscriptionPaymentProps) {
     // Create subscription on mount
     const createSubscription = async () => {
       try {
-        const response = await apiRequest('/api/seller/subscribe', {
-          method: 'POST'
-        }) as any;
+        const response = await apiRequest('/api/seller/subscribe', 'POST') as any;
         
         if (response?.status === 'active') {
           // Already subscribed
@@ -191,8 +202,31 @@ function PaymentForm({ onSuccess, onCancel }: SubscriptionPaymentProps) {
 }
 
 export default function SubscriptionPayment({ onSuccess, onCancel }: SubscriptionPaymentProps) {
+  const [stripeReady, setStripeReady] = useState(false);
+  const [stripe, setStripe] = useState<any>(null);
+
+  useEffect(() => {
+    getStripe().then(stripeInstance => {
+      setStripe(stripeInstance);
+      setStripeReady(true);
+    });
+  }, []);
+
+  if (!stripeReady) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Loading Payment System
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={stripe}>
       <PaymentForm onSuccess={onSuccess} onCancel={onCancel} />
     </Elements>
   );
