@@ -350,10 +350,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const userId = req.user.claims.sub;
+      console.log(`[SUBSCRIPTION] Processing create request, req.user:`, req.user);
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        console.error(`[SUBSCRIPTION] No user ID found in request`);
+        return res.status(401).json({ error: "User authentication required" });
+      }
+      
       const user = await storage.getUser(userId);
       
       if (!user) {
+        console.error(`[SUBSCRIPTION] User ${userId} not found in database`);
         return res.status(404).json({ error: "User not found" });
       }
 
