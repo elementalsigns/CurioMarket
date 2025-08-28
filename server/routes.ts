@@ -491,6 +491,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // If no client secret, create a setup intent for future payments
         let clientSecret = paymentIntent?.client_secret;
+        console.log(`[SUBSCRIPTION] Client secret check: paymentIntent exists=${!!paymentIntent}, clientSecret exists=${!!clientSecret}`);
+        
         if (!clientSecret) {
           try {
             console.log(`[SUBSCRIPTION] No payment intent found, creating setup intent for customer ${customerId}`);
@@ -504,10 +506,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               },
             });
             clientSecret = setupIntent.client_secret;
-            console.log(`[SUBSCRIPTION] Created setup intent with client secret: ${clientSecret ? 'present' : 'failed'}`);
+            console.log(`[SUBSCRIPTION] Created setup intent: ${setupIntent.id} with client secret: ${clientSecret ? 'present' : 'failed'}`);
           } catch (setupError) {
             console.error(`[SUBSCRIPTION] Failed to create setup intent:`, setupError);
           }
+        } else {
+          console.log(`[SUBSCRIPTION] Using existing payment intent client secret`);
+        }
+        
+        console.log(`[SUBSCRIPTION] Final response will include clientSecret: ${clientSecret ? 'YES' : 'NO'}`);
+
+        if (!clientSecret) {
+          console.error(`[SUBSCRIPTION] CRITICAL: No client secret available after all attempts`);
+          return res.status(500).json({ error: "Unable to create payment setup" });
         }
 
         res.json({
