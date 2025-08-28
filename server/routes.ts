@@ -193,6 +193,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update seller profile
+  app.put('/api/seller/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      // Verify user has active subscription
+      const user = await storage.getUser(userId);
+      if (!user?.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active seller subscription required" });
+      }
+
+      if (stripe) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status !== 'active') {
+          return res.status(403).json({ error: "Active seller subscription required" });
+        }
+      }
+
+      // Update seller profile
+      const updateData = {
+        shopName: req.body.shopName || seller.shopName,
+        bio: req.body.bio || seller.bio,
+        location: req.body.location || seller.location,
+        policies: req.body.policies || seller.policies,
+        shippingInfo: req.body.shippingInfo || seller.shippingInfo,
+        returnPolicy: req.body.returnPolicy || seller.returnPolicy,
+        bannerImageUrl: req.body.bannerImageUrl || seller.bannerImageUrl,
+        avatarImageUrl: req.body.avatarImageUrl || seller.avatarImageUrl,
+      };
+
+      const updatedSeller = await storage.updateSeller(seller.id, updateData);
+      res.json(updatedSeller);
+    } catch (error: any) {
+      console.error("Error updating seller profile:", error);
+      res.status(500).json({ error: "Failed to update seller profile" });
+    }
+  });
+
   // Get seller listings
   app.get('/api/seller/listings', isAuthenticated, async (req: any, res) => {
     try {

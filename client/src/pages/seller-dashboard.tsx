@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -16,6 +16,10 @@ import { SocialSharing } from "@/components/social-sharing";
 import type { Promotion, InsertPromotion } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -359,44 +363,7 @@ export default function SellerDashboard() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4" data-testid="content-profile">
-            <h2 className="text-2xl font-serif font-bold">Shop Profile</h2>
-            
-            <Card className="glass-effect" data-testid="shop-profile">
-              <CardHeader>
-                <CardTitle className="font-serif">{seller.shopName}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Bio</h4>
-                  <p className="text-foreground/80" data-testid="shop-bio">
-                    {seller.bio || 'No bio provided'}
-                  </p>
-                </div>
-                
-                {seller.location && (
-                  <div>
-                    <h4 className="font-medium mb-2">Location</h4>
-                    <p className="text-foreground/80" data-testid="shop-location">
-                      {seller.location}
-                    </p>
-                  </div>
-                )}
-                
-                {seller.policies && (
-                  <div>
-                    <h4 className="font-medium mb-2">Shop Policies</h4>
-                    <p className="text-foreground/80" data-testid="shop-policies">
-                      {seller.policies}
-                    </p>
-                  </div>
-                )}
-                
-                <Button variant="outline" data-testid="button-edit-profile">
-                  <Edit className="mr-2" size={16} />
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
+            <ShopProfileManager seller={seller} />
           </TabsContent>
         </Tabs>
       </div>
@@ -652,6 +619,365 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Shop Profile Manager Component
+function ShopProfileManager({ seller }: { seller: any }) {
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState(seller?.bannerImageUrl || "");
+  const [avatarUrl, setAvatarUrl] = useState(seller?.avatarImageUrl || "");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const profileForm = useForm({
+    defaultValues: {
+      shopName: seller?.shopName || "",
+      bio: seller?.bio || "",
+      location: seller?.location || "",
+      policies: seller?.policies || "",
+      shippingInfo: seller?.shippingInfo || "",
+      returnPolicy: seller?.returnPolicy || "",
+    }
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("PUT", "/api/seller/profile", {
+        ...data,
+        bannerImageUrl: bannerUrl || undefined,
+        avatarImageUrl: avatarUrl || undefined,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile Updated",
+        description: "Your shop profile has been updated successfully.",
+      });
+      setIsEditingProfile(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/dashboard"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleProfileSubmit = (data: any) => {
+    updateProfileMutation.mutate(data);
+  };
+
+  if (isEditingProfile) {
+    return (
+      <Card className="glass-effect" data-testid="shop-profile-editor">
+        <CardHeader>
+          <CardTitle className="font-serif flex items-center justify-between">
+            Edit Shop Profile
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditingProfile(false)}
+              data-testid="button-cancel-edit"
+            >
+              Cancel
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...profileForm}>
+            <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-6">
+              {/* Shop Images */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Shop Images</h4>
+                
+                {/* Banner Image */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Banner Image</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-20 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden">
+                      {bannerUrl ? (
+                        <img src={bannerUrl} alt="Shop banner" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-8 h-8 text-zinc-500" />
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Banner image URL"
+                        value={bannerUrl}
+                        onChange={(e) => setBannerUrl(e.target.value)}
+                        className="w-64"
+                        data-testid="input-banner-url"
+                      />
+                      <Button type="button" variant="outline" size="sm">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Avatar Image */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Shop Avatar</label>
+                  <div className="flex items-center gap-4">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={avatarUrl} />
+                      <AvatarFallback>{seller?.shopName?.[0] || 'S'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Avatar image URL"
+                        value={avatarUrl}
+                        onChange={(e) => setAvatarUrl(e.target.value)}
+                        className="w-64"
+                        data-testid="input-avatar-url"
+                      />
+                      <Button type="button" variant="outline" size="sm">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={profileForm.control}
+                  name="shopName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Shop Name *</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-shop-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={profileForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="City, State" data-testid="input-location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={profileForm.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Shop Bio</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Tell customers about your shop and what makes it special..."
+                        rows={4}
+                        data-testid="input-bio"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Policies */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Shop Policies</h4>
+                
+                <FormField
+                  control={profileForm.control}
+                  name="policies"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>General Policies</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="Describe your shop policies, terms of service, etc..."
+                          rows={3}
+                          data-testid="input-policies"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={profileForm.control}
+                  name="shippingInfo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Shipping Information</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="Shipping costs, processing times, international shipping, etc..."
+                          rows={3}
+                          data-testid="input-shipping"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={profileForm.control}
+                  name="returnPolicy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Return & Refund Policy</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="Return policy, refund conditions, exchanges, etc..."
+                          rows={3}
+                          data-testid="input-return-policy"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditingProfile(false)}
+                  data-testid="button-cancel-profile"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={updateProfileMutation.isPending}
+                  className="bg-gothic-red hover:bg-gothic-red/80"
+                  data-testid="button-save-profile"
+                >
+                  {updateProfileMutation.isPending ? (
+                    <>Saving...</>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-serif font-bold">Shop Profile</h2>
+        <Button 
+          onClick={() => setIsEditingProfile(true)}
+          className="bg-gothic-red hover:bg-gothic-red/80"
+          data-testid="button-edit-profile"
+        >
+          <Edit className="mr-2" size={16} />
+          Edit Profile
+        </Button>
+      </div>
+
+      {/* Shop Header */}
+      <Card className="glass-effect" data-testid="shop-profile-display">
+        {bannerUrl && (
+          <div className="h-32 bg-cover bg-center rounded-t-lg" style={{ backgroundImage: `url(${bannerUrl})` }} />
+        )}
+        <CardHeader className="pb-4">
+          <div className="flex items-start gap-4">
+            <Avatar className="w-20 h-20 border-4 border-background">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback className="text-2xl">{seller?.shopName?.[0] || 'S'}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <CardTitle className="font-serif text-2xl">{seller?.shopName || 'Shop Name'}</CardTitle>
+              {seller?.location && (
+                <p className="text-foreground/60 mt-1" data-testid="shop-location-display">
+                  📍 {seller.location}
+                </p>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {seller?.bio && (
+            <div>
+              <h4 className="font-medium mb-2">About This Shop</h4>
+              <p className="text-foreground/80 leading-relaxed" data-testid="shop-bio-display">
+                {seller.bio}
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {seller?.policies && (
+              <div>
+                <h4 className="font-medium mb-2">Shop Policies</h4>
+                <p className="text-foreground/70 text-sm leading-relaxed" data-testid="shop-policies-display">
+                  {seller.policies}
+                </p>
+              </div>
+            )}
+
+            {seller?.shippingInfo && (
+              <div>
+                <h4 className="font-medium mb-2">Shipping Information</h4>
+                <p className="text-foreground/70 text-sm leading-relaxed" data-testid="shop-shipping-display">
+                  {seller.shippingInfo}
+                </p>
+              </div>
+            )}
+
+            {seller?.returnPolicy && (
+              <div>
+                <h4 className="font-medium mb-2">Return Policy</h4>
+                <p className="text-foreground/70 text-sm leading-relaxed" data-testid="shop-return-display">
+                  {seller.returnPolicy}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {(!seller?.policies && !seller?.shippingInfo && !seller?.returnPolicy) && (
+            <div className="text-center py-8 text-foreground/60">
+              <p>Complete your shop profile to help customers learn more about your business.</p>
+              <Button 
+                onClick={() => setIsEditingProfile(true)}
+                variant="outline"
+                className="mt-4"
+                data-testid="button-complete-profile"
+              >
+                Complete Profile
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
