@@ -59,29 +59,31 @@ export default function SellerOnboarding() {
     }
   }, [user, authLoading, toast]);
 
-  // Check subscription status when user is available
+  // Check actual subscription status with Stripe
   useEffect(() => {
-    if (user && hasSubscription === null) {
-      // Check if user has a subscription ID in their profile
-      if ((user as any).stripeSubscriptionId) {
-        setHasSubscription(true);
-        if ((user as any).role === 'seller') {
-          toast({
-            title: "Welcome Seller!",
-            description: "You can now create your shop profile.",
-            variant: "default",
-          });
+    const checkSubscriptionStatus = async () => {
+      if (user && hasSubscription === null) {
+        try {
+          const response = await apiRequest("GET", "/api/subscription/status");
+          setHasSubscription(response.hasActiveSubscription);
+          
+          if (!response.hasActiveSubscription) {
+            toast({
+              title: "Subscription Required", 
+              description: `Please complete your seller subscription. Status: ${response.subscriptionStatus || 'none'}`,
+              variant: "destructive",
+            });
+            navigate("/subscribe");
+          }
+        } catch (error) {
+          console.error("Error checking subscription:", error);
+          setHasSubscription(false);
+          navigate("/subscribe");
         }
-      } else {
-        setHasSubscription(false);
-        toast({
-          title: "Subscription Required",
-          description: "Please complete your seller subscription to continue.",
-          variant: "destructive",
-        });
-        navigate("/subscribe");
       }
-    }
+    };
+    
+    checkSubscriptionStatus();
   }, [user, hasSubscription, toast, navigate]);
 
   const createSellerMutation = useMutation({
@@ -207,7 +209,7 @@ export default function SellerOnboarding() {
                     <strong>Step 1:</strong> Subscribe ($10/month) → <strong>Step 2:</strong> Create your shop profile
                   </p>
                   
-                  {!(user as any)?.stripeSubscriptionId ? (
+                  {!hasSubscription ? (
                     <Button 
                       onClick={() => navigate("/subscribe")}
                       className="bg-gothic-red hover:bg-gothic-red/80 text-white px-8 py-3 text-lg"
