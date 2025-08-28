@@ -149,15 +149,30 @@ export default function Subscribe() {
       console.log("Checking conditions: clientSecret exists =", !!data.clientSecret, "status =", data.status);
       
       if (data.status === 'active') {
-        // User already has an active subscription, redirect to onboarding
-        console.log("Active subscription detected, redirecting to onboarding");
-        toast({
-          title: "Subscription Already Active!",
-          description: "Great! Your subscription is active. Setting up your seller profile...",
-        });
-        setTimeout(() => {
-          window.location.href = "/seller/onboarding";
-        }, 2000);
+        // User already has an active subscription, check if they have a seller profile
+        console.log("Active subscription detected, hasSellerProfile:", data.hasSellerProfile);
+        
+        if (data.hasSellerProfile) {
+          // Seller profile exists, redirect to dashboard
+          console.log("Seller profile exists, redirecting to dashboard");
+          toast({
+            title: "Welcome Back!",
+            description: "Your subscription is active. Taking you to your dashboard...",
+          });
+          setTimeout(() => {
+            window.location.href = "/seller/dashboard";
+          }, 1000);
+        } else {
+          // No seller profile, redirect to onboarding
+          console.log("No seller profile, redirecting to onboarding");
+          toast({
+            title: "Subscription Active!",
+            description: "Great! Your subscription is active. Let's set up your seller profile...",
+          });
+          setTimeout(() => {
+            window.location.href = "/seller/onboarding";
+          }, 1000);
+        }
       } else if (data.clientSecret) {
         setClientSecret(data.clientSecret);
         console.log("Client secret set:", data.clientSecret);

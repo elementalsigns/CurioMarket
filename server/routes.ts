@@ -267,6 +267,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get seller dashboard (aggregated data)
+  app.get('/api/seller/dashboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify user has active subscription
+      if (!user.stripeSubscriptionId && stripe) {
+        return res.status(403).json({ message: "Active subscription required" });
+      }
+
+      if (stripe && user.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status !== 'active') {
+          return res.status(403).json({ message: "Active subscription required" });
+        }
+      }
+
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+
+      // Get all seller data
+      const [listingsResult, orders, stats] = await Promise.all([
+        storage.getListings({ sellerId: seller.id }),
+        storage.getOrdersBySellerId(seller.id),
+        storage.getSellerStats(seller.id)
+      ]);
+
+      res.json({
+        seller,
+        listings: listingsResult.listings,
+        orders,
+        stats
+      });
+    } catch (error) {
+      console.error("Error fetching seller dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch seller dashboard" });
+    }
+  });
+
   // ==================== SELLER ONBOARDING ====================
   
   // Create seller subscription
@@ -455,10 +501,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const existingSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           if (existingSubscription.status === 'active') {
             console.log(`[SUBSCRIPTION] User ${userId} already has active subscription: ${user.stripeSubscriptionId}`);
+            
+            // Check if seller profile exists
+            let hasSellerProfile = false;
+            try {
+              const seller = await storage.getSellerByUserId(userId);
+              hasSellerProfile = !!seller;
+            } catch (error) {
+              console.log(`[SUBSCRIPTION] Error checking seller profile for user ${userId}:`, error);
+            }
+            
             return res.json({
               subscriptionId: user.stripeSubscriptionId,
               clientSecret: null,
               status: 'active',
+              hasSellerProfile,
               success: true
             });
           }
