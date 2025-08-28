@@ -105,12 +105,14 @@ export default function Subscribe() {
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           } else if (data.success && !data.clientSecret) {
-            // Already has active subscription
+            // Already has active subscription - redirect to onboarding
             toast({
               title: "Already Subscribed",
-              description: "You already have an active subscription",
+              description: "You already have an active subscription. Let's set up your shop!",
             });
-            window.location.href = "/seller/dashboard";
+            setTimeout(() => {
+              window.location.href = "/seller/onboarding";
+            }, 1500);
           } else {
             throw new Error("No client secret received");
           }
@@ -127,7 +129,13 @@ export default function Subscribe() {
   }, [user, toast]);
 
   const handleSuccess = () => {
-    window.location.href = "/seller/dashboard";
+    toast({
+      title: "Subscription Activated!",
+      description: "Welcome to Curio Market! Now let's set up your shop.",
+    });
+    setTimeout(() => {
+      window.location.href = "/seller/onboarding";
+    }, 1500);
   };
 
   if (authLoading) {
@@ -273,8 +281,16 @@ export default function Subscribe() {
                 </CardContent>
               </Card>
 
+            </div>
+
+            {/* Subscription Form */}
+            <div>
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <SubscribeForm onSuccess={handleSuccess} />
+              </Elements>
+
               {/* Next Steps */}
-              <Card className="glass-effect" data-testid="next-steps">
+              <Card className="glass-effect mt-6" data-testid="next-steps">
                 <CardHeader>
                   <CardTitle className="font-serif flex items-center">
                     <Store className="mr-2" size={20} />
@@ -285,30 +301,23 @@ export default function Subscribe() {
                   <ol className="space-y-2 text-foreground/80">
                     <li className="flex items-start">
                       <span className="font-bold mr-2">1.</span>
-                      Complete your subscription payment below
+                      Complete your subscription payment above
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">2.</span>
-                      Access your seller dashboard immediately
+                      You'll be redirected to create your shop profile
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">3.</span>
-                      Create your first listing and start selling
+                      Set up your seller dashboard and create listings
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">4.</span>
-                      Connect with collectors and grow your business
+                      Connect with collectors and start selling
                     </li>
                   </ol>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Subscription Form */}
-            <div>
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <SubscribeForm onSuccess={handleSuccess} />
-              </Elements>
 
               <div className="mt-6">
                 <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-reminder">
