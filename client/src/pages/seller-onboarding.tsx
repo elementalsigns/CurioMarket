@@ -201,7 +201,7 @@ export default function SellerOnboarding() {
               <CardContent className="p-6">
                 <div className="text-center">
                   <h2 className="text-xl font-serif font-bold mb-4 text-gothic-red">
-                    Ready to Start Your Gothic Empire?
+                    Ready to Start Your Shop?
                   </h2>
                   <p className="text-foreground/80 mb-6">
                     <strong>Step 1:</strong> Subscribe for $10/month to unlock your seller account<br />
