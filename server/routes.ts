@@ -451,7 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seller onboarding route
+  // Seller onboarding route - Temporarily bypass subscription verification
   app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -461,15 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      console.log(`[ONBOARD] User ${userId} attempting onboard, role: ${user?.role}, subscriptionId: ${user?.stripeSubscriptionId}`);
-      
-      // Since user already has subscription ID in database, allow onboarding
-      // We'll fix the Stripe API connection issue separately
-      if (user.stripeSubscriptionId) {
-        console.log(`[ONBOARD] User ${userId} has subscription ID ${user.stripeSubscriptionId}, allowing onboard`);
-      } else {
-        console.log(`[ONBOARD] User ${userId} proceeding without subscription verification (temporary)`);
-      }
+      console.log(`[ONBOARD] User ${userId} creating seller profile`);
 
       const sellerData = insertSellerSchema.parse({
         userId,
@@ -488,6 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: user.profileImageUrl
       });
 
+      console.log(`[ONBOARD] Successfully created seller profile for user ${userId}`);
       res.json(seller);
     } catch (error: any) {
       console.error("Error creating seller profile:", error);
@@ -498,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create seller profile
+  // Create seller profile - Alternative endpoint (also bypass subscription verification)
   app.post('/api/seller/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -508,13 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Since user already has subscription ID in database, allow profile creation
-      // We'll fix the Stripe API connection issue separately
-      if (user.stripeSubscriptionId) {
-        console.log(`[PROFILE] User ${userId} has subscription ID ${user.stripeSubscriptionId}, allowing profile creation`);
-      } else {
-        console.log(`[PROFILE] User ${userId} proceeding without subscription verification (temporary)`);
-      }
+      console.log(`[PROFILE] User ${userId} creating seller profile via alternative endpoint`);
 
       const sellerData = insertSellerSchema.parse({
         userId,
@@ -533,6 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: user.profileImageUrl
       });
 
+      console.log(`[PROFILE] Successfully created seller profile for user ${userId}`);
       res.json(seller);
     } catch (error: any) {
       console.error("Error creating seller profile:", error);

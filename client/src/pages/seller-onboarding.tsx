@@ -88,15 +88,6 @@ export default function SellerOnboarding() {
       navigate("/seller/dashboard");
     },
     onError: (error: any) => {
-      if (error?.status === 403 && error?.data?.error?.includes("subscription")) {
-        toast({
-          title: "Subscription Required",
-          description: "Please complete your seller subscription first.",
-          variant: "destructive",
-        });
-        navigate("/subscribe");
-        return;
-      }
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
