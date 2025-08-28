@@ -1,7 +1,10 @@
 # Overview
 Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 3% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
-## Recent Enhancement (August 21, 2025)
+## Recent Enhancement (August 27, 2025)
+- **Complete Stripe Subscription Model**: Full implementation of $10/month seller subscriptions with real Stripe integration. Includes secure payment processing, webhook handling, automatic role management, subscription dashboard, and professional onboarding flow. Replaces temporary bypasses with production-ready subscription system.
+
+## Previous Enhancement (August 21, 2025)
 - **Review Photos System**: Complete photo upload functionality added to reviews, allowing buyers to share visual proof of their purchases. Includes secure object storage integration, photo galleries in review displays, and professional photo management with up to 5 photos per review.
 
 # User Preferences

@@ -18,6 +18,126 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "2.6");
 
+// Helper function to create seller subscription price if it doesn't exist
+async function createSellerSubscriptionPrice(stripe: Stripe): Promise<string> {
+  try {
+    // First, create the product
+    const product = await stripe.products.create({
+      name: 'Curio Market Seller Subscription',
+      description: 'Monthly subscription for sellers on Curio Market platform',
+      metadata: {
+        type: 'seller_subscription'
+      }
+    });
+
+    // Then create the recurring price
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: 1000, // $10.00 in cents
+      currency: 'usd',
+      recurring: {
+        interval: 'month',
+      },
+      metadata: {
+        type: 'seller_subscription'
+      }
+    });
+
+    console.log(`Created Stripe price: ${price.id} for product: ${product.id}`);
+    return price.id;
+  } catch (error) {
+    console.error('Error creating Stripe product/price:', error);
+    throw new Error('Failed to create subscription pricing');
+  }
+}
+
+// Webhook handler functions
+async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+  const userId = subscription.metadata.userId;
+  if (!userId) return;
+
+  try {
+    const user = await storage.getUser(userId);
+    if (user) {
+      await storage.updateUserStripeInfo(userId, {
+        customerId: subscription.customer as string,
+        subscriptionId: subscription.id
+      });
+      
+      // If subscription is active, ensure user has seller role
+      if (subscription.status === 'active') {
+        await storage.upsertUser({
+          ...user,
+          role: 'seller' as const
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error handling subscription update:', error);
+  }
+}
+
+async function handleSubscriptionCancellation(subscription: Stripe.Subscription) {
+  const userId = subscription.metadata.userId;
+  if (!userId) return;
+
+  try {
+    const user = await storage.getUser(userId);
+    if (user) {
+      await storage.updateUserStripeInfo(userId, {
+        customerId: subscription.customer as string,
+        subscriptionId: undefined
+      });
+      
+      // Downgrade user role back to buyer
+      await storage.upsertUser({
+        ...user,
+        role: 'buyer' as const
+      });
+    }
+  } catch (error) {
+    console.error('Error handling subscription cancellation:', error);
+  }
+}
+
+async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+  if (!invoice.subscription || !stripe) return;
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const userId = subscription.metadata.userId;
+    
+    if (userId) {
+      const user = await storage.getUser(userId);
+      if (user?.email) {
+        // Send success email notification - implement this in emailService if needed
+        console.log(`Payment succeeded for user ${userId}, amount: $${(invoice.amount_paid || 0) / 100}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error handling payment success:', error);
+  }
+}
+
+async function handlePaymentFailed(invoice: Stripe.Invoice) {
+  if (!invoice.subscription || !stripe) return;
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const userId = subscription.metadata.userId;
+    
+    if (userId) {
+      const user = await storage.getUser(userId);
+      if (user?.email) {
+        // Send payment failure notification - implement this in emailService if needed
+        console.log(`Payment failed for user ${userId}, amount: $${(invoice.amount_due || 0) / 100}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error handling payment failure:', error);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Static file serving for assets
   app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
@@ -135,19 +255,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId = customer.id;
       }
 
+      // Create or get the seller subscription price
+      const SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID || await createSellerSubscriptionPrice(stripe);
+
       // Create subscription
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{
-          price_data: {
-            currency: 'usd',
-            recurring: { interval: 'month' },
-            unit_amount: 1000, // $10.00
-            product: 'prod_subscription_id' // Use your actual product ID from Stripe
-          }
+          price: SELLER_SUBSCRIPTION_PRICE_ID,
         }],
         payment_behavior: 'default_incomplete',
         expand: ['latest_invoice.payment_intent'],
+        metadata: {
+          userId: userId,
+          type: 'seller_subscription'
+        }
       });
 
       // Update user with Stripe info
@@ -269,6 +391,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to create seller profile" });
+    }
+  });
+
+  // Cancel seller subscription
+  app.post('/api/seller/subscription/cancel', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.stripeSubscriptionId) {
+        return res.status(404).json({ error: "No active subscription found" });
+      }
+
+      // Cancel the subscription at period end
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true
+      });
+
+      res.json({ 
+        message: "Subscription will be canceled at the end of the current billing period",
+        cancelAt: new Date(subscription.cancel_at! * 1000)
+      });
+    } catch (error: any) {
+      console.error("Error canceling subscription:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ==================== STRIPE WEBHOOKS ====================
+  
+  // Stripe webhook endpoint
+  app.post('/api/webhooks/stripe', express.raw({type: 'application/json'}), async (req, res) => {
+    const sig = req.headers['stripe-signature'] as string;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripe || !webhookSecret) {
+      return res.status(400).send('Stripe not configured');
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+      switch (event.type) {
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+          const subscription = event.data.object as Stripe.Subscription;
+          await handleSubscriptionUpdate(subscription);
+          break;
+        
+        case 'customer.subscription.deleted':
+          const deletedSubscription = event.data.object as Stripe.Subscription;
+          await handleSubscriptionCancellation(deletedSubscription);
+          break;
+
+        case 'invoice.payment_succeeded':
+          const invoice = event.data.object as Stripe.Invoice;
+          await handlePaymentSucceeded(invoice);
+          break;
+
+        case 'invoice.payment_failed':
+          const failedInvoice = event.data.object as Stripe.Invoice;
+          await handlePaymentFailed(failedInvoice);
+          break;
+
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({received: true});
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({error: 'Webhook processing failed'});
     }
   });
 

@@ -42,6 +42,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import Events from "@/pages/events";
 import SignIn from "@/pages/signin";
 import SignInOnly from "@/pages/signin-only";
+import SellerSubscription from "@/pages/SellerSubscription";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -87,6 +88,7 @@ function Router() {
           <Route path="/terms" component={TermsOfServiceStandalone} />
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/cookies" component={CookiesPolicyStandalone} />
+          <Route path="/seller/subscription" component={SellerSubscription} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/orders" component={SellerOrders} />

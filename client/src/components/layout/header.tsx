@@ -23,7 +23,8 @@ import {
   Settings,
   LogOut,
   Plus,
-  ChevronDown
+  ChevronDown,
+  CreditCard
 } from "lucide-react";
 
 export default function Header() {
@@ -293,9 +294,9 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/seller/terms" className="flex items-center">
-                          <Store className="mr-2" size={16} />
-                          Sell on Curio Market
+                        <Link to="/seller/subscription" className="flex items-center">
+                          <CreditCard className="mr-2" size={16} />
+                          Become a Seller
                         </Link>
                       </DropdownMenuItem>
                     </>
