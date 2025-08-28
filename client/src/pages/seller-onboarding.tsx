@@ -197,37 +197,15 @@ export default function SellerOnboarding() {
 
           {/* Subscription Info Notice */}
           <div className="mb-8" data-testid="subscription-notice">
-            <Card className="border-white/50 bg-gothic-red/10">
+            <Card className="glass-effect border-white/30 hover:border-gothic-red/30 transition-colors">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <h2 className="text-xl font-serif font-bold mb-4 text-gothic-red">
+                  <h2 className="text-2xl font-serif font-bold mb-4 text-gothic-red">
                     Ready to Start Your Shop?
                   </h2>
-                  <p className="text-foreground/80 mb-6">
-                    <strong>Step 1:</strong> Subscribe for $10/month to unlock your seller account<br />
-                    <strong>Step 2:</strong> Create your shop profile and start selling
+                  <p className="text-foreground/80 mb-6 text-lg">
+                    <strong>Step 1:</strong> Subscribe ($10/month) → <strong>Step 2:</strong> Create your shop profile
                   </p>
-                  
-                  <div className="grid md:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-background/50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gothic-red mb-2">✓ Subscription Benefits</h3>
-                      <ul className="text-sm text-left space-y-1 text-foreground/70">
-                        <li>• Unlimited product listings</li>
-                        <li>• Only 5.5% total selling fees</li>
-                        <li>• Professional seller dashboard</li>
-                        <li>• Direct customer messaging</li>
-                      </ul>
-                    </div>
-                    <div className="bg-background/50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gothic-red mb-2">📊 Why We Charge Less</h3>
-                      <ul className="text-sm text-left space-y-1 text-foreground/70">
-                        <li>• Etsy: 8.5% + listing fees</li>
-                        <li>• eBay: 10-15% final value fees</li>
-                        <li>• <strong>Curio Market: Only 5.5%</strong></li>
-                        <li>• Predictable monthly costs</li>
-                      </ul>
-                    </div>
-                  </div>
                   
                   {!(user as any)?.stripeSubscriptionId ? (
                     <Button 
@@ -240,7 +218,7 @@ export default function SellerOnboarding() {
                   ) : (
                     <div className="inline-flex items-center space-x-3 bg-green-600/20 border border-green-600/30 rounded-lg px-6 py-3">
                       <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">✓</div>
-                      <span className="text-green-400 font-medium">Subscription Active - Ready for Step 2!</span>
+                      <span className="text-green-400 font-medium text-lg">Subscription Active - Ready for Step 2!</span>
                     </div>
                   )}
                 </div>
