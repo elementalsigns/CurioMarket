@@ -62,15 +62,15 @@ export default function SellerOnboarding() {
   // Check subscription status when user is available
   useEffect(() => {
     if (user && hasSubscription === null) {
-      // Check if user has an active subscription
-      fetch('/api/auth/user')
-        .then(res => res.json())
-        .then(userData => {
-          if (userData.stripeSubscriptionId && userData.stripeSubscriptionId.trim() !== "") {
+      // Check subscription status by trying to create one - this will tell us if it's actually active
+      apiRequest("POST", "/api/subscription/create")
+        .then((data: any) => {
+          if (data.success && !data.clientSecret) {
+            // Already has active subscription
             setHasSubscription(true);
-          } else {
+          } else if (data.clientSecret) {
+            // Needs to complete payment
             setHasSubscription(false);
-            // Show clear message about subscription requirement
             toast({
               title: "Subscription Required - Step 1",
               description: "Please complete your seller subscription first, then return to create your shop.",
@@ -79,6 +79,9 @@ export default function SellerOnboarding() {
             setTimeout(() => {
               navigate("/subscribe");
             }, 1500);
+          } else {
+            setHasSubscription(false);
+            navigate("/subscribe");
           }
         })
         .catch(() => {
