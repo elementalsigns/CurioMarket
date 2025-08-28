@@ -64,7 +64,7 @@ export default function SellerOnboarding() {
     const checkSubscriptionStatus = async () => {
       if (user && hasSubscription === null) {
         try {
-          const response = await apiRequest("GET", "/api/subscription/status");
+          const response: any = await apiRequest("GET", "/api/subscription/status");
           setHasSubscription(response.hasActiveSubscription);
           
           if (!response.hasActiveSubscription) {
