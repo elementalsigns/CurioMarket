@@ -99,16 +99,36 @@ export default function Subscribe() {
 
   useEffect(() => {
     if (user) {
-      // STOP AUTOMATIC SUBSCRIPTION CREATION - Let user manually trigger it
+      // If user is already a seller, redirect to onboarding
       if (user.role === 'seller') {
         window.location.href = "/seller/onboarding";
         return;
       }
       
-      // Show UI but don't auto-create subscription
-      console.log("User ready for manual subscription creation");
+      // Check if user already has an active subscription but not seller role
+      if (user.stripeSubscriptionId && !isCreatingSubscription && !clientSecret) {
+        console.log("User has subscription ID, checking status");
+        setIsCreatingSubscription(true);
+        
+        apiRequest("POST", "/api/subscription/create")
+          .then((data: any) => {
+            console.log("Subscription check response:", data);
+            if (data.success && !data.clientSecret) {
+              // Has active subscription, redirect to onboarding
+              window.location.href = "/seller/onboarding";
+            } else if (data.clientSecret) {
+              setClientSecret(data.clientSecret);
+            }
+          })
+          .catch((error) => {
+            console.error("Subscription check error:", error);
+          })
+          .finally(() => {
+            setIsCreatingSubscription(false);
+          });
+      }
     }
-  }, [user]);
+  }, [user, isCreatingSubscription, clientSecret]);
 
   const handleSuccess = () => {
     toast({

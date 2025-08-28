@@ -506,15 +506,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      // Verify user has active subscription
-      if (!user?.stripeSubscriptionId) {
-        return res.status(403).json({ error: "Active seller subscription required" });
-      }
-
-      if (stripe) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-        if (subscription.status !== 'active') {
+      console.log(`[ONBOARD] User ${userId} attempting onboard, role: ${user?.role}, subscriptionId: ${user?.stripeSubscriptionId}`);
+      
+      // Check if user already has seller role - allow them to proceed
+      if (user?.role === 'seller') {
+        console.log(`[ONBOARD] User ${userId} already has seller role, allowing onboard`);
+      } else {
+        // Verify user has active subscription
+        if (!user?.stripeSubscriptionId) {
+          console.log(`[ONBOARD] User ${userId} has no subscription ID`);
           return res.status(403).json({ error: "Active seller subscription required" });
+        }
+
+        if (stripe) {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          console.log(`[ONBOARD] User ${userId} subscription status: ${subscription.status}`);
+          if (subscription.status !== 'active') {
+            return res.status(403).json({ error: "Active seller subscription required" });
+          }
         }
       }
 

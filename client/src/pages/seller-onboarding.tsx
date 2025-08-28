@@ -62,19 +62,20 @@ export default function SellerOnboarding() {
   // Check subscription status when user is available
   useEffect(() => {
     if (user && hasSubscription === null) {
-      // STOP ALL SUBSCRIPTION CHECKING - just check role
+      // Proper subscription flow: Check if user has seller role (indicates active subscription)
       if (user.role === 'seller') {
         setHasSubscription(true);
       } else {
-        // For testing: temporarily allow all users to proceed
-        // TODO: Re-enable subscription requirement after fixing the infinite loop
-        setHasSubscription(true);
-        
+        // Redirect to Step 1: Subscribe
+        setHasSubscription(false);
         toast({
-          title: "Notice",
-          description: "Subscription requirement temporarily disabled for testing. Please complete subscription setup later.",
-          variant: "default",
+          title: "Subscription Required - Step 1",
+          description: "Please complete your seller subscription first, then return to create your shop.",
+          variant: "destructive",
         });
+        setTimeout(() => {
+          navigate("/subscribe");
+        }, 1500);
       }
     }
   }, [user, hasSubscription, toast, navigate]);
