@@ -198,48 +198,6 @@ export default function SellerOnboarding() {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Subscription Requirement Notice - Top Priority */}
-          <Card className="mb-8 bg-gothic-red/10 border-2 border-white" data-testid="subscription-required-notice">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-serif text-gothic-red text-center">
-                Important: Subscription Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-foreground/80">
-                Before creating your shop, you'll need to complete your seller subscription ($10/month). 
-                This gives you access to unlimited listings and seller tools.
-              </p>
-              <Button 
-                onClick={async () => {
-                  try {
-                    // Check subscription status first
-                    const response = await apiRequest("POST", "/api/subscription/create") as any;
-                    if (response.success && !response.clientSecret) {
-                      // Already subscribed - show message and reload page
-                      toast({
-                        title: "Already Subscribed!",
-                        description: "You already have an active subscription. Refreshing page...",
-                      });
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1500);
-                    } else {
-                      // Needs subscription - go to subscribe page
-                      navigate("/subscribe");
-                    }
-                  } catch (error) {
-                    console.error("Subscription check error:", error);
-                    navigate("/subscribe");
-                  }
-                }}
-                className="w-full max-w-md bg-gothic-red hover:bg-gothic-red/80"
-                data-testid="button-start-subscription"
-              >
-                Start Subscription Setup
-              </Button>
-            </CardContent>
-          </Card>
 
           {/* Header */}
           <div className="text-center mb-12" data-testid="onboarding-header">
