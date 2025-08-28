@@ -231,10 +231,10 @@ export default function Subscribe() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
             {/* Plan Details */}
             <div>
-              <Card className="glass-effect border border-gothic-purple/30 mb-8" data-testid="plan-details">
+              <Card className="glass-effect border border-gothic-purple/30" data-testid="plan-details">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-2xl font-serif">Core Seller Plan</CardTitle>
@@ -299,23 +299,8 @@ export default function Subscribe() {
                           <span>5.5% + $0.30</span>
                         </div>
                         <div className="text-xs text-foreground/60 mt-2">
-                          Example: On a $100 sale, you keep $94.20 after all fees.
+                          Example: On a $100 sale, you keep <strong>$94.20</strong> after all fees.
                         </div>
-                        <div className="flex justify-between">
-                          <span>Monthly subscription</span>
-                          <span>$10.00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Platform fee per sale</span>
-                          <span>2.6%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Payment processing</span>
-                          <span>2.9% + $0.30</span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-foreground/60 mt-2">
-                        Example: On a $100 sale, you keep $93.80 after all fees
                       </div>
                     </CardContent>
                   </Card>
