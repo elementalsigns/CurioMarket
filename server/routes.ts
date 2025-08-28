@@ -406,10 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (seller) {
               return res.redirect('/seller/dashboard');
             } else {
-              return res.redirect('/seller/onboarding');
+              return res.redirect('/seller-onboarding.html');
             }
           } catch {
-            return res.redirect('/seller/onboarding');
+            return res.redirect('/seller-onboarding.html');
           }
         }
       }
@@ -420,6 +420,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in seller redirect:", error);
       res.redirect('/subscribe');
     }
+  });
+
+  // Simple seller onboarding status check (no auth required for HTML page)
+  app.get('/seller-onboarding.html', (req, res) => {
+    res.sendFile('seller-onboarding.html', { root: './client/public' });
   });
 
   // Create subscription endpoint

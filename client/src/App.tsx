@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Browse from "@/pages/browse";
 import Product from "@/pages/product";
 import SellerOnboarding from "@/pages/seller-onboarding";
+import SellerOnboardingSimple from "@/pages/seller-onboarding-simple";
 import SellerDashboard from "@/pages/seller-dashboard";
 import SellerOrders from "@/pages/seller-orders";
 import CreateListing from "@/pages/create-listing";
@@ -92,6 +93,7 @@ function Router() {
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/seller/subscription" component={SellerSubscription} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
+          <Route path="/seller/onboarding" component={SellerOnboardingSimple} />
           <Route path="/seller/start" component={SellerStart} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/orders" component={SellerOrders} />

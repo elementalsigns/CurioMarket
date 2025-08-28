@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Shop - Curio Market</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: hsl(212, 5%, 5%);
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: hsl(351, 67%, 36%);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid hsl(351, 67%, 36%);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: hsl(351, 67%, 36%);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 1rem;
+            background: hsl(351, 67%, 36%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background: hsl(351, 67%, 30%);
+        }
+        
+        .button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .success {
+            color: #51cf66;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .char-count {
+            font-size: 0.875rem;
+            color: #aaa;
+            margin-top: 0.25rem;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid hsl(351, 67%, 36%);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Create Your Shop</h1>
+            <p>Complete your seller profile to start listing your curiosities</p>
+        </div>
+        
+        <div class="status" id="statusMessage">
+            <p>✓ Subscription Active: Your payment has been processed</p>
+        </div>
+        
+        <div class="card">
+            <form id="shopForm">
+                <div class="form-group">
+                    <label for="shopName">Shop Name *</label>
+                    <input type="text" id="shopName" name="shopName" required minlength="3" 
+                           placeholder="Enter your shop name">
+                    <div class="error" id="shopNameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bio">Shop Bio *</label>
+                    <textarea id="bio" name="bio" required minlength="50" 
+                              placeholder="Tell customers about your shop and what makes your items special..."></textarea>
+                    <div class="char-count" id="bioCount">0/50 characters minimum</div>
+                    <div class="error" id="bioError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location *</label>
+                    <input type="text" id="location" name="location" required 
+                           placeholder="City, Country">
+                    <div class="error" id="locationError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="policies">Shop Policies *</label>
+                    <textarea id="policies" name="policies" required minlength="20" 
+                              placeholder="Return policy, shipping information, care instructions..."></textarea>
+                    <div class="char-count" id="policiesCount">0/20 characters minimum</div>
+                    <div class="error" id="policiesError"></div>
+                </div>
+                
+                <button type="submit" class="button" id="submitBtn">
+                    Create Shop
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Character counters
+        document.getElementById('bio').addEventListener('input', function(e) {
+            const count = e.target.value.length;
+            document.getElementById('bioCount').textContent = `${count}/50 characters minimum`;
+        });
+        
+        document.getElementById('policies').addEventListener('input', function(e) {
+            const count = e.target.value.length;
+            document.getElementById('policiesCount').textContent = `${count}/20 characters minimum`;
+        });
+        
+        // Form submission
+        document.getElementById('shopForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Clear errors
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Validation
+            let hasErrors = false;
+            
+            if (data.shopName.length < 3) {
+                document.getElementById('shopNameError').textContent = 'Shop name must be at least 3 characters';
+                hasErrors = true;
+            }
+            
+            if (data.bio.length < 50) {
+                document.getElementById('bioError').textContent = 'Bio must be at least 50 characters';
+                hasErrors = true;
+            }
+            
+            if (!data.location.trim()) {
+                document.getElementById('locationError').textContent = 'Location is required';
+                hasErrors = true;
+            }
+            
+            if (data.policies.length < 20) {
+                document.getElementById('policiesError').textContent = 'Policies must be at least 20 characters';
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            // Submit form
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Shop...';
+            
+            try {
+                const response = await fetch('/api/seller/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('statusMessage').innerHTML = 
+                        '<p style="color: #51cf66;">✓ Shop Created Successfully! Redirecting to dashboard...</p>';
+                    setTimeout(() => {
+                        window.location.href = '/seller/dashboard';
+                    }, 2000);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to create shop profile');
+                }
+            } catch (error) {
+                document.getElementById('statusMessage').innerHTML = 
+                    `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Shop';
+            }
+        });
+    </script>
+</body>
+</html>
