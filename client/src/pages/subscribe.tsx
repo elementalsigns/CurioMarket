@@ -105,14 +105,8 @@ export default function Subscribe() {
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           } else if (data.success && !data.clientSecret) {
-            // Already has active subscription - redirect to onboarding
-            toast({
-              title: "Already Subscribed",
-              description: "You already have an active subscription. Let's set up your shop!",
-            });
-            setTimeout(() => {
-              window.location.href = "/seller/onboarding";
-            }, 1500);
+            // Already has active subscription - redirect to onboarding immediately
+            window.location.href = "/seller/onboarding";
           } else {
             throw new Error("No client secret received");
           }
