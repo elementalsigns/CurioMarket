@@ -62,47 +62,60 @@ export function ObjectUploader({
   children,
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
-  const [uppy] = useState(() =>
-    new Uppy({
+  const [uppy] = useState(() => {
+    const uppyInstance = new Uppy({
       restrictions: {
         maxNumberOfFiles,
         maxFileSize,
         allowedFileTypes,
       },
       autoProceed: false,
-    })
-      .use(AwsS3, {
-        shouldUseMultipart: false,
-        getUploadParameters: onGetUploadParameters,
-      })
-      .on("complete", (result) => {
-        onComplete?.(result);
-      })
-  );
+    });
+
+    uppyInstance.use(AwsS3, {
+      shouldUseMultipart: false,
+      getUploadParameters: onGetUploadParameters,
+    });
+
+    uppyInstance.on("complete", (result) => {
+      if (onComplete) {
+        onComplete(result);
+      }
+      setShowModal(false); // Close modal after upload
+    });
+
+    return uppyInstance;
+  });
+
+  const handleClick = () => {
+    console.log('Upload button clicked');
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    console.log('Modal close requested');
+    setShowModal(false);
+  };
 
   return (
     <div>
       <Button 
-        onClick={() => {
-          console.log('Upload button clicked');
-          setShowModal(true);
-        }} 
+        onClick={handleClick}
         className={buttonClassName}
         type="button"
       >
         {children}
       </Button>
 
-      <DashboardModal
-        uppy={uppy}
-        open={showModal}
-        onRequestClose={() => {
-          console.log('Modal close requested');
-          setShowModal(false);
-        }}
-        proudlyDisplayPoweredByUppy={false}
-        showProgressDetails={true}
-      />
+      {showModal && (
+        <DashboardModal
+          uppy={uppy}
+          open={showModal}
+          onRequestClose={handleClose}
+          proudlyDisplayPoweredByUppy={false}
+          showProgressDetails={true}
+        />
+      )}
     </div>
   );
 }
