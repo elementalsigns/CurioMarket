@@ -10,7 +10,8 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Store } from "lucide-react";
+import { Store, Upload } from "lucide-react";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 export default function SellerOnboardingSimple() {
   const { user } = useAuth();
@@ -21,9 +22,11 @@ export default function SellerOnboardingSimple() {
     location: "",
     policies: ""
   });
+  const [bannerUrl, setBannerUrl] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
 
   const createSellerMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: typeof formData & { banner?: string; avatar?: string }) => {
       return await apiRequest("POST", "/api/seller/profile", data);
     },
     onSuccess: () => {
@@ -84,7 +87,11 @@ export default function SellerOnboardingSimple() {
       return;
     }
 
-    createSellerMutation.mutate(formData);
+    createSellerMutation.mutate({
+      ...formData,
+      banner: bannerUrl || undefined,
+      avatar: avatarUrl || undefined,
+    });
   };
 
   const handleChange = (field: string, value: string) => {
@@ -191,6 +198,146 @@ export default function SellerOnboardingSimple() {
                   <p className="text-sm text-foreground/60 mt-1">
                     {formData.policies.length}/20 characters minimum
                   </p>
+                </div>
+
+                {/* Shop Banner Upload */}
+                <div>
+                  <Label className="text-foreground">Shop Banner (Optional)</Label>
+                  <p className="text-sm text-foreground/70 mb-2">
+                    Upload a banner image for your shop - this will be displayed at the top of your shop page
+                  </p>
+                  <p className="text-xs text-foreground/50 mb-3">
+                    Recommended: 1200×300 pixels • JPG, PNG • Max 10MB
+                  </p>
+                  <div className="relative">
+                    {bannerUrl ? (
+                      <div className="space-y-3">
+                        <div className="relative group">
+                          <img 
+                            src={bannerUrl} 
+                            alt="Shop banner preview" 
+                            className="w-full h-32 object-cover rounded-lg border border-gothic-purple/30"
+                            data-testid="banner-preview"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <ObjectUploader
+                              maxNumberOfFiles={1}
+                              maxFileSize={10485760}
+                              allowedFileTypes={['image/*']}
+                              onGetUploadParameters={async () => {
+                                const response = await apiRequest("POST", "/api/objects/upload") as any;
+                                return { method: "PUT" as const, url: response.uploadURL };
+                              }}
+                              onComplete={(result) => {
+                                if (result.successful && result.successful[0]) {
+                                  setBannerUrl(result.successful[0].uploadURL || "");
+                                  toast({
+                                    title: "Banner updated",
+                                    description: "Your shop banner has been updated successfully.",
+                                  });
+                                }
+                              }}
+                              buttonClassName="bg-white/90 hover:bg-white text-black px-4 py-2 rounded text-sm font-medium"
+                              data-testid="change-banner"
+                            >
+                              Change Banner
+                            </ObjectUploader>
+                          </div>
+                        </div>
+                        <p className="text-sm text-green-400" data-testid="banner-upload-success">
+                          ✓ Banner uploaded successfully
+                        </p>
+                      </div>
+                    ) : (
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        maxFileSize={10485760}
+                        allowedFileTypes={['image/*']}
+                        onGetUploadParameters={async () => {
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
+                          return { method: "PUT" as const, url: response.uploadURL };
+                        }}
+                        onComplete={(result) => {
+                          if (result.successful && result.successful[0]) {
+                            setBannerUrl(result.successful[0].uploadURL || "");
+                            toast({
+                              title: "Banner uploaded",
+                              description: "Your shop banner has been uploaded successfully.",
+                            });
+                          }
+                        }}
+                        buttonClassName="border-2 border-dashed border-gothic-purple/30 hover:border-gothic-red transition-colors w-full h-32 rounded-lg bg-gothic-purple/5 hover:bg-gothic-purple/10"
+                        data-testid="upload-banner"
+                      >
+                        <div className="flex flex-col items-center justify-center gap-2 text-center">
+                          <Upload size={24} className="text-gothic-purple" />
+                          <span className="text-foreground/70">Upload Shop Banner</span>
+                          <span className="text-xs text-foreground/50">or drag and drop</span>
+                        </div>
+                      </ObjectUploader>
+                    )}
+                  </div>
+                </div>
+
+                {/* Shop Avatar Upload */}
+                <div>
+                  <Label className="text-foreground">Shop Profile Picture (Optional)</Label>
+                  <p className="text-sm text-foreground/70 mb-2">
+                    Upload a profile picture for your shop - this will represent your brand throughout the marketplace
+                  </p>
+                  <p className="text-xs text-foreground/50 mb-3">
+                    Recommended: 400×400 pixels (square) • JPG, PNG • Max 5MB
+                  </p>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      {avatarUrl ? (
+                        <div className="relative group">
+                          <img 
+                            src={avatarUrl} 
+                            alt="Shop profile picture preview" 
+                            className="w-20 h-20 object-cover rounded-full border-2 border-gothic-purple/30"
+                            data-testid="avatar-preview"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
+                            <Upload size={16} className="text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 border-2 border-dashed border-gothic-purple/30 rounded-full bg-gothic-purple/5 flex items-center justify-center">
+                          <Upload size={20} className="text-gothic-purple/50" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        maxFileSize={5242880}
+                        allowedFileTypes={['image/*']}
+                        onGetUploadParameters={async () => {
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
+                          return { method: "PUT" as const, url: response.uploadURL };
+                        }}
+                        onComplete={(result) => {
+                          if (result.successful && result.successful[0]) {
+                            setAvatarUrl(result.successful[0].uploadURL || "");
+                            toast({
+                              title: "Profile picture uploaded",
+                              description: "Your shop profile picture has been uploaded successfully.",
+                            });
+                          }
+                        }}
+                        buttonClassName="border border-gothic-purple/30 hover:border-gothic-red transition-colors px-4 py-2 rounded text-sm"
+                        data-testid="upload-avatar"
+                      >
+                        {avatarUrl ? "Change Photo" : "Add Photo"}
+                      </ObjectUploader>
+                      {avatarUrl && (
+                        <p className="text-sm text-green-400 mt-2" data-testid="avatar-upload-success">
+                          ✓ Profile picture uploaded successfully
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <Button
