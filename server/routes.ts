@@ -343,22 +343,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create subscription endpoint (TEMPORARILY DISABLED - RETURNS SUCCESS FOR TESTING)
+  // Create subscription endpoint
   app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
     try {
       const userId = req.user.claims.sub;
-      console.log(`[SUBSCRIPTION] Create request for user ${userId} - returning success (subscription temporarily disabled)`);
+      const user = await storage.getUser(userId);
       
-      // TEMPORARILY: Return success to allow testing
-      // TODO: Fix Stripe customer creation issues and re-enable proper subscription flow
-      res.json({
-        subscriptionId: 'temp-bypass-subscription',
-        clientSecret: null,
-        status: 'active',
-        success: true
-      });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      console.log(`[SUBSCRIPTION] Create request for user ${userId}, email: ${user.email}`);
+
+      // Check if user already has an active subscription
+      if (user.stripeSubscriptionId) {
+        try {
+          const existingSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (existingSubscription.status === 'active') {
+            console.log(`[SUBSCRIPTION] User ${userId} already has active subscription: ${user.stripeSubscriptionId}`);
+            return res.json({
+              subscriptionId: user.stripeSubscriptionId,
+              clientSecret: null,
+              status: 'active',
+              success: true
+            });
+          }
+        } catch (error) {
+          console.log(`[SUBSCRIPTION] Existing subscription ${user.stripeSubscriptionId} not found, creating new one`);
+        }
+      }
+
+      let customerId = user.stripeCustomerId;
+
+      // Create Stripe customer if doesn't exist
+      if (!customerId) {
+        try {
+          const customer = await stripe.customers.create({
+            email: user.email,
+            metadata: {
+              userId: userId,
+            },
+          });
+          customerId = customer.id;
+          console.log(`[SUBSCRIPTION] Created new Stripe customer: ${customerId} for user ${userId}`);
+
+          // Update user with customer ID
+          await storage.upsertUser({
+            id: userId,
+            email: user.email || '',
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl,
+            role: user.role,
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: user.stripeSubscriptionId
+          });
+        } catch (customerError: any) {
+          console.error(`[SUBSCRIPTION] Failed to create Stripe customer for user ${userId}:`, customerError);
+          return res.status(500).json({ error: "Failed to create customer account" });
+        }
+      }
+
+      // Create subscription
+      try {
+        const subscription = await stripe.subscriptions.create({
+          customer: customerId,
+          items: [{ price: process.env.STRIPE_SELLER_PRICE_ID }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: { save_default_payment_method: 'on_subscription' },
+          expand: ['latest_invoice.payment_intent'],
+        });
+
+        console.log(`[SUBSCRIPTION] Created subscription ${subscription.id} for user ${userId}`);
+
+        // Update user with subscription ID
+        await storage.upsertUser({
+          id: userId,
+          email: user.email || '',
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          role: user.role,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscription.id
+        });
+
+        const invoice = subscription.latest_invoice as any;
+        const paymentIntent = invoice?.payment_intent;
+
+        res.json({
+          subscriptionId: subscription.id,
+          clientSecret: paymentIntent?.client_secret,
+          status: subscription.status,
+          success: true
+        });
+      } catch (subscriptionError: any) {
+        console.error(`[SUBSCRIPTION] Failed to create subscription for user ${userId}:`, subscriptionError);
+        return res.status(500).json({ error: "Failed to create subscription" });
+      }
     } catch (error: any) {
-      console.error("Error in subscription endpoint:", error);
+      console.error(`[SUBSCRIPTION] Error in subscription endpoint for user:`, error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -369,12 +457,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
       console.log(`[ONBOARD] User ${userId} attempting onboard, role: ${user?.role}, subscriptionId: ${user?.stripeSubscriptionId}`);
       
-      // TEMPORARILY: Allow all users to proceed (subscription requirement disabled for testing)
-      console.log(`[ONBOARD] User ${userId} proceeding with onboard (subscription check disabled)`);
-      
-      // TODO: Re-enable subscription verification after fixing Stripe customer creation issues
+      // Verify user has active subscription
+      if (!user.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active subscription required" });
+      }
+
+      if (stripe) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status !== 'active') {
+            return res.status(403).json({ error: "Active subscription required" });
+          }
+          console.log(`[ONBOARD] User ${userId} has active subscription, proceeding with onboard`);
+        } catch (error) {
+          console.error(`[ONBOARD] Error verifying subscription for user ${userId}:`, error);
+          return res.status(403).json({ error: "Unable to verify subscription" });
+        }
+      }
 
       const sellerData = insertSellerSchema.parse({
         userId,
