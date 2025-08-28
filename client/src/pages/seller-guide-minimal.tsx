@@ -34,7 +34,10 @@ export default function SellerGuideMinimal() {
             <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
               Transform your passion for the macabre into a thriving business. Learn everything you need to know about selling on Curio Market.
             </p>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded text-lg font-medium">
+            <button 
+              className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded text-lg font-medium"
+              onClick={() => window.location.href = '/seller/onboarding'}
+            >
               Start Selling Today
             </button>
           </div>

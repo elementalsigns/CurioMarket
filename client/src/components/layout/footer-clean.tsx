@@ -61,7 +61,7 @@ export default function FooterClean() {
             <h4 className="text-lg font-serif font-bold mb-4 text-foreground">Support</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/sell">
+                <Link to="/seller/onboarding">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
                     Start Selling
                   </Button>

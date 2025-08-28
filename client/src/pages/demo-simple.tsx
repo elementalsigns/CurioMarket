@@ -66,7 +66,10 @@ export default function DemoSimple() {
               </div>
 
               <div className="mt-6 p-4 border border-zinc-700 rounded-lg">
-                <button className="w-full bg-red-900 hover:bg-red-800 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2">
+                <button 
+                  className="w-full bg-red-900 hover:bg-red-800 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2"
+                  onClick={() => window.location.href = '/seller/onboarding'}
+                >
                   <span>🏪</span> Become a Seller
                 </button>
               </div>

@@ -91,16 +91,19 @@ export default function SellerGuideFinal() {
             }}>
               Transform your passion for the macabre into a thriving business. Learn everything you need to know about selling on Curio Market.
             </p>
-            <button style={{
-              backgroundColor: '#dc2626',
-              color: 'white',
-              padding: '0.75rem 2rem',
-              fontSize: '1.125rem',
-              fontWeight: '500',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}>
+            <button 
+              style={{
+                backgroundColor: '#dc2626',
+                color: 'white',
+                padding: '0.75rem 2rem',
+                fontSize: '1.125rem',
+                fontWeight: '500',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+              onClick={() => window.location.href = '/seller/onboarding'}
+            >
               Start Selling Today
             </button>
           </div>

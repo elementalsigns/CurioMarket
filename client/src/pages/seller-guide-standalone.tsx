@@ -189,7 +189,7 @@ function SellerGuideStandalone() {
             <div className="hero">
               <h1>Seller's <span className="accent">Guide</span></h1>
               <p>Transform your passion for the macabre into a thriving business. Learn everything you need to know about selling on Curio Market.</p>
-              <button className="btn-primary btn-large" onClick={() => window.location.href = '/seller/terms'}>Start Selling Today</button>
+              <button className="btn-primary btn-large" onClick={() => window.location.href = '/seller/onboarding'}>Start Selling Today</button>
             </div>
 
             <div className="stats-grid">
@@ -340,7 +340,7 @@ function SellerGuideStandalone() {
               <h2 className="section-title">Ready to Start Your Gothic Empire?</h2>
               <p className="section-subtitle">Join our community of passionate sellers and turn your unique collection into a profitable business.</p>
               <div className="cta-buttons">
-                <button className="btn-primary btn-large" onClick={() => window.location.href = '/seller/terms'}>Begin Seller Application</button>
+                <button className="btn-primary btn-large" onClick={() => window.location.href = '/seller/onboarding'}>Begin Seller Application</button>
                 <button className="btn-secondary btn-large" onClick={() => window.location.href = '/seller/terms'}>Read Seller Terms</button>
               </div>
             </div>
