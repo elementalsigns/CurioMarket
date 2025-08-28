@@ -104,7 +104,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription.toString());
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -123,7 +123,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!invoice.subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription.toString());
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!customerId) {
         try {
           const customer = await stripe.customers.create({
-            email: user.email,
+            email: user.email || undefined,
             metadata: {
               userId: userId,
             },
@@ -537,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[ONBOARD] Subscription status for user ${userId}:`, {
             id: subscription.id,
             status: subscription.status,
-            current_period_end: new Date(subscription.current_period_end * 1000),
+            current_period_end: new Date((subscription as any).current_period_end * 1000),
             cancel_at_period_end: subscription.cancel_at_period_end
           });
           
