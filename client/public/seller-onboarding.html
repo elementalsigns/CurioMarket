@@ -122,6 +122,24 @@
             margin-bottom: 2rem;
             text-align: center;
         }
+        
+        .preview-image {
+            max-width: 200px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        
+        input[type="file"] {
+            padding: 0.5rem;
+            border-style: dashed;
+        }
+        
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -167,6 +185,24 @@
                     <div class="error" id="policiesError"></div>
                 </div>
                 
+                <div class="form-group">
+                    <label for="avatar">Shop Avatar (Optional)</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*" 
+                           style="background: rgba(255, 255, 255, 0.1); border: 1px dashed #666;">
+                    <div class="char-count">Upload your shop profile image (JPG, PNG, GIF)</div>
+                    <div class="error" id="avatarError"></div>
+                    <div id="avatarPreview" style="margin-top: 0.5rem;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="banner">Shop Banner (Optional)</label>
+                    <input type="file" id="banner" name="banner" accept="image/*" 
+                           style="background: rgba(255, 255, 255, 0.1); border: 1px dashed #666;">
+                    <div class="char-count">Upload your shop banner image (JPG, PNG, GIF)</div>
+                    <div class="error" id="bannerError"></div>
+                    <div id="bannerPreview" style="margin-top: 0.5rem;"></div>
+                </div>
+                
                 <button type="submit" class="button" id="submitBtn">
                     Create Shop
                 </button>
@@ -186,6 +222,28 @@
             document.getElementById('policiesCount').textContent = `${count}/20 characters minimum`;
         });
         
+        // Image preview handlers
+        document.getElementById('avatar').addEventListener('change', function(e) {
+            previewImage(e.target.files[0], 'avatarPreview');
+        });
+        
+        document.getElementById('banner').addEventListener('change', function(e) {
+            previewImage(e.target.files[0], 'bannerPreview');
+        });
+        
+        function previewImage(file, previewId) {
+            const preview = document.getElementById(previewId);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+        
         // Form submission
         document.getElementById('shopForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -194,7 +252,18 @@
             document.querySelectorAll('.error').forEach(el => el.textContent = '');
             
             const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
+            
+            // Get text data
+            const data = {
+                shopName: formData.get('shopName'),
+                bio: formData.get('bio'),
+                location: formData.get('location'),
+                policies: formData.get('policies')
+            };
+            
+            // Handle file uploads (for future implementation)
+            const avatarFile = formData.get('avatar');
+            const bannerFile = formData.get('banner');
             
             // Validation
             let hasErrors = false;
@@ -227,6 +296,7 @@
             submitBtn.textContent = 'Creating Shop...';
             
             try {
+                // First create the seller profile
                 const response = await fetch('/api/seller/profile', {
                     method: 'POST',
                     headers: {
