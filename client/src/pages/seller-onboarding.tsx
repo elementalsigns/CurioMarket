@@ -66,19 +66,19 @@ export default function SellerOnboarding() {
       fetch('/api/auth/user')
         .then(res => res.json())
         .then(userData => {
-          if (userData.stripeSubscriptionId) {
+          if (userData.stripeSubscriptionId && userData.stripeSubscriptionId.trim() !== "") {
             setHasSubscription(true);
           } else {
             setHasSubscription(false);
             // Show clear message about subscription requirement
             toast({
-              title: "Seller Subscription Required",
-              description: "You need an active subscription to create your shop. Redirecting you to subscribe...",
+              title: "Subscription Required - Step 1",
+              description: "Please complete your seller subscription first, then return to create your shop.",
               variant: "destructive",
             });
             setTimeout(() => {
               navigate("/subscribe");
-            }, 2000);
+            }, 1500);
           }
         })
         .catch(() => {
@@ -165,10 +165,10 @@ export default function SellerOnboarding() {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-foreground/70">
-                To become a seller on Curio Market, you need an active subscription.
+                You've reached <strong>Step 2</strong>, but need to complete <strong>Step 1</strong> first.
               </p>
               <div className="bg-gothic-red/10 border border-gothic-red/30 rounded-lg p-4">
-                <p className="text-sm font-medium mb-2">Seller Subscription Benefits:</p>
+                <p className="text-sm font-medium mb-2">Complete Step 1 to unlock:</p>
                 <ul className="text-sm text-left space-y-1">
                   <li>• Unlimited product listings</li>
                   <li>• Professional seller dashboard</li>
@@ -176,12 +176,13 @@ export default function SellerOnboarding() {
                   <li>• Sales analytics and reporting</li>
                 </ul>
               </div>
-              <p className="text-lg font-semibold">Only $10/month</p>
+              <p className="text-lg font-semibold">Step 1: Only $10/month subscription</p>
               <Button 
                 onClick={() => navigate("/subscribe")}
                 className="w-full bg-gothic-red hover:bg-gothic-red/80"
+                data-testid="button-subscribe-step1"
               >
-                Start Your Subscription
+                Go to Step 1: Subscribe Now
               </Button>
             </CardContent>
           </Card>
