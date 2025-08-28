@@ -451,7 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seller onboarding route - Temporarily bypass subscription verification
+  // Seller onboarding route
   app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -461,7 +461,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      console.log(`[ONBOARD] User ${userId} creating seller profile`);
+      console.log(`[ONBOARD] User ${userId} attempting onboard, role: ${user?.role}, subscriptionId: ${user?.stripeSubscriptionId}`);
+      
+      // Verify user has active subscription
+      if (!user.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active subscription required" });
+      }
+
+      if (stripe) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status !== 'active') {
+            return res.status(403).json({ error: "Active subscription required" });
+          }
+          console.log(`[ONBOARD] User ${userId} has active subscription, proceeding with onboard`);
+        } catch (error) {
+          console.error(`[ONBOARD] Error verifying subscription for user ${userId}:`, error);
+          return res.status(403).json({ error: "Unable to verify subscription" });
+        }
+      }
 
       const sellerData = insertSellerSchema.parse({
         userId,
@@ -491,7 +509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create seller profile - Alternative endpoint (also bypass subscription verification)
+  // Create seller profile
   app.post('/api/seller/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -501,7 +519,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      console.log(`[PROFILE] User ${userId} creating seller profile via alternative endpoint`);
+      // Verify user has active subscription
+      if (!user.stripeSubscriptionId) {
+        return res.status(403).json({ error: "Active seller subscription required" });
+      }
+
+      if (stripe) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        if (subscription.status !== 'active') {
+          return res.status(403).json({ error: "Active seller subscription required" });
+        }
+      }
 
       const sellerData = insertSellerSchema.parse({
         userId,
@@ -520,7 +548,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: user.profileImageUrl
       });
 
-      console.log(`[PROFILE] Successfully created seller profile for user ${userId}`);
       res.json(seller);
     } catch (error: any) {
       console.error("Error creating seller profile:", error);

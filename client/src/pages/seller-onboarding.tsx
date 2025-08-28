@@ -62,16 +62,24 @@ export default function SellerOnboarding() {
   // Check subscription status when user is available
   useEffect(() => {
     if (user && hasSubscription === null) {
-      // Since you already have an active subscription in the database, allow access
-      // We'll fix the Stripe API connection separately
-      setHasSubscription(true);
-      
-      if (user.role === 'seller') {
+      // Check if user has a subscription ID in their profile
+      if (user.stripeSubscriptionId) {
+        setHasSubscription(true);
+        if (user.role === 'seller') {
+          toast({
+            title: "Welcome Seller!",
+            description: "You can now create your shop profile.",
+            variant: "default",
+          });
+        }
+      } else {
+        setHasSubscription(false);
         toast({
-          title: "Welcome Seller!",
-          description: "You can now create your shop profile.",
-          variant: "default",
+          title: "Subscription Required",
+          description: "Please complete your seller subscription to continue.",
+          variant: "destructive",
         });
+        navigate("/subscribe");
       }
     }
   }, [user, hasSubscription, toast, navigate]);
@@ -88,6 +96,15 @@ export default function SellerOnboarding() {
       navigate("/seller/dashboard");
     },
     onError: (error: any) => {
+      if (error?.status === 403 && error?.data?.error?.includes("subscription")) {
+        toast({
+          title: "Subscription Required",
+          description: "Please complete your seller subscription first.",
+          variant: "destructive",
+        });
+        navigate("/subscribe");
+        return;
+      }
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
