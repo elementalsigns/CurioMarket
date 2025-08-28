@@ -309,14 +309,10 @@ export default function Subscribe() {
 
             </div>
 
-            {/* Subscription Form */}
-            <div>
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <SubscribeForm onSuccess={handleSuccess} />
-              </Elements>
-
+            {/* Right Column - Next Steps & Payment */}
+            <div className="space-y-6">
               {/* Next Steps */}
-              <Card className="glass-effect mt-6" data-testid="next-steps">
+              <Card className="glass-effect border border-gothic-purple/30" data-testid="next-steps">
                 <CardHeader>
                   <CardTitle className="font-serif flex items-center">
                     <Store className="mr-2" size={20} />
@@ -327,7 +323,7 @@ export default function Subscribe() {
                   <ol className="space-y-2 text-foreground/80">
                     <li className="flex items-start">
                       <span className="font-bold mr-2">1.</span>
-                      Complete your subscription payment above
+                      Complete your subscription payment below
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">2.</span>
@@ -345,23 +341,24 @@ export default function Subscribe() {
                 </CardContent>
               </Card>
 
-              <div className="mt-6">
-                <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-reminder">
-                  <CardContent className="p-4">
-                    <h4 className="font-serif font-bold mb-2">Compliance Reminder</h4>
-                    <p className="text-sm text-foreground/80">
-                      By subscribing, you agree to comply with all local, state, and federal laws regarding 
-                      the sale of oddities and specimens. Review our prohibited items list and seller guidelines.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Subscription Form */}
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <SubscribeForm onSuccess={handleSuccess} />
+              </Elements>
 
-              <div className="mt-4 text-center">
-                <p className="text-xs text-foreground/60">
-                  Secure payment processing by Stripe. Cancel anytime from your dashboard.
-                </p>
-              </div>
+              {/* Compliance & Security Info */}
+              <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-reminder">
+                <CardContent className="p-4">
+                  <h4 className="font-serif font-bold mb-2">Compliance Reminder</h4>
+                  <p className="text-sm text-foreground/80 mb-3">
+                    By subscribing, you agree to comply with all local, state, and federal laws regarding 
+                    the sale of oddities and specimens. Review our prohibited items list and seller guidelines.
+                  </p>
+                  <p className="text-xs text-foreground/60 text-center">
+                    Secure payment processing by Stripe. Cancel anytime from your dashboard.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
