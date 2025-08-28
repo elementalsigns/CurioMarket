@@ -15,6 +15,7 @@ import SellerOrders from "@/pages/seller-orders";
 import CreateListing from "@/pages/create-listing";
 import Checkout from "@/pages/checkout";
 import Subscribe from "@/pages/subscribe";
+import SellerStart from "@/pages/seller-start";
 import UserProfile from "@/pages/user-profile";
 import AccountManager from "@/pages/account-manager";
 import SellerTerms from "@/pages/seller-terms";
@@ -91,6 +92,7 @@ function Router() {
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/seller/subscription" component={SellerSubscription} />
           <Route path="/seller/onboard" component={SellerOnboarding} />
+          <Route path="/seller/start" component={SellerStart} />
           <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/orders" component={SellerOrders} />
           <Route path="/seller/analytics" component={SellerAnalytics} />
