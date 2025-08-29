@@ -25,6 +25,12 @@ export default function Home() {
     enabled: !!user,
   });
 
+  const { data: sellerProfile } = useQuery({
+    queryKey: ["/api/seller/profile"],
+    enabled: !!user,
+    retry: false, // Don't retry if user is not a seller
+  });
+
   useEffect(() => {
     if (featuredError && isUnauthorizedError(featuredError as Error)) {
       toast({
@@ -81,10 +87,10 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              Welcome back, {(user as any)?.claims?.first_name || (user as any)?.claims?.name || 'Collector'}
+              Welcome back, {sellerProfile ? 'Curator' : 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
-              Discover new oddities and manage your collection
+              {sellerProfile ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection'}
             </p>
           </div>
 
@@ -121,15 +127,31 @@ export default function Home() {
             <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
                 <Star className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
-                <h3 className="text-xl font-serif font-bold mb-2">Become a Seller</h3>
-                <p className="text-foreground/70 mb-4">
-                  Share your oddities with collectors worldwide
-                </p>
-                <Link to="/subscribe">
-                  <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-become-seller">
-                    Start Selling
-                  </Button>
-                </Link>
+                {sellerProfile ? (
+                  <>
+                    <h3 className="text-xl font-serif font-bold mb-2">Seller Dashboard</h3>
+                    <p className="text-foreground/70 mb-4">
+                      Manage your listings and view analytics
+                    </p>
+                    <Link to="/seller/dashboard">
+                      <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-seller-dashboard">
+                        View Dashboard
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-serif font-bold mb-2">Become a Seller</h3>
+                    <p className="text-foreground/70 mb-4">
+                      Share your oddities with collectors worldwide
+                    </p>
+                    <Link to="/subscribe">
+                      <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-become-seller">
+                        Start Selling
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
