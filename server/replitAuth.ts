@@ -43,6 +43,7 @@ export function getSession() {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: sessionTtl,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     });
   } catch (error) {
@@ -56,6 +57,7 @@ export function getSession() {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: sessionTtl,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     });
   }
@@ -127,10 +129,10 @@ export async function setupAuth(app: Express) {
     app.get("/api/login", (req, res, next) => {
       const hostname = req.hostname;
       console.log("Login attempt for hostname:", hostname);
-      console.log("Available strategies:", Object.keys(passport._strategies || {}));
+      console.log("Available strategies:", Object.keys((passport as any)._strategies || {}));
       
       // Find matching strategy - include localhost for development
-      const strategyName = Object.keys(passport._strategies || {}).find(key => 
+      const strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
           (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
@@ -153,7 +155,7 @@ export async function setupAuth(app: Express) {
       const hostname = req.hostname;
       
       // Find matching strategy - include localhost for development
-      const strategyName = Object.keys(passport._strategies || {}).find(key => 
+      const strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
           (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
@@ -206,7 +208,12 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  console.log('Auth check - isAuthenticated():', req.isAuthenticated());
+  console.log('Auth check - user:', user ? 'exists' : 'null');
+  console.log('Auth check - user.expires_at:', user?.expires_at);
+
+  if (!req.isAuthenticated() || !user?.expires_at) {
+    console.log('Auth failed - missing authentication or expires_at');
     return res.status(401).json({ message: "Unauthorized" });
   }
 
