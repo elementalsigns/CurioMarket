@@ -533,7 +533,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive = true;
           console.log(`[SUBSCRIPTION] Treating incomplete subscription ${subscription.id} as active due to attached payment method: ${subscription.default_payment_method}`);
         } else {
-          console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
+          // Check if the customer has any payment methods at all
+          try {
+            const paymentMethods = await stripe.paymentMethods.list({
+              customer: user.stripeCustomerId!,
+              type: 'card'
+            });
+            
+            if (paymentMethods.data.length > 0) {
+              // User has payment methods but subscription doesn't - let's fix this
+              const paymentMethod = paymentMethods.data[0];
+              console.log(`[SUBSCRIPTION] Found payment method ${paymentMethod.id} for customer, attaching to subscription`);
+              
+              try {
+                // Attach payment method to subscription
+                await stripe.subscriptions.update(subscription.id, {
+                  default_payment_method: paymentMethod.id
+                });
+                
+                // Set customer default too
+                await stripe.customers.update(user.stripeCustomerId!, {
+                  invoice_settings: { default_payment_method: paymentMethod.id }
+                });
+                
+                console.log(`[SUBSCRIPTION] Successfully attached payment method to subscription ${subscription.id}`);
+                isActive = true; // Now treat as active
+              } catch (attachError: any) {
+                console.error(`[SUBSCRIPTION] Failed to attach payment method:`, attachError.message);
+                isActive = false;
+              }
+            } else {
+              console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
+              // PRODUCTION FAILSAFE: If user has seller role in database but incomplete subscription, treat as active
+              // This handles cases where subscription setup succeeded but Stripe sync failed
+              if (user.role === 'seller') {
+                console.log(`[SUBSCRIPTION] User ${user.id} has seller role despite incomplete subscription - treating as active (failsafe)`);
+                isActive = true;
+              } else {
+                isActive = false;
+              }
+            }
+          } catch (error) {
+            console.error(`[SUBSCRIPTION] Error checking customer payment methods:`, error);
+            isActive = false;
+          }
         }
       } else {
         console.log(`[SUBSCRIPTION] Subscription ${subscription.id} status: ${subscription.status}, payment method: ${subscription.default_payment_method || 'none'} - NOT active`);
