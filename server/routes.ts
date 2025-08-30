@@ -437,7 +437,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create or get the seller subscription price - validate existing price ID
       let SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID;
       
-      if (SELLER_SUBSCRIPTION_PRICE_ID && SELLER_SUBSCRIPTION_PRICE_ID.trim() !== '') {
+      // Force price creation if we have the old product ID
+      if (SELLER_SUBSCRIPTION_PRICE_ID?.startsWith('prod_')) {
+        console.log(`Detected old product ID ${SELLER_SUBSCRIPTION_PRICE_ID}, creating new price...`);
+        SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
+      } else if (SELLER_SUBSCRIPTION_PRICE_ID && SELLER_SUBSCRIPTION_PRICE_ID.trim() !== '') {
         try {
           await stripe.prices.retrieve(SELLER_SUBSCRIPTION_PRICE_ID);
         } catch (error: any) {
@@ -482,7 +486,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error creating seller subscription:", error);
-      res.status(500).json({ error: error.message });
+      console.error("Full error details:", {
+        message: error.message,
+        code: error.code,
+        type: error.type,
+        statusCode: error.statusCode,
+        priceId: process.env.STRIPE_SELLER_PRICE_ID
+      });
+      res.status(500).json({ 
+        error: error.message || "Failed to create subscription",
+        details: process.env.NODE_ENV === 'development' ? error.type : undefined
+      });
     }
   });
 
@@ -645,8 +659,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // If price ID doesn't exist or is invalid, create a new one
         if (!priceId || priceId.trim() === '' || priceId.startsWith('prod_')) {
-          console.log(`[SUBSCRIPTION] Creating new price for $10/month subscription`);
+          console.log(`[SUBSCRIPTION] Invalid/missing price ID: ${priceId}, creating new price for $10/month subscription`);
           priceId = await createSellerSubscriptionPrice(stripe);
+        } else {
+          // Validate the price ID exists in Stripe
+          try {
+            await stripe.prices.retrieve(priceId);
+            console.log(`[SUBSCRIPTION] Using existing price ID: ${priceId}`);
+          } catch (error: any) {
+            console.log(`[SUBSCRIPTION] Price ID ${priceId} not found in Stripe, creating new price...`);
+            priceId = await createSellerSubscriptionPrice(stripe);
+          }
         }
 
         const subscription = await stripe.subscriptions.create({
@@ -727,7 +750,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (subscriptionError: any) {
         console.error(`[SUBSCRIPTION] Failed to create subscription for user ${userId}:`, subscriptionError);
-        return res.status(500).json({ error: "Failed to create subscription" });
+        console.error(`[SUBSCRIPTION] Error details:`, {
+          message: subscriptionError.message,
+          code: subscriptionError.code,
+          type: subscriptionError.type,
+          priceId: process.env.STRIPE_SELLER_PRICE_ID,
+          priceCheckPassed: !process.env.STRIPE_SELLER_PRICE_ID?.startsWith('prod_')
+        });
+        return res.status(500).json({ 
+          error: "Failed to create subscription",
+          details: subscriptionError.message
+        });
       }
     } catch (error: any) {
       console.error(`[SUBSCRIPTION] Error in subscription endpoint for user:`, error);
