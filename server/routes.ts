@@ -101,10 +101,11 @@ async function handleSubscriptionCancellation(subscription: Stripe.Subscription)
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  if (!invoice.subscription || !stripe) return;
+  if (!(invoice as any).subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const subscriptionId = typeof (invoice as any).subscription === 'string' ? (invoice as any).subscription : (invoice as any).subscription.id;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -120,10 +121,11 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  if (!invoice.subscription || !stripe) return;
+  if (!(invoice as any).subscription || !stripe) return;
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+    const subscriptionId = typeof (invoice as any).subscription === 'string' ? (invoice as any).subscription : (invoice as any).subscription.id;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     const userId = subscription.metadata.userId;
     
     if (userId) {
@@ -969,7 +971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         hasActiveSubscription: subscription.status === 'active',
         status: subscription.status,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         paymentMethodLast4: paymentMethod?.card?.last4 || null,
         priceId: subscription.items.data[0]?.price.id
@@ -1001,9 +1003,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         message: "Subscription will be canceled at the end of the current billing period",
-        cancelAt: new Date(subscription.cancel_at! * 1000),
+        cancelAt: new Date((subscription as any).cancel_at * 1000),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString()
       });
     } catch (error: any) {
       console.error("Error canceling subscription:", error);
