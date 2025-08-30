@@ -45,13 +45,25 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
         // Check if this is a setup intent or payment intent
         if (data.clientSecret.startsWith('seti_')) {
           // This is a setup intent, use confirmSetup
-          const { error: confirmError } = await stripe.confirmSetup({
+          const { error: confirmError, setupIntent } = await stripe.confirmSetup({
             elements,
             clientSecret: data.clientSecret,
             redirect: 'if_required'
           });
           if (confirmError) {
             throw confirmError;
+          }
+          
+          // After successful setup intent, activate the subscription
+          if (setupIntent?.status === 'succeeded') {
+            const activateResponse = await apiRequest('POST', '/api/subscription/activate', {
+              setupIntentId: setupIntent.id
+            });
+            
+            if (!activateResponse.ok) {
+              const errorData = await activateResponse.json();
+              throw new Error(errorData.error || 'Failed to activate subscription');
+            }
           }
         } else {
           // This is a payment intent, use confirmPayment  

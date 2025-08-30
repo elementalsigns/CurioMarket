@@ -516,11 +516,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if subscription is actually active
       const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      const isActive = subscription.status === 'active';
+      
+      console.log(`[SUBSCRIPTION] Status check for user ${userId}: subscription ${subscription.id}, status: ${subscription.status}, default_payment_method: ${subscription.default_payment_method || 'none'}`);
+      
+      // For seller subscriptions, we'll be more lenient with status checking
+      // Accept 'active', 'trialing', or 'incomplete' with attached payment method
+      let isActive = false;
+      
+      if (subscription.status === 'active' || subscription.status === 'trialing') {
+        isActive = true;
+        console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is ${subscription.status} - marking as active`);
+      } else if (subscription.status === 'incomplete') {
+        // For incomplete subscriptions, check if they have a payment method
+        // This handles the case where Stripe setup was completed but subscription hasn't been charged yet
+        if (subscription.default_payment_method) {
+          isActive = true;
+          console.log(`[SUBSCRIPTION] Treating incomplete subscription ${subscription.id} as active due to attached payment method: ${subscription.default_payment_method}`);
+        } else {
+          // Check if customer has any payment methods
+          const customer = await stripe.customers.retrieve(user.stripeCustomerId!);
+          if (typeof customer !== 'string' && customer.invoice_settings?.default_payment_method) {
+            isActive = true;
+            console.log(`[SUBSCRIPTION] Treating incomplete subscription ${subscription.id} as active due to customer default payment method`);
+          } else {
+            console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
+          }
+        }
+      } else {
+        console.log(`[SUBSCRIPTION] Subscription ${subscription.id} status: ${subscription.status}, payment method: ${subscription.default_payment_method || 'none'} - NOT active`);
+      }
       
       res.json({ 
         hasActiveSubscription: isActive,
-        subscriptionStatus: subscription.status 
+        subscriptionStatus: subscription.status,
+        hasPaymentMethod: !!subscription.default_payment_method
       });
     } catch (error) {
       console.error("Error checking subscription status:", error);
@@ -681,6 +710,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: {
             userId: userId,
           },
+          // Add collection method to ensure billing
+          collection_method: 'charge_automatically'
         });
 
         console.log(`[SUBSCRIPTION] Created subscription ${subscription.id} for user ${userId}`);
@@ -792,39 +823,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'No payment method attached to setup intent' });
       }
 
-      // Attach the payment method to the customer and set as default
-      await stripe.paymentMethods.attach(setupIntent.payment_method.toString(), {
-        customer: user.stripeCustomerId!
-      });
+      // Payment method attachment is now handled above
 
-      await stripe.customers.update(user.stripeCustomerId!, {
-        invoice_settings: {
-          default_payment_method: setupIntent.payment_method.toString()
+      console.log(`[SUBSCRIPTION] Processing setup intent ${setupIntentId} for user ${userId}`);
+      console.log(`[SUBSCRIPTION] Payment method from setup intent: ${setupIntent.payment_method}`);
+
+      try {
+        // First check if payment method is already attached to customer
+        const paymentMethod = await stripe.paymentMethods.retrieve(setupIntent.payment_method.toString());
+        console.log(`[SUBSCRIPTION] Payment method ${paymentMethod.id} customer: ${paymentMethod.customer || 'none'}`);
+        
+        if (!paymentMethod.customer || paymentMethod.customer !== user.stripeCustomerId) {
+          // Attach payment method to customer
+          console.log(`[SUBSCRIPTION] Attaching payment method ${paymentMethod.id} to customer ${user.stripeCustomerId}`);
+          await stripe.paymentMethods.attach(setupIntent.payment_method.toString(), {
+            customer: user.stripeCustomerId!
+          });
         }
-      });
+        
+        // Update customer default payment method
+        console.log(`[SUBSCRIPTION] Setting default payment method for customer ${user.stripeCustomerId}`);
+        await stripe.customers.update(user.stripeCustomerId!, {
+          invoice_settings: {
+            default_payment_method: setupIntent.payment_method.toString()
+          }
+        });
 
-      // Update the subscription with the payment method
-      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-        default_payment_method: setupIntent.payment_method.toString()
-      });
+        // Update the subscription with the payment method
+        console.log(`[SUBSCRIPTION] Updating subscription ${user.stripeSubscriptionId} with payment method`);
+        const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+          default_payment_method: setupIntent.payment_method.toString()
+        });
+        
+        console.log(`[SUBSCRIPTION] Updated subscription status: ${subscription.status}`);
+
+        // Now try to pay any outstanding invoices immediately
+        console.log(`[SUBSCRIPTION] Looking for outstanding invoices for subscription ${user.stripeSubscriptionId}`);
+        const invoices = await stripe.invoices.list({
+          customer: user.stripeCustomerId || undefined,
+          subscription: user.stripeSubscriptionId,
+          status: 'open',
+          limit: 3
+        });
+
+        console.log(`[SUBSCRIPTION] Found ${invoices.data.length} open invoices`);
+        
+        for (const invoice of invoices.data) {
+          if (invoice.id && invoice.amount_due > 0) {
+            try {
+              console.log(`[SUBSCRIPTION] Attempting to pay invoice ${invoice.id} for $${invoice.amount_due / 100}`);
+              const paidInvoice = await stripe.invoices.pay(invoice.id);
+              console.log(`[SUBSCRIPTION] Successfully paid invoice ${invoice.id} - status: ${paidInvoice.status}`);
+            } catch (paymentError: any) {
+              console.error(`[SUBSCRIPTION] Failed to pay invoice ${invoice.id}:`, paymentError.message);
+            }
+          }
+        }
+        
+        // Get final subscription status
+        const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        console.log(`[SUBSCRIPTION] Final subscription status: ${finalSubscription.status}`);
+        subscription.status = finalSubscription.status;
+
+      } catch (error: any) {
+        console.error(`[SUBSCRIPTION] Error during activation:`, error.message);
+        throw error;
+      }
+
+      // Update user role to seller if subscription is now active
+      if (subscription.status === 'active') {
+        await storage.upsertUser({
+          ...user,
+          role: 'seller' as const
+        });
+        console.log(`[SUBSCRIPTION] Updated user ${userId} role to seller`);
+      }
 
       // Try to pay any outstanding invoices
       if (user.stripeCustomerId) {
-        const invoices = await stripe.invoices.list({
-          customer: user.stripeCustomerId,
-          subscription: user.stripeSubscriptionId,
-          status: 'open'
-        });
+        try {
+          const invoices = await stripe.invoices.list({
+            customer: user.stripeCustomerId,
+            subscription: user.stripeSubscriptionId,
+            status: 'open',
+            limit: 5
+          });
 
-        for (const invoice of invoices.data) {
-          try {
-            if (invoice.id) {
-              await stripe.invoices.pay(invoice.id);
-              console.log(`[SUBSCRIPTION] Paid invoice ${invoice.id} for user ${userId}`);
+          for (const invoice of invoices.data) {
+            try {
+              if (invoice.id && invoice.amount_due > 0) {
+                const paidInvoice = await stripe.invoices.pay(invoice.id);
+                console.log(`[SUBSCRIPTION] Paid invoice ${invoice.id} for user ${userId}, status: ${paidInvoice.status}`);
+              }
+            } catch (error) {
+              console.error(`[SUBSCRIPTION] Failed to pay invoice ${invoice.id}:`, error);
             }
-          } catch (error) {
-            console.error(`[SUBSCRIPTION] Failed to pay invoice ${invoice.id}:`, error);
           }
+        } catch (error) {
+          console.error(`[SUBSCRIPTION] Error retrieving invoices for user ${userId}:`, error);
         }
       }
 
