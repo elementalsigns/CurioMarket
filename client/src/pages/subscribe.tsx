@@ -31,32 +31,36 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
     }
 
     try {
-      // Confirm the setup intent with payment method
-      const { error: confirmError, setupIntent } = await stripe.confirmSetup({
-        elements,
-        redirect: 'if_required'
-      });
-
-      if (confirmError) {
-        throw confirmError;
-      }
-
-      if (setupIntent && setupIntent.status === 'succeeded') {
-        // Now activate the subscription on the server
-        const response = await apiRequest('POST', '/api/subscription/activate', {
-          setupIntentId: setupIntent.id
+      // Use the existing subscription create endpoint that handles everything
+      const response = await apiRequest('POST', '/api/subscription/create');
+      const data = await response.json();
+      
+      if (response.ok && data.clientSecret) {
+        // Confirm payment with the client secret
+        const { error: confirmError } = await stripe.confirmPayment({
+          elements,
+          clientSecret: data.clientSecret,
+          redirect: 'if_required'
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          toast({
-            title: "Subscription Activated",
-            description: "Welcome to Curio Market! Your seller account is now active.",
-          });
-          onSuccess();
-        } else {
-          throw new Error('Failed to activate subscription');
+        if (confirmError) {
+          throw confirmError;
         }
+
+        toast({
+          title: "Subscription Activated",
+          description: "Welcome to Curio Market! Your seller account is now active.",
+        });
+        onSuccess();
+      } else if (response.ok && data.status === 'active') {
+        // Already has active subscription
+        toast({
+          title: "Subscription Active",
+          description: "Your subscription is already active!",
+        });
+        onSuccess();
+      } else {
+        throw new Error(data.error || 'Failed to create subscription');
       }
     } catch (error: any) {
       console.error('Subscription error:', error);
