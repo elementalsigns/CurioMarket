@@ -42,15 +42,27 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
       const data = await response.json();
       
       if (response.ok && data.clientSecret) {
-        // Confirm payment with the client secret
-        const { error: confirmError } = await stripe.confirmPayment({
-          elements,
-          clientSecret: data.clientSecret,
-          redirect: 'if_required'
-        });
-
-        if (confirmError) {
-          throw confirmError;
+        // Check if this is a setup intent or payment intent
+        if (data.clientSecret.startsWith('seti_')) {
+          // This is a setup intent, use confirmSetup
+          const { error: confirmError } = await stripe.confirmSetup({
+            elements,
+            clientSecret: data.clientSecret,
+            redirect: 'if_required'
+          });
+          if (confirmError) {
+            throw confirmError;
+          }
+        } else {
+          // This is a payment intent, use confirmPayment  
+          const { error: confirmError } = await stripe.confirmPayment({
+            elements,
+            clientSecret: data.clientSecret,
+            redirect: 'if_required'
+          });
+          if (confirmError) {
+            throw confirmError;
+          }
         }
 
         toast({
