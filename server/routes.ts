@@ -201,6 +201,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Debug endpoint to check environment variables
+  app.get('/api/debug/env', (req, res) => {
+    res.json({
+      priceId: process.env.STRIPE_SELLER_PRICE_ID || 'not set',
+      priceIdLength: (process.env.STRIPE_SELLER_PRICE_ID || '').length,
+      hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
+      hasPublicKey: !!process.env.VITE_STRIPE_PUBLIC_KEY,
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET
+    });
+  });
+
   // Object storage routes
   app.post('/api/objects/upload', requireAuth, async (req: any, res) => {
     try {
@@ -435,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create or get the seller subscription price - validate existing price ID
       let SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID;
       
-      if (SELLER_SUBSCRIPTION_PRICE_ID) {
+      if (SELLER_SUBSCRIPTION_PRICE_ID && SELLER_SUBSCRIPTION_PRICE_ID.trim() !== '') {
         try {
           await stripe.prices.retrieve(SELLER_SUBSCRIPTION_PRICE_ID);
         } catch (error: any) {
@@ -443,6 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
         }
       } else {
+        console.log(`No valid price ID found, creating new subscription product...`);
         SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
       }
 
@@ -641,34 +653,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let priceId = process.env.STRIPE_SELLER_PRICE_ID;
         
         // If price ID doesn't exist or is invalid, create a new one
-        if (!priceId || priceId.startsWith('prod_')) {
+        if (!priceId || priceId.trim() === '' || priceId.startsWith('prod_')) {
           console.log(`[SUBSCRIPTION] Creating new price for $10/month subscription`);
-          
-          // First, ensure we have a product
-          let productId = process.env.STRIPE_SELLER_PRICE_ID;
-          if (!productId || !productId.startsWith('prod_')) {
-            const product = await stripe.products.create({
-              name: 'Curio Market Seller Subscription',
-              description: 'Monthly subscription for sellers on Curio Market',
-            });
-            productId = product.id;
-            console.log(`[SUBSCRIPTION] Created product: ${productId}`);
-          }
-          
-          // Create the recurring price
-          const price = await stripe.prices.create({
-            product: productId,
-            unit_amount: 1000, // $10.00 in cents
-            currency: 'usd',
-            recurring: {
-              interval: 'month',
-            },
-            metadata: {
-              type: 'seller_subscription',
-            },
-          });
-          priceId = price.id;
-          console.log(`[SUBSCRIPTION] Created price: ${priceId} for $10/month`);
+          priceId = await createSellerSubscriptionPrice(stripe);
         }
 
         const subscription = await stripe.subscriptions.create({
