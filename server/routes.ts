@@ -180,6 +180,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get access token for incognito mode
+  app.get('/api/auth/token', async (req, res) => {
+    try {
+      // This endpoint redirects to Replit auth to get a token that can be used in incognito mode
+      const hostname = req.hostname;
+      const authUrl = `https://${hostname}/api/login?return_token=true`;
+      
+      res.json({ 
+        message: 'Visit the auth URL to get your access token',
+        authUrl: authUrl,
+        instructions: 'After login, the token will be in the URL parameters'
+      });
+    } catch (error) {
+      console.error("Error getting token URL:", error);
+      res.status(500).json({ message: "Failed to get token URL" });
+    }
+  });
+
   // Get seller profile
   app.get('/api/seller/profile', isAuthenticated, async (req: any, res) => {
     try {

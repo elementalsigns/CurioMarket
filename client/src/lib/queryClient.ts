@@ -7,14 +7,38 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Get auth token from URL params (for incognito mode) or localStorage
+function getAuthToken(): string | null {
+  // First check URL params for token (after OAuth redirect)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('access_token');
+  if (tokenFromUrl) {
+    // Store in localStorage and remove from URL
+    localStorage.setItem('replit_access_token', tokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return tokenFromUrl;
+  }
+  
+  // Fall back to localStorage
+  return localStorage.getItem('replit_access_token');
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const token = getAuthToken();
+  const headers: HeadersInit = data ? { "Content-Type": "application/json" } : {};
+  
+  // Add Authorization header if token exists
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -29,8 +53,17 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const token = getAuthToken();
+    const headers: HeadersInit = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      headers,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

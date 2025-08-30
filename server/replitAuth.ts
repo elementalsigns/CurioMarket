@@ -211,7 +211,31 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log('Auth check - isAuthenticated():', req.isAuthenticated());
   console.log('Auth check - user:', user ? 'exists' : 'null');
   console.log('Auth check - user.expires_at:', user?.expires_at);
+  console.log('Auth check - Authorization header:', req.headers.authorization);
 
+  // Try Authorization header first (for incognito/cookieless requests)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      const config = await getOidcConfig();
+      const userinfo = await client.userinfo(config, token);
+      
+      // Create a fake user object with the required data
+      req.user = {
+        claims: userinfo,
+        access_token: token,
+        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+      };
+      
+      console.log('Auth success via Bearer token');
+      return next();
+    } catch (error) {
+      console.log('Bearer token validation failed:', error);
+    }
+  }
+
+  // Fall back to session-based auth
   if (!req.isAuthenticated() || !user?.expires_at) {
     console.log('Auth failed - missing authentication or expires_at');
     return res.status(401).json({ message: "Unauthorized" });

@@ -45,6 +45,7 @@ import Events from "@/pages/events";
 import SignIn from "@/pages/signin";
 import SignInOnly from "@/pages/signin-only";
 import SellerSubscription from "@/pages/SellerSubscription";
+import IncognitoAuth from "@/pages/incognito-auth";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -75,6 +76,8 @@ function Router() {
           <Route path="/seller/subscription" component={SellerSubscription} />
           <Route path="/signin" component={SignInOnly} />
           <Route path="/signup" component={SignIn} />
+          <Route path="/incognito-auth" component={IncognitoAuth} />
+          <Route path="/subscribe" component={Subscribe} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       ) : (
@@ -109,6 +112,7 @@ function Router() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/wishlists" component={Wishlists} />
           <Route path="/events" component={Events} />
+          <Route path="/incognito-auth" component={IncognitoAuth} />
           <Route path="/account-demo" component={DemoSimple} />
         </>
       )}
