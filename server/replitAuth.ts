@@ -217,21 +217,35 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
-    try {
-      const config = await getOidcConfig();
-      const userinfo = await client.userinfo(config, token);
-      
-      // Create a fake user object with the required data
-      req.user = {
-        claims: userinfo,
-        access_token: token,
-        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
-      };
-      
-      console.log('Auth success via Bearer token');
-      return next();
-    } catch (error) {
-      console.log('Bearer token validation failed:', error);
+    console.log('Found Bearer token, attempting validation...');
+    
+    // For development/testing, accept any token that looks valid
+    // In production, you'd want proper token validation
+    if (token && token.length > 10) {
+      try {
+        // Simple token validation - make a request to Replit userinfo endpoint
+        const response = await fetch('https://replit.com/api/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const userinfo = await response.json();
+          
+          // Create a user object with the required data
+          req.user = {
+            claims: userinfo,
+            access_token: token,
+            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+          };
+          
+          console.log('Auth success via Bearer token for user:', userinfo.sub || userinfo.id);
+          return next();
+        }
+      } catch (error) {
+        console.log('Bearer token validation failed:', error);
+      }
     }
   }
 
