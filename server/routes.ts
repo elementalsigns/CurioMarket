@@ -201,16 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Debug endpoint to check environment variables
-  app.get('/api/debug/env', (req, res) => {
-    res.json({
-      priceId: process.env.STRIPE_SELLER_PRICE_ID || 'not set',
-      priceIdLength: (process.env.STRIPE_SELLER_PRICE_ID || '').length,
-      hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
-      hasPublicKey: !!process.env.VITE_STRIPE_PUBLIC_KEY,
-      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET
-    });
-  });
+
 
   // Object storage routes
   app.post('/api/objects/upload', requireAuth, async (req: any, res) => {
