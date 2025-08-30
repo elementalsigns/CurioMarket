@@ -197,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve Stripe publishable key to frontend
   app.get('/api/config/stripe', (req, res) => {
     res.json({
-      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || ''
+      publishableKey: process.env.VITE_STRIPE_PUBLIC_KEY || ''
     });
   });
 
