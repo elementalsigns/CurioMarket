@@ -533,14 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive = true;
           console.log(`[SUBSCRIPTION] Treating incomplete subscription ${subscription.id} as active due to attached payment method: ${subscription.default_payment_method}`);
         } else {
-          // Check if customer has any payment methods
-          const customer = await stripe.customers.retrieve(user.stripeCustomerId!);
-          if (typeof customer !== 'string' && customer.invoice_settings?.default_payment_method) {
-            isActive = true;
-            console.log(`[SUBSCRIPTION] Treating incomplete subscription ${subscription.id} as active due to customer default payment method`);
-          } else {
-            console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
-          }
+          console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
         }
       } else {
         console.log(`[SUBSCRIPTION] Subscription ${subscription.id} status: ${subscription.status}, payment method: ${subscription.default_payment_method || 'none'} - NOT active`);
@@ -809,9 +802,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Setup intent ID required' });
       }
 
-      const user = await storage.getUser(userId);
-      if (!user || !user.stripeSubscriptionId || !stripe) {
-        return res.status(404).json({ error: 'User or subscription not found' });
+      if (!stripe) {
+        console.error(`[SUBSCRIPTION] Stripe not initialized`);
+        return res.status(500).json({ error: 'Payment system not available' });
+      }
+
+      // First, try to get the user from the database
+      let user = await storage.getUser(userId);
+      
+      // If user not found in database, create them from the auth claims
+      if (!user) {
+        console.log(`[SUBSCRIPTION] User ${userId} not found in database, creating from auth claims`);
+        const claims = req.user.claims;
+        user = await storage.upsertUser({
+          id: userId,
+          email: claims.email,
+          firstName: claims.first_name,
+          lastName: claims.last_name,
+          profileImageUrl: claims.profile_image_url,
+          role: 'buyer' as const
+        });
+        console.log(`[SUBSCRIPTION] Created user ${userId} in database`);
+      }
+      
+      // Check if user has a subscription ID, if not, try to find it in Stripe
+      if (!user.stripeSubscriptionId) {
+        console.log(`[SUBSCRIPTION] User ${userId} has no stripeSubscriptionId, searching Stripe`);
+        
+        // Try to find the subscription by setup intent metadata
+        try {
+          const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+          if (setupIntent.metadata?.subscription_id) {
+            console.log(`[SUBSCRIPTION] Found subscription ${setupIntent.metadata.subscription_id} from setup intent metadata`);
+            
+            // Update user with the subscription ID
+            user = await storage.upsertUser({
+              ...user,
+              stripeSubscriptionId: setupIntent.metadata.subscription_id
+            });
+          } else {
+            console.error(`[SUBSCRIPTION] No subscription ID found in setup intent metadata`);
+            return res.status(404).json({ error: 'No subscription found for user' });
+          }
+        } catch (intentError) {
+          console.error(`[SUBSCRIPTION] Failed to retrieve setup intent:`, intentError);
+          return res.status(404).json({ error: 'Setup intent not found' });
+        }
       }
 
       console.log(`[SUBSCRIPTION] Activating subscription for user ${userId}, setupIntent: ${setupIntentId}`);
@@ -883,15 +919,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get final subscription status
         const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
         console.log(`[SUBSCRIPTION] Final subscription status: ${finalSubscription.status}`);
-        subscription.status = finalSubscription.status;
 
       } catch (error: any) {
         console.error(`[SUBSCRIPTION] Error during activation:`, error.message);
         throw error;
       }
 
-      // Update user role to seller if subscription is now active
-      if (subscription.status === 'active') {
+      // Update user role to seller if subscription is now active  
+      const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      if (finalSubscription.status === 'active') {
         await storage.upsertUser({
           ...user,
           role: 'seller' as const
@@ -928,8 +964,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         message: 'Subscription activated successfully',
-        subscriptionId: subscription.id,
-        status: subscription.status,
+        subscriptionId: finalSubscription.id,
+        status: finalSubscription.status,
         success: true
       });
     } catch (error: any) {
