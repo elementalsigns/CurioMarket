@@ -31,6 +31,12 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
     }
 
     try {
+      // Submit the payment elements first (required by Stripe)
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        throw submitError;
+      }
+
       // Use the existing subscription create endpoint that handles everything
       const response = await apiRequest('POST', '/api/subscription/create');
       const data = await response.json();
