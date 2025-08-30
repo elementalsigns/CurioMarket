@@ -866,13 +866,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         // First check if payment method is already attached to customer
-        const paymentMethod = await stripe.paymentMethods.retrieve(setupIntent.payment_method.toString());
+        const paymentMethod = await stripe.paymentMethods.retrieve(setupIntent.payment_method!.toString());
         console.log(`[SUBSCRIPTION] Payment method ${paymentMethod.id} customer: ${paymentMethod.customer || 'none'}`);
         
         if (!paymentMethod.customer || paymentMethod.customer !== user.stripeCustomerId) {
           // Attach payment method to customer
           console.log(`[SUBSCRIPTION] Attaching payment method ${paymentMethod.id} to customer ${user.stripeCustomerId}`);
-          await stripe.paymentMethods.attach(setupIntent.payment_method.toString(), {
+          await stripe.paymentMethods.attach(setupIntent.payment_method!.toString(), {
             customer: user.stripeCustomerId!
           });
         }
@@ -881,14 +881,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[SUBSCRIPTION] Setting default payment method for customer ${user.stripeCustomerId}`);
         await stripe.customers.update(user.stripeCustomerId!, {
           invoice_settings: {
-            default_payment_method: setupIntent.payment_method.toString()
+            default_payment_method: setupIntent.payment_method!.toString()
           }
         });
 
         // Update the subscription with the payment method
         console.log(`[SUBSCRIPTION] Updating subscription ${user.stripeSubscriptionId} with payment method`);
-        const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-          default_payment_method: setupIntent.payment_method.toString()
+        const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId!, {
+          default_payment_method: setupIntent.payment_method!.toString()
         });
         
         console.log(`[SUBSCRIPTION] Updated subscription status: ${subscription.status}`);
@@ -897,7 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[SUBSCRIPTION] Looking for outstanding invoices for subscription ${user.stripeSubscriptionId}`);
         const invoices = await stripe.invoices.list({
           customer: user.stripeCustomerId || undefined,
-          subscription: user.stripeSubscriptionId,
+          subscription: user.stripeSubscriptionId!,
           status: 'open',
           limit: 3
         });
@@ -917,7 +917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Get final subscription status
-        const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId!);
         console.log(`[SUBSCRIPTION] Final subscription status: ${finalSubscription.status}`);
 
       } catch (error: any) {
@@ -926,7 +926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update user role to seller if subscription is now active  
-      const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const finalSubscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId!);
       if (finalSubscription.status === 'active') {
         await storage.upsertUser({
           ...user,
@@ -939,8 +939,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user.stripeCustomerId) {
         try {
           const invoices = await stripe.invoices.list({
-            customer: user.stripeCustomerId,
-            subscription: user.stripeSubscriptionId,
+            customer: user.stripeCustomerId!,
+            subscription: user.stripeSubscriptionId!,
             status: 'open',
             limit: 5
           });
