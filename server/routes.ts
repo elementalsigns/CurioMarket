@@ -453,37 +453,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
       }
 
-      // Create subscription
+      // Create subscription with proper setup intent
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [{
           price: SELLER_SUBSCRIPTION_PRICE_ID,
         }],
         payment_behavior: 'default_incomplete',
-        expand: ['latest_invoice.payment_intent'],
+        payment_settings: {
+          save_default_payment_method: 'on_subscription'
+        },
+        expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
         metadata: {
           userId: userId,
           type: 'seller_subscription'
         }
       });
 
-      // Update user with Stripe info
+      // Update user with Stripe info FIRST
       await storage.updateUserStripeInfo(userId, {
         customerId,
         subscriptionId: subscription.id
       });
 
       const latestInvoice = subscription.latest_invoice as any;
-      let clientSecret = null;
-      if (latestInvoice?.payment_intent?.client_secret) {
-        clientSecret = latestInvoice.payment_intent.client_secret;
-      }
+      const paymentIntent = latestInvoice?.payment_intent;
+      const setupIntent = subscription.pending_setup_intent as any;
       
-      res.json({
-        subscriptionId: subscription.id,
-        clientSecret,
-        status: subscription.status
-      });
+      if (setupIntent && setupIntent.client_secret) {
+        // Setup intent for future payments (most common for subscriptions)
+        res.json({
+          subscriptionId: subscription.id,
+          clientSecret: setupIntent.client_secret,
+          status: subscription.status,
+          success: true
+        });
+      } else if (paymentIntent && paymentIntent.client_secret) {
+        // Payment intent for immediate payment
+        res.json({
+          subscriptionId: subscription.id,
+          clientSecret: paymentIntent.client_secret,
+          status: subscription.status,
+          success: true
+        });
+      } else {
+        // Create a manual setup intent for the subscription
+        console.log(`[SUBSCRIPTION] No setup/payment intent found, creating manual setup intent for customer ${customerId}`);
+        
+        const manualSetupIntent = await stripe.setupIntents.create({
+          customer: customerId,
+          payment_method_types: ['card'],
+          usage: 'off_session',
+          metadata: {
+            subscription_id: subscription.id,
+            user_id: userId
+          }
+        });
+        
+        res.json({
+          subscriptionId: subscription.id,
+          clientSecret: manualSetupIntent.client_secret,
+          status: subscription.status,
+          success: true
+        });
+      }
     } catch (error: any) {
       console.error("Error creating seller subscription:", error);
       console.error("Full error details:", {
