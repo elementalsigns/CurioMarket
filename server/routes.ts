@@ -900,6 +900,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!clientSecret) {
           try {
             console.log(`[SUBSCRIPTION] No payment intent found, creating setup intent for customer ${customerId}`);
+            
+            // Validate customer ID before creating setup intent
+            if (!customerId || customerId.trim() === '') {
+              throw new Error('Customer ID is empty or invalid');
+            }
+            
+            // Verify customer exists in Stripe
+            try {
+              await stripe.customers.retrieve(customerId);
+              console.log(`[SUBSCRIPTION] Customer ${customerId} verified in Stripe`);
+            } catch (customerError: any) {
+              console.error(`[SUBSCRIPTION] Customer ${customerId} not found in Stripe:`, customerError.message);
+              throw new Error(`Invalid customer: ${customerError.message}`);
+            }
+            
             const setupIntent = await stripe.setupIntents.create({
               customer: customerId,
               payment_method_types: ['card'],
@@ -911,8 +926,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             clientSecret = setupIntent.client_secret;
             console.log(`[SUBSCRIPTION] Created setup intent: ${setupIntent.id} with client secret: ${clientSecret ? 'present' : 'failed'}`);
-          } catch (setupError) {
+          } catch (setupError: any) {
             console.error(`[SUBSCRIPTION] Failed to create setup intent:`, setupError);
+            console.error(`[SUBSCRIPTION] Setup intent error details:`, {
+              message: setupError.message,
+              type: setupError.type,
+              code: setupError.code,
+              customerId: customerId,
+              customerIdValid: !!(customerId && customerId.trim())
+            });
           }
         } else {
           console.log(`[SUBSCRIPTION] Using existing payment intent client secret`);
