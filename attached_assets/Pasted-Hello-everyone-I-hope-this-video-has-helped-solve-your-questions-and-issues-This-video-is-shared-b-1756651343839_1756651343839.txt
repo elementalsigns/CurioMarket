@@ -1,0 +1,87 @@
+Hello everyone! I hope this video has helped solve your questions and issues. This video is shared because a solution has been found for the question/problem. I create videos for questions that have solutions. If you have any other issues, feel free to reach out to me on Instagram:   / ky.emrah    
+
+Below, you can find the text related to the question/problem. In the video, the question will be presented first, followed by the answers. If the video moves too fast, feel free to pause and review the answers. If you need more detailed information, you can find the necessary sources and links at the bottom of this description. I hope this video has been helpful, and even if it doesn't directly solve your problem, it will guide you to the source of the solution. I'd appreciate it if you like the video and subscribe to my channel!Stripe webhook -Webhook Error: Webhook payload must be provided as a string or a Buffer
+
+I am trying to console a message when payment is success using stripe for that i am using webhooks.
+const stripe = require('stripe')('sk_test_'); // Replace with your actual key
+
+const handleWebhook = async (req, res) =  {
+    let event;
+    
+    try {
+        const sig = req.headers['stripe-signature'];
+        // Use req.body directly since it's raw
+        event = stripe.webhooks.constructEvent(req.body, sig, 'whsec_code'); 
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log(event.type);
+    switch (event.type) {
+        case 'checkout.session.completed':
+            const session = event.data.object;
+            console.log('Checkout session completed:', session.id);
+            if (session.payment_status === 'paid') { alert("hii")
+                console.log('PaymentIntent was successful!');
+                const updatedValues = JSON.parse(session.metadata.updatedValues);
+                console.log("updatedValues is", updatedValues);
+            }
+            break;
+
+const stripe = require('stripe')('sk_test_'); // Replace with your actual key
+
+const handleWebhook = async (req, res) =  {
+    let event;
+    
+    try {
+        const sig = req.headers['stripe-signature'];
+        // Use req.body directly since it's raw
+        event = stripe.webhooks.constructEvent(req.body, sig, 'whsec_code'); 
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log(event.type);
+    switch (event.type) {
+        case 'checkout.session.completed':
+            const session = event.data.object;
+            console.log('Checkout session completed:', session.id);
+            if (session.payment_status === 'paid') { alert("hii")
+                console.log('PaymentIntent was successful!');
+                const updatedValues = JSON.parse(session.metadata.updatedValues);
+                console.log("updatedValues is", updatedValues);
+            }
+            break;
+
+And session.payment_status === 'paid' i need to test whether webhook is working or not.so i just alert a message.but i am getting
+
+Webhook Error: Webhook payload must be provided as a string or a
+Buffer (https://nodejs.org/api/buffer.html) instance representing the
+raw request body.Payload was provided as a parsed JavaScript object instead.  Signature verification is impossible without access to the
+original signed material.
+
+Webhook Error: Webhook payload must be provided as a string or a
+Buffer (https://nodejs.org/api/buffer.html) instance representing the
+raw request body.Payload was provided as a parsed JavaScript object instead.  Signature verification is impossible without access to the
+original signed material.
+https://nodejs.org/api/buffer.html
+raw
+my app.js
+gsrApp.use((req, res, next) =  {
+  console.log(`Incoming request size: ${JSON.stringify(req.body).length} bytes`);
+  next();
+});
+
+gsrApp.use((req, res, next) =  {
+  console.log(`Incoming request size: ${JSON.stringify(req.body).length} bytes`);
+  next();
+});
+
+and router i have
+routerV2.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+
+routerV2.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+
+Thanks in advance
