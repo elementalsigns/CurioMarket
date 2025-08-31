@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Category } from "@shared/schema";
 
 const createListingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -50,7 +51,7 @@ export default function CreateListing() {
   const [previewMode, setPreviewMode] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -216,7 +217,7 @@ export default function CreateListing() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {categories && categories.map((category: any) => (
+                            {categories && Array.isArray(categories) && categories.map((category: Category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
