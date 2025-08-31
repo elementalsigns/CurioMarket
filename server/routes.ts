@@ -839,7 +839,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let priceId = process.env.STRIPE_SELLER_PRICE_ID;
         
         // If price ID doesn't exist or is invalid, create a new one
-        if (!priceId || priceId.trim() === '' || priceId.startsWith('prod_')) {
+        // FORCE creation if we have the problematic product ID
+        if (!priceId || priceId.trim() === '' || priceId.startsWith('prod_') || priceId === 'prod_SwnHA5or5KqQyu') {
           console.log(`[SUBSCRIPTION] Invalid/missing price ID: ${priceId}, creating new price for $10/month subscription`);
           priceId = await createSellerSubscriptionPrice(stripe);
         } else {
