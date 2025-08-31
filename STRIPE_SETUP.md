@@ -42,7 +42,7 @@ STRIPE_SELLER_PRICE_ID=price_... (optional - will auto-create if not provided)
 
 Your webhook endpoint is already configured at: `/api/webhooks/stripe`
 
-**Webhook URL**: `https://your-replit-app.replit.app/api/webhooks/stripe`
+**Webhook URL**: `https://www.curiosities.market/api/webhooks/stripe`
 
 **Required Events**:
 - `customer.subscription.created`
