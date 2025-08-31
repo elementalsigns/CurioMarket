@@ -3210,7 +3210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let csvContent = "title,price,sku,mpn,category,condition,url,image_url,description\n";
         
         listings.forEach((listing: any) => {
-          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://www.curiosities.market'}/listing/${listing.slug}`;
           const imageUrl = listing.images?.[0] || '';
           const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
           const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
@@ -3225,7 +3225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let fbContent = "id,title,description,availability,condition,price,link,image_link,brand,mpn,sku,product_type\n";
         
         listings.forEach((listing: any) => {
-          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+          const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://www.curiosities.market'}/listing/${listing.slug}`;
           const imageUrl = listing.images?.[0] || '';
           const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
           const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
@@ -3342,7 +3342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let csvContent = 'title,price,sku,mpn,category,condition,link,image_link,description\n';
           
           listings.forEach((listing: any) => {
-            const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://curio-market.replit.app'}/listing/${listing.slug}`;
+            const url = `${process.env.REPLIT_DEV_DOMAIN || 'https://www.curiosities.market'}/listing/${listing.slug}`;
             const imageUrl = listing.images?.[0] || '';
             const escapedTitle = `"${(listing.title || '').replace(/"/g, '""')}"`;
             const escapedDescription = `"${(listing.description || '').replace(/"/g, '""').substring(0, 100)}..."`;
