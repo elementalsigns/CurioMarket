@@ -76,20 +76,23 @@ function PaymentForm({ onSuccess, onCancel }: SubscriptionPaymentProps) {
     }
 
     try {
-      // Confirm the subscription payment
-      const result = await stripe.confirmCardPayment(clientSecret, {
+      // For subscriptions, we need to confirm the setup intent, not payment intent
+      const result = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
           card: cardElement,
         }
       });
 
       if (result.error) {
-        setError(result.error.message || 'Payment failed');
+        setError(result.error.message || 'Payment setup failed');
+        console.error('Setup error:', result.error);
       } else {
-        // Payment succeeded
+        console.log('Setup intent confirmed successfully:', result.setupIntent);
+        // Setup succeeded - webhook will handle subscription activation
         onSuccess();
       }
     } catch (err: any) {
+      console.error('Payment processing error:', err);
       setError(err.message || 'Payment processing failed');
     } finally {
       setLoading(false);
