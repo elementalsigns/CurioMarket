@@ -169,45 +169,12 @@ export default function Subscribe() {
   }, [user, authLoading, toast]);
 
   // Check subscription status when user is authenticated
+  // Auto-redirect paid sellers to dashboard
   useEffect(() => {
-    const checkExistingSubscription = async () => {
-      if (user && !isCreatingSubscription) {
-        try {
-          const response = await apiRequest("POST", "/api/subscription/create");
-          const data = await response.json();
-          
-          if (data.status === 'active') {
-            console.log("Auto-detected active subscription, hasSellerProfile:", data.hasSellerProfile);
-            
-            if (data.hasSellerProfile) {
-              // User has subscription and seller profile, redirect to dashboard
-              toast({
-                title: "Welcome Back!",
-                description: "Your subscription is active. Taking you to your dashboard...",
-              });
-              setTimeout(() => {
-                window.location.href = "/seller/dashboard";
-              }, 1000);
-            } else {
-              // User has subscription but no seller profile, redirect to onboarding
-              toast({
-                title: "Complete Setup",
-                description: "Your subscription is active. Let's finish setting up your seller profile...",
-              });
-              setTimeout(() => {
-                window.location.href = "/seller/onboarding";
-              }, 1000);
-            }
-          }
-        } catch (error) {
-          // If there's an error, let user manually proceed
-          console.log("Error checking existing subscription:", error);
-        }
-      }
-    };
-    
-    checkExistingSubscription();
-  }, [user, toast, isCreatingSubscription]);
+    if (user?.role === 'seller') {
+      window.location.href = "/seller/dashboard";
+    }
+  }, [user]);
 
   const handleSuccess = () => {
     toast({

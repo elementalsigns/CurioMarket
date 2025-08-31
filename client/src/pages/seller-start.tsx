@@ -34,16 +34,10 @@ export default function SellerStart() {
 
   useEffect(() => {
     if (user?.role === 'seller') {
-      // User has seller role, redirect to onboarding
-      toast({
-        title: "Subscription Active!",
-        description: "Redirecting to seller onboarding...",
-      });
-      setTimeout(() => {
-        window.location.href = "/seller/onboarding";
-      }, 2000);
+      // User has seller role, redirect directly to dashboard
+      window.location.href = "/seller/dashboard";
     }
-  }, [user, toast]);
+  }, [user]);
 
   const handleStartOnboarding = () => {
     if (user?.role === 'seller') {

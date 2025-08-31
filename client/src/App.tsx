@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -48,7 +49,19 @@ import SellerSubscription from "@/pages/SellerSubscription";
 import IncognitoAuth from "@/pages/incognito-auth";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  // Auto-redirect paid sellers away from subscription pages
+  useEffect(() => {
+    if (user?.role === 'seller') {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/subscribe' || 
+          currentPath === '/seller/subscription' || 
+          currentPath === '/seller/start') {
+        window.location.href = '/seller/dashboard';
+      }
+    }
+  }, [user]);
 
   return (
     <Switch>
