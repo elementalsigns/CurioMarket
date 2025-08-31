@@ -55,8 +55,8 @@ export default function SellerSubscriptionPage() {
     );
   }
 
-  // Check if user has seller role OR subscription ID (indicating they're a paid seller)
-  const hasActiveSubscription = (user as any)?.role === 'seller' || (user as any)?.stripeSubscriptionId;
+  // Check if user has seller role (indicating they're a paid seller)
+  const hasActiveSubscription = (user as any)?.role === 'seller';
 
   // Auto-redirect paid sellers to dashboard
   useEffect(() => {

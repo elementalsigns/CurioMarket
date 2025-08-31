@@ -113,7 +113,7 @@ export default function SubscriptionStatus({ onManageSubscription }: Subscriptio
     );
   }
 
-  if (!(user as any)?.stripeSubscriptionId) {
+  if ((user as any)?.role !== 'seller') {
     return (
       <Alert className="border-yellow-800 bg-yellow-900/20">
         <AlertTriangle className="h-4 w-4" />
