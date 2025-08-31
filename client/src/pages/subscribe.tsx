@@ -31,17 +31,17 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
     }
 
     try {
-      // Submit the payment elements first (required by Stripe)
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        throw submitError;
-      }
-
-      // Use the existing subscription create endpoint that handles everything
+      // Create the subscription first to get the customer ID and client secret
       const response = await apiRequest('POST', '/api/subscription/create');
       const data = await response.json();
       
       if (response.ok && data.clientSecret) {
+        // Submit the payment elements now that we have the subscription and customer
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          throw submitError;
+        }
+
         // Check if this is a setup intent or payment intent
         if (data.clientSecret.startsWith('seti_')) {
           // This is a setup intent, use confirmSetup
