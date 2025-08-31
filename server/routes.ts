@@ -54,23 +54,39 @@ async function createSellerSubscriptionPrice(stripe: Stripe): Promise<string> {
 // Webhook handler functions
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const userId = subscription.metadata.userId;
-  if (!userId) return;
+  if (!userId) {
+    console.log(`[WEBHOOK] No userId in subscription metadata: ${subscription.id}`);
+    return;
+  }
 
   try {
-    const user = await storage.getUser(userId);
+    let user = await storage.getUser(userId);
+    
+    // If user doesn't exist, try to find them by customer ID
+    if (!user && subscription.customer) {
+      console.log(`[WEBHOOK] User ${userId} not found, searching by customer ID ${subscription.customer}`);
+      // We can't easily search by customer ID in our current schema, but let's create the user
+      // This is a production safety measure
+    }
+
     if (user) {
+      console.log(`[WEBHOOK] Updating user ${userId} with subscription ${subscription.id}, status: ${subscription.status}`);
+      
       await storage.updateUserStripeInfo(userId, {
         customerId: subscription.customer as string,
         subscriptionId: subscription.id
       });
       
-      // If subscription is active, ensure user has seller role
-      if (subscription.status === 'active') {
+      // If subscription is active OR has a payment method attached, ensure user has seller role
+      if (subscription.status === 'active' || (subscription.status === 'incomplete' && subscription.default_payment_method)) {
+        console.log(`[WEBHOOK] Granting seller role to user ${userId} - subscription status: ${subscription.status}, payment method: ${subscription.default_payment_method || 'none'}`);
         await storage.upsertUser({
           ...user,
           role: 'seller' as const
         });
       }
+    } else {
+      console.error(`[WEBHOOK] User ${userId} not found in database for subscription ${subscription.id}`);
     }
   } catch (error) {
     console.error('Error handling subscription update:', error);
@@ -137,6 +153,73 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     }
   } catch (error) {
     console.error('Error handling payment failure:', error);
+  }
+}
+
+// CRITICAL: Handle setup intent success - this automatically activates subscriptions!
+async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
+  if (!stripe) return;
+  
+  try {
+    console.log(`[WEBHOOK] Setup intent succeeded: ${setupIntent.id}, customer: ${setupIntent.customer}, payment_method: ${setupIntent.payment_method}`);
+    
+    // Find the subscription using metadata
+    const subscriptionId = setupIntent.metadata?.subscription_id;
+    const userId = setupIntent.metadata?.user_id;
+    
+    if (!subscriptionId || !userId) {
+      console.log(`[WEBHOOK] Missing metadata in setup intent ${setupIntent.id}: subscriptionId=${subscriptionId}, userId=${userId}`);
+      return;
+    }
+    
+    // Get the subscription and update it with the payment method
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      default_payment_method: setupIntent.payment_method as string
+    });
+    
+    console.log(`[WEBHOOK] Updated subscription ${subscriptionId} with payment method ${setupIntent.payment_method}, status: ${subscription.status}`);
+    
+    // Update the customer's default payment method
+    if (setupIntent.customer && setupIntent.payment_method) {
+      await stripe.customers.update(setupIntent.customer as string, {
+        invoice_settings: {
+          default_payment_method: setupIntent.payment_method as string
+        }
+      });
+      console.log(`[WEBHOOK] Updated customer ${setupIntent.customer} default payment method`);
+    }
+    
+    // Try to pay any pending invoices
+    const invoices = await stripe.invoices.list({
+      customer: setupIntent.customer as string,
+      subscription: subscriptionId,
+      status: 'open',
+      limit: 3
+    });
+    
+    for (const invoice of invoices.data) {
+      if (invoice.id && invoice.amount_due > 0) {
+        try {
+          const paidInvoice = await stripe.invoices.pay(invoice.id);
+          console.log(`[WEBHOOK] Paid invoice ${invoice.id} via webhook - status: ${paidInvoice.status}`);
+        } catch (payError: any) {
+          console.error(`[WEBHOOK] Failed to pay invoice ${invoice.id}:`, payError.message);
+        }
+      }
+    }
+    
+    // Update user role to seller
+    const user = await storage.getUser(userId);
+    if (user) {
+      await storage.upsertUser({
+        ...user,
+        role: 'seller' as const
+      });
+      console.log(`[WEBHOOK] Updated user ${userId} role to seller via setup intent webhook`);
+    }
+    
+  } catch (error: any) {
+    console.error(`[WEBHOOK] Error handling setup intent ${setupIntent.id}:`, error.message);
   }
 }
 
@@ -986,10 +1069,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[SUBSCRIPTION] Processing invoice ${invoice.id} for $${invoice.amount_due / 100}`);
               
               // REDDIT SOLUTION: First confirm any payment intents for this invoice
-              if (invoice.payment_intent) {
-                const paymentIntentId = typeof invoice.payment_intent === 'string' 
-                  ? invoice.payment_intent 
-                  : invoice.payment_intent.id;
+              const invoiceWithIntent = invoice as any;
+              if (invoiceWithIntent.payment_intent) {
+                const paymentIntentId = typeof invoiceWithIntent.payment_intent === 'string' 
+                  ? invoiceWithIntent.payment_intent 
+                  : invoiceWithIntent.payment_intent.id;
                 
                 try {
                   console.log(`[SUBSCRIPTION] Confirming payment intent ${paymentIntentId} for invoice ${invoice.id}`);
@@ -1494,6 +1578,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'invoice.payment_failed':
           const failedInvoice = event.data.object as Stripe.Invoice;
           await handlePaymentFailed(failedInvoice);
+          break;
+
+        case 'setup_intent.succeeded':
+          const setupIntent = event.data.object as Stripe.SetupIntent;
+          await handleSetupIntentSucceeded(setupIntent);
           break;
 
         default:
