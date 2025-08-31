@@ -137,7 +137,7 @@ export interface IStorage {
   deleteListingVariation(id: string): Promise<void>;
   updateListingStock(id: string, quantity: number): Promise<Listing>;
   getLowStockListings(sellerId: string): Promise<Listing[]>;
-  bulkUpdateListings(sellerId: string, updates: Partial<InsertListing>[]): Promise<Listing[]>;
+  bulkUpdateListings(sellerId: string, updates: { id: string; updates: Partial<InsertListing> }[]): Promise<Listing[]>;
   
   // Advanced Search & Discovery
   createSavedSearch(search: InsertSavedSearch): Promise<SavedSearch>;
@@ -306,9 +306,6 @@ export class DatabaseStorage implements IStorage {
     offset?: number;
     state?: string;
   }): Promise<{ listings: Listing[]; total: number }> {
-    let query = db.select().from(listings);
-    let countQuery = db.select({ count: count() }).from(listings);
-
     const conditions = [];
     
     if (filters?.categoryId) {
@@ -335,9 +332,14 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-      countQuery = countQuery.where(and(...conditions));
+    const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
+
+    let query = db.select().from(listings);
+    let countQuery = db.select({ count: count() }).from(listings);
+
+    if (whereCondition) {
+      query = query.where(whereCondition);
+      countQuery = countQuery.where(whereCondition);
     }
 
     query = query.orderBy(desc(listings.createdAt));
@@ -351,8 +353,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     const [listingsResult, totalResult] = await Promise.all([
-      query,
-      countQuery
+      query.execute(),
+      countQuery.execute()
     ]);
 
     return {
@@ -731,14 +733,14 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
-  async bulkUpdateListings(sellerId: string, updates: Partial<InsertListing>[]): Promise<Listing[]> {
+  async bulkUpdateListings(sellerId: string, updates: { id: string; updates: Partial<InsertListing> }[]): Promise<Listing[]> {
     const results = [];
-    for (const update of updates) {
-      if (update.id) {
+    for (const { id, updates: updateData } of updates) {
+      if (id) {
         const [listing] = await db
           .update(listings)
-          .set({ ...update, updatedAt: new Date() })
-          .where(and(eq(listings.id, update.id), eq(listings.sellerId, sellerId)))
+          .set({ ...updateData, updatedAt: new Date() })
+          .where(and(eq(listings.id, id), eq(listings.sellerId, sellerId)))
           .returning();
         if (listing) results.push(listing);
       }
@@ -834,7 +836,7 @@ export class DatabaseStorage implements IStorage {
       .from(listings)
       .where(sql`${listings.id} IN (${userFavorites.map(f => `'${f.listingId}'`).join(',')})`);
 
-    const categoryIds = [...new Set(favoriteListings.map(l => l.categoryId).filter(Boolean))];
+    const categoryIds = Array.from(new Set(favoriteListings.map(l => l.categoryId).filter(Boolean)));
 
     if (categoryIds.length === 0) {
       return this.getFeaturedListings(limit);
@@ -1567,9 +1569,9 @@ export class DatabaseStorage implements IStorage {
         title: listings.title,
         description: listings.description,
         price: listings.price,
-        category: listings.category,
+        categoryId: listings.categoryId,
         condition: listings.condition,
-        status: listings.status,
+        state: listings.state,
         views: listings.views,
         createdAt: listings.createdAt,
         updatedAt: listings.updatedAt,
@@ -1599,7 +1601,7 @@ export class DatabaseStorage implements IStorage {
 
     // Add status filter
     if (status && status !== 'all') {
-      query = query.where(eq(listings.status, status));
+      query = query.where(eq(listings.state, status));
     }
 
     const results = await query
