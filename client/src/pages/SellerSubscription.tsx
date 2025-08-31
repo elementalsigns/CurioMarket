@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,15 @@ export default function SellerSubscriptionPage() {
     );
   }
 
-  const hasActiveSubscription = (user as any)?.stripeSubscriptionId && (user as any)?.subscriptionStatus === 'active';
+  // Check if user has seller role OR subscription ID (indicating they're a paid seller)
+  const hasActiveSubscription = (user as any)?.role === 'seller' || (user as any)?.stripeSubscriptionId;
+
+  // Auto-redirect paid sellers to dashboard
+  useEffect(() => {
+    if (hasActiveSubscription && !showPayment) {
+      navigate('/seller/dashboard');
+    }
+  }, [hasActiveSubscription, showPayment, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 to-zinc-900">
@@ -164,10 +172,10 @@ export default function SellerSubscriptionPage() {
           {hasActiveSubscription && (
             <div className="mt-8 text-center">
               <Button 
-                onClick={() => navigate('/seller/setup')}
+                onClick={() => navigate('/seller/dashboard')}
                 className="bg-red-800 hover:bg-red-700 text-white"
               >
-                Continue to Shop Setup
+                Go to Seller Dashboard
               </Button>
             </div>
           )}
