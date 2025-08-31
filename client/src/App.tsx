@@ -51,14 +51,33 @@ import IncognitoAuth from "@/pages/incognito-auth";
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
 
-  // Auto-redirect paid sellers away from subscription pages
+  // Auto-redirect paid sellers away from subscription pages with LOCAL STORAGE persistence
   useEffect(() => {
     const checkAndRedirect = async () => {
+      const currentPath = window.location.pathname;
+      
+      // INSTANT CHECK: Check localStorage first for immediate redirect
+      const cachedRole = localStorage.getItem('curio_user_role');
+      if (cachedRole === 'seller' && (
+          currentPath === '/subscribe' || 
+          currentPath === '/seller/subscription' || 
+          currentPath === '/seller/start'
+        )) {
+        console.log('[INSTANT REDIRECT] Cached seller role detected - immediate redirect');
+        window.location.replace('/seller/dashboard');
+        return;
+      }
+      
       // Wait for auth to complete before redirecting
       if (!isLoading && user) {
-        const currentPath = window.location.pathname;
         const userRole = (user as any).role;
         const userId = (user as any).id;
+        
+        // Cache the role for instant future redirects
+        if (userRole) {
+          localStorage.setItem('curio_user_role', userRole);
+          localStorage.setItem('curio_user_id', userId);
+        }
         
         console.log('[PRODUCTION REDIRECT] User loaded:', {
           userId,
@@ -105,6 +124,9 @@ function Router() {
           }
         }
       } else if (!isLoading && !user) {
+        // Clear cached role if no user
+        localStorage.removeItem('curio_user_role');
+        localStorage.removeItem('curio_user_id');
         console.log('[PRODUCTION REDIRECT] No user authenticated, path:', window.location.pathname);
       }
     };

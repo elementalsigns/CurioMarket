@@ -835,8 +835,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile('seller-onboarding.html', { root: './client/public' });
   });
 
+  // Seller blocking middleware - prevents sellers from creating new subscriptions
+  const blockSellersFromSubscription = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (user?.role === 'seller') {
+          console.log('[SELLER BLOCK] Seller attempting to access subscription creation - redirecting to dashboard');
+          return res.status(200).json({ 
+            status: 'active',
+            hasSellerProfile: true,
+            redirect: '/seller/dashboard',
+            message: 'Existing seller account detected'
+          });
+        }
+      }
+      next();
+    } catch (error) {
+      console.error('[SELLER BLOCK] Error checking user role:', error);
+      next();
+    }
+  };
+
   // Create subscription endpoint
-  app.post('/api/subscription/create', requireAuth, async (req: any, res) => {
+  app.post('/api/subscription/create', requireAuth, blockSellersFromSubscription, async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
