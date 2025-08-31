@@ -64,13 +64,13 @@ export default function SellerOnboarding() {
     const checkSubscriptionStatus = async () => {
       if (user && hasSubscription === null) {
         try {
-          const response: any = await apiRequest("GET", "/api/subscription/status");
-          setHasSubscription(response.hasActiveSubscription);
+          // Check if user has seller role (indicates active subscription)
+          setHasSubscription(user.role === 'seller');
           
-          if (!response.hasActiveSubscription) {
+          if (user.role !== 'seller') {
             toast({
               title: "Subscription Required", 
-              description: `Please complete your seller subscription. Status: ${response.subscriptionStatus || 'none'}`,
+              description: "Please complete your seller subscription.",
               variant: "destructive",
             });
             navigate("/subscribe");

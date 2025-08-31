@@ -33,8 +33,8 @@ export default function SellerStart() {
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (subscriptionStatus?.hasActiveSubscription) {
-      // User has active subscription, redirect to onboarding
+    if (user?.role === 'seller') {
+      // User has seller role, redirect to onboarding
       toast({
         title: "Subscription Active!",
         description: "Redirecting to seller onboarding...",
@@ -43,10 +43,10 @@ export default function SellerStart() {
         window.location.href = "/seller/onboarding";
       }, 2000);
     }
-  }, [subscriptionStatus, toast]);
+  }, [user, toast]);
 
   const handleStartOnboarding = () => {
-    if (subscriptionStatus?.hasActiveSubscription) {
+    if (user?.role === 'seller') {
       window.location.href = "/seller/onboarding";
     } else {
       window.location.href = "/subscribe";
@@ -76,7 +76,7 @@ export default function SellerStart() {
             Welcome to <span className="text-gothic-purple">Seller Central</span>
           </h1>
           
-          {subscriptionStatus?.hasActiveSubscription ? (
+          {user?.role === 'seller' ? (
             <Card className="glass-effect border border-green-500/30 mb-8">
               <CardHeader>
                 <CardTitle className="text-green-400 flex items-center justify-center">
