@@ -961,7 +961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
 
-        // Update the subscription with the payment method
+        // REDDIT SOLUTION: Update the subscription with the payment method AND confirm any payment intents
         console.log(`[SUBSCRIPTION] Updating subscription ${user.stripeSubscriptionId} with payment method`);
         const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId!, {
           default_payment_method: setupIntent.payment_method!.toString()
@@ -969,8 +969,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`[SUBSCRIPTION] Updated subscription status: ${subscription.status}`);
 
-        // Now try to pay any outstanding invoices immediately
-        console.log(`[SUBSCRIPTION] Looking for outstanding invoices for subscription ${user.stripeSubscriptionId}`);
+        // REDDIT SOLUTION: Find and confirm any payment intents for this subscription  
+        console.log(`[SUBSCRIPTION] Looking for payment intents to confirm for subscription ${user.stripeSubscriptionId}`);
         const invoices = await stripe.invoices.list({
           customer: user.stripeCustomerId || undefined,
           subscription: user.stripeSubscriptionId!,
@@ -983,11 +983,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         for (const invoice of invoices.data) {
           if (invoice.id && invoice.amount_due > 0) {
             try {
-              console.log(`[SUBSCRIPTION] Attempting to pay invoice ${invoice.id} for $${invoice.amount_due / 100}`);
+              console.log(`[SUBSCRIPTION] Processing invoice ${invoice.id} for $${invoice.amount_due / 100}`);
+              
+              // REDDIT SOLUTION: First confirm any payment intents for this invoice
+              if (invoice.payment_intent) {
+                const paymentIntentId = typeof invoice.payment_intent === 'string' 
+                  ? invoice.payment_intent 
+                  : invoice.payment_intent.id;
+                
+                try {
+                  console.log(`[SUBSCRIPTION] Confirming payment intent ${paymentIntentId} for invoice ${invoice.id}`);
+                  const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+                    payment_method: setupIntent.payment_method!.toString()
+                  });
+                  console.log(`[SUBSCRIPTION] Payment intent ${paymentIntentId} confirmed with status: ${confirmedPaymentIntent.status}`);
+                } catch (confirmError: any) {
+                  console.error(`[SUBSCRIPTION] Failed to confirm payment intent ${paymentIntentId}:`, confirmError.message);
+                  // Continue anyway, sometimes payment intent is already confirmed
+                }
+              }
+              
+              // Then pay the invoice
               const paidInvoice = await stripe.invoices.pay(invoice.id);
               console.log(`[SUBSCRIPTION] Successfully paid invoice ${invoice.id} - status: ${paidInvoice.status}`);
             } catch (paymentError: any) {
-              console.error(`[SUBSCRIPTION] Failed to pay invoice ${invoice.id}:`, paymentError.message);
+              console.error(`[SUBSCRIPTION] Failed to process invoice ${invoice.id}:`, paymentError.message);
             }
           }
         }
