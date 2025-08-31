@@ -53,15 +53,19 @@ function Router() {
 
   // Auto-redirect paid sellers away from subscription pages
   useEffect(() => {
-    if (user?.role === 'seller') {
+    // Wait for auth to complete before redirecting
+    if (!isLoading && user?.role === 'seller') {
       const currentPath = window.location.pathname;
+      console.log('REDIRECT CHECK: User role:', user.role, 'Current path:', currentPath);
+      
       if (currentPath === '/subscribe' || 
           currentPath === '/seller/subscription' || 
           currentPath === '/seller/start') {
+        console.log('REDIRECTING SELLER to dashboard');
         window.location.href = '/seller/dashboard';
       }
     }
-  }, [user]);
+  }, [user, isLoading]);
 
   return (
     <Switch>
