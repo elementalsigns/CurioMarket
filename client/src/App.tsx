@@ -53,18 +53,63 @@ function Router() {
 
   // Auto-redirect paid sellers away from subscription pages
   useEffect(() => {
-    // Wait for auth to complete before redirecting
-    if (!isLoading && user?.role === 'seller') {
-      const currentPath = window.location.pathname;
-      console.log('REDIRECT CHECK: User role:', user.role, 'Current path:', currentPath);
-      
-      if (currentPath === '/subscribe' || 
-          currentPath === '/seller/subscription' || 
-          currentPath === '/seller/start') {
-        console.log('REDIRECTING SELLER to dashboard');
-        window.location.href = '/seller/dashboard';
+    const checkAndRedirect = async () => {
+      // Wait for auth to complete before redirecting
+      if (!isLoading && user) {
+        const currentPath = window.location.pathname;
+        const userRole = (user as any).role;
+        const userId = (user as any).id;
+        
+        console.log('[PRODUCTION REDIRECT] User loaded:', {
+          userId,
+          role: userRole,
+          path: currentPath,
+          timestamp: new Date().toISOString(),
+          isProduction: import.meta.env.PROD
+        });
+        
+        // Method 1: Check user role (primary method)
+        if (userRole === 'seller') {
+          if (currentPath === '/subscribe' || 
+              currentPath === '/seller/subscription' || 
+              currentPath === '/seller/start') {
+            console.log('[PRODUCTION REDIRECT] SELLER DETECTED - Redirecting by role to dashboard');
+            // Use replace to prevent back button issues
+            window.location.replace('/seller/dashboard');
+            return;
+          }
+        }
+        
+        // Method 2: Check subscription status as backup (for edge cases)
+        if (currentPath === '/subscribe' || 
+            currentPath === '/seller/subscription' || 
+            currentPath === '/seller/start') {
+          try {
+            console.log('[PRODUCTION REDIRECT] Checking subscription status as backup...');
+            const response = await fetch('/api/subscription/status', { 
+              method: 'POST',
+              credentials: 'include' // Ensure cookies are sent
+            });
+            if (response.ok) {
+              const data = await response.json();
+              console.log('[PRODUCTION REDIRECT] Subscription status response:', data);
+              if (data.hasActiveSubscription) {
+                console.log('[PRODUCTION REDIRECT] ACTIVE SUBSCRIPTION - Redirecting to dashboard');
+                window.location.replace('/seller/dashboard');
+              }
+            } else {
+              console.log('[PRODUCTION REDIRECT] Subscription status check failed:', response.status);
+            }
+          } catch (error) {
+            console.error('[PRODUCTION REDIRECT] Subscription check error:', error);
+          }
+        }
+      } else if (!isLoading && !user) {
+        console.log('[PRODUCTION REDIRECT] No user authenticated, path:', window.location.pathname);
       }
-    }
+    };
+    
+    checkAndRedirect();
   }, [user, isLoading]);
 
   return (

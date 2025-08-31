@@ -15,6 +15,14 @@ export default function SellerSubscriptionPage() {
     queryKey: ['/api/auth/user'],
   });
 
+  // Immediate redirect for existing sellers
+  useEffect(() => {
+    if (user && (user as any).role === 'seller') {
+      console.log('SellerSubscription: Redirecting seller to dashboard');
+      window.location.href = '/seller/dashboard';
+    }
+  }, [user]);
+
   const handleSubscriptionSuccess = () => {
     setShowPayment(false);
     // Redirect to seller onboarding
