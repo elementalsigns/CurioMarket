@@ -227,6 +227,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Static file serving for assets
   app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
+  // IMPORTANT: Webhook route must be set up BEFORE JSON parsing middleware
+  // This ensures Stripe webhooks receive raw body for signature verification
+  app.post('/api/webhooks/stripe', express.raw({type: 'application/json'}), async (req, res) => {
+    const sig = req.headers['stripe-signature'] as string;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripe || !webhookSecret) {
+      console.error('[WEBHOOK] Stripe not configured - missing stripe instance or webhook secret');
+      return res.status(400).send('Stripe not configured');
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      console.log(`[WEBHOOK] Successfully verified webhook signature for event: ${event.type}`);
+    } catch (err: any) {
+      console.error('[WEBHOOK] Signature verification failed:', err.message);
+      console.error('[WEBHOOK] Request headers:', req.headers);
+      console.error('[WEBHOOK] Body type:', typeof req.body);
+      console.error('[WEBHOOK] Body constructor:', req.body?.constructor?.name);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+      console.log(`[WEBHOOK] Processing event: ${event.type}, id: ${event.id}`);
+      
+      switch (event.type) {
+        case 'setup_intent.succeeded':
+          const setupIntent = event.data.object as Stripe.SetupIntent;
+          console.log(`[WEBHOOK] Setup intent succeeded: ${setupIntent.id}`);
+          await handleSetupIntentSucceeded(setupIntent);
+          break;
+
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+          const subscription = event.data.object as Stripe.Subscription;
+          console.log(`[WEBHOOK] Subscription ${event.type}: ${subscription.id}, status: ${subscription.status}`);
+          await handleSubscriptionUpdate(subscription);
+          break;
+        
+        case 'invoice.payment_succeeded':
+          const invoice = event.data.object as Stripe.Invoice;
+          console.log(`[WEBHOOK] Invoice payment succeeded: ${invoice.id}`);
+          if ((invoice as any).subscription) {
+            try {
+              const subscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string);
+              await handleSubscriptionUpdate(subscription);
+            } catch (error: any) {
+              console.error(`[WEBHOOK] Error retrieving subscription for invoice ${invoice.id}:`, error.message);
+            }
+          }
+          break;
+        
+        default:
+          console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
+      }
+      
+      console.log(`[WEBHOOK] Successfully processed event: ${event.type}, id: ${event.id}`);
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error(`[WEBHOOK] Error processing event ${event.type}:`, error.message);
+      console.error(`[WEBHOOK] Full error:`, error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // NOW set up JSON parsing middleware for all other routes
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+
   // Auth middleware  
   await setupAuth(app);
   
@@ -1545,64 +1617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== STRIPE WEBHOOKS ====================
-  
-  // Stripe webhook endpoint
-  app.post('/api/webhooks/stripe', express.raw({type: 'application/json'}), async (req, res) => {
-    const sig = req.headers['stripe-signature'] as string;
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    if (!stripe || !webhookSecret) {
-      return res.status(400).send('Stripe not configured');
-    }
-
-    let event: Stripe.Event;
-
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    try {
-      switch (event.type) {
-        case 'customer.subscription.created':
-        case 'customer.subscription.updated':
-          const subscription = event.data.object as Stripe.Subscription;
-          await handleSubscriptionUpdate(subscription);
-          break;
-        
-        case 'customer.subscription.deleted':
-          const deletedSubscription = event.data.object as Stripe.Subscription;
-          await handleSubscriptionCancellation(deletedSubscription);
-          break;
-
-        case 'invoice.payment_succeeded':
-          const invoice = event.data.object as Stripe.Invoice;
-          await handlePaymentSucceeded(invoice);
-          break;
-
-        case 'invoice.payment_failed':
-          const failedInvoice = event.data.object as Stripe.Invoice;
-          await handlePaymentFailed(failedInvoice);
-          break;
-
-        case 'setup_intent.succeeded':
-          const setupIntent = event.data.object as Stripe.SetupIntent;
-          await handleSetupIntentSucceeded(setupIntent);
-          break;
-
-        default:
-          console.log(`Unhandled event type ${event.type}`);
-      }
-
-      res.json({received: true});
-    } catch (error) {
-      console.error('Error processing webhook:', error);
-      res.status(500).json({error: 'Webhook processing failed'});
-    }
-  });
+  // Note: Webhook endpoint is defined earlier in the file before JSON parsing middleware
 
   // ==================== LISTING MANAGEMENT ====================
   
