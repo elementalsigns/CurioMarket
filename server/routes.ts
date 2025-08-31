@@ -517,24 +517,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId = customer.id;
       }
 
-      // Create or get the seller subscription price - validate existing price ID
-      let SELLER_SUBSCRIPTION_PRICE_ID = process.env.STRIPE_SELLER_PRICE_ID;
-      
-      // Force price creation if we have the old product ID
-      if (SELLER_SUBSCRIPTION_PRICE_ID?.startsWith('prod_')) {
-        console.log(`Detected old product ID ${SELLER_SUBSCRIPTION_PRICE_ID}, creating new price...`);
-        SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
-      } else if (SELLER_SUBSCRIPTION_PRICE_ID && SELLER_SUBSCRIPTION_PRICE_ID.trim() !== '') {
-        try {
-          await stripe.prices.retrieve(SELLER_SUBSCRIPTION_PRICE_ID);
-        } catch (error: any) {
-          console.log(`Price ID ${SELLER_SUBSCRIPTION_PRICE_ID} not found, creating new price...`);
-          SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
-        }
-      } else {
-        console.log(`No valid price ID found, creating new subscription product...`);
-        SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
-      }
+      // Always create a new price to avoid issues with cached/invalid price IDs
+      console.log(`[SUBSCRIPTION] Invalid/missing price ID: ${process.env.STRIPE_SELLER_PRICE_ID}, creating new price for $10/month subscription`);
+      const SELLER_SUBSCRIPTION_PRICE_ID = await createSellerSubscriptionPrice(stripe);
 
       // Create subscription with proper setup intent
       const subscription = await stripe.subscriptions.create({
