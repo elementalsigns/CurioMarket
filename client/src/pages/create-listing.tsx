@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Upload, X, Eye, Info } from "lucide-react";
+import { ImageUploadGrid } from "@/components/ImageUploadGrid";
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,7 @@ export default function CreateListing() {
         quantity: parseInt(data.quantity),
         shippingCost: parseFloat(data.shippingCost),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
+        images: images, // Include the uploaded images
         state: 'published',
       };
       return apiRequest("POST", "/api/listings", payload);
@@ -522,22 +524,12 @@ export default function CreateListing() {
                     </div>
                   </div>
 
-                  {/* Image Upload Placeholder */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-serif font-bold">Images</h3>
-                    <Card className="glass-effect border-dashed border-2 border-border" data-testid="image-upload">
-                      <CardContent className="p-8 text-center">
-                        <Upload className="mx-auto mb-4 text-foreground/40" size={48} />
-                        <h4 className="text-lg font-medium mb-2">Upload Images</h4>
-                        <p className="text-foreground/60 mb-4">
-                          Add up to 10 high-quality images of your item. The first image will be the main image.
-                        </p>
-                        <Button variant="outline" disabled data-testid="button-upload-images">
-                          Choose Images (Coming Soon)
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  {/* Image Upload */}
+                  <ImageUploadGrid
+                    images={images}
+                    onImagesChange={setImages}
+                    maxImages={10}
+                  />
 
                   {/* Compliance Notice */}
                   <Card className="bg-gothic-purple/10 border border-gothic-purple/30" data-testid="compliance-notice">
