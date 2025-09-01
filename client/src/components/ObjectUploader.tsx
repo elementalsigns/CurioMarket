@@ -77,7 +77,9 @@ export function ObjectUploader({
           throw new Error(`Upload failed: ${response.statusText}`);
         }
 
-        results.push({ uploadURL: url });
+        // Extract the clean URL without query parameters for access
+        const cleanUrl = url.split('?')[0];
+        results.push({ uploadURL: cleanUrl });
         setUploadProgress(((i + 1) / selectedFiles.length) * 100);
       }
 
