@@ -63,6 +63,20 @@ export default function SellerDashboard() {
     }
   }, [error, toast]);
 
+  // Debug logging for production
+  useEffect(() => {
+    if (user) {
+      console.log('[SELLER-DASHBOARD] User data:', {
+        userId: (user as any)?.id,
+        role: (user as any)?.role,
+        stripeCustomerId: (user as any)?.stripeCustomerId,
+        hasSellerData: !!dashboardData?.seller,
+        isLoading,
+        error: error?.message
+      });
+    }
+  }, [user, dashboardData, isLoading, error]);
+
   const deleteListingMutation = useMutation({
     mutationFn: async (listingId: string) => {
       return apiRequest("DELETE", `/api/listings/${listingId}`);
@@ -94,20 +108,6 @@ export default function SellerDashboard() {
       </div>
     );
   }
-
-  // Debug logging for production
-  useEffect(() => {
-    if (user) {
-      console.log('[SELLER-DASHBOARD] User data:', {
-        userId: (user as any)?.id,
-        role: (user as any)?.role,
-        stripeCustomerId: (user as any)?.stripeCustomerId,
-        hasSellerData: !!dashboardData?.seller,
-        isLoading,
-        error: error?.message
-      });
-    }
-  }, [user, dashboardData, isLoading, error]);
 
   if (!dashboardData?.seller) {
     // Check if user should have access
