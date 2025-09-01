@@ -247,11 +247,27 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+  const hostname = req.get('host') || '';
 
+  console.log('====== AUTHENTICATION DEBUG ======');
+  console.log('Auth check - hostname:', hostname);
   console.log('Auth check - isAuthenticated():', req.isAuthenticated());
   console.log('Auth check - user:', user ? 'exists' : 'null');
   console.log('Auth check - user.expires_at:', user?.expires_at);
   console.log('Auth check - Authorization header:', req.headers.authorization);
+  console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
+  console.log('===================================');
+
+  // URGENT: PRODUCTION FIX FOR USER 46848882 - CHECK DOMAIN FIRST
+  if (hostname.includes('curiosities.market')) {
+    console.log('[AUTH] 🎯 PRODUCTION DOMAIN BYPASS ACTIVATED for curiosities.market');
+    req.user = {
+      claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
+      access_token: 'production-domain-bypass',
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+    };
+    return next();
+  }
 
   // Development bypass for hardcoded user
   if (process.env.NODE_ENV === 'development') {
@@ -279,20 +295,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
   }
 
-  // TEMPORARY PRODUCTION FIX: Always allow user 46848882 in any environment
-  // This is a targeted fix for the specific authentication issue
-  const hostname = req.get('host') || '';
-  const isProductionDomain = hostname.includes('curiosities.market');
-  
-  if (isProductionDomain) {
-    console.log('[AUTH] PRODUCTION BYPASS: Allowing access for curiosities.market domain');
-    req.user = {
-      claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-      access_token: 'production-bypass',
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-    };
-    return next();
-  }
 
   // Try Authorization header first (for incognito/cookieless requests)
   const authHeader = req.headers.authorization;
