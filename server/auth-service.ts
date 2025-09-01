@@ -195,6 +195,8 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
       // Method 2: Check session-based authentication (fallback)
       if (req.isAuthenticated && req.isAuthenticated() && req.user) {
         const sessionUser = req.user as any;
+        console.log('[AUTH] Session user found:', sessionUser.claims?.sub || sessionUser.id);
+        
         if (sessionUser.claims && sessionUser.expires_at) {
           const now = Math.floor(Date.now() / 1000);
           
@@ -217,6 +219,15 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
               return next();
             }
           }
+        } else if (sessionUser.claims) {
+          // For production users with valid sessions but no explicit token
+          console.log('[AUTH] Using session without explicit token for user:', sessionUser.claims.sub);
+          req.user = {
+            claims: sessionUser.claims,
+            access_token: 'session-based',
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+          };
+          return next();
         }
       }
 

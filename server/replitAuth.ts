@@ -168,9 +168,32 @@ export async function setupAuth(app: Express) {
         return res.redirect("/api/login");
       }
       
-      passport.authenticate(strategyName, {
-        successReturnToOrRedirect: "/",
-        failureRedirect: "/api/login",
+      passport.authenticate(strategyName, (err: any, user: any, info: any) => {
+        if (err) {
+          console.error('[AUTH] Passport authentication error:', err);
+          return res.redirect("/api/login");
+        }
+        if (!user) {
+          console.error('[AUTH] No user returned from authentication');
+          return res.redirect("/api/login");
+        }
+        
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error('[AUTH] Login error:', err);
+            return res.redirect("/api/login");
+          }
+          
+          // For production, include access token in redirect for frontend storage
+          const redirectUrl = new URL('/', `${req.protocol}://${req.get('host')}`);
+          if (user.access_token) {
+            redirectUrl.searchParams.set('access_token', user.access_token);
+            redirectUrl.searchParams.set('auth_success', 'true');
+            console.log('[AUTH] Redirecting with access token');
+          }
+          
+          res.redirect(redirectUrl.toString());
+        });
       })(req, res, next);
     });
 
