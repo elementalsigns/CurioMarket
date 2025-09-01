@@ -30,7 +30,7 @@ export default function SellerDashboard() {
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard"],
-    enabled: !!user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId),
+    enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
     refetchOnWindowFocus: true,
   }) as { data: { seller: any; listings: any[]; orders: any[]; stats: any; promotions: any[] } | undefined; isLoading: boolean; error: any };
