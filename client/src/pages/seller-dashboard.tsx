@@ -776,13 +776,41 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             url: response.uploadURL,
                           };
                         }}
-                        onComplete={(result) => {
+                        onComplete={async (result) => {
                           if (result.successful && result.successful[0]) {
-                            setBannerUrl(result.successful[0].uploadURL);
-                            toast({
-                              title: "Banner Uploaded",
-                              description: "Your shop banner has been uploaded successfully.",
-                            });
+                            const uploadURL = result.successful[0].uploadURL;
+                            console.log('[BANNER-UPLOAD] Upload completed, processing:', uploadURL);
+                            
+                            try {
+                              // Process the uploaded image URL
+                              const response = await apiRequest("PUT", "/api/seller/images", {
+                                bannerImageURL: uploadURL
+                              }) as any;
+                              
+                              if (response.success && response.bannerPath) {
+                                setBannerUrl(response.bannerPath);
+                                console.log('[BANNER-UPLOAD] Banner path normalized:', response.bannerPath);
+                                toast({
+                                  title: "Banner Uploaded",
+                                  description: "Your shop banner has been uploaded successfully.",
+                                });
+                              } else {
+                                setBannerUrl(uploadURL);
+                                toast({
+                                  title: "Banner Uploaded",
+                                  description: "Banner uploaded, but path normalization failed.",
+                                  variant: "destructive"
+                                });
+                              }
+                            } catch (error) {
+                              console.error('[BANNER-UPLOAD] Error processing banner:', error);
+                              setBannerUrl(uploadURL);
+                              toast({
+                                title: "Upload Warning",
+                                description: "Image uploaded but processing failed. Please save to apply changes.",
+                                variant: "destructive"
+                              });
+                            }
                           }
                         }}
                         buttonClassName="text-sm h-8"
@@ -821,13 +849,41 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             url: response.uploadURL,
                           };
                         }}
-                        onComplete={(result) => {
+                        onComplete={async (result) => {
                           if (result.successful && result.successful[0]) {
-                            setAvatarUrl(result.successful[0].uploadURL);
-                            toast({
-                              title: "Avatar Uploaded",
-                              description: "Your shop avatar has been uploaded successfully.",
-                            });
+                            const uploadURL = result.successful[0].uploadURL;
+                            console.log('[AVATAR-UPLOAD] Upload completed, processing:', uploadURL);
+                            
+                            try {
+                              // Process the uploaded image URL
+                              const response = await apiRequest("PUT", "/api/seller/images", {
+                                avatarImageURL: uploadURL
+                              }) as any;
+                              
+                              if (response.success && response.avatarPath) {
+                                setAvatarUrl(response.avatarPath);
+                                console.log('[AVATAR-UPLOAD] Avatar path normalized:', response.avatarPath);
+                                toast({
+                                  title: "Avatar Uploaded",
+                                  description: "Your shop avatar has been uploaded successfully.",
+                                });
+                              } else {
+                                setAvatarUrl(uploadURL);
+                                toast({
+                                  title: "Avatar Uploaded",
+                                  description: "Avatar uploaded, but path normalization failed.",
+                                  variant: "destructive"
+                                });
+                              }
+                            } catch (error) {
+                              console.error('[AVATAR-UPLOAD] Error processing avatar:', error);
+                              setAvatarUrl(uploadURL);
+                              toast({
+                                title: "Upload Warning",
+                                description: "Image uploaded but processing failed. Please save to apply changes.",
+                                variant: "destructive"
+                              });
+                            }
                           }
                         }}
                         buttonClassName="text-sm h-8"
