@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -32,7 +33,7 @@ export default function SellerDashboard() {
     enabled: !!user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId),
     retry: 3,
     refetchOnWindowFocus: true,
-  });
+  }) as { data: { seller: any; listings: any[]; orders: any[]; stats: any; promotions: any[] } | undefined; isLoading: boolean; error: any };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -527,7 +528,8 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
                   <FormControl>
                     <Textarea 
                       placeholder="Describe your promotion..." 
-                      {...field} 
+                      {...field}
+                      value={field.value || ''}
                       data-testid="input-promotion-description"
                     />
                   </FormControl>
@@ -570,7 +572,8 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
                         type="number" 
                         step="0.01" 
                         min="0"
-                        {...field} 
+                        {...field}
+                        value={field.value || ''}
                         data-testid="input-min-purchase"
                       />
                     </FormControl>
@@ -590,7 +593,8 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
                         type="number" 
                         min="1"
                         placeholder="Unlimited"
-                        {...field} 
+                        {...field}
+                        value={field.value || ''}
                         data-testid="input-max-uses"
                       />
                     </FormControl>
@@ -761,7 +765,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         maxFileSize={10485760}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload");
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
                           return {
                             method: "PUT" as const,
                             url: response.uploadURL,
@@ -806,7 +810,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         maxFileSize={5242880}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload");
+                          const response = await apiRequest("POST", "/api/objects/upload") as any;
                           return {
                             method: "PUT" as const,
                             url: response.uploadURL,
@@ -1112,7 +1116,7 @@ function PromotionsList() {
     );
   }
 
-  if (promotions.length === 0) {
+  if ((promotions as any)?.length === 0) {
     return (
       <Card className="glass-effect" data-testid="no-promotions">
         <CardContent className="p-12 text-center">
@@ -1129,7 +1133,7 @@ function PromotionsList() {
 
   return (
     <div className="space-y-4" data-testid="promotions-list">
-      {promotions.map((promotion: Promotion) => (
+      {(promotions as any)?.map((promotion: Promotion) => (
         <Card key={promotion.id} className="glass-effect" data-testid={`promotion-${promotion.id}`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
