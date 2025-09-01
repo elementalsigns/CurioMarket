@@ -15,7 +15,7 @@ export default function SellerStart() {
   // IMMEDIATE seller check - before any other logic
   useEffect(() => {
     console.log('[SELLER-START] Component mounted, user:', user);
-    if (user?.role === 'seller') {
+    if (user && (user as any)?.role === 'seller') {
       console.log('[SELLER-START] IMMEDIATE seller redirect triggered');
       window.location.replace("/seller/dashboard");
     }
@@ -24,7 +24,7 @@ export default function SellerStart() {
   // Check subscription status - but only for non-sellers
   const { data: subscriptionStatus, isLoading: statusLoading } = useQuery({
     queryKey: ["/api/subscription/status"],
-    enabled: !!user && user?.role !== 'seller',
+    enabled: !!user && (user as any)?.role !== 'seller',
   });
 
   useEffect(() => {
@@ -68,15 +68,15 @@ export default function SellerStart() {
 
   // ADDITIONAL check for when user data updates
   useEffect(() => {
-    if (user?.role === 'seller') {
+    if (user && (user as any)?.role === 'seller') {
       console.log('[SELLER-START] User role confirmed as seller - forcing redirect');
       localStorage.setItem('curio_user_role', 'seller');
       window.location.replace("/seller/dashboard");
     }
-  }, [user?.role]);
+  }, [(user as any)?.role]);
 
   const handleStartOnboarding = () => {
-    if (user?.role === 'seller') {
+    if ((user as any)?.role === 'seller') {
       window.location.href = "/seller/onboarding";
     } else {
       window.location.href = "/subscribe";
@@ -84,7 +84,7 @@ export default function SellerStart() {
   };
 
   // RENDER GUARD: Never show subscription content to sellers
-  if (user?.role === 'seller') {
+  if (user && (user as any)?.role === 'seller') {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -122,7 +122,7 @@ export default function SellerStart() {
             Welcome to <span className="text-gothic-purple">Seller Central</span>
           </h1>
           
-          {user?.role === 'seller' ? (
+          {(user as any)?.role === 'seller' ? (
             <Card className="glass-effect border border-green-500/30 mb-8">
               <CardHeader>
                 <CardTitle className="text-green-400 flex items-center justify-center">
@@ -150,7 +150,7 @@ export default function SellerStart() {
               <CardContent>
                 <p className="text-foreground/80 mb-4">
                   To become a seller on Curio Market, you need an active $10/month subscription.
-                  Status: {subscriptionStatus?.subscriptionStatus || 'None'}
+                  Status: {(subscriptionStatus as any)?.subscriptionStatus || 'None'}
                 </p>
                 <Button
                   onClick={handleStartOnboarding}
