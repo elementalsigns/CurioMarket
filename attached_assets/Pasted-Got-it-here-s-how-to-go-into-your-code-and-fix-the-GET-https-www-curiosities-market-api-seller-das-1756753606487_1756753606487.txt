@@ -1,0 +1,175 @@
+Got it—here’s how to go into your code and fix the GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden) so the Seller Dashboard screen loads.
+A 403 means your backend received the request but refused it. For a seller dashboard that’s almost always one of these:
+Auth cookie/JWT not being sent from the browser
+CORS/CSRF settings blocking an otherwise valid request
+The route’s auth/role guard says “user isn’t a seller / not verified”
+Reverse proxy (Nginx/Cloudflare) stripping the Authorization header
+Below are concrete, file-by-file edits for the two most common setups (Next.js + Route Handler or Express API). Pick the one that matches your app.
+1) Frontend: make sure credentials/tokens are sent
+Open the component or API hook that loads the seller dashboard—your stack trace points to something like index-DKoRaQxN.js, but in your repo it will likely be a file like:
+app/(seller)/dashboard/page.tsx (Next.js App Router)
+src/hooks/useSellerDashboard.ts or src/services/api.ts
+pages/seller/dashboard.tsx (Pages Router)
+Anywhere you fetch('/api/seller/dashboard')
+Fix (cookie/session auth)
+// ✅ ensure cookies are sent
+await fetch('https://www.curiosities.market/api/seller/dashboard', {
+  method: 'GET',
+  credentials: 'include',
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+Fix (JWT auth)
+// ✅ ensure Authorization header is present
+const token = localStorage.getItem('access_token'); // or wherever you store it
+await fetch('https://www.curiosities.market/api/seller/dashboard', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${token}`
+  }
+});
+If you’re using Axios, set withCredentials: true on the client instance.
+2) Backend: verify the route and auth guard
+A) Next.js (App Router) with a Route Handler
+File: app/api/seller/dashboard/route.ts
+import { NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth'; // <- your helper that reads cookie/JWT
+
+export async function GET(req: Request) {
+  const session = await getSession(req); // read your cookie/JWT here
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  // Make sure the claim your middleware checks actually exists
+  if (session.role !== 'seller') {
+    // 👇 TEMP: log what the server sees so you know why it’s failing
+    console.warn('403 /api/seller/dashboard', { userId: session.userId, role: session.role });
+    return NextResponse.json({ error: 'Forbidden: seller role required' }, { status: 403 });
+  }
+
+  // ... pull seller data
+  const dashboard = await getSellerDashboard(session.userId);
+  return NextResponse.json(dashboard);
+}
+If you use a middleware guard:
+File: middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getSession } from '@/lib/auth';
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith('/api/seller')) {
+    const session = await getSession(req);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (session.role !== 'seller') {
+      console.warn('403 middleware', { userId: session.userId, role: session.role });
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+  }
+
+  return NextResponse.next();
+}
+
+// If you have an experimental matcher, ensure /api is included if that’s your intent.
+export const config = {
+  matcher: ['/api/:path*', '/seller/:path*'],
+};
+If you rely on cookies for auth, be sure they’re set correctly:
+Wherever you login and set the cookie (e.g., app/api/auth/login/route.ts):
+import { cookies } from 'next/headers';
+
+cookies().set('sid', sessionId, {
+  httpOnly: true,
+  secure: true,         // required with SameSite=None on HTTPS
+  sameSite: 'lax',      // 'none' if cross-site; 'lax' is fine for same-site
+  path: '/',
+  // domain: '.curiosities.market'  // only if you need subdomains to share cookies
+});
+If your frontend and API both live at www.curiosities.market, prefer SameSite=Lax (default-ish) and you don’t need CORS for same-site requests.
+B) Express (Node) API
+File: src/server.ts or src/index.ts
+import cors from 'cors';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+
+const app = express();
+
+app.use(cookieParser());
+app.use(express.json());
+
+// If you do cross-site calls and send cookies:
+app.use(cors({
+  origin: 'https://www.curiosities.market',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+}));
+
+// Auth middleware
+function requireSeller(req, res, next) {
+  const user = req.user; // however you attach user (JWT decode / session lookup)
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+  if (!user.roles?.includes('seller')) {
+    console.warn('403 /api/seller/dashboard', { userId: user.id, roles: user.roles });
+    return res.status(403).json({ error: 'Forbidden: seller role required' });
+  }
+  next();
+}
+
+app.get('/api/seller/dashboard', requireSeller, async (req, res) => {
+  const data = await getSellerDashboard(req.user.id);
+  res.json(data);
+});
+
+app.listen(3000);
+If using JWT behind Nginx, ensure the Authorization header isn’t stripped:
+File: /etc/nginx/conf.d/your-site.conf
+location /api/ {
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+
+  # ✅ keep the bearer token
+  proxy_set_header Authorization $http_authorization;
+
+  proxy_pass http://your_api_upstream;
+}
+3) Quickly prove which layer is failing
+Browser DevTools
+Open Network tab → click the failing GET /api/seller/dashboard
+Check Request Headers:
+If no Cookie and you use sessions → your fetch needs credentials: 'include'
+If no Authorization and you use JWT → add Authorization: Bearer <token>
+Check Response body—your backend may already be telling you “role missing” or “email not verified”.
+cURL test (run locally)
+# Cookie-based session
+curl -i 'https://www.curiosities.market/api/seller/dashboard' \
+  -H 'Accept: application/json' \
+  --cookie 'sid=PASTE_YOUR_SESSION_COOKIE'
+
+# JWT-based
+curl -i 'https://www.curiosities.market/api/seller/dashboard' \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer PASTE_YOUR_JWT'
+If cURL works but the browser doesn’t → it’s a cookie/JWT not being sent from frontend (or CORS if cross-site).
+If both fail → it’s backend auth/role.
+4) Most common “silent” blockers
+Role not set: In your DB, confirm your user has role = 'seller' (Prisma example):
+await prisma.user.update({ where: { id }, data: { role: 'seller' } });
+Token expired and refresh flow isn’t wired into this request.
+Origin mismatch: your CORS says curiosities.market but the site loads from www.curiosities.market.
+Cloudflare/WAF rule blocking /api/seller/*—check Security → Events.
+CSRF required by your framework for protected GET routes (rare but happens). If so, include X-CSRF-Token.
+Do this in order (fastest path to green):
+Add credentials: 'include' (or Authorization: Bearer …) in the exact frontend call that hits /api/seller/dashboard.
+If using cookies, confirm the login response sets a cookie with httpOnly, secure, and a sensible sameSite (lax for same-site).
+In the route handler/middleware, log the denial reason (user id, role) just before returning 403. Fix the role/approval flag if wrong.
+If you proxy, add the Nginx proxy_set_header Authorization $http_authorization;.
+If you paste your route handler and the frontend fetch/axios snippet you’re using for the Seller Dashboard, I’ll mark exactly where to add the one-line fix an
