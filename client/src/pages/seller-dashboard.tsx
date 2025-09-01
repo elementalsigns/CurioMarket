@@ -772,7 +772,8 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         onGetUploadParameters={async () => {
                           console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
                           try {
-                            const response = await apiRequest("POST", "/api/objects/upload") as any;
+                            const res = await apiRequest("POST", "/api/objects/upload");
+                            const response = await res.json();
                             console.log('[UPLOAD-DEBUG] Response from server:', response);
                             
                             if (!response) {
@@ -799,9 +800,10 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             
                             try {
                               // Process the uploaded image URL
-                              const response = await apiRequest("PUT", "/api/seller/images", {
+                              const res = await apiRequest("PUT", "/api/seller/images", {
                                 bannerImageURL: uploadURL
-                              }) as any;
+                              });
+                              const response = await res.json();
                               
                               if (response.success && response.bannerPath) {
                                 setBannerUrl(response.bannerPath);
@@ -861,7 +863,8 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         onGetUploadParameters={async () => {
                           console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
                           try {
-                            const response = await apiRequest("POST", "/api/objects/upload") as any;
+                            const res = await apiRequest("POST", "/api/objects/upload");
+                            const response = await res.json();
                             console.log('[UPLOAD-DEBUG] Response from server:', response);
                             
                             if (!response) {
