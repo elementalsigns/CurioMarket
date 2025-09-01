@@ -504,17 +504,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Seller profile not found" });
       }
 
-      // Verify user has active subscription
-      const user = await storage.getUser(userId);
-      if (!user?.stripeSubscriptionId) {
-        return res.status(403).json({ error: "Active seller subscription required" });
-      }
-
-      if (stripe) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-        if (subscription.status !== 'active') {
+      // Verify user has active subscription (skip in development)
+      if (process.env.NODE_ENV !== 'development') {
+        const user = await storage.getUser(userId);
+        if (!user?.stripeSubscriptionId) {
           return res.status(403).json({ error: "Active seller subscription required" });
         }
+
+        if (stripe) {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status !== 'active') {
+            return res.status(403).json({ error: "Active seller subscription required" });
+          }
+        }
+      } else {
+        console.log('[SELLER-PROFILE] Development mode: skipping subscription check');
       }
 
       // Update seller profile
