@@ -88,13 +88,19 @@ export function ObjectUploader({
       }
 
       console.log('Upload complete:', results);
-      onComplete?.({ successful: results, failed: [] });
+      onComplete?.({ successful: results });
       setShowModal(false);
       setSelectedFiles([]);
       
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
+      console.error('Upload error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : null,
+        type: typeof error,
+        error: error
+      });
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
