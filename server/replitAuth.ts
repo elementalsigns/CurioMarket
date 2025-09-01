@@ -215,13 +215,22 @@ export async function setupAuth(app: Express) {
     });
 
     app.get("/api/logout", (req, res) => {
+      console.log('[LOGOUT] Logout requested');
       req.logout(() => {
-        res.redirect(
-          client.buildEndSessionUrl(config, {
-            client_id: process.env.REPL_ID!,
-            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-          }).href
-        );
+        // Clear session
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('[LOGOUT] Session destroy error:', err);
+          }
+          // Clear cookies
+          res.clearCookie('connect.sid');
+          res.redirect(
+            client.buildEndSessionUrl(config, {
+              client_id: process.env.REPL_ID!,
+              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+            }).href
+          );
+        });
       });
     });
   } catch (error) {
@@ -240,7 +249,14 @@ export async function setupAuth(app: Express) {
     });
     
     app.get("/api/logout", (req, res) => {
-      res.redirect("/");
+      console.log('[LOGOUT] Fallback logout - clearing session');
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('[LOGOUT] Session destroy error:', err);
+        }
+        res.clearCookie('connect.sid');
+        res.redirect("/");
+      });
     });
   }
 }

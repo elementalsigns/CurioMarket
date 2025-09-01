@@ -88,7 +88,7 @@ export function ObjectUploader({
       }
 
       console.log('Upload complete:', results);
-      onComplete?.({ successful: results });
+      onComplete?.({ successful: results, failed: [] });
       setShowModal(false);
       setSelectedFiles([]);
       
