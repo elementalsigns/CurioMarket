@@ -1,0 +1,139 @@
+{id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', timestamp: '2025-09-01T19:12:42.980Z'}
+index-DKoRaQxN.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', timestamp: '2025-09-01T19:12:42.980Z'}
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'buyer', stripeCustomerId: 'cus_SxseUxXvlQBmUv', hasSellerData: false, isLoading: true, …}
+index-DKoRaQxN.js:48  GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden)
+(anonymous) @ index-DKoRaQxN.js:48
+a @ index-DKoRaQxN.js:48
+g @ index-DKoRaQxN.js:48
+start @ index-DKoRaQxN.js:48
+fetch @ index-DKoRaQxN.js:48
+sd @ index-DKoRaQxN.js:48
+onSubscribe @ index-DKoRaQxN.js:48
+subscribe @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+tT @ index-DKoRaQxN.js:38
+Jg @ index-DKoRaQxN.js:40
+Fl @ index-DKoRaQxN.js:40
+oF @ index-DKoRaQxN.js:40
+no @ index-DKoRaQxN.js:40
+O2 @ index-DKoRaQxN.js:40
+Ka @ index-DKoRaQxN.js:38
+(anonymous) @ index-DKoRaQxN.js:40Understand this error
+index-DKoRaQxN.js:48 [AUTH] API call failed with status: 403
+index-DKoRaQxN.js:48 [AUTH] URL: /api/seller/dashboard
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:48  GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden)
+(anonymous) @ index-DKoRaQxN.js:48
+a @ index-DKoRaQxN.js:48
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+start @ index-DKoRaQxN.js:48
+fetch @ index-DKoRaQxN.js:48
+sd @ index-DKoRaQxN.js:48
+onSubscribe @ index-DKoRaQxN.js:48
+subscribe @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+tT @ index-DKoRaQxN.js:38
+Jg @ index-DKoRaQxN.js:40
+Fl @ index-DKoRaQxN.js:40
+oF @ index-DKoRaQxN.js:40
+no @ index-DKoRaQxN.js:40
+O2 @ index-DKoRaQxN.js:40
+Ka @ index-DKoRaQxN.js:38
+(anonymous) @ index-DKoRaQxN.js:40Understand this error
+index-DKoRaQxN.js:48 [AUTH] API call failed with status: 403
+index-DKoRaQxN.js:48 [AUTH] URL: /api/seller/dashboard
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:48  GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden)
+(anonymous) @ index-DKoRaQxN.js:48
+a @ index-DKoRaQxN.js:48
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+start @ index-DKoRaQxN.js:48
+fetch @ index-DKoRaQxN.js:48
+sd @ index-DKoRaQxN.js:48
+onSubscribe @ index-DKoRaQxN.js:48
+subscribe @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+tT @ index-DKoRaQxN.js:38
+Jg @ index-DKoRaQxN.js:40
+Fl @ index-DKoRaQxN.js:40
+oF @ index-DKoRaQxN.js:40
+no @ index-DKoRaQxN.js:40
+O2 @ index-DKoRaQxN.js:40
+Ka @ index-DKoRaQxN.js:38
+(anonymous) @ index-DKoRaQxN.js:40Understand this error
+index-DKoRaQxN.js:48 [AUTH] API call failed with status: 403
+index-DKoRaQxN.js:48 [AUTH] URL: /api/seller/dashboard
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:48  GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden)
+(anonymous) @ index-DKoRaQxN.js:48
+a @ index-DKoRaQxN.js:48
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.then
+(anonymous) @ index-DKoRaQxN.js:48
+Promise.catch
+g @ index-DKoRaQxN.js:48
+start @ index-DKoRaQxN.js:48
+fetch @ index-DKoRaQxN.js:48
+sd @ index-DKoRaQxN.js:48
+onSubscribe @ index-DKoRaQxN.js:48
+subscribe @ index-DKoRaQxN.js:48
+(anonymous) @ index-DKoRaQxN.js:48
+tT @ index-DKoRaQxN.js:38
+Jg @ index-DKoRaQxN.js:40
+Fl @ index-DKoRaQxN.js:40
+oF @ index-DKoRaQxN.js:40
+no @ index-DKoRaQxN.js:40
+O2 @ index-DKoRaQxN.js:40
+Ka @ index-DKoRaQxN.js:38
+(anonymous) @ index-DKoRaQxN.js:40Understand this error
+index-DKoRaQxN.js:48 [AUTH] API call failed with status: 403
+index-DKoRaQxN.js:48 [AUTH] URL: /api/seller/dashboard
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] ERROR: Seller should have access but no seller data found
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] Dashboard API Response: undefined
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] User ID: 46848882
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'buyer', stripeCustomerId: 'cus_SxseUxXvlQBmUv', hasSellerData: false, isLoading: false, …}
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:48 [AUTH] Getting token from localStorage: Found
+index-DKoRaQxN.js:48 [AUTH] Using Bearer token for API call
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] ERROR: Seller should have access but no seller data found
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] Dashboard API Response: undefined
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] User ID: 46848882
+index-DKoRaQxN.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxsdFwjekicmTT', timestamp: '2025-09-01T19:14:07.830Z'}
+index-DKoRaQxN.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxsdFwjekicmTT', timestamp: '2025-09-01T19:14:07.830Z'}
+index-DKoRaQxN.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'buyer', stripeCustomerId: 'cus_SxsdFwjekicmTT', hasSellerData: false, isLoading: false, …}
+index-DKoRaQxN.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxsdFwjekicmTT', timestamp: '2025-09-01T19:14:07.831Z'}
+index-DKoRaQxN.js:808 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'buyer', path: '/seller/dashboard', timestamp: '2025-09-01T19:14:07.831Z', isProduction: true}
