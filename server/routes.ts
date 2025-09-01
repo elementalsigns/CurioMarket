@@ -509,9 +509,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/seller/dashboard', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log(`[SELLER-DASHBOARD] Request from userId: ${userId}`);
+      
       const user = await storage.getUser(userId);
       
       if (!user) {
+        console.log(`[SELLER-DASHBOARD] User ${userId} not found in database`);
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -545,11 +548,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Require subscription only if user is not already a verified seller
       if (!hasActiveSubscription) {
+        console.log(`[SELLER-DASHBOARD] User ${userId} does not have active subscription`);
         return res.status(403).json({ message: "Active subscription required" });
       }
 
       const seller = await storage.getSellerByUserId(userId);
+      console.log(`[SELLER-DASHBOARD] Looking for seller with userId: ${userId}`);
+      console.log(`[SELLER-DASHBOARD] Found seller:`, seller ? `${seller.shopName} (${seller.id})` : 'null');
+      
       if (!seller) {
+        console.log(`[SELLER-DASHBOARD] ERROR: No seller found for userId ${userId}`);
         return res.status(404).json({ message: "Seller profile not found" });
       }
 
