@@ -65,9 +65,12 @@ export default function SellerOnboarding() {
       if (user && hasSubscription === null) {
         try {
           // Check if user has seller role (indicates active subscription)
-          setHasSubscription(user.role === 'seller');
+          const isSeller = user.role === 'seller';
+          setHasSubscription(isSeller);
           
-          if (user.role !== 'seller') {
+          console.log('[SELLER-ONBOARDING] User role check:', { role: user.role, isSeller });
+          
+          if (!isSeller) {
             toast({
               title: "Subscription Required", 
               description: "Please complete your seller subscription.",
@@ -85,6 +88,14 @@ export default function SellerOnboarding() {
     
     checkSubscriptionStatus();
   }, [user, hasSubscription, toast, navigate]);
+
+  // FORCE immediate redirect for sellers
+  useEffect(() => {
+    if (user?.role === 'seller') {
+      console.log('[SELLER-ONBOARDING] Confirmed seller role - user should see onboarding form');
+      setHasSubscription(true);
+    }
+  }, [user?.role]);
 
   const createSellerMutation = useMutation({
     mutationFn: async (data: SellerOnboardingForm) => {

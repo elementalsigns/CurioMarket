@@ -12,10 +12,19 @@ export default function SellerStart() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  // Check subscription status
+  // IMMEDIATE seller check - before any other logic
+  useEffect(() => {
+    console.log('[SELLER-START] Component mounted, user:', user);
+    if (user?.role === 'seller') {
+      console.log('[SELLER-START] IMMEDIATE seller redirect triggered');
+      window.location.replace("/seller/dashboard");
+    }
+  }, [user]);
+
+  // Check subscription status - but only for non-sellers
   const { data: subscriptionStatus, isLoading: statusLoading } = useQuery({
     queryKey: ["/api/subscription/status"],
-    enabled: !!user,
+    enabled: !!user && user?.role !== 'seller',
   });
 
   useEffect(() => {
@@ -57,6 +66,15 @@ export default function SellerStart() {
     }
   }, [user]);
 
+  // ADDITIONAL check for when user data updates
+  useEffect(() => {
+    if (user?.role === 'seller') {
+      console.log('[SELLER-START] User role confirmed as seller - forcing redirect');
+      localStorage.setItem('curio_user_role', 'seller');
+      window.location.replace("/seller/dashboard");
+    }
+  }, [user?.role]);
+
   const handleStartOnboarding = () => {
     if (user?.role === 'seller') {
       window.location.href = "/seller/onboarding";
@@ -64,6 +82,22 @@ export default function SellerStart() {
       window.location.href = "/subscribe";
     }
   };
+
+  // RENDER GUARD: Never show subscription content to sellers
+  if (user?.role === 'seller') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-foreground/70">Redirecting to seller dashboard...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (authLoading || statusLoading) {
     return (
