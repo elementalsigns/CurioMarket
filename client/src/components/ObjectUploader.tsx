@@ -65,6 +65,7 @@ export function ObjectUploader({
         const { url } = await onGetUploadParameters();
         
         // Upload file
+        console.log('Uploading to URL:', url);
         const response = await fetch(url, {
           method: 'PUT',
           body: file,
@@ -73,8 +74,11 @@ export function ObjectUploader({
           },
         });
 
+        console.log('Upload response status:', response.status, response.statusText);
         if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
+          const errorText = await response.text();
+          console.error('Upload failed with response:', errorText);
+          throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
         }
 
         // Extract the clean URL without query parameters for access
