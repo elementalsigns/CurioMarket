@@ -14,14 +14,14 @@ function getAuthToken(): string | null {
   const tokenFromUrl = urlParams.get('access_token');
   if (tokenFromUrl) {
     // Store in localStorage and remove from URL
-    localStorage.setItem('replit_access_token', tokenFromUrl);
+    localStorage.setItem('curio_auth_token', tokenFromUrl);
     window.history.replaceState({}, document.title, window.location.pathname);
     console.log('[AUTH] Token found in URL and stored');
     return tokenFromUrl;
   }
   
-  // Fall back to localStorage
-  const storedToken = localStorage.getItem('replit_access_token');
+  // Fall back to localStorage - check both possible keys for compatibility
+  const storedToken = localStorage.getItem('curio_auth_token') || localStorage.getItem('replit_access_token');
   console.log('[AUTH] Getting token from localStorage:', storedToken ? 'Found' : 'Not found');
   return storedToken;
 }
