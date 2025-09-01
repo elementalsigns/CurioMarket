@@ -891,9 +891,10 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             
                             try {
                               // Process the uploaded image URL
-                              const response = await apiRequest("PUT", "/api/seller/images", {
+                              const res = await apiRequest("PUT", "/api/seller/images", {
                                 avatarImageURL: uploadURL
-                              }) as any;
+                              });
+                              const response = await res.json();
                               
                               if (response.success && response.avatarPath) {
                                 setAvatarUrl(response.avatarPath);
