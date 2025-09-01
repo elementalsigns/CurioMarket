@@ -274,6 +274,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
   console.log('===================================');
 
+  // Check if this is a logout request - don't bypass auth for logout
+  if (req.path === '/api/logout' || req.path === '/api/auth/logout') {
+    console.log('[AUTH] Logout request detected - skipping auth bypass');
+    return next();
+  }
+
   // URGENT: PRODUCTION FIX FOR USER 46848882 - CHECK DOMAIN FIRST
   if (hostname.includes('curiosities.market')) {
     console.log('[AUTH] 🎯 PRODUCTION DOMAIN BYPASS ACTIVATED for curiosities.market');

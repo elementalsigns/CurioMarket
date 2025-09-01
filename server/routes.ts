@@ -432,30 +432,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth user route  
-  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        // Create a basic user if doesn't exist
-        const newUser = {
-          id: userId,
-          email: req.user.claims.email || "elementalsigns@gmail.com",
-          firstName: "Elemental",
-          lastName: "Signs",
-          role: "buyer" as const
-        };
-        await storage.upsertUser(newUser);
-        res.json(newUser);
-      } else {
-        res.json(user);
-      }
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+  // Auth user route - handle logout gracefully
+  app.get('/api/auth/user', async (req: any, res) => {
+    // Check if user is logged out or no session
+    if (!req.isAuthenticated() && !req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
     }
+    
+    // Apply auth requirements only if not in logout state
+    return requireAuth(req, res, async () => {
+      try {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          // Create a basic user if doesn't exist
+          const newUser = {
+            id: userId,
+            email: req.user.claims.email || "elementalsigns@gmail.com",
+            firstName: "Elemental",
+            lastName: "Signs",
+            role: "buyer" as const
+          };
+          await storage.upsertUser(newUser);
+          res.json(newUser);
+        } else {
+          res.json(user);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
+      }
+    });
   });
 
   // Get access token for incognito mode
