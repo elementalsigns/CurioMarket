@@ -253,6 +253,17 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log('Auth check - user.expires_at:', user?.expires_at);
   console.log('Auth check - Authorization header:', req.headers.authorization);
 
+  // Development bypass for hardcoded user
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[AUTH] Using development bypass in isAuthenticated middleware');
+    req.user = {
+      claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
+      access_token: 'dev-token',
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+    };
+    return next();
+  }
+
   // Try Authorization header first (for incognito/cookieless requests)
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
