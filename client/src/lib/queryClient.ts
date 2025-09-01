@@ -76,12 +76,32 @@ export const getQueryFn: <T>(options: {
     // Add Authorization header if token exists
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+      console.log('[AUTH] Using Bearer token for API call');
+    } else {
+      console.log('[AUTH] No token, relying on session cookies');
     }
 
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
       headers,
     });
+
+    // Handle authentication failures specifically for production
+    if (res.status === 401 || res.status === 403) {
+      console.log('[AUTH] API call failed with status:', res.status);
+      console.log('[AUTH] URL:', queryKey.join("/"));
+      
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      
+      // For production users without tokens, try re-authentication
+      if (!token && window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
+        console.log('[AUTH] Production auth failure, redirecting to login...');
+        window.location.href = '/api/login';
+        return null;
+      }
+    }
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;

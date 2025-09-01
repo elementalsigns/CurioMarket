@@ -506,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller dashboard (aggregated data)
-  app.get('/api/seller/dashboard', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/dashboard', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       console.log(`[SELLER-DASHBOARD] Request from userId: ${userId}`);
