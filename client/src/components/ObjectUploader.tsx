@@ -62,7 +62,14 @@ export function ObjectUploader({
         console.log('Uploading file:', file.name);
         
         // Get upload URL
-        const { url } = await onGetUploadParameters();
+        console.log('Getting upload parameters...');
+        const uploadResponse = await onGetUploadParameters();
+        console.log('Upload response received:', uploadResponse);
+        const { url } = uploadResponse || {};
+        
+        if (!url) {
+          throw new Error('Upload URL not received from server');
+        }
         
         // Upload file
         console.log('Uploading to URL:', url);
@@ -82,7 +89,10 @@ export function ObjectUploader({
         }
 
         // Extract the clean URL without query parameters for access
-        const cleanUrl = url.split('?')[0];
+        const cleanUrl = url ? url.split('?')[0] : null;
+        if (!cleanUrl) {
+          throw new Error('Upload URL is missing or invalid');
+        }
         results.push({ uploadURL: cleanUrl });
         setUploadProgress(((i + 1) / selectedFiles.length) * 100);
       }
