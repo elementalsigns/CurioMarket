@@ -16,11 +16,14 @@ function getAuthToken(): string | null {
     // Store in localStorage and remove from URL
     localStorage.setItem('replit_access_token', tokenFromUrl);
     window.history.replaceState({}, document.title, window.location.pathname);
+    console.log('[AUTH] Token found in URL and stored');
     return tokenFromUrl;
   }
   
   // Fall back to localStorage
-  return localStorage.getItem('replit_access_token');
+  const storedToken = localStorage.getItem('replit_access_token');
+  console.log('[AUTH] Getting token from localStorage:', storedToken ? 'Found' : 'Not found');
+  return storedToken;
 }
 
 export async function apiRequest(
@@ -34,6 +37,9 @@ export async function apiRequest(
   // Add Authorization header if token exists
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+    console.log('[AUTH] Adding Bearer token to request');
+  } else {
+    console.log('[AUTH] No token available for request');
   }
 
   const res = await fetch(url, {
@@ -42,6 +48,17 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+
+  // Handle authentication failures specifically
+  if (res.status === 401 || res.status === 403) {
+    console.log('[AUTH] Authentication failed, status:', res.status);
+    // Trigger re-authentication for production users
+    if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
+      console.log('[AUTH] Redirecting to login...');
+      window.location.href = '/api/login';
+      return new Response(); // Return empty response to prevent further processing
+    }
+  }
 
   await throwIfResNotOk(res);
   return res;
