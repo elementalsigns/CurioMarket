@@ -330,14 +330,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      // Method 3: Universal bypass for specific user (works in both dev and production)
-      const targetUserId = "46848882";
-      const existingUser = await storage.getUser(targetUserId);
-      if (existingUser) {
-        console.log('[AUTH] Using universal bypass for seller user');
+      // Method 3: Development bypass for specific user
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[AUTH] Using development bypass');
         req.user = {
-          claims: { sub: targetUserId, email: existingUser.email || "elementalsigns@gmail.com" },
-          access_token: 'seller-token',
+          claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
+          access_token: 'dev-token',
           expires_at: Math.floor(Date.now() / 1000) + 3600,
         };
         return next();

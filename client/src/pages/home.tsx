@@ -15,6 +15,24 @@ import { Link } from "wouter";
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+  
+  // Debug production user detection
+  useEffect(() => {
+    if (user) {
+      const isSeller = (user as any)?.role === 'seller';
+      const hasStripeId = !!(user as any)?.stripeCustomerId;
+      console.log('[PRODUCTION REDIRECT] User loaded:', {
+        userId: (user as any)?.id,
+        role: (user as any)?.role,
+        path: window.location.pathname,
+        timestamp: new Date().toISOString(),
+        isProduction: process.env.NODE_ENV === 'production',
+        isSeller,
+        hasStripeId,
+        shouldShowDashboard: isSeller || hasStripeId
+      });
+    }
+  }, [user]);
 
   const { data: featuredListings, error: featuredError } = useQuery({
     queryKey: ["/api/listings/featured"],
@@ -127,7 +145,7 @@ export default function Home() {
             <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
                 <Star className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
-                {user && (user as any)?.role === 'seller' ? (
+                {user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId) ? (
                   <>
                     <h3 className="text-xl font-serif font-bold mb-2">Seller Dashboard</h3>
                     <p className="text-foreground/70 mb-4">
