@@ -11,6 +11,21 @@ export default function SellerSubscriptionPage() {
   const [, navigate] = useLocation();
   const [showPayment, setShowPayment] = useState(false);
 
+  // IMMEDIATE scroll to top when component loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // INSTANT redirect check from localStorage
+  useEffect(() => {
+    const cachedRole = localStorage.getItem('curio_user_role');
+    if (cachedRole === 'seller') {
+      console.log('[SELLER-SUBSCRIPTION] Cached seller detected - immediate redirect');
+      window.location.replace('/seller/dashboard');
+      return;
+    }
+  }, []);
+
   const { data: user, isLoading } = useQuery({
     queryKey: ['/api/auth/user'],
   });
@@ -19,7 +34,9 @@ export default function SellerSubscriptionPage() {
   useEffect(() => {
     if (user && (user as any).role === 'seller') {
       console.log('SellerSubscription: Redirecting seller to dashboard');
-      window.location.href = '/seller/dashboard';
+      localStorage.setItem('curio_user_role', 'seller');
+      window.location.replace('/seller/dashboard');
+      return;
     }
   }, [user]);
 

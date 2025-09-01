@@ -32,10 +32,28 @@ export default function SellerStart() {
     }
   }, [user, authLoading, toast]);
 
+  // IMMEDIATE scroll to top when component loads
   useEffect(() => {
-    if (user?.role === 'seller') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // INSTANT redirect check from localStorage
+  useEffect(() => {
+    const cachedRole = localStorage.getItem('curio_user_role');
+    if (cachedRole === 'seller') {
+      console.log('[SELLER-START] Cached seller detected - immediate redirect');
+      window.location.replace('/seller/dashboard');
+      return;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user && (user as any)?.role === 'seller') {
       // User has seller role, redirect directly to dashboard
-      window.location.href = "/seller/dashboard";
+      console.log('[SELLER-START] Seller detected - redirecting to dashboard');
+      localStorage.setItem('curio_user_role', 'seller');
+      window.location.replace("/seller/dashboard");
+      return;
     }
   }, [user]);
 

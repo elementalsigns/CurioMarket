@@ -154,6 +154,21 @@ export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
   const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
+  // IMMEDIATE scroll to top when component loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // INSTANT redirect check from localStorage
+  useEffect(() => {
+    const cachedRole = localStorage.getItem('curio_user_role');
+    if (cachedRole === 'seller') {
+      console.log('[SUBSCRIBE] Cached seller detected - immediate redirect');
+      window.location.replace('/seller/dashboard');
+      return;
+    }
+  }, []);
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -171,10 +186,25 @@ export default function Subscribe() {
   // Check subscription status when user is authenticated
   // Auto-redirect paid sellers to dashboard
   useEffect(() => {
-    if (user?.role === 'seller') {
-      window.location.href = "/seller/dashboard";
+    if (user && (user as any)?.role === 'seller') {
+      console.log('[SUBSCRIBE] Seller detected - redirecting to dashboard');
+      localStorage.setItem('curio_user_role', 'seller');
+      window.location.replace("/seller/dashboard");
+      return;
     }
   }, [user]);
+
+  // Show loading/redirect message for sellers
+  if (localStorage.getItem('curio_user_role') === 'seller' || (user && (user as any).role === 'seller')) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-zinc-950 to-zinc-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-zinc-400">Redirecting to seller dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSuccess = () => {
     toast({
