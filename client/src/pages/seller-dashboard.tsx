@@ -29,7 +29,9 @@ export default function SellerDashboard() {
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard"],
-    enabled: !!user,
+    enabled: !!user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId),
+    retry: 3,
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {
@@ -92,7 +94,49 @@ export default function SellerDashboard() {
     );
   }
 
+  // Debug logging for production
+  useEffect(() => {
+    if (user) {
+      console.log('[SELLER-DASHBOARD] User data:', {
+        userId: (user as any)?.id,
+        role: (user as any)?.role,
+        stripeCustomerId: (user as any)?.stripeCustomerId,
+        hasSellerData: !!dashboardData?.seller,
+        isLoading,
+        error: error?.message
+      });
+    }
+  }, [user, dashboardData, isLoading, error]);
+
   if (!dashboardData?.seller) {
+    // Check if user should have access
+    const shouldHaveAccess = (user as any)?.role === 'seller' || (user as any)?.stripeCustomerId;
+    
+    if (shouldHaveAccess && !isLoading) {
+      console.log('[SELLER-DASHBOARD] ERROR: Seller should have access but no seller data found');
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="container mx-auto px-4 py-20 text-center">
+            <h1 className="text-4xl font-serif font-bold mb-4 text-red-500">Dashboard Loading Error</h1>
+            <p className="text-foreground/70 mb-8">Unable to load your seller dashboard. Your seller account exists but there may be a connection issue.</p>
+            <div className="space-y-4">
+              <Button onClick={() => window.location.reload()} className="bg-gothic-red hover:bg-gothic-red/80">
+                Refresh Page
+              </Button>
+              <br />
+              <Link to="/seller/onboard">
+                <Button variant="outline" data-testid="button-setup-seller">
+                  Re-setup Seller Profile
+                </Button>
+              </Link>
+            </div>
+          </div>
+          <Footer />
+        </div>
+      );
+    }
+    
     return (
       <div className="min-h-screen bg-background">
         <Header />
