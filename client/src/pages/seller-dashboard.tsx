@@ -770,11 +770,27 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         maxFileSize={10485760}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload") as any;
-                          return {
-                            method: "PUT" as const,
-                            url: response.uploadURL,
-                          };
+                          console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
+                          try {
+                            const response = await apiRequest("POST", "/api/objects/upload") as any;
+                            console.log('[UPLOAD-DEBUG] Response from server:', response);
+                            
+                            if (!response) {
+                              throw new Error('No response received from server');
+                            }
+                            
+                            if (!response.uploadURL) {
+                              throw new Error('Server did not return uploadURL');
+                            }
+                            
+                            return {
+                              method: "PUT" as const,
+                              url: response.uploadURL,
+                            };
+                          } catch (error) {
+                            console.error('[UPLOAD-DEBUG] Error in onGetUploadParameters:', error);
+                            throw error;
+                          }
                         }}
                         onComplete={async (result) => {
                           if (result.successful && result.successful[0]) {
@@ -843,11 +859,27 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         maxFileSize={5242880}
                         allowedFileTypes={['image/*']}
                         onGetUploadParameters={async () => {
-                          const response = await apiRequest("POST", "/api/objects/upload") as any;
-                          return {
-                            method: "PUT" as const,
-                            url: response.uploadURL,
-                          };
+                          console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
+                          try {
+                            const response = await apiRequest("POST", "/api/objects/upload") as any;
+                            console.log('[UPLOAD-DEBUG] Response from server:', response);
+                            
+                            if (!response) {
+                              throw new Error('No response received from server');
+                            }
+                            
+                            if (!response.uploadURL) {
+                              throw new Error('Server did not return uploadURL');
+                            }
+                            
+                            return {
+                              method: "PUT" as const,
+                              url: response.uploadURL,
+                            };
+                          } catch (error) {
+                            console.error('[UPLOAD-DEBUG] Error in onGetUploadParameters:', error);
+                            throw error;
+                          }
                         }}
                         onComplete={async (result) => {
                           if (result.successful && result.successful[0]) {
