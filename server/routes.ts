@@ -946,19 +946,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         let priceId = process.env.STRIPE_SELLER_PRICE_ID;
         
-        // If price ID doesn't exist or is invalid, create a new one
-        // FORCE creation if we have the problematic product ID
-        if (!priceId || priceId.trim() === '' || priceId.startsWith('prod_') || priceId === 'prod_SwnHA5or5KqQyu') {
-          console.log(`[SUBSCRIPTION] Invalid/missing price ID: ${priceId}, creating new price for $10/month subscription`);
+        console.log(`[SUBSCRIPTION] Raw price ID from environment: "${priceId}"`);
+        
+        // FORCE creation of new price - the environment variable seems corrupted
+        if (!priceId || priceId.trim() === '' || priceId === 'p' || priceId.startsWith('prod_') || priceId === 'prod_SwnHA5or5KqQyu') {
+          console.log(`[SUBSCRIPTION] Invalid/missing price ID: "${priceId}", creating new price for $10/month subscription`);
           priceId = await createSellerSubscriptionPrice(stripe);
+          console.log(`[SUBSCRIPTION] Created new price ID: ${priceId}`);
         } else {
           // Validate the price ID exists in Stripe
           try {
-            await stripe.prices.retrieve(priceId);
-            console.log(`[SUBSCRIPTION] Using existing price ID: ${priceId}`);
+            const price = await stripe.prices.retrieve(priceId);
+            console.log(`[SUBSCRIPTION] Using existing price ID: ${priceId}, amount: ${price.unit_amount}`);
           } catch (error: any) {
             console.log(`[SUBSCRIPTION] Price ID ${priceId} not found in Stripe, creating new price...`);
             priceId = await createSellerSubscriptionPrice(stripe);
+            console.log(`[SUBSCRIPTION] Created replacement price ID: ${priceId}`);
           }
         }
 
