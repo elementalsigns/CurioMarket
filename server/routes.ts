@@ -224,6 +224,35 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // CORS configuration - CRITICAL for production authentication
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const hostname = req.get('host') || '';
+    
+    // Allow requests from production and development domains
+    if (origin && (
+      origin.includes('curiosities.market') || 
+      origin.includes('localhost') || 
+      origin.includes('replit.dev')
+    )) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+    
+    // Essential for cookie-based authentication
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, Cookie');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+      return;
+    }
+    
+    console.log(`[CORS] Request from origin: ${origin || 'none'}, host: ${hostname}`);
+    next();
+  });
+
   // Static file serving for assets
   app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
 
