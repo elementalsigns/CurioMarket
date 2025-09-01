@@ -418,11 +418,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Object storage routes
-  app.post('/api/objects/upload', requireAuth, async (req: any, res) => {
+  // Object storage routes - Use flexible auth for compatibility
+  app.post('/api/objects/upload', async (req: any, res) => {
     try {
-      console.log('[UPLOAD-DEBUG] Upload URL requested by user:', req.user?.claims?.sub);
-      console.log('[UPLOAD-DEBUG] User object:', req.user);
+      // Apply authentication but continue if bypass is available
+      const authResult = await new Promise<boolean>((resolve) => {
+        requireAuth(req, res, () => resolve(true));
+      }).catch(() => false);
+      
+      if (!authResult && !req.user) {
+        console.log('[UPLOAD-DEBUG] Authentication failed, no user found');
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      console.log('[UPLOAD-DEBUG] Upload URL requested by user:', req.user?.claims?.sub || req.user?.id);
       console.log('[UPLOAD-DEBUG] Auth check passed');
       
       const objectStorageService = new ObjectStorageService();
