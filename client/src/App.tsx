@@ -198,6 +198,29 @@ function Router() {
           <Route path="/events" component={Events} />
           <Route path="/incognito-auth" component={IncognitoAuth} />
           <Route path="/account-demo" component={DemoSimple} />
+          <Route path="/logout-complete" component={() => {
+            // Clear localStorage tokens and redirect
+            useEffect(() => {
+              console.log('[LOGOUT-COMPLETE] Clearing localStorage tokens');
+              localStorage.removeItem('curio_auth_token');
+              localStorage.removeItem('curio_user_role');
+              localStorage.removeItem('curio_user_id');
+              
+              // Force a page reload to clear any cached auth state
+              setTimeout(() => {
+                window.location.replace('/');
+              }, 100);
+            }, []);
+            
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-2xl font-garamond text-white mb-4">Signing out...</h1>
+                  <div className="animate-spin w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full mx-auto" />
+                </div>
+              </div>
+            );
+          }} />
         </>
       )}
     </Switch>

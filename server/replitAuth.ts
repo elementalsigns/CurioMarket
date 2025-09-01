@@ -224,12 +224,11 @@ export async function setupAuth(app: Express) {
           }
           // Clear cookies
           res.clearCookie('connect.sid');
-          res.redirect(
-            client.buildEndSessionUrl(config, {
-              client_id: process.env.REPL_ID!,
-              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-            }).href
-          );
+          
+          // Instead of redirecting to OIDC logout, redirect to a custom logout page that clears localStorage
+          const logoutUrl = new URL('/logout-complete', `${req.protocol}://${req.hostname}`);
+          logoutUrl.searchParams.set('clear_tokens', 'true');
+          res.redirect(logoutUrl.toString());
         });
       });
     });
