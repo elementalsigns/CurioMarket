@@ -169,6 +169,13 @@ export async function setupAuth(app: Express) {
       }
       
       passport.authenticate(strategyName, (err: any, user: any, info: any) => {
+        console.log('[AUTH] Passport callback triggered:', {
+          hasError: !!err,
+          hasUser: !!user,
+          userKeys: user ? Object.keys(user) : [],
+          strategyName
+        });
+        
         if (err) {
           console.error('[AUTH] Passport authentication error:', err);
           return res.redirect("/api/login");
@@ -184,12 +191,22 @@ export async function setupAuth(app: Express) {
             return res.redirect("/api/login");
           }
           
+          // Debug token generation
+          console.log('[AUTH] User object after login:', {
+            hasAccessToken: !!user.access_token,
+            tokenLength: user.access_token?.length || 0,
+            userKeys: Object.keys(user || {}),
+            userId: user.id || user.claims?.sub
+          });
+          
           // For production, include access token in redirect for frontend storage
           const redirectUrl = new URL('/', `${req.protocol}://${req.get('host')}`);
           if (user.access_token) {
             redirectUrl.searchParams.set('access_token', user.access_token);
             redirectUrl.searchParams.set('auth_success', 'true');
-            console.log('[AUTH] Redirecting with access token');
+            console.log('[AUTH] Redirecting with access token, length:', user.access_token.length);
+          } else {
+            console.log('[AUTH] WARNING: No access token found in user object');
           }
           
           res.redirect(redirectUrl.toString());

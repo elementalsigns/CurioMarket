@@ -301,6 +301,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth middleware  
   await setupAuth(app);
+
+  // Debug endpoint to check token generation
+  app.get('/api/auth/debug', (req: any, res) => {
+    const authInfo = {
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      hasUser: !!req.user,
+      userKeys: req.user ? Object.keys(req.user) : [],
+      userClaims: req.user?.claims,
+      userAccessToken: req.user?.access_token ? 'Present' : 'Missing',
+      sessionId: req.sessionID,
+      headers: {
+        authorization: req.headers.authorization ? 'Present' : 'Missing',
+        cookie: req.headers.cookie ? 'Present' : 'Missing'
+      }
+    };
+    
+    console.log('[AUTH DEBUG]', authInfo);
+    res.json(authInfo);
+  });
   
   // Create a better auth middleware that works everywhere
   const requireAuth = async (req: any, res: any, next: any) => {
