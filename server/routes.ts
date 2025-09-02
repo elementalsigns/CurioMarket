@@ -353,6 +353,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a better auth middleware that works everywhere
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
+      // Check if user explicitly logged out
+      if (req.cookies?.user_logged_out === 'true') {
+        console.log('[AUTH] User has explicitly logged out, blocking access');
+        return res.status(401).json({ message: "User logged out" });
+      }
       // Method 1: Check Authorization header (Bearer token)
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -449,6 +454,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[UPLOAD-DEBUG] Error getting upload URL:", error);
       res.status(500).json({ error: "Failed to get upload URL" });
     }
+  });
+
+  // Logout route
+  app.get('/api/logout', (req: any, res) => {
+    console.log('[LOGOUT] User signing out');
+    
+    // Set a special cookie to indicate the user explicitly logged out
+    res.cookie('user_logged_out', 'true', { 
+      maxAge: 60000, // 1 minute
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    
+    req.logout((err: any) => {
+      if (err) {
+        console.error('[LOGOUT] Error during logout:', err);
+      }
+      req.session.destroy((sessionErr: any) => {
+        if (sessionErr) {
+          console.error('[LOGOUT] Error destroying session:', sessionErr);
+        }
+        res.clearCookie('connect.sid'); // Clear the session cookie
+        console.log('[LOGOUT] Session destroyed, redirecting to home');
+        res.redirect('/');
+      });
+    });
   });
 
   // Auth user route  
