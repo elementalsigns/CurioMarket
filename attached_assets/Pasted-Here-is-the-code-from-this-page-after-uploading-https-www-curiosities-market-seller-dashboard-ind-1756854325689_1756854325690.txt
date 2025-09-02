@@ -1,0 +1,162 @@
+Here is the code from this page after uploading https://www.curiosities.market/seller/dashboard
+
+index-CRDFch28.js:48 [AUTH] Token found in URL and stored
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:498 [PRODUCTION REDIRECT] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:808 [PRODUCTION REDIRECT] User loaded: Object
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: Object
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: Object
+index-CRDFch28.js:511 Upload button clicked
+index-CRDFch28.js:502 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-CRDFch28.js:502
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 Files selected: 1
+index-CRDFch28.js:511 Uploading file: 123.jpeg
+index-CRDFch28.js:511 Getting upload parameters...
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Making request to /api/objects/upload
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Response from server: {uploadURL: 'https://storage.googleapis.com/replit-objstore-cd5…c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Upload response received: {method: 'PUT', url: 'https://storage.googleapis.com/replit-objstore-cd5…c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Uploading to URL: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/10887bd6-39ca-433e-bae8-a42347c47c46?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=heimdall-production%40replit-user-deployments.iam.gserviceaccount.com%2F20250902%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20250902T230345Z&X-Goog-Expires=899&X-Goog-Signature=79afe8a1073f78461ba62035c54ce8b9f0daab519cfa247291307fd183dcc373f16ba49eff49fa1e2e92363c08923ef32fb66331048a948a23928a28c7104ec57d7b45eedfc029340d9847610f2c185d95045161bc37eec306732f22780c7d645dc68584df1d4e890437c3269ddf8407dfa021fa523bf32c0080b433d0dfd6bd079272f264c0b18ca5944d29ad60350b945da83645a7d6201f1ee1511d213e1e8fae2cb9def2a58bbed1812ec47578f10e5b35fca64f6a87ac3475ab617abd29db4b71db4f3a40b6dc5c843a824fe753f9be476deeaa12f77fcde33be026c1b49280cff91fb0ffac8d34fcf99ed8b5c2f4ce0fbe6c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host
+index-CRDFch28.js:511 Upload response status: 200 
+index-CRDFch28.js:511 Upload complete: [{…}]
+index-CRDFch28.js:511 [BANNER-UPLOAD] Upload completed, processing: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/10887bd6-39ca-433e-bae8-a42347c47c46
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [BANNER-UPLOAD] Banner path normalized: /objects/uploads/10887bd6-39ca-433e-bae8-a42347c47c46
+index-CRDFch28.js:511 Upload button clicked
+index-CRDFch28.js:502 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-CRDFch28.js:502
+ex @ index-CRDFch28.js:40
+Wl @ index-CRDFch28.js:40
+lF @ index-CRDFch28.js:40
+no @ index-CRDFch28.js:40
+T2 @ index-CRDFch28.js:40
+Ka @ index-CRDFch28.js:38
+(anonymous) @ index-CRDFch28.js:40
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 Files selected: 1
+index-CRDFch28.js:511 Uploading file: 456.jpeg
+index-CRDFch28.js:511 Getting upload parameters...
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Making request to /api/objects/upload
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Response from server: {uploadURL: 'https://storage.googleapis.com/replit-objstore-cd5…58dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Upload response received: {method: 'PUT', url: 'https://storage.googleapis.com/replit-objstore-cd5…58dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Uploading to URL: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=heimdall-production%40replit-user-deployments.iam.gserviceaccount.com%2F20250902%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20250902T230355Z&X-Goog-Expires=899&X-Goog-Signature=c252ddb60d2b35c0eb7a3603acb63f38c0d11af64cffc2abd0bb8dbca66751c4c198ba1ac816b06dd79c73aedb32900b26ca12e8b854657c5eb2eb62e5eb9152f1187dd12faf83962616c66751edc8d98d66f9e2124f193af25c6bdfe92b97170784b72374994a1c56ca0ac8b07fe4754b9b042e9e87a34015088ca0dc1b3866087a8870675294a416bf74e7d986b4f7ef5b5fc555e05326488bbf45f20cfd42dc252d3b2566b9c1a2842b51b041e12305e435f62ac9b057025cab575036901d6e6bab4a61651b44492d5bc19ca68f924fe684a2de3339b33750a51e37aa007dac982aa6532533b0ba6d32891f3aaf3eab9c7cbb958dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host
+index-CRDFch28.js:511 Upload response status: 200 
+index-CRDFch28.js:511 Upload complete: [{…}]
+index-CRDFch28.js:511 [AVATAR-UPLOAD] Upload completed, processing: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [AVATAR-UPLOAD] Avatar path normalized: /objects/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+
+
+Now I am going to view live shop the link shows 
+https://www.curiosities.market/shop/b23d9c45-dbf1-40a0-aeca-1eb89eefd4c2.     It still does not show the uploaded info 
+
+index-CRDFch28.js:48 [AUTH] Token found in URL and stored
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:498 [PRODUCTION REDIRECT] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:808 [PRODUCTION REDIRECT] User loaded: Object
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: Object
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: Object
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: Object
+index-CRDFch28.js:511 Upload button clicked
+index-CRDFch28.js:502 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-CRDFch28.js:502
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 Files selected: 1
+index-CRDFch28.js:511 Uploading file: 123.jpeg
+index-CRDFch28.js:511 Getting upload parameters...
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Making request to /api/objects/upload
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Response from server: {uploadURL: 'https://storage.googleapis.com/replit-objstore-cd5…c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Upload response received: {method: 'PUT', url: 'https://storage.googleapis.com/replit-objstore-cd5…c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Uploading to URL: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/10887bd6-39ca-433e-bae8-a42347c47c46?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=heimdall-production%40replit-user-deployments.iam.gserviceaccount.com%2F20250902%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20250902T230345Z&X-Goog-Expires=899&X-Goog-Signature=79afe8a1073f78461ba62035c54ce8b9f0daab519cfa247291307fd183dcc373f16ba49eff49fa1e2e92363c08923ef32fb66331048a948a23928a28c7104ec57d7b45eedfc029340d9847610f2c185d95045161bc37eec306732f22780c7d645dc68584df1d4e890437c3269ddf8407dfa021fa523bf32c0080b433d0dfd6bd079272f264c0b18ca5944d29ad60350b945da83645a7d6201f1ee1511d213e1e8fae2cb9def2a58bbed1812ec47578f10e5b35fca64f6a87ac3475ab617abd29db4b71db4f3a40b6dc5c843a824fe753f9be476deeaa12f77fcde33be026c1b49280cff91fb0ffac8d34fcf99ed8b5c2f4ce0fbe6c1dd70ad370b8d14cc26686&X-Goog-SignedHeaders=host
+index-CRDFch28.js:511 Upload response status: 200 
+index-CRDFch28.js:511 Upload complete: [{…}]
+index-CRDFch28.js:511 [BANNER-UPLOAD] Upload completed, processing: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/10887bd6-39ca-433e-bae8-a42347c47c46
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [BANNER-UPLOAD] Banner path normalized: /objects/uploads/10887bd6-39ca-433e-bae8-a42347c47c46
+index-CRDFch28.js:511 Upload button clicked
+index-CRDFch28.js:502 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-CRDFch28.js:502
+ex @ index-CRDFch28.js:40
+Wl @ index-CRDFch28.js:40
+lF @ index-CRDFch28.js:40
+no @ index-CRDFch28.js:40
+T2 @ index-CRDFch28.js:40
+Ka @ index-CRDFch28.js:38
+(anonymous) @ index-CRDFch28.js:40
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 Files selected: 1
+index-CRDFch28.js:511 Uploading file: 456.jpeg
+index-CRDFch28.js:511 Getting upload parameters...
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Making request to /api/objects/upload
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [UPLOAD-DEBUG] Response from server: {uploadURL: 'https://storage.googleapis.com/replit-objstore-cd5…58dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Upload response received: {method: 'PUT', url: 'https://storage.googleapis.com/replit-objstore-cd5…58dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host'}
+index-CRDFch28.js:511 Uploading to URL: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=heimdall-production%40replit-user-deployments.iam.gserviceaccount.com%2F20250902%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20250902T230355Z&X-Goog-Expires=899&X-Goog-Signature=c252ddb60d2b35c0eb7a3603acb63f38c0d11af64cffc2abd0bb8dbca66751c4c198ba1ac816b06dd79c73aedb32900b26ca12e8b854657c5eb2eb62e5eb9152f1187dd12faf83962616c66751edc8d98d66f9e2124f193af25c6bdfe92b97170784b72374994a1c56ca0ac8b07fe4754b9b042e9e87a34015088ca0dc1b3866087a8870675294a416bf74e7d986b4f7ef5b5fc555e05326488bbf45f20cfd42dc252d3b2566b9c1a2842b51b041e12305e435f62ac9b057025cab575036901d6e6bab4a61651b44492d5bc19ca68f924fe684a2de3339b33750a51e37aa007dac982aa6532533b0ba6d32891f3aaf3eab9c7cbb958dc671f1e413c8a562d8e7&X-Goog-SignedHeaders=host
+index-CRDFch28.js:511 Upload response status: 200 
+index-CRDFch28.js:511 Upload complete: [{…}]
+index-CRDFch28.js:511 [AVATAR-UPLOAD] Upload completed, processing: https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:511 [AVATAR-UPLOAD] Avatar path normalized: /objects/uploads/d44d8f29-eab0-4bae-b215-cb98bd4c321d
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Adding Bearer token to request
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
+index-CRDFch28.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-02T23:04:38.756Z'}
+index-CRDFch28.js:48 [AUTH] Getting token from localStorage: Found
+index-CRDFch28.js:48 [AUTH] Using Bearer token for API call
