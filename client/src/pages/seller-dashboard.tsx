@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ObjectUploader } from "@/components/ObjectUploader";
+import ShopPage from "@/pages/shop";
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -679,6 +680,7 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
 // Shop Profile Manager Component
 function ShopProfileManager({ seller }: { seller: any }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [bannerUrl, setBannerUrl] = useState(seller?.bannerImageUrl || "");
   const [avatarUrl, setAvatarUrl] = useState(seller?.avatarImageUrl || "");
   const { toast } = useToast();
@@ -1080,14 +1082,59 @@ function ShopProfileManager({ seller }: { seller: any }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-serif font-bold">Shop Profile</h2>
-        <Button 
-          onClick={() => setIsEditingProfile(true)}
-          className="bg-gothic-red hover:bg-gothic-red/80"
-          data-testid="button-edit-profile"
-        >
-          <Edit className="mr-2" size={16} />
-          Edit Profile
-        </Button>
+        <div className="flex gap-2">
+          <Dialog open={showPreview} onOpenChange={setShowPreview}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                data-testid="button-preview-shop"
+              >
+                <Eye className="mr-2" size={16} />
+                Preview Shop
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="font-serif">Shop Page Preview</DialogTitle>
+                <DialogDescription>
+                  This is how your shop will appear to customers
+                </DialogDescription>
+              </DialogHeader>
+              <div className="-m-6">
+                <ShopPage
+                  isPreview={true}
+                  previewData={{
+                    shopName: profileForm.watch("shopName") || seller?.shopName,
+                    bio: profileForm.watch("bio") || seller?.bio,
+                    location: profileForm.watch("location") || seller?.location,
+                    policies: profileForm.watch("policies") || seller?.policies,
+                    shippingInfo: profileForm.watch("shippingInfo") || seller?.shippingInfo,
+                    returnPolicy: profileForm.watch("returnPolicy") || seller?.returnPolicy,
+                    bannerImageUrl: bannerUrl || seller?.bannerImageUrl,
+                    avatarImageUrl: avatarUrl || seller?.avatarImageUrl,
+                  }}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Link to={`/shop/${seller?.id}`} target="_blank">
+            <Button 
+              variant="outline"
+              data-testid="button-view-live-shop"
+            >
+              <Eye className="mr-2" size={16} />
+              View Live Shop
+            </Button>
+          </Link>
+          <Button 
+            onClick={() => setIsEditingProfile(true)}
+            className="bg-gothic-red hover:bg-gothic-red/80"
+            data-testid="button-edit-profile"
+          >
+            <Edit className="mr-2" size={16} />
+            Edit Profile
+          </Button>
+        </div>
       </div>
 
       {/* Shop Header */}

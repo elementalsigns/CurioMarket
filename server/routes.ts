@@ -754,6 +754,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get public seller profile (for shop pages)
+  app.get('/api/seller/public/:sellerId', async (req, res) => {
+    try {
+      const { sellerId } = req.params;
+      const seller = await storage.getSeller(sellerId);
+      
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      // Get seller listings
+      const listingsResult = await storage.getListings({ sellerId });
+      
+      res.json({
+        seller,
+        listings: listingsResult.listings
+      });
+    } catch (error) {
+      console.error("Error fetching public seller profile:", error);
+      res.status(500).json({ message: "Failed to fetch seller profile" });
+    }
+  });
+
   // ==================== SELLER ONBOARDING ====================
   
   // Create seller subscription
