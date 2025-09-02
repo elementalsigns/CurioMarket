@@ -389,63 +389,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      // Method 4: Production bypass for specific domain and user
-      // BUT ONLY if not on logout-related pages
-      const hostname = req.get('host') || '';
-      const path = req.path || '';
-      
-      // Don't auto-authenticate on logout or if coming from logout
-      if (path === '/logout-complete' || path === '/api/logout' || req.headers.referer?.includes('logout')) {
-        console.log('[AUTH] Skipping production bypass - user is logging out');
-        console.log('[AUTH] Authentication failed');
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      
-      if (hostname.includes('curiosities.market')) {
-        console.log('[AUTH] 🚨 PRODUCTION BYPASS for curiosities.market domain');
-        console.log('[AUTH] Request path:', req.path);
-        console.log('[AUTH] Request method:', req.method);
-        req.user = {
-          claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-          access_token: 'production-bypass-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600,
-        };
-        return next();
-      }
-
-      // Final fallback for production user 46848882 - but respect logout
-      if (path === '/logout-complete' || path === '/api/logout' || req.headers.referer?.includes('logout')) {
-        console.log('[AUTH] Final fallback skipped - user is logging out');
-        console.log('[AUTH] Authentication failed');
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      
-      console.log('[AUTH] 🆘 FINAL FALLBACK ACTIVATED - Allowing access for production user');
-      req.user = {
-        claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-        access_token: 'emergency-fallback-token',
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      };
-      return next();
+      console.log('[AUTH] Authentication failed');
+      return res.status(401).json({ message: "Unauthorized" });
 
     } catch (error) {
       console.error('[AUTH] Auth middleware error:', error);
-      
-      // Respect logout even on error
-      const path = req.path || '';
-      if (path === '/logout-complete' || path === '/api/logout' || req.headers.referer?.includes('logout')) {
-        console.log('[AUTH] Error fallback skipped - user is logging out');
-        return res.status(500).json({ message: "Authentication error" });
-      }
-      
-      // Even on error, allow this specific user through
-      console.log('[AUTH] 🚨 ERROR FALLBACK for user 46848882');
-      req.user = {
-        claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-        access_token: 'error-fallback-token',
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      };
-      return next();
+      return res.status(500).json({ message: "Authentication error" });
     }
   };
 
