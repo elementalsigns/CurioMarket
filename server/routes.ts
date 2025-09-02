@@ -488,8 +488,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error('[LOGOUT] Error destroying session:', sessionErr);
         }
         res.clearCookie('connect.sid'); // Clear the session cookie
-        console.log('[LOGOUT] Session destroyed, redirecting to home');
-        res.redirect('/');
+        console.log('[LOGOUT] Session destroyed, redirecting to logout complete');
+        res.redirect('/logout-complete');
       });
     });
   });
