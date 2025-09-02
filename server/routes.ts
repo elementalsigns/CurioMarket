@@ -510,7 +510,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('User object exists:', !!req.user);
       console.log('User claims:', req.user?.claims);
       console.log('Request body keys:', Object.keys(req.body));
-      console.log('Cookies:', req.cookies);
+      console.log('Request body banner fields:', {
+        banner: req.body.banner,
+        bannerImageUrl: req.body.bannerImageUrl,
+        avatar: req.body.avatar,
+        avatarImageUrl: req.body.avatarImageUrl
+      });
+      console.log('Full request body:', req.body);
       console.log('================================');
 
       // HARD-CODED USER ID for production user to prevent auth issues
