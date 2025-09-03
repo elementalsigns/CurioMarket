@@ -796,8 +796,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get seller listings
       const listingsResult = await storage.getListings({ sellerId });
       
+      // Map database fields to frontend expectations
+      const sellerWithMappedFields = {
+        ...seller,
+        bannerImageUrl: seller.banner,
+        avatarImageUrl: seller.avatar
+      };
+
       res.json({
-        seller,
+        seller: sellerWithMappedFields,
         listings: listingsResult.listings
       });
     } catch (error) {
