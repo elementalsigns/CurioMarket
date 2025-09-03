@@ -45,6 +45,8 @@ const createListingSchema = z.object({
 type CreateListingForm = z.infer<typeof createListingSchema>;
 
 export default function CreateListing() {
+  console.log('[CREATE-LISTING] Component starting to render');
+  
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
