@@ -53,7 +53,6 @@ export default function CreateListing() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
-    queryFn: () => fetch("/api/categories").then(res => res.json()),
   });
 
   const {
