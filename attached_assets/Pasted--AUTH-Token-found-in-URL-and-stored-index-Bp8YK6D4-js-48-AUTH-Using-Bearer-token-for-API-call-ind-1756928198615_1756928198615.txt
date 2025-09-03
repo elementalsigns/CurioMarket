@@ -1,0 +1,64 @@
+[AUTH] Token found in URL and stored
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:498 [PRODUCTION REDIRECT] User loaded: Object
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:808 [PRODUCTION REDIRECT] User loaded: Object
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: Object
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: Object
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: Object
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: Object
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:31:20.678Z'}
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:31:20.685Z'}
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:31:46.648Z'}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:50.650Z'}
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:50.656Z'}
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:51.791Z'}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:51.792Z'}
+index-Bp8YK6D4.js:498 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/', timestamp: '2025-09-03T19:34:51.793Z', isProduction: true, …}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:58.162Z'}
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:34:58.167Z'}
+index-Bp8YK6D4.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
+index-Bp8YK6D4.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:35:30.137Z'}
+index-Bp8YK6D4.js:48 [AUTH] Getting token from localStorage: Found
+index-Bp8YK6D4.js:48 [AUTH] Using Bearer token for API call
