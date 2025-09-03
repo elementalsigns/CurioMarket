@@ -56,6 +56,15 @@ export default function CreateListing() {
   });
 
   console.log('[CATEGORIES] Loading:', categoriesLoading, 'Data:', categories, 'Error:', categoriesError);
+  
+  // Force test the API call
+  useEffect(() => {
+    console.log('[CREATE-LISTING] Component mounted');
+    fetch('/api/categories', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => console.log('[CREATE-LISTING] Manual fetch result:', data))
+      .catch(err => console.log('[CREATE-LISTING] Manual fetch error:', err));
+  }, []);
 
   const {
     register,
