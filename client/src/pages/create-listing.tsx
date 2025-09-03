@@ -51,9 +51,11 @@ export default function CreateListing() {
   const [previewMode, setPreviewMode] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
-  const { data: categories } = useQuery<Category[]>({
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
+
+  console.log('[CATEGORIES] Loading:', categoriesLoading, 'Data:', categories, 'Error:', categoriesError);
 
   const {
     register,
