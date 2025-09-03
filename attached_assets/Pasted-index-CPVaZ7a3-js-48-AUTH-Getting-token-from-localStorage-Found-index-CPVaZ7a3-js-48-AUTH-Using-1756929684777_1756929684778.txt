@@ -1,0 +1,21 @@
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:59:15.909Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:59:15.912Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: false, isLoading: true, …}
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:59:15.924Z'}
+index-CPVaZ7a3.js:808 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/seller/dashboard', timestamp: '2025-09-03T19:59:15.925Z', isProduction: true}
+index-CPVaZ7a3.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-CPVaZ7a3.js:511 [SHOP] Making API call to: /api/seller/public/b23d9c45-dbf1-40a0-aeca-1eb89eefd4c2
+index-CPVaZ7a3.js:511 [SHOP] API response: {seller: {…}, listings: Array(0)}
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-03T19:59:21.807Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call

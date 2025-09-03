@@ -40,15 +40,9 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
   const { sellerId } = useParams();
 
   // In preview mode, use previewData; otherwise fetch from API
-  const { data: fetchedData, isLoading, error } = useQuery({
+  const { data: fetchedData, isLoading } = useQuery({
     queryKey: ["/api/seller/public", sellerId],
-    queryFn: async () => {
-      console.log(`[SHOP] Making API call to: /api/seller/public/${sellerId}`);
-      const response = await fetch(`/api/seller/public/${sellerId}`);
-      const data = await response.json();
-      console.log(`[SHOP] API response:`, data);
-      return data;
-    },
+    queryFn: () => fetch(`/api/seller/public/${sellerId}`).then(res => res.json()),
     enabled: !isPreview && !!sellerId,
   });
 
