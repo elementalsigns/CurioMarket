@@ -681,8 +681,8 @@ function PromotionDialog({ onSuccess }: { onSuccess: () => void }) {
 function ShopProfileManager({ seller }: { seller: any }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [bannerUrl, setBannerUrl] = useState(seller?.bannerImageUrl || "");
-  const [avatarUrl, setAvatarUrl] = useState(seller?.avatarImageUrl || "");
+  const [bannerUrl, setBannerUrl] = useState(seller?.banner || "");
+  const [avatarUrl, setAvatarUrl] = useState(seller?.avatar || "");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -723,6 +723,9 @@ function ShopProfileManager({ seller }: { seller: any }) {
   });
 
   const handleProfileSubmit = (data: any) => {
+    console.log('[PROFILE-SAVE] Submitting with bannerUrl:', bannerUrl);
+    console.log('[PROFILE-SAVE] Submitting with avatarUrl:', avatarUrl);
+    console.log('[PROFILE-SAVE] Full form data:', data);
     updateProfileMutation.mutate(data);
   };
 
