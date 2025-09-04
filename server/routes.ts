@@ -2092,6 +2092,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete listing
+  app.delete('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(403).json({ error: "Seller profile required" });
+      }
+
+      const listing = await storage.getListing(req.params.id);
+      if (!listing || listing.sellerId !== seller.id) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+
+      await storage.deleteListing(req.params.id);
+      
+      console.log(`[DELETE-SUCCESS] Deleted listing ${req.params.id} for seller ${seller.id}`);
+      
+      res.json({ success: true, message: "Listing deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      res.status(500).json({ error: "Failed to delete listing" });
+    }
+  });
+
   // ==================== CATEGORIES ====================
   
   // Get categories

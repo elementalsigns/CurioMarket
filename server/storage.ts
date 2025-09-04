@@ -303,34 +303,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Listing operations
-  async createListing(listing: InsertListing): Promise<Listing> {
-    // Generate a URL-friendly slug from the title
-    const generateSlug = (title: string): string => {
-      return title
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-')     // Replace spaces with hyphens
-        .replace(/-+/g, '-')      // Replace multiple hyphens with single
-        .trim();
-    };
+  
+  // Generate a URL-friendly slug from the title
+  private generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-')     // Replace spaces with hyphens
+      .replace(/-+/g, '-')      // Replace multiple hyphens with single
+      .trim();
+  }
 
-    // Ensure slug is unique by checking existing slugs
-    const ensureUniqueSlug = async (baseSlug: string): Promise<string> => {
-      let slug = baseSlug;
-      let counter = 1;
-      
-      while (true) {
-        const existing = await db.select().from(listings).where(eq(listings.slug, slug)).limit(1);
-        if (existing.length === 0) {
-          return slug;
-        }
-        slug = `${baseSlug}-${counter}`;
-        counter++;
+  // Ensure slug is unique by checking existing slugs
+  async generateUniqueSlug(title: string): Promise<string> {
+    const baseSlug = this.generateSlug(title);
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+      const existing = await db.select().from(listings).where(eq(listings.slug, slug)).limit(1);
+      if (existing.length === 0) {
+        return slug;
       }
-    };
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  }
 
-    const baseSlug = generateSlug(listing.title);
-    const uniqueSlug = await ensureUniqueSlug(baseSlug);
+  async createListing(listing: InsertListing): Promise<Listing> {
+    const uniqueSlug = await this.generateUniqueSlug(listing.title);
     
     const [newListing] = await db.insert(listings).values({
       ...listing,
