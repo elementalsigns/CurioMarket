@@ -123,8 +123,8 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/browse?category=vintage-medical" className="flex items-center">
-                    Vintage Medical
+                  <Link to="/browse?category=medical-art" className="flex items-center">
+                    Medical Art
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
