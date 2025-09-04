@@ -1,0 +1,29 @@
+index-CPVaZ7a3.js:48 [AUTH] Token found in URL and stored
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:33:58.507Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:33:58.518Z'}
+index-CPVaZ7a3.js:498 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/', timestamp: '2025-09-04T01:33:58.519Z', isProduction: true, …}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:33:58.528Z'}
+index-CPVaZ7a3.js:808 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/', timestamp: '2025-09-04T01:33:58.532Z', isProduction: true}
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:34:10.402Z'}
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:34:10.403Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: false, isLoading: true, …}
+index-CPVaZ7a3.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:34:45.033Z'}
+index-CPVaZ7a3.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T01:34:45.038Z'}
+index-CPVaZ7a3.js:48 [AUTH] Getting token from localStorage: Found
+index-CPVaZ7a3.js:48 [AUTH] Using Bearer token for API call
