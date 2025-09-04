@@ -33,7 +33,7 @@ const createListingSchema = z.object({
   description: z.string().min(50, "Description must be at least 50 characters"),
   price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Price must be a valid positive number"),
   quantity: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Quantity must be a valid positive number"),
-  categoryId: z.string().min(1, "Please select a category"),
+  categoryIds: z.array(z.string()).min(1, "Please select at least one category"),
   speciesOrMaterial: z.string().optional(),
   provenance: z.string().optional(),
   shippingCost: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, "Shipping cost must be a valid number"),
@@ -86,6 +86,7 @@ export default function CreateListing() {
     defaultValues: {
       quantity: "1",
       shippingCost: "0",
+      categoryIds: [],
     },
   });
 
@@ -231,22 +232,31 @@ export default function CreateListing() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="categoryId">Category *</Label>
-                        <Select onValueChange={(value) => setValue("categoryId", value)}>
-                          <SelectTrigger className="mt-1" data-testid="select-category">
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories && Array.isArray(categories) && categories.map((category: Category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.categoryId && (
+                        <Label htmlFor="categoryIds">Categories * (Select at least one)</Label>
+                        <div className="mt-2 space-y-2 border rounded-md p-3 max-h-48 overflow-y-auto">
+                          {categories && Array.isArray(categories) && categories.map((category: Category) => (
+                            <label key={category.id} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                value={category.id}
+                                onChange={(e) => {
+                                  const currentIds = watch("categoryIds") || [];
+                                  if (e.target.checked) {
+                                    setValue("categoryIds", [...currentIds, category.id]);
+                                  } else {
+                                    setValue("categoryIds", currentIds.filter(id => id !== category.id));
+                                  }
+                                }}
+                                className="rounded border-border"
+                                data-testid={`checkbox-category-${category.id}`}
+                              />
+                              <span className="text-sm">{category.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {errors.categoryIds && (
                           <p className="text-destructive text-sm mt-1" data-testid="error-category">
-                            {errors.categoryId.message}
+                            {errors.categoryIds.message}
                           </p>
                         )}
                       </div>

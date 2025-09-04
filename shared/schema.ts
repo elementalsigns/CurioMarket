@@ -155,7 +155,7 @@ export const listings = pgTable("listings", {
   dimensions: varchar("dimensions"), // e.g., "12 x 8 x 6 inches"
   weight: decimal("weight", { precision: 6, scale: 2 }), // in lbs
   origin: varchar("origin"), // Geographic origin
-  categoryId: varchar("category_id").references(() => categories.id),
+  categoryIds: text("category_ids").array().default(sql`'{}'`),
   state: listingStateEnum("state").default('draft'),
   tags: text("tags").array(),
   shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).default('0'),
@@ -519,12 +519,10 @@ export const sellersRelations = relations(sellers, ({ one, many }) => ({
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, { fields: [categories.parentId], references: [categories.id] }),
   children: many(categories, { relationName: "parent" }),
-  listings: many(listings),
 }));
 
 export const listingsRelations = relations(listings, ({ one, many }) => ({
   seller: one(sellers, { fields: [listings.sellerId], references: [sellers.id] }),
-  category: one(categories, { fields: [listings.categoryId], references: [categories.id] }),
   images: many(listingImages),
   cartItems: many(cartItems),
   orderItems: many(orderItems),
@@ -590,8 +588,12 @@ export const insertSellerSchema = createInsertSchema(sellers).omit({
 
 export const insertListingSchema = createInsertSchema(listings).omit({
   id: true,
+  slug: true,
+  views: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  categoryIds: z.array(z.string()).min(1, "Please select at least one category"),
 });
 
 export const insertCategorySchema = createInsertSchema(categories).omit({
