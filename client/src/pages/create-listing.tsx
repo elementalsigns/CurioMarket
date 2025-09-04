@@ -51,31 +51,29 @@ export default function CreateListing() {
   const [previewMode, setPreviewMode] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
-  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
-  });
-
-  // Temporary fallback to load categories if React Query fails
-  const [fallbackCategories, setFallbackCategories] = useState<Category[]>([]);
+  // Direct category loading without React Query complications
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   
   useEffect(() => {
-    if (!categories && !categoriesLoading) {
-      console.log('[CATEGORIES] Loading fallback categories...');
-      fetch("/api/categories", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
-          console.log('[CATEGORIES] Fallback data loaded:', data);
-          setFallbackCategories(data);
-        })
-        .catch(err => console.error("Failed to load categories:", err));
-    }
-  }, [categories, categoriesLoading]);
+    console.log('[CATEGORIES] Loading categories directly...');
+    setCategoriesLoading(true);
+    fetch("/api/categories", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        console.log('[CATEGORIES] Categories loaded:', data);
+        setCategories(Array.isArray(data) ? data : []);
+        setCategoriesLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load categories:", err);
+        setCategories([]);
+        setCategoriesLoading(false);
+      });
+  }, []);
 
-  const displayCategories = categories || fallbackCategories;
-
-  console.log('[CATEGORIES] React Query categories:', categories);
-  console.log('[CATEGORIES] Fallback categories:', fallbackCategories);
-  console.log('[CATEGORIES] Display categories:', displayCategories);
+  console.log('[CATEGORIES] Current categories:', categories);
+  console.log('[CATEGORIES] Categories loading:', categoriesLoading);
 
 
   const {
@@ -240,7 +238,7 @@ export default function CreateListing() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {displayCategories && Array.isArray(displayCategories) && displayCategories.map((category: Category) => (
+                            {categories && Array.isArray(categories) && categories.map((category: Category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
