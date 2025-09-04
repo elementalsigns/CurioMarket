@@ -175,15 +175,19 @@ export default function CreateListing() {
         images: images, // Include the uploaded images
         state: 'published',
       };
-      return apiRequest("POST", "/api/listings", payload);
+      const response = await apiRequest("POST", "/api/listings", payload);
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
         title: "Listing Created",
         description: "Your listing has been created successfully!",
       });
-      // Navigate to the product page using the slug
-      navigate(`/product/${data.slug}`);
+      // Navigate to the product page using the slug with fallback
+      const slug = data.slug || data.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'new-listing';
+      console.log('[CREATE-SUCCESS] Response data:', data);
+      console.log('[CREATE-SUCCESS] Using slug:', slug);
+      navigate(`/product/${slug}`);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
