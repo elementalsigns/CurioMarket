@@ -655,8 +655,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller profile not found" });
       }
       const result = await storage.getListings({ sellerId: seller.id });
-      const listings = result.listings;
-      res.json(listings);
+      
+      // Add images to each listing
+      const listingsWithImages = await Promise.all(
+        result.listings.map(async (listing) => {
+          const images = await storage.getListingImages(listing.id);
+          return { ...listing, images };
+        })
+      );
+      
+      res.json(listingsWithImages);
     } catch (error) {
       console.error("Error fetching seller listings:", error);
       res.status(500).json({ message: "Failed to fetch seller listings" });
@@ -771,9 +779,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getSellerStats(seller.id)
       ]);
 
+      // Add images to each listing
+      const listingsWithImages = await Promise.all(
+        listingsResult.listings.map(async (listing) => {
+          const images = await storage.getListingImages(listing.id);
+          return { ...listing, images };
+        })
+      );
+
       res.json({
         seller,
-        listings: listingsResult.listings,
+        listings: listingsWithImages,
         orders,
         stats
       });
@@ -1976,7 +1992,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         state: 'published'
       });
 
-      res.json(result);
+      // Add images to each listing
+      const listingsWithImages = await Promise.all(
+        result.listings.map(async (listing) => {
+          const images = await storage.getListingImages(listing.id);
+          return { ...listing, images };
+        })
+      );
+
+      res.json({ ...result, listings: listingsWithImages });
     } catch (error) {
       console.error("Error fetching listings:", error);
       res.status(500).json({ error: "Failed to fetch listings" });
@@ -2050,7 +2074,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedListing = await storage.updateListing(req.params.id, updateData);
-      res.json(updatedListing);
+      
+      // Return the listing with slug for proper redirect
+      res.json({ ...updatedListing, slug: updatedListing.slug });
     } catch (error) {
       console.error("Error updating listing:", error);
       res.status(500).json({ error: "Failed to update listing" });
