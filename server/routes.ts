@@ -2042,7 +2042,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const images = await storage.getListingImages(listing.id);
-      res.json({ ...listing, images });
+      // Convert cloud storage URLs to object URLs for proper serving
+      const objectStorageService = new ObjectStorageService();
+      const convertedImages = images.map(image => ({
+        ...image,
+        url: objectStorageService.normalizeObjectEntityPath(image.url)
+      }));
+      res.json({ ...listing, images: convertedImages });
     } catch (error) {
       console.error("Error fetching listing:", error);
       res.status(500).json({ error: "Failed to fetch listing" });
@@ -2059,7 +2065,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fetch associated images
       const images = await storage.getListingImages(listing.id);
-      res.json({ ...listing, images });
+      // Convert cloud storage URLs to object URLs for proper serving
+      const objectStorageService = new ObjectStorageService();
+      const convertedImages = images.map(image => ({
+        ...image,
+        url: objectStorageService.normalizeObjectEntityPath(image.url)
+      }));
+      res.json({ ...listing, images: convertedImages });
     } catch (error) {
       console.error("Error fetching listing by slug:", error);
       res.status(500).json({ error: "Failed to fetch listing" });
