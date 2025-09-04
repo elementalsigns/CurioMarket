@@ -220,9 +220,10 @@ export default function EditListing() {
                 {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="edit-title">Title *</Label>
                     <Input
-                      id="title"
+                      id="edit-title"
+                      name="title"
                       {...form.register("title")}
                       className="bg-zinc-900 border-zinc-700"
                       placeholder="Enter listing title"
@@ -233,9 +234,10 @@ export default function EditListing() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price ($) *</Label>
+                    <Label htmlFor="edit-price">Price ($) *</Label>
                     <Input
-                      id="price"
+                      id="edit-price"
+                      name="price"
                       {...form.register("price")}
                       className="bg-zinc-900 border-zinc-700"
                       placeholder="0.00"
