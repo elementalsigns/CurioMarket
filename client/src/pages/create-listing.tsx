@@ -55,6 +55,20 @@ export default function CreateListing() {
     queryKey: ["/api/categories"],
   });
 
+  // Temporary fallback to load categories if React Query fails
+  const [fallbackCategories, setFallbackCategories] = useState<Category[]>([]);
+  
+  useEffect(() => {
+    if (!categories && !categoriesLoading) {
+      fetch("/api/categories", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setFallbackCategories(data))
+        .catch(err => console.error("Failed to load categories:", err));
+    }
+  }, [categories, categoriesLoading]);
+
+  const displayCategories = categories || fallbackCategories;
+
 
   const {
     register,
@@ -218,7 +232,7 @@ export default function CreateListing() {
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {categories && Array.isArray(categories) && categories.map((category: Category) => (
+                            {displayCategories && Array.isArray(displayCategories) && displayCategories.map((category: Category) => (
                               <SelectItem key={category.id} value={category.id}>
                                 {category.name}
                               </SelectItem>
