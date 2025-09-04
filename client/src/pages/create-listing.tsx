@@ -45,8 +45,6 @@ const createListingSchema = z.object({
 type CreateListingForm = z.infer<typeof createListingSchema>;
 
 export default function CreateListing() {
-  console.log('[CREATE-LISTING] Component is loading!');
-  console.log('[DEBUG] If you see this, React is working!');
   
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -59,12 +57,10 @@ export default function CreateListing() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   
   useEffect(() => {
-    console.log('[CATEGORIES] Loading categories directly...');
     setCategoriesLoading(true);
     fetch("/api/categories", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
-        console.log('[CATEGORIES] Categories loaded:', data);
         setCategories(Array.isArray(data) ? data : []);
         setCategoriesLoading(false);
       })
