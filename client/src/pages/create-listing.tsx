@@ -182,7 +182,8 @@ export default function CreateListing() {
         title: "Listing Created",
         description: "Your listing has been created successfully!",
       });
-      navigate("/seller/dashboard");
+      // Navigate to the product page using the slug
+      navigate(`/product/${data.slug}`);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

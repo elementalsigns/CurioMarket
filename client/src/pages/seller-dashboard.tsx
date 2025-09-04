@@ -312,10 +312,12 @@ export default function SellerDashboard() {
                               View
                             </Button>
                           </Link>
-                          <Button variant="outline" size="sm" data-testid={`button-edit-${listing.id}`}>
-                            <Edit size={16} className="mr-1" />
-                            Edit
-                          </Button>
+                          <Link to={`/seller/listings/edit/${listing.id}`}>
+                            <Button variant="outline" size="sm" data-testid={`button-edit-${listing.id}`}>
+                              <Edit size={16} className="mr-1" />
+                              Edit
+                            </Button>
+                          </Link>
                           <Button
                             variant="outline"
                             size="sm"

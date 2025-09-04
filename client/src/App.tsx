@@ -15,6 +15,7 @@ import SellerOnboardingSimple from "@/pages/seller-onboarding-simple";
 import SellerDashboard from "@/pages/seller-dashboard";
 import SellerOrders from "@/pages/seller-orders";
 import CreateListing from "@/pages/create-listing";
+import EditListing from "@/pages/edit-listing";
 import Checkout from "@/pages/checkout";
 import Subscribe from "@/pages/subscribe";
 import SellerStart from "@/pages/seller-start";
@@ -190,6 +191,7 @@ function Router() {
           <Route path="/seller/inventory" component={InventoryManagement} />
           <Route path="/seller/reviews" component={Reviews} />
           <Route path="/seller/listings/create" component={CreateListing} />
+          <Route path="/seller/listings/edit/:id" component={EditListing} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
