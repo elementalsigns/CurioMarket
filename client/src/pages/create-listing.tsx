@@ -45,8 +45,6 @@ const createListingSchema = z.object({
 type CreateListingForm = z.infer<typeof createListingSchema>;
 
 export default function CreateListing() {
-  console.log('[CREATE-LISTING] Component starting to render');
-  
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -57,16 +55,6 @@ export default function CreateListing() {
     queryKey: ["/api/categories"],
   });
 
-  console.log('[CATEGORIES] Loading:', categoriesLoading, 'Data:', categories, 'Error:', categoriesError);
-  
-  // Force test the API call
-  useEffect(() => {
-    console.log('[CREATE-LISTING] Component mounted');
-    fetch('/api/categories', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => console.log('[CREATE-LISTING] Manual fetch result:', data))
-      .catch(err => console.log('[CREATE-LISTING] Manual fetch error:', err));
-  }, []);
 
   const {
     register,
