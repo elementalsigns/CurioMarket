@@ -2042,7 +2042,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Listing not found" });
       }
 
-      const updatedListing = await storage.updateListing(req.params.id, req.body);
+      // If title changed, regenerate the slug
+      let updateData = { ...req.body };
+      if (req.body.title && req.body.title !== listing.title) {
+        updateData.slug = await storage.generateUniqueSlug(req.body.title);
+      }
+
+      const updatedListing = await storage.updateListing(req.params.id, updateData);
       res.json(updatedListing);
     } catch (error) {
       console.error("Error updating listing:", error);
