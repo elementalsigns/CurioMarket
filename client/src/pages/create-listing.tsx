@@ -60,12 +60,20 @@ export default function CreateListing() {
   
   useEffect(() => {
     if (!categories && !categoriesLoading) {
+      console.log('[CATEGORIES] Loading fallback categories...');
       fetch("/api/categories", { credentials: "include" })
         .then(res => res.json())
-        .then(data => setFallbackCategories(data))
+        .then(data => {
+          console.log('[CATEGORIES] Fallback data loaded:', data);
+          setFallbackCategories(data);
+        })
         .catch(err => console.error("Failed to load categories:", err));
     }
   }, [categories, categoriesLoading]);
+
+  console.log('[CATEGORIES] React Query categories:', categories);
+  console.log('[CATEGORIES] Fallback categories:', fallbackCategories);
+  console.log('[CATEGORIES] Display categories:', displayCategories);
 
   const displayCategories = categories || fallbackCategories;
 
