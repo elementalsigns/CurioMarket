@@ -48,23 +48,23 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=bones-skulls">
+                <Link to="/browse?category=antique">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Bones & Skulls
+                    Antique
                   </Button>
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=occult-art">
+                <Link to="/browse?category=funeral">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Occult Art
+                    Funeral
                   </Button>
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=wet-specimens">
+                <Link to="/browse?category=vintage">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Wet Specimens
+                    Vintage
                   </Button>
                 </Link>
               </li>

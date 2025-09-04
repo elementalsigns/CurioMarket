@@ -73,6 +73,11 @@ export default function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64">
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=antique" className="flex items-center">
+                    Antique
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=bones-skulls" className="flex items-center">
                     Bones & Skulls
                   </Link>
@@ -85,6 +90,11 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/browse?category=crystals" className="flex items-center">
                     Crystals
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/browse?category=funeral" className="flex items-center">
+                    Funeral
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -108,6 +118,11 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=vintage" className="flex items-center">
+                    Vintage
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=vintage-medical" className="flex items-center">
                     Vintage Medical
                   </Link>
@@ -120,11 +135,6 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/browse?category=wet-specimens" className="flex items-center">
                     Wet Specimens
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=murderabilia" className="flex items-center">
-                    Murderabilia
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
