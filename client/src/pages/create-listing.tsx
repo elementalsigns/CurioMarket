@@ -170,9 +170,7 @@ export default function CreateListing() {
     mutationFn: async (data: CreateListingForm) => {
       const payload = {
         ...data,
-        price: parseFloat(data.price),
         quantity: parseInt(data.quantity),
-        shippingCost: parseFloat(data.shippingCost),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
         images: images, // Include the uploaded images
         state: 'published',
