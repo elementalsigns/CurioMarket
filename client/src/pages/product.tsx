@@ -25,12 +25,7 @@ export default function Product() {
   const { data: listing, isLoading } = useQuery({
     queryKey: ["/api/listings/by-slug", slug],
     queryFn: () => 
-      fetch(`/api/listings/by-slug/${slug}`, {
-        credentials: 'include'
-      }).then(res => {
-        if (!res.ok) throw new Error('Listing not found');
-        return res.json();
-      }),
+      apiRequest("GET", `/api/listings/by-slug/${slug}`).then(res => res.json()),
   });
 
   const { data: favorites = [] } = useQuery({
