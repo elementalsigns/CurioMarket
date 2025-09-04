@@ -146,7 +146,10 @@ export default function EditListing() {
         description: "Your listing has been updated successfully!",
       });
       // Navigate to the product page using the slug
-      navigate(`/product/${data.slug}`);
+      const slug = data.slug || listing?.slug || data.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      console.log('[EDIT-SUCCESS] Mutation response:', data);
+      console.log('[EDIT-SUCCESS] Using slug:', slug);
+      navigate(`/product/${slug}`);
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
     },
     onError: (error) => {
