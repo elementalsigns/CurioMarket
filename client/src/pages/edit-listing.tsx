@@ -139,6 +139,7 @@ export default function EditListing() {
         ...data,
         quantity: parseInt(data.quantity),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
+        images: images, // Include the uploaded images
       };
       const response = await apiRequest("PUT", `/api/listings/${id}`, payload);
       return response.json();
