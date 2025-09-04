@@ -112,6 +112,29 @@ export default function CreateListing() {
 
   console.log('[CATEGORIES] Current categories:', categories);
   console.log('[CATEGORIES] Categories loading:', categoriesLoading);
+  
+  // Force fallback categories if we end up with an empty array after loading
+  useEffect(() => {
+    if (!categoriesLoading && categories.length === 0) {
+      const fallbackCategories = [
+        { id: 'antique', name: 'Antique', slug: 'antique', description: 'Authentic antique pieces', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls', description: 'Skeletal remains and specimens', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'candles', name: 'Candles', slug: 'candles', description: 'Gothic and occult candles', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'crystals', name: 'Crystals', slug: 'crystals', description: 'Natural crystals and gemstones', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'funeral', name: 'Funeral', slug: 'funeral', description: 'Funeral and mortuary items', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'jewelry', name: 'Jewelry', slug: 'jewelry', description: 'Gothic and occult jewelry', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'medical-art', name: 'Medical Art', slug: 'medical-art', description: 'Medical instruments and art', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia', description: 'Crime-related collectibles', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'occult', name: 'Occult', slug: 'occult', description: 'Dark and mystical items', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy', description: 'Preserved animal specimens', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'vintage', name: 'Vintage', slug: 'vintage', description: 'Vintage items from past eras', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'wall-art', name: 'Wall Art', slug: 'wall-art', description: 'Dark and mystical wall art', icon: null, parentId: null, createdAt: new Date() },
+        { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens', description: 'Preserved biological specimens', icon: null, parentId: null, createdAt: new Date() }
+      ];
+      console.log('[CATEGORIES] Forcing fallback categories after load completed with empty array');
+      setCategories(fallbackCategories);
+    }
+  }, [categoriesLoading, categories.length]);
 
 
   const {
@@ -271,27 +294,32 @@ export default function CreateListing() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="categoryIds">Categories * (Select at least one)</Label>
+                        <Label>Categories * (Select at least one)</Label>
                         <div className="mt-2 space-y-2 border rounded-md p-3 max-h-48 overflow-y-auto">
-                          {categories && Array.isArray(categories) && categories.map((category: Category) => (
-                            <label key={category.id} className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                value={category.id}
-                                onChange={(e) => {
-                                  const currentIds = watch("categoryIds") || [];
-                                  if (e.target.checked) {
-                                    setValue("categoryIds", [...currentIds, category.id]);
-                                  } else {
-                                    setValue("categoryIds", currentIds.filter(id => id !== category.id));
-                                  }
-                                }}
-                                className="rounded border-border"
-                                data-testid={`checkbox-category-${category.id}`}
-                              />
-                              <span className="text-sm">{category.name}</span>
-                            </label>
-                          ))}
+                          {(!categoriesLoading && categories.length === 0) ? (
+                            <p className="text-sm text-muted-foreground">Loading categories...</p>
+                          ) : (
+                            categories.map((category: Category) => (
+                              <label key={category.id} className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  id={`category-${category.id}`}
+                                  value={category.id}
+                                  onChange={(e) => {
+                                    const currentIds = watch("categoryIds") || [];
+                                    if (e.target.checked) {
+                                      setValue("categoryIds", [...currentIds, category.id]);
+                                    } else {
+                                      setValue("categoryIds", currentIds.filter(id => id !== category.id));
+                                    }
+                                  }}
+                                  className="rounded border-border"
+                                  data-testid={`checkbox-category-${category.id}`}
+                                />
+                                <span className="text-sm">{category.name}</span>
+                              </label>
+                            ))
+                          )}
                         </div>
                         {errors.categoryIds && (
                           <p className="text-destructive text-sm mt-1" data-testid="error-category">
