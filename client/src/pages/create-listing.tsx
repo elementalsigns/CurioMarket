@@ -65,19 +65,19 @@ export default function CreateListing() {
         // If API returns empty array, use fallback categories
         if (loadedCategories.length === 0) {
           const fallbackCategories = [
-            { id: 'antique', name: 'Antique', slug: 'antique' },
-            { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls' },
-            { id: 'candles', name: 'Candles', slug: 'candles' },
-            { id: 'crystals', name: 'Crystals', slug: 'crystals' },
-            { id: 'funeral', name: 'Funeral', slug: 'funeral' },
-            { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
-            { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
-            { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia' },
-            { id: 'occult', name: 'Occult', slug: 'occult' },
-            { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy' },
-            { id: 'vintage', name: 'Vintage', slug: 'vintage' },
-            { id: 'wall-art', name: 'Wall Art', slug: 'wall-art' },
-            { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens' }
+            { id: 'antique', name: 'Antique', slug: 'antique', description: 'Authentic antique pieces', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls', description: 'Skeletal remains and specimens', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'candles', name: 'Candles', slug: 'candles', description: 'Gothic and occult candles', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'crystals', name: 'Crystals', slug: 'crystals', description: 'Natural crystals and gemstones', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'funeral', name: 'Funeral', slug: 'funeral', description: 'Funeral and mortuary items', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'jewelry', name: 'Jewelry', slug: 'jewelry', description: 'Gothic and occult jewelry', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'medical-art', name: 'Medical Art', slug: 'medical-art', description: 'Medical instruments and art', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia', description: 'Crime-related collectibles', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'occult', name: 'Occult', slug: 'occult', description: 'Dark and mystical items', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy', description: 'Preserved animal specimens', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'vintage', name: 'Vintage', slug: 'vintage', description: 'Vintage items from past eras', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'wall-art', name: 'Wall Art', slug: 'wall-art', description: 'Dark and mystical wall art', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens', description: 'Preserved biological specimens', icon: null, parentId: null, createdAt: new Date() }
           ];
           console.log('[CATEGORIES] Using fallback categories due to empty API response');
           setCategories(fallbackCategories);
@@ -90,19 +90,19 @@ export default function CreateListing() {
         console.error("Failed to load categories:", err);
         // Use fallback categories on error too
         const fallbackCategories = [
-          { id: 'antique', name: 'Antique', slug: 'antique' },
-          { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls' },
-          { id: 'candles', name: 'Candles', slug: 'candles' },
-          { id: 'crystals', name: 'Crystals', slug: 'crystals' },
-          { id: 'funeral', name: 'Funeral', slug: 'funeral' },
-          { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
-          { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
-          { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia' },
-          { id: 'occult', name: 'Occult', slug: 'occult' },
-          { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy' },
-          { id: 'vintage', name: 'Vintage', slug: 'vintage' },
-          { id: 'wall-art', name: 'Wall Art', slug: 'wall-art' },
-          { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens' }
+          { id: 'antique', name: 'Antique', slug: 'antique', description: 'Authentic antique pieces', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls', description: 'Skeletal remains and specimens', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'candles', name: 'Candles', slug: 'candles', description: 'Gothic and occult candles', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'crystals', name: 'Crystals', slug: 'crystals', description: 'Natural crystals and gemstones', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'funeral', name: 'Funeral', slug: 'funeral', description: 'Funeral and mortuary items', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'jewelry', name: 'Jewelry', slug: 'jewelry', description: 'Gothic and occult jewelry', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'medical-art', name: 'Medical Art', slug: 'medical-art', description: 'Medical instruments and art', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia', description: 'Crime-related collectibles', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'occult', name: 'Occult', slug: 'occult', description: 'Dark and mystical items', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy', description: 'Preserved animal specimens', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'vintage', name: 'Vintage', slug: 'vintage', description: 'Vintage items from past eras', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'wall-art', name: 'Wall Art', slug: 'wall-art', description: 'Dark and mystical wall art', icon: null, parentId: null, createdAt: new Date() },
+          { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens', description: 'Preserved biological specimens', icon: null, parentId: null, createdAt: new Date() }
         ];
         console.log('[CATEGORIES] Using fallback categories due to API error');
         setCategories(fallbackCategories);
