@@ -91,6 +91,7 @@ export interface IStorage {
   // Listing images
   addListingImage(listingId: string, url: string, alt?: string, sortOrder?: number): Promise<ListingImage>;
   getListingImages(listingId: string): Promise<ListingImage[]>;
+  deleteListingImages(listingId: string): Promise<void>;
   
   // Cart operations
   getOrCreateCart(userId?: string, sessionId?: string): Promise<Cart>;
@@ -445,6 +446,10 @@ export class DatabaseStorage implements IStorage {
       .from(listingImages)
       .where(eq(listingImages.listingId, listingId))
       .orderBy(asc(listingImages.sortOrder));
+  }
+
+  async deleteListingImages(listingId: string): Promise<void> {
+    await db.delete(listingImages).where(eq(listingImages.listingId, listingId));
   }
 
   // Cart operations

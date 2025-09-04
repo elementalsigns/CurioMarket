@@ -1964,6 +1964,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const listing = await storage.createListing(listingData);
+      
+      // Handle images if provided
+      if (req.body.images && Array.isArray(req.body.images)) {
+        for (let i = 0; i < req.body.images.length; i++) {
+          await storage.addListingImage(listing.id, req.body.images[i], undefined, i);
+        }
+      }
+      
       res.json(listing);
     } catch (error: any) {
       console.error("Error creating listing:", error);
@@ -2075,11 +2083,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedListing = await storage.updateListing(req.params.id, updateData);
       
+      // Handle images if provided
+      if (req.body.images && Array.isArray(req.body.images)) {
+        // For simplicity, replace all images (delete old ones and add new ones)
+        await storage.deleteListingImages(req.params.id);
+        for (let i = 0; i < req.body.images.length; i++) {
+          await storage.addListingImage(req.params.id, req.body.images[i], undefined, i);
+        }
+      }
+      
       // Ensure slug exists - if not, generate one from title
       let responseSlug = updatedListing.slug;
       if (!responseSlug && updatedListing.title) {
         responseSlug = await storage.generateUniqueSlug(updatedListing.title);
-        await storage.updateListing(req.params.id, { slug: responseSlug });
+        await storage.updateListing(req.params.id, { slug: responseSlug } as any);
       }
       
       console.log(`[EDIT-DEBUG] Updated listing ${req.params.id}: title="${updatedListing.title}", slug="${responseSlug}"`);
