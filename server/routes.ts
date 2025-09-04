@@ -2075,8 +2075,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedListing = await storage.updateListing(req.params.id, updateData);
       
-      // Return the listing with slug for proper redirect
-      res.json({ ...updatedListing, slug: updatedListing.slug });
+      // Ensure slug exists - if not, generate one from title
+      let responseSlug = updatedListing.slug;
+      if (!responseSlug && updatedListing.title) {
+        responseSlug = await storage.generateUniqueSlug(updatedListing.title);
+        await storage.updateListing(req.params.id, { slug: responseSlug });
+      }
+      
+      console.log(`[EDIT-DEBUG] Updated listing ${req.params.id}: title="${updatedListing.title}", slug="${responseSlug}"`);
+      
+      // Return the listing with guaranteed slug for proper redirect
+      res.json({ ...updatedListing, slug: responseSlug });
     } catch (error) {
       console.error("Error updating listing:", error);
       res.status(500).json({ error: "Failed to update listing" });
