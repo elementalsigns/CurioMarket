@@ -1,0 +1,60 @@
+every time i hit update listing the top of the page shows 
+
+https://www.curiosities.market/product/undefined
+
+
+index-rIJOiRiS.js:48 [AUTH] Token found in URL and stored
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:05.959Z'}
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:05.963Z'}
+index-rIJOiRiS.js:498 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/', timestamp: '2025-09-04T18:29:05.963Z', isProduction: true, …}
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:05.965Z'}
+index-rIJOiRiS.js:808 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'seller', path: '/', timestamp: '2025-09-04T18:29:05.965Z', isProduction: true}
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:08.458Z'}
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:08.458Z'}
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: false, isLoading: true, …}
+index-rIJOiRiS.js:511 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'seller', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: true, isLoading: false, …}
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:12.034Z'}
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:12.034Z'}
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Adding Bearer token to request
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:26.989Z'}
+index-rIJOiRiS.js:458 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'seller', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-04T18:29:26.990Z'}
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+index-rIJOiRiS.js:506  GET https://www.curiosities.market/api/listings/by-slug/undefined 404 (Not Found)
+queryFn @ index-rIJOiRiS.js:506
+a @ index-rIJOiRiS.js:48
+g @ index-rIJOiRiS.js:48
+start @ index-rIJOiRiS.js:48
+fetch @ index-rIJOiRiS.js:48
+ld @ index-rIJOiRiS.js:48
+onSubscribe @ index-rIJOiRiS.js:48
+subscribe @ index-rIJOiRiS.js:48
+(anonymous) @ index-rIJOiRiS.js:48
+iT @ index-rIJOiRiS.js:38
+ex @ index-rIJOiRiS.js:40
+ql @ index-rIJOiRiS.js:40
+lF @ index-rIJOiRiS.js:40
+io @ index-rIJOiRiS.js:40
+M2 @ index-rIJOiRiS.js:40
+Ka @ index-rIJOiRiS.js:38
+(anonymous) @ index-rIJOiRiS.js:40
+index-rIJOiRiS.js:48 [AUTH] Getting token from localStorage: Found
+index-rIJOiRiS.js:48 [AUTH] Using Bearer token for API call
+
+
+
+also another issue the view page doesn’t show the live image 
