@@ -46,6 +46,7 @@ type CreateListingForm = z.infer<typeof createListingSchema>;
 
 export default function CreateListing() {
   console.log('[CREATE-LISTING] Component is loading!');
+  console.log('[DEBUG] If you see this, React is working!');
   
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
