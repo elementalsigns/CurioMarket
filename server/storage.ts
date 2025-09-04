@@ -304,7 +304,38 @@ export class DatabaseStorage implements IStorage {
 
   // Listing operations
   async createListing(listing: InsertListing): Promise<Listing> {
-    const [newListing] = await db.insert(listings).values(listing).returning();
+    // Generate a URL-friendly slug from the title
+    const generateSlug = (title: string): string => {
+      return title
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-')     // Replace spaces with hyphens
+        .replace(/-+/g, '-')      // Replace multiple hyphens with single
+        .trim();
+    };
+
+    // Ensure slug is unique by checking existing slugs
+    const ensureUniqueSlug = async (baseSlug: string): Promise<string> => {
+      let slug = baseSlug;
+      let counter = 1;
+      
+      while (true) {
+        const existing = await db.select().from(listings).where(eq(listings.slug, slug)).limit(1);
+        if (existing.length === 0) {
+          return slug;
+        }
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+    };
+
+    const baseSlug = generateSlug(listing.title);
+    const uniqueSlug = await ensureUniqueSlug(baseSlug);
+    
+    const [newListing] = await db.insert(listings).values({
+      ...listing,
+      slug: uniqueSlug
+    }).returning();
     return newListing;
   }
 
