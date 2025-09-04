@@ -64,47 +64,9 @@ export function ImageUploadGrid({
           continue;
         }
 
-        try {
-          // Get upload URL from server
-          const uploadResponse = await fetch('/api/objects/upload', {
-            method: 'POST',
-            credentials: 'include'
-          });
-          
-          if (!uploadResponse.ok) {
-            throw new Error('Failed to get upload URL');
-          }
-          
-          const { uploadURL } = await uploadResponse.json();
-          
-          // Upload file to cloud storage
-          const response = await fetch(uploadURL, {
-            method: 'PUT',
-            body: file,
-            headers: {
-              'Content-Type': file.type,
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Upload failed: ${response.status}`);
-          }
-
-          // Extract the clean URL without query parameters for access
-          const cleanUrl = uploadURL ? uploadURL.split('?')[0] : null;
-          if (!cleanUrl) {
-            throw new Error('Upload URL is missing or invalid');
-          }
-          
-          newImages.push(cleanUrl);
-        } catch (uploadError) {
-          console.error('Failed to upload file:', file.name, uploadError);
-          toast({
-            title: "Upload failed",
-            description: `Failed to upload ${file.name}. Please try again.`,
-            variant: "destructive",
-          });
-        }
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(file);
+        newImages.push(previewUrl);
       }
 
       if (newImages.length > 0) {
