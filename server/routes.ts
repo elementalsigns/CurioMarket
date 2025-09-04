@@ -2018,7 +2018,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!listing) {
         return res.status(404).json({ error: "Listing not found" });
       }
-      
+
+      // Fetch associated images
       const images = await storage.getListingImages(listing.id);
       res.json({ ...listing, images });
     } catch (error) {
