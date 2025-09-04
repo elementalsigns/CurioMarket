@@ -64,9 +64,51 @@ export function ImageUploadGrid({
           continue;
         }
 
-        // Create preview URL
-        const previewUrl = URL.createObjectURL(file);
-        newImages.push(previewUrl);
+        try {
+          // Get upload URL from server
+          const uploadResponse = await fetch('/api/objects/upload', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to get upload URL');
+          }
+          
+          const { uploadURL } = await uploadResponse.json();
+          
+          // Upload file to cloud storage
+          const response = await fetch(uploadURL, {
+            method: 'PUT',
+            body: file,
+            headers: {
+              'Content-Type': file.type,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+          }
+
+          // Extract the clean URL without query parameters for persistent access
+          const cleanUrl = uploadURL ? uploadURL.split('?')[0] : null;
+          if (!cleanUrl) {
+            throw new Error('Upload URL is missing or invalid');
+          }
+          
+          // Use the cloud storage URL for persistence
+          newImages.push(cleanUrl);
+        } catch (uploadError) {
+          console.error('Failed to upload file:', file.name, uploadError);
+          // Fallback to blob URL for immediate preview (but warn user)
+          const previewUrl = URL.createObjectURL(file);
+          newImages.push(previewUrl);
+          toast({
+            title: "Upload warning",
+            description: `${file.name} uploaded as preview only. Save again to persist.`,
+            variant: "destructive",
+          });
+        }
       }
 
       if (newImages.length > 0) {
