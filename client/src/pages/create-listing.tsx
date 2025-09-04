@@ -437,6 +437,7 @@ export default function CreateListing() {
                         </div>
                         <Input
                           id="sku"
+                          name="sku"
                           {...register("sku")}
                           placeholder="e.g., VIC-OCT-001"
                           className="mt-1"
@@ -487,6 +488,7 @@ export default function CreateListing() {
                         </div>
                         <Input
                           id="mpn"
+                          name="mpn"
                           {...register("mpn")}
                           placeholder="e.g., SPEC-8ARM-1885"
                           className="mt-1"
