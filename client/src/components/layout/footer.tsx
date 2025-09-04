@@ -48,20 +48,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=wet-specimens">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Wet Specimens
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/browse?category=gothic-home-decor">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Gothic Decor
-                  </Button>
-                </Link>
-              </li>
-              <li>
                 <Link to="/browse?category=bones-skulls">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
                     Bones & Skulls
@@ -69,16 +55,30 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=jewelry">
+                <Link to="/browse?category=occult-art">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Jewelry
+                    Occult Art
                   </Button>
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=occult">
+                <Link to="/browse?category=taxidermy">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Occult
+                    Taxidermy
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/browse?category=vintage-medical">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Vintage Medical
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/browse?category=wet-specimens">
+                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
+                    Wet Specimens
                   </Button>
                 </Link>
               </li>

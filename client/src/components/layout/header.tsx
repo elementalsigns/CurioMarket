@@ -73,8 +73,18 @@ export default function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64">
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=bones-skulls" className="flex items-center">
+                    Bones & Skulls
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/browse?category=occult-art" className="flex items-center">
+                    Occult Art
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=taxidermy" className="flex items-center">
-                    Taxidermy & Bones
+                    Taxidermy
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -83,33 +93,8 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/browse?category=gothic-decor" className="flex items-center">
-                    Gothic Decor
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=oddities" className="flex items-center">
-                    Oddities & Curiosities
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=specimens" className="flex items-center">
-                    Antique Specimens
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=victorian" className="flex items-center">
-                    Victorian Era
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=jewelry" className="flex items-center">
-                    Jewelry
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=occult" className="flex items-center">
-                    Occult
+                  <Link to="/browse?category=wet-specimens" className="flex items-center">
+                    Wet Specimens
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
