@@ -138,7 +138,8 @@ export default function EditListing() {
         quantity: parseInt(data.quantity),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
       };
-      return apiRequest("PUT", `/api/listings/${id}`, payload);
+      const response = await apiRequest("PUT", `/api/listings/${id}`, payload);
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
