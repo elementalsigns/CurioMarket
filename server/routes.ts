@@ -2011,6 +2011,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single listing by slug (public)
+  app.get('/api/listings/by-slug/:slug', async (req, res) => {
+    try {
+      const listing = await storage.getListingBySlug(req.params.slug);
+      if (!listing) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+      
+      const images = await storage.getListingImages(listing.id);
+      res.json({ ...listing, images });
+    } catch (error) {
+      console.error("Error fetching listing by slug:", error);
+      res.status(500).json({ error: "Failed to fetch listing" });
+    }
+  });
+
   // Update listing
   app.put('/api/listings/:id', isAuthenticated, async (req: any, res) => {
     try {

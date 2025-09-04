@@ -23,9 +23,11 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
 
   const { data: listing, isLoading } = useQuery({
-    queryKey: ["/api/listings", slug],
+    queryKey: ["/api/listings/by-slug", slug],
     queryFn: () => 
-      fetch(`/api/listings/${slug}`).then(res => {
+      fetch(`/api/listings/by-slug/${slug}`, {
+        credentials: 'include'
+      }).then(res => {
         if (!res.ok) throw new Error('Listing not found');
         return res.json();
       }),
