@@ -779,11 +779,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getSellerStats(seller.id)
       ]);
 
-      // Add images to each listing
+      // Add images to each listing with proper URL conversion for dashboard display
       const listingsWithImages = await Promise.all(
         listingsResult.listings.map(async (listing) => {
           const images = await storage.getListingImages(listing.id);
-          return { ...listing, images };
+          // Convert cloud storage URLs to object URLs for proper serving
+          const objectStorageService = new ObjectStorageService();
+          const convertedImages = images.map(image => ({
+            ...image,
+            url: objectStorageService.normalizeObjectEntityPath(image.url)
+          }));
+          return { ...listing, images: convertedImages };
         })
       );
 
