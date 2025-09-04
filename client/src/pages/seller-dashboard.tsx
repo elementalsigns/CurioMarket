@@ -273,7 +273,7 @@ export default function SellerDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center">
+                          <div className="w-24 h-24 bg-card rounded-lg flex items-center justify-center">
                             {listing.images?.[0]?.url ? (
                               <img
                                 src={listing.images[0].url}
@@ -281,7 +281,7 @@ export default function SellerDashboard() {
                                 className="w-full h-full object-cover rounded-lg"
                               />
                             ) : (
-                              <Package className="text-foreground/40" size={24} />
+                              <Package className="text-foreground/40" size={32} />
                             )}
                           </div>
                           <div>
