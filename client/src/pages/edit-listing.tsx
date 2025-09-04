@@ -17,6 +17,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { ImageUploadGrid } from "@/components/ImageUploadGrid";
 import type { Category } from "@shared/schema";
 
 const editListingSchema = z.object({
@@ -43,6 +44,7 @@ export default function EditListing() {
   const queryClient = useQueryClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [images, setImages] = useState<string[]>([]);
 
   // Fetch listing data
   const { data: listing, isLoading: listingLoading } = useQuery({
@@ -146,11 +148,10 @@ export default function EditListing() {
         title: "Listing Updated",
         description: "Your listing has been updated successfully!",
       });
-      // Navigate to the product page using the slug
-      const slug = data.slug || listing?.slug || data.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      // Navigate back to the seller dashboard
       console.log('[EDIT-SUCCESS] Mutation response:', data);
-      console.log('[EDIT-SUCCESS] Using slug:', slug);
-      navigate(`/product/${slug}`);
+      console.log('[EDIT-SUCCESS] Redirecting to dashboard');
+      navigate('/seller/dashboard');
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
     },
     onError: (error) => {
@@ -368,6 +369,13 @@ export default function EditListing() {
                     placeholder="gothic, vintage, rare"
                   />
                 </div>
+
+                {/* Image Upload */}
+                <ImageUploadGrid
+                  images={images}
+                  onImagesChange={setImages}
+                  maxImages={10}
+                />
 
                 <div className="flex gap-4 pt-4">
                   <Button
