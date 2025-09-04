@@ -71,11 +71,11 @@ export default function CreateListing() {
     }
   }, [categories, categoriesLoading]);
 
+  const displayCategories = categories || fallbackCategories;
+
   console.log('[CATEGORIES] React Query categories:', categories);
   console.log('[CATEGORIES] Fallback categories:', fallbackCategories);
   console.log('[CATEGORIES] Display categories:', displayCategories);
-
-  const displayCategories = categories || fallbackCategories;
 
 
   const {
