@@ -108,8 +108,8 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/browse?category=occult-art" className="flex items-center">
-                    Occult Art
+                  <Link to="/browse?category=occult" className="flex items-center">
+                    Occult
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
