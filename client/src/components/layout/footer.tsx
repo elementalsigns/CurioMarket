@@ -55,44 +55,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=crystals">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Crystals
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/browse?category=jewelry">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Jewelry
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/browse?category=murderabilia">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Murderabilia
-                  </Button>
-                </Link>
-              </li>
-              <li>
                 <Link to="/browse?category=occult-art">
                   <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
                     Occult Art
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/browse?category=taxidermy">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Taxidermy
-                  </Button>
-                </Link>
-              </li>
-              <li>
-                <Link to="/browse?category=vintage-medical">
-                  <Button variant="ghost" size="sm" className="p-0 h-auto text-foreground/70 hover:text-red-600 hover:bg-transparent transition-colors">
-                    Vintage Medical
                   </Button>
                 </Link>
               </li>
