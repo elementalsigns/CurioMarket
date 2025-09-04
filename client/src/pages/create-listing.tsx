@@ -183,11 +183,10 @@ export default function CreateListing() {
         title: "Listing Created",
         description: "Your listing has been created successfully!",
       });
-      // Navigate to the product page using the slug with fallback
-      const slug = data.slug || data.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'new-listing';
+      // Navigate back to seller dashboard after successful creation
       console.log('[CREATE-SUCCESS] Response data:', data);
-      console.log('[CREATE-SUCCESS] Using slug:', slug);
-      navigate(`/product/${slug}`);
+      console.log('[CREATE-SUCCESS] Redirecting to dashboard');
+      navigate('/seller/dashboard');
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
