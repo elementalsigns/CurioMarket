@@ -130,6 +130,8 @@ export default function EditListing() {
         sku: listing.sku || "",
         mpn: listing.mpn || "",
       });
+      // Load existing images into the images state
+      setImages(listing.images?.map((img: any) => img.url) || []);
     }
   }, [listing, form]);
 
