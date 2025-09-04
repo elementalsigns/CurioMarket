@@ -78,6 +78,11 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=candles" className="flex items-center">
+                    Candles
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=crystals" className="flex items-center">
                     Crystals
                   </Link>
@@ -105,6 +110,11 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/browse?category=vintage-medical" className="flex items-center">
                     Vintage Medical
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/browse?category=wall-art" className="flex items-center">
+                    Wall Art
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
