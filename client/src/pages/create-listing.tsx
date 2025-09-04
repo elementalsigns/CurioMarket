@@ -61,12 +61,51 @@ export default function CreateListing() {
     fetch("/api/categories", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
-        setCategories(Array.isArray(data) ? data : []);
+        const loadedCategories = Array.isArray(data) ? data : [];
+        // If API returns empty array, use fallback categories
+        if (loadedCategories.length === 0) {
+          const fallbackCategories = [
+            { id: 'antique', name: 'Antique', slug: 'antique' },
+            { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls' },
+            { id: 'candles', name: 'Candles', slug: 'candles' },
+            { id: 'crystals', name: 'Crystals', slug: 'crystals' },
+            { id: 'funeral', name: 'Funeral', slug: 'funeral' },
+            { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
+            { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
+            { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia' },
+            { id: 'occult', name: 'Occult', slug: 'occult' },
+            { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy' },
+            { id: 'vintage', name: 'Vintage', slug: 'vintage' },
+            { id: 'wall-art', name: 'Wall Art', slug: 'wall-art' },
+            { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens' }
+          ];
+          console.log('[CATEGORIES] Using fallback categories due to empty API response');
+          setCategories(fallbackCategories);
+        } else {
+          setCategories(loadedCategories);
+        }
         setCategoriesLoading(false);
       })
       .catch(err => {
         console.error("Failed to load categories:", err);
-        setCategories([]);
+        // Use fallback categories on error too
+        const fallbackCategories = [
+          { id: 'antique', name: 'Antique', slug: 'antique' },
+          { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls' },
+          { id: 'candles', name: 'Candles', slug: 'candles' },
+          { id: 'crystals', name: 'Crystals', slug: 'crystals' },
+          { id: 'funeral', name: 'Funeral', slug: 'funeral' },
+          { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
+          { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
+          { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia' },
+          { id: 'occult', name: 'Occult', slug: 'occult' },
+          { id: 'taxidermy', name: 'Taxidermy', slug: 'taxidermy' },
+          { id: 'vintage', name: 'Vintage', slug: 'vintage' },
+          { id: 'wall-art', name: 'Wall Art', slug: 'wall-art' },
+          { id: 'wet-specimens', name: 'Wet Specimens', slug: 'wet-specimens' }
+        ];
+        console.log('[CATEGORIES] Using fallback categories due to API error');
+        setCategories(fallbackCategories);
         setCategoriesLoading(false);
       });
   }, []);
