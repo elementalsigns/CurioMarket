@@ -264,6 +264,11 @@ export default function Browse() {
 
 
             {/* Results Grid */}
+            {/* Debug current search results */}
+            <div className="text-xs text-yellow-400 mb-2 font-mono">
+              Loading: {isLoading ? 'true' : 'false'} | Results: {searchResults?.listings?.length || 0} | Total: {searchResults?.total || 0}
+            </div>
+            
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
