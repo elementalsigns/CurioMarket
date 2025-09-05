@@ -31,14 +31,20 @@ export default function Browse() {
   const [showWishlistDialog, setShowWishlistDialog] = useState(false);
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
   const [searchName, setSearchName] = useState("");
+  const [isUserInitiated, setIsUserInitiated] = useState(false);
   const { toast } = useToast();
 
   // Extract URL parameters whenever the location changes
   useEffect(() => {
+    // Skip URL updates if this was a user-initiated change
+    if (isUserInitiated) {
+      setIsUserInitiated(false);
+      return;
+    }
+    
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category');
     const q = urlParams.get('q');
-    
     
     setFilters(prev => ({ 
       ...prev, 
@@ -50,7 +56,7 @@ export default function Browse() {
     } else {
       setSearchQuery("");
     }
-  }, [location]);
+  }, [location, isUserInitiated]);
 
   // Function to update URL when filters change
   const updateURL = (newFilters: typeof filters, newSearchQuery: string = searchQuery) => {
@@ -66,6 +72,7 @@ export default function Browse() {
 
   // Enhanced filter change handler that updates URL
   const handleFiltersChange = (newFilters: typeof filters) => {
+    setIsUserInitiated(true);
     setFilters(newFilters);
     updateURL(newFilters);
   };
