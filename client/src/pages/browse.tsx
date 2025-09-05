@@ -137,15 +137,12 @@ export default function Browse() {
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    setFilters(prev => ({ ...prev, category: "" }));
-                    navigate('/browse');
-                  }}
+                  onClick={() => navigate('/')}
                   className="text-zinc-400 hover:text-white"
-                  data-testid="button-back-to-all"
+                  data-testid="button-back-home"
                 >
                   <ArrowLeft size={16} className="mr-2" />
-                  Back to All Categories
+                  Back to Home
                 </Button>
                 <div className="text-white font-medium">
                   {categories?.find((cat: any) => cat.slug === filters.category)?.name || filters.category}
