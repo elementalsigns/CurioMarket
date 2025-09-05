@@ -2348,7 +2348,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset: parseInt(offset as string)
       });
       
-      res.json(result);
+      res.json({
+        listings: result.listings,
+        total: result.total,
+        // DEPLOYMENT TEST: If you see this message, the fix is deployed
+        deploymentTest: "CATEGORY-FIX-DEPLOYED-" + new Date().toISOString()
+      });
     } catch (error) {
       console.error("Error searching listings:", error);
       res.status(500).json({ error: "Failed to search listings" });
