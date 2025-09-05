@@ -294,12 +294,12 @@ export default function SellerDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className="w-32 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden">
+                          <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center overflow-hidden">
                             {listing.images?.[0]?.url ? (
                               <img
                                 src={`${listing.images[0].url}?t=${Date.now()}`}
                                 alt={listing.title}
-                                className="max-w-full max-h-full object-contain rounded-lg"
+                                className="w-full h-full object-cover rounded-lg"
                                 onError={(e) => {
                                   console.log('[IMAGE ERROR] Failed to load:', listing.images[0].url);
                                   e.currentTarget.style.display = 'none';
@@ -309,7 +309,7 @@ export default function SellerDashboard() {
                                 }}
                               />
                             ) : (
-                              <Package className="text-foreground/40" size={32} />
+                              <Package className="text-foreground/40" size={24} />
                             )}
                           </div>
                           <div>
