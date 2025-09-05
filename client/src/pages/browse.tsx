@@ -268,7 +268,7 @@ export default function Browse() {
                 total: searchResults?.total,
                 listingsLength: searchResults?.listings?.length,
                 firstListingId: searchResults?.listings?.[0]?.id,
-                queryKey: JSON.stringify(queryKey)
+                category: filters.category
               })}
             </div>
 
