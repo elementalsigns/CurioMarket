@@ -350,11 +350,6 @@ export class DatabaseStorage implements IStorage {
     state?: string;
     sortByDisplayOrder?: boolean;
   }): Promise<{ listings: Listing[]; total: number }> {
-    // TEMPORARY FIX: Force antique category to return 0 results until deployment issue is resolved
-    if (filters?.categoryId === 'antique') {
-      return { listings: [], total: 0 };
-    }
-    
     const conditions = [];
     
     if (filters?.categoryId) {
