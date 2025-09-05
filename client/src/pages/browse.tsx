@@ -39,16 +39,17 @@ export default function Browse() {
     const category = urlParams.get('category');
     const q = urlParams.get('q');
     
-    setFilters(prev => ({ 
-      ...prev, 
-      category: category || "" 
-    }));
+    // Only update if different to prevent loops
+    setFilters(prev => {
+      const newCategory = category || "";
+      if (prev.category !== newCategory) {
+        return { ...prev, category: newCategory };
+      }
+      return prev;
+    });
     
-    if (q) {
-      setSearchQuery(q);
-    } else {
-      setSearchQuery("");
-    }
+    const newSearchQuery = q || "";
+    setSearchQuery(prev => prev !== newSearchQuery ? newSearchQuery : prev);
   }, [location]);
 
   // Function to update URL when filters change
@@ -82,10 +83,10 @@ export default function Browse() {
       const result = await response.json();
       return result;
     },
-    staleTime: 5000, // Cache for 5 seconds to prevent duplicate requests
-    gcTime: 30000, // Keep in cache for 30 seconds
-    refetchOnWindowFocus: false, // Don't refetch when window gains focus
-    refetchOnMount: false, // Don't refetch on component remount
+    staleTime: 0, // Always refetch when filters change
+    gcTime: 5000, // Short cache time  
+    refetchOnWindowFocus: false,
+    refetchOnMount: true, // Ensure fresh data on mount
   });
 
   const handleSearch = (e: React.FormEvent) => {
