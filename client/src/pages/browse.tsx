@@ -71,7 +71,7 @@ export default function Browse() {
   };
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ["/api/search", { q: searchQuery, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice, sortBy: filters.sortBy }],
+    queryKey: ["/api/search", filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
@@ -85,8 +85,10 @@ export default function Browse() {
       console.log('✅ API Response:', result);
       return result;
     },
-    staleTime: 1000, // Cache for 1 second to prevent duplicate requests
+    staleTime: 5000, // Cache for 5 seconds to prevent duplicate requests
+    gcTime: 30000, // Keep in cache for 30 seconds
     refetchOnWindowFocus: false, // Don't refetch when window gains focus
+    refetchOnMount: false, // Don't refetch on component remount
   });
 
   const handleSearch = (e: React.FormEvent) => {
