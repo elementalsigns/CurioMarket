@@ -72,18 +72,21 @@ export default function Browse() {
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ["/api/search", { q: searchQuery, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice, sortBy: filters.sortBy }],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (filters.category) params.append("category", filters.category);
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
-      
-      return fetch(`/api/search?${params.toString()}`).then(res => res.json());
+      console.log('🚀 API Request:', `/api/search?${params.toString()}`);
+      const response = await fetch(`/api/search?${params.toString()}`);
+      const result = await response.json();
+      console.log('✅ API Response:', result);
+      return result;
     },
-    staleTime: 0, // Always refetch when query key changes
-    gcTime: 0, // Don't cache results
+    staleTime: 1000, // Cache for 1 second to prevent duplicate requests
+    refetchOnWindowFocus: false, // Don't refetch when window gains focus
   });
 
   const handleSearch = (e: React.FormEvent) => {
