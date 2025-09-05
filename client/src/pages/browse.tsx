@@ -79,8 +79,10 @@ export default function Browse() {
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
+      console.log('🔍 SINGLE API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery });
       const response = await fetch(`/api/search?${params.toString()}`);
       const result = await response.json();
+      console.log('📦 SINGLE API RESPONSE:', result);
       return result;
     },
     staleTime: 0, // Always refetch when filters change
