@@ -31,10 +31,25 @@ export default function SellerDashboard() {
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard", "v2"],
-    queryFn: () => fetch("/api/seller/dashboard", { 
-      credentials: 'include',
-      cache: 'no-cache' // Force fresh request
-    }).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch("/api/seller/dashboard", { 
+        credentials: 'include',
+        cache: 'no-cache' // Force fresh request
+      });
+      const data = await response.json();
+      
+      // Debug log to see what image URLs we're getting
+      if (data.listings && data.listings.length > 0) {
+        console.log('[DASHBOARD DEBUG] First listing images:', data.listings[0].images);
+        data.listings.forEach((listing: any, index: number) => {
+          if (listing.images && listing.images.length > 0) {
+            console.log(`[DASHBOARD DEBUG] Listing ${index} (${listing.title}):`, listing.images[0].url);
+          }
+        });
+      }
+      
+      return data;
+    },
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
     refetchOnWindowFocus: true,
@@ -282,9 +297,16 @@ export default function SellerDashboard() {
                           <div className="w-32 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden">
                             {listing.images?.[0]?.url ? (
                               <img
-                                src={listing.images[0].url}
+                                src={`${listing.images[0].url}?t=${Date.now()}`}
                                 alt={listing.title}
                                 className="max-w-full max-h-full object-contain rounded-lg"
+                                onError={(e) => {
+                                  console.log('[IMAGE ERROR] Failed to load:', listing.images[0].url);
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                                onLoad={() => {
+                                  console.log('[IMAGE SUCCESS] Loaded:', listing.images[0].url);
+                                }}
                               />
                             ) : (
                               <Package className="text-foreground/40" size={32} />
