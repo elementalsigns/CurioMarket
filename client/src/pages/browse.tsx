@@ -13,8 +13,10 @@ import { Search, Filter, Grid, List, Save, BookmarkPlus, TrendingUp, Heart } fro
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function Browse() {
+  const [location] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     category: "",
@@ -31,19 +33,23 @@ export default function Browse() {
   const [searchName, setSearchName] = useState("");
   const { toast } = useToast();
 
-  // Extract URL parameters on component mount
+  // Extract URL parameters whenever the location changes
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category');
     const q = urlParams.get('q');
     
-    if (category) {
-      setFilters(prev => ({ ...prev, category }));
-    }
+    setFilters(prev => ({ 
+      ...prev, 
+      category: category || "" 
+    }));
+    
     if (q) {
       setSearchQuery(q);
+    } else {
+      setSearchQuery("");
     }
-  }, []);
+  }, [location]);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ["/api/search", searchQuery, filters],
