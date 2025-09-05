@@ -187,6 +187,15 @@ export default function Browse() {
                 
                 <span className="text-foreground/70" data-testid="results-count">
                   {searchResults?.total || 0} results found
+                  {/* Debug info */}
+                  <div className="text-xs text-yellow-400 mt-1">
+                    Debug: {JSON.stringify({ 
+                      total: searchResults?.total, 
+                      listingsLength: searchResults?.listings?.length,
+                      isLoading,
+                      category: filters.category 
+                    })}
+                  </div>
                 </span>
               </div>
 
