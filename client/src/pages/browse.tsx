@@ -270,6 +270,9 @@ export default function Browse() {
             </div>
 
             {/* Results Grid */}
+            <div className="text-xs text-red-400 mb-2">
+              Render Debug: isLoading={isLoading.toString()}, hasListings={!!searchResults?.listings?.length}, listingsCount={searchResults?.listings?.length}
+            </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -283,6 +286,9 @@ export default function Browse() {
                 }
                 data-testid="results-grid"
               >
+                <div className="text-green-400 text-sm mb-4">
+                  SHOWING RESULTS: {searchResults.listings.length} items
+                </div>
                 {searchResults.listings.map((listing: any) => (
                   <ProductCard 
                     key={listing.id} 
