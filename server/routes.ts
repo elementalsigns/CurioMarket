@@ -824,6 +824,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get seller listings
       const listingsResult = await storage.getListings({ sellerId });
       
+      // Add images to each listing and convert cloud storage URLs
+      const listingsWithImages = await Promise.all(
+        listingsResult.listings.map(async (listing) => {
+          const images = await storage.getListingImages(listing.id);
+          // Convert cloud storage URLs to object URLs for proper serving
+          const objectStorageService = new ObjectStorageService();
+          const convertedImages = images.map(image => ({
+            ...image,
+            url: objectStorageService.normalizeObjectEntityPath(image.url)
+          }));
+          return { ...listing, images: convertedImages };
+        })
+      );
+      
       // Map database fields to frontend expectations
       const sellerWithMappedFields = {
         ...seller,
@@ -833,7 +847,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         seller: sellerWithMappedFields,
-        listings: listingsResult.listings
+        listings: listingsWithImages
       });
     } catch (error) {
       console.error("Error fetching public seller profile:", error);
