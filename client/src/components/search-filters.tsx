@@ -118,7 +118,7 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
         {/* Categories */}
         <div className="space-y-3">
           <Label>Category</Label>
-          <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
+          <Select value={filters.category || "all"} onValueChange={(value) => handleFilterChange('category', value === "all" ? "" : value)}>
             <SelectTrigger data-testid="select-category">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
