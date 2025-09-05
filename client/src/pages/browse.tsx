@@ -13,10 +13,10 @@ import { Search, Filter, Grid, List, Save, BookmarkPlus, TrendingUp, Heart } fro
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 
 export default function Browse() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     category: "",
@@ -39,6 +39,7 @@ export default function Browse() {
     const category = urlParams.get('category');
     const q = urlParams.get('q');
     
+    
     setFilters(prev => ({ 
       ...prev, 
       category: category || "" 
@@ -50,6 +51,24 @@ export default function Browse() {
       setSearchQuery("");
     }
   }, [location]);
+
+  // Function to update URL when filters change
+  const updateURL = (newFilters: typeof filters, newSearchQuery: string = searchQuery) => {
+    const params = new URLSearchParams();
+    if (newSearchQuery) params.set('q', newSearchQuery);
+    if (newFilters.category) params.set('category', newFilters.category);
+    if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
+    if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
+    
+    const newURL = params.toString() ? `/browse?${params.toString()}` : '/browse';
+    navigate(newURL, { replace: true });
+  };
+
+  // Enhanced filter change handler that updates URL
+  const handleFiltersChange = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+    updateURL(newFilters);
+  };
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ["/api/search", { q: searchQuery, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice, sortBy: filters.sortBy }],
@@ -127,13 +146,17 @@ export default function Browse() {
                 
                 <SearchFilters 
                   filters={filters} 
-                  onFiltersChange={setFilters}
-                  onClearFilters={() => setFilters({
-                    category: "",
-                    minPrice: "",
-                    maxPrice: "",
-                    sortBy: "newest",
-                  })}
+                  onFiltersChange={handleFiltersChange}
+                  onClearFilters={() => {
+                    const clearedFilters = {
+                      category: "",
+                      minPrice: "",
+                      maxPrice: "",
+                      sortBy: "newest",
+                    };
+                    setFilters(clearedFilters);
+                    updateURL(clearedFilters);
+                  }}
                 />
               </CardContent>
             </Card>
