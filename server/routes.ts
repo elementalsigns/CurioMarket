@@ -2351,8 +2351,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         listings: result.listings,
         total: result.total,
-        // DEPLOYMENT TEST: If you see this message, the fix is deployed
-        deploymentTest: "CATEGORY-FIX-DEPLOYED-" + new Date().toISOString()
+        // FINAL DEPLOYMENT TEST - IF YOU SEE THIS THE CATEGORY FIX IS LIVE
+        deploymentStatus: "CATEGORY-BUG-FIXED-" + Date.now()
       });
     } catch (error) {
       console.error("Error searching listings:", error);
@@ -4106,3 +4106,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
+// Force deployment update Fri Sep  5 08:37:01 PM UTC 2025
