@@ -69,6 +69,8 @@ export default function Browse() {
 
   // Enhanced filter change handler that updates URL
   const handleFiltersChange = (newFilters: typeof filters) => {
+    // Clear cache before updating filters to force fresh data
+    queryClient.removeQueries({ queryKey: ["/api/search"] });
     setFilters(newFilters);
     updateURL(newFilters);
   };
@@ -82,16 +84,16 @@ export default function Browse() {
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
-      console.log('🔍 FINAL API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery });
+      console.log('🔍 FINAL API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery, timestamp: new Date().toISOString() });
       const response = await fetch(`/api/search?${params.toString()}`);
       const result = await response.json();
       console.log('📦 FINAL API RESPONSE:', result);
       return result;
     },
-    staleTime: 1000, // Short stale time to prevent duplicate requests
-    gcTime: 2000, // Very short cache time
+    staleTime: 0, // Always consider data stale to force refetch
+    gcTime: 0, // Don't cache at all
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Don't refetch on mount to prevent duplicates
+    refetchOnMount: true, // Refetch on mount to ensure fresh data
     enabled: true, // Always enabled
   });
 
