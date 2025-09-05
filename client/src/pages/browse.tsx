@@ -62,6 +62,8 @@ export default function Browse() {
       
       return fetch(`/api/search?${params.toString()}`).then(res => res.json());
     },
+    staleTime: 0, // Always refetch when query key changes
+    gcTime: 0, // Don't cache results
   });
 
   const handleSearch = (e: React.FormEvent) => {
