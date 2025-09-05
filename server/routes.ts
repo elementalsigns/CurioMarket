@@ -778,9 +778,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller profile not found" });
       }
 
-      // Get all seller data
+      // Get all seller data (listings sorted by display order for dashboard)
       const [listingsResult, orders, stats] = await Promise.all([
-        storage.getListings({ sellerId: seller.id }),
+        storage.getListings({ sellerId: seller.id, sortByDisplayOrder: true }),
         storage.getSellerOrders(seller.id),
         storage.getSellerStats(seller.id)
       ]);
@@ -821,8 +821,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller not found" });
       }
 
-      // Get seller listings
-      const listingsResult = await storage.getListings({ sellerId });
+      // Get seller listings, sorted by display order for shop display
+      const listingsResult = await storage.getListings({ 
+        sellerId, 
+        sortByDisplayOrder: true 
+      });
       
       // Add images to each listing and convert cloud storage URLs
       const listingsWithImages = await Promise.all(
