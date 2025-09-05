@@ -40,19 +40,14 @@ export default function Browse() {
     const q = urlParams.get('q');
     
     // Clear any existing search cache to prevent conflicts
-    queryClient.removeQueries({ queryKey: ["/api/search"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/search"] });
     
-    // Only update if different to prevent loops
-    setFilters(prev => {
-      const newCategory = category || "";
-      if (prev.category !== newCategory) {
-        return { ...prev, category: newCategory };
-      }
-      return prev;
-    });
-    
+    // Update filters synchronously to prevent race conditions
+    const newCategory = category || "";
     const newSearchQuery = q || "";
-    setSearchQuery(prev => prev !== newSearchQuery ? newSearchQuery : prev);
+    
+    setFilters(prev => ({ ...prev, category: newCategory }));
+    setSearchQuery(newSearchQuery);
   }, [location]);
 
   // Function to update URL when filters change
@@ -69,14 +64,12 @@ export default function Browse() {
 
   // Enhanced filter change handler that updates URL
   const handleFiltersChange = (newFilters: typeof filters) => {
-    // Clear cache before updating filters to force fresh data
-    queryClient.removeQueries({ queryKey: ["/api/search"] });
     setFilters(newFilters);
     updateURL(newFilters);
   };
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ["/api/search", filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy],
+    queryKey: ["search", filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
@@ -84,17 +77,11 @@ export default function Browse() {
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
-      console.log('🔍 FINAL API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery, timestamp: new Date().toISOString() });
       const response = await fetch(`/api/search?${params.toString()}`);
-      const result = await response.json();
-      console.log('📦 FINAL API RESPONSE:', result);
-      return result;
+      return await response.json();
     },
-    staleTime: 0, // Always consider data stale to force refetch
-    gcTime: 0, // Don't cache at all
+    staleTime: 0,
     refetchOnWindowFocus: false,
-    refetchOnMount: true, // Refetch on mount to ensure fresh data
-    enabled: true, // Always enabled
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -266,11 +253,6 @@ export default function Browse() {
 
 
             {/* Results Grid */}
-            {/* Debug current search results */}
-            <div className="text-xs text-yellow-400 mb-2 font-mono">
-              Loading: {isLoading ? 'true' : 'false'} | Results: {searchResults?.listings?.length || 0} | Total: {searchResults?.total || 0}
-            </div>
-            
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
