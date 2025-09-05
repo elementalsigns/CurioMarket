@@ -52,7 +52,7 @@ export default function Browse() {
   }, [location]);
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ["/api/search", searchQuery, filters],
+    queryKey: ["/api/search", searchQuery, filters.category, filters.minPrice, filters.maxPrice, filters.sortBy],
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
