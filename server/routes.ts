@@ -2248,8 +2248,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { q, category, limit = 20, offset = 0 } = req.query;
       
+      let categoryId = category as string;
+      
+      // If category is provided and looks like a slug (not a UUID), convert it to ID
+      if (category && typeof category === 'string' && !category.includes('-')) {
+        const categoryRecord = await storage.getCategoryBySlug(category);
+        categoryId = categoryRecord?.id || '';
+      }
+      
       const result = await storage.searchListings(q as string, {
-        categoryId: category as string,
+        categoryId,
         limit: parseInt(limit as string),
         offset: parseInt(offset as string)
       });
