@@ -30,10 +30,12 @@ export default function SellerDashboard() {
   const queryClient = useQueryClient();
 
   const { data: dashboardData, isLoading, error } = useQuery({
-    queryKey: ["/api/seller/dashboard"],
+    queryKey: ["/api/seller/dashboard", Date.now()],
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
     refetchOnWindowFocus: true,
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache
   }) as { data: { seller: any; listings: any[]; orders: any[]; stats: any; promotions: any[] } | undefined; isLoading: boolean; error: any };
 
   useEffect(() => {
