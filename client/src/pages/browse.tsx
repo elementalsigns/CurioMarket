@@ -65,6 +65,7 @@ export default function Browse() {
 
   // Enhanced filter change handler that updates URL
   const handleFiltersChange = (newFilters: typeof filters) => {
+    console.log('🔥 Filter change triggered:', { old: filters, new: newFilters });
     setFilters(newFilters);
     updateURL(newFilters);
   };
