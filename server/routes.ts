@@ -2323,7 +2323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== SEARCH & DISCOVERY ====================
-  // VERSION: Category filtering fix v2.1 - Sep 5, 2025
+  // VERSION: Category filtering fix v2.2 - FORCE DEPLOYMENT - Sep 5, 2025
   
   // Search listings - FIXED CATEGORY FILTERING
   app.get('/api/search', async (req, res) => {
@@ -2349,7 +2349,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset: parseInt(offset as string)
       });
       
-      res.json(result);
+      // TEMP: Add debug info to response to verify deployment
+      const debugInfo = {
+        originalCategory: category,
+        resolvedCategoryId: categoryId,
+        version: "v2.2-FORCE-DEPLOYMENT",
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json({
+        ...result,
+        _debug: debugInfo
+      });
     } catch (error) {
       console.error("Error searching listings:", error);
       res.status(500).json({ error: "Failed to search listings" });
