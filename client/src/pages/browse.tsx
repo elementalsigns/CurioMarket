@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import SearchFilters from "@/components/search-filters";
 import ProductCard from "@/components/product-card";
 import { Badge } from "@/components/ui/badge";
-import { Grid, List, Filter, Save, Heart } from "lucide-react";
+import { Grid, List, Filter, Save, Heart, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -131,6 +131,27 @@ export default function Browse() {
                 </form>
               </CardContent>
             </Card>
+
+            {/* Back Button for Category Pages */}
+            {filters.category && (
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setFilters(prev => ({ ...prev, category: "" }));
+                    navigate('/browse');
+                  }}
+                  className="text-zinc-400 hover:text-white"
+                  data-testid="button-back-to-all"
+                >
+                  <ArrowLeft size={16} className="mr-2" />
+                  Back to All Categories
+                </Button>
+                <div className="text-white font-medium">
+                  {categories?.find((cat: any) => cat.slug === filters.category)?.name || filters.category}
+                </div>
+              </div>
+            )}
 
             {/* Results Header */}
             <div className="flex items-center justify-between">

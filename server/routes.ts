@@ -2332,9 +2332,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let categoryId = category as string;
       
       // If category is provided and looks like a slug (not a UUID), convert it to ID
-      if (category && typeof category === 'string' && !category.includes('-')) {
-        const categoryRecord = await storage.getCategoryBySlug(category);
-        categoryId = categoryRecord?.id || '';
+      if (category && typeof category === 'string') {
+        // Check if it's a UUID format (8-4-4-4-12 pattern)
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidPattern.test(category)) {
+          // It's a slug, convert to ID
+          const categoryRecord = await storage.getCategoryBySlug(category);
+          categoryId = categoryRecord?.id || '';
+        }
       }
       
       const result = await storage.searchListings(q as string, {
