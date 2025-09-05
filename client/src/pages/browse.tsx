@@ -39,6 +39,9 @@ export default function Browse() {
     const category = urlParams.get('category');
     const q = urlParams.get('q');
     
+    // Clear any existing search cache to prevent conflicts
+    queryClient.removeQueries({ queryKey: ["/api/search"] });
+    
     // Only update if different to prevent loops
     setFilters(prev => {
       const newCategory = category || "";
@@ -79,16 +82,17 @@ export default function Browse() {
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
-      console.log('🔍 SINGLE API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery });
+      console.log('🔍 FINAL API REQUEST:', `/api/search?${params.toString()}`, { category: filters.category, query: searchQuery });
       const response = await fetch(`/api/search?${params.toString()}`);
       const result = await response.json();
-      console.log('📦 SINGLE API RESPONSE:', result);
+      console.log('📦 FINAL API RESPONSE:', result);
       return result;
     },
-    staleTime: 0, // Always refetch when filters change
-    gcTime: 5000, // Short cache time  
+    staleTime: 1000, // Short stale time to prevent duplicate requests
+    gcTime: 2000, // Very short cache time
     refetchOnWindowFocus: false,
-    refetchOnMount: true, // Ensure fresh data on mount
+    refetchOnMount: false, // Don't refetch on mount to prevent duplicates
+    enabled: true, // Always enabled
   });
 
   const handleSearch = (e: React.FormEvent) => {
