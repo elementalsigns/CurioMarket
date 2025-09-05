@@ -31,6 +31,10 @@ export default function SellerDashboard() {
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard", "v2"],
+    queryFn: () => fetch("/api/seller/dashboard", { 
+      credentials: 'include',
+      cache: 'no-cache' // Force fresh request
+    }).then(res => res.json()),
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
     refetchOnWindowFocus: true,
