@@ -36,19 +36,7 @@ export default function SellerDashboard() {
         credentials: 'include',
         cache: 'no-cache' // Force fresh request
       });
-      const data = await response.json();
-      
-      // Debug log to see what image URLs we're getting
-      if (data.listings && data.listings.length > 0) {
-        console.log('[DASHBOARD DEBUG] First listing images:', data.listings[0].images);
-        data.listings.forEach((listing: any, index: number) => {
-          if (listing.images && listing.images.length > 0) {
-            console.log(`[DASHBOARD DEBUG] Listing ${index} (${listing.title}):`, listing.images[0].url);
-          }
-        });
-      }
-      
-      return data;
+      return await response.json();
     },
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
@@ -294,22 +282,16 @@ export default function SellerDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center overflow-hidden">
+                          <div className="w-20 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50">
                             {listing.images?.[0]?.url ? (
                               <img
-                                src={`${listing.images[0].url}?t=${Date.now()}`}
+                                src={`${listing.images[0].url}?cache=${Date.now()}`}
                                 alt={listing.title}
                                 className="w-full h-full object-cover rounded-lg"
-                                onError={(e) => {
-                                  console.log('[IMAGE ERROR] Failed to load:', listing.images[0].url);
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                                onLoad={() => {
-                                  console.log('[IMAGE SUCCESS] Loaded:', listing.images[0].url);
-                                }}
+                                style={{ aspectRatio: '1/1' }}
                               />
                             ) : (
-                              <Package className="text-foreground/40" size={24} />
+                              <Package className="text-foreground/40" size={28} />
                             )}
                           </div>
                           <div>
