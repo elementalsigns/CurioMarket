@@ -2323,16 +2323,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== SEARCH & DISCOVERY ====================
+  // VERSION: Category filtering fix v2.1 - Sep 5, 2025
   
-  // Search listings
+  // Search listings - FIXED CATEGORY FILTERING
   app.get('/api/search', async (req, res) => {
     try {
       const { q, category, limit = 20, offset = 0 } = req.query;
       
       let categoryId = category as string;
-      
-      // TEMP DEBUG: Log the original request
-      console.log(`[DEBUG SEARCH] Original request - category: "${category}", q: "${q}"`);
       
       // If category is provided and looks like a slug (not a UUID), convert it to ID
       if (category && typeof category === 'string') {
@@ -2340,24 +2338,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!uuidPattern.test(category)) {
           // It's a slug, convert to ID
-          console.log(`[DEBUG SEARCH] Converting slug "${category}" to ID`);
           const categoryRecord = await storage.getCategoryBySlug(category);
           categoryId = categoryRecord?.id || '';
-          console.log(`[DEBUG SEARCH] Converted to categoryId: "${categoryId}"`);
-        } else {
-          console.log(`[DEBUG SEARCH] Category "${category}" is already a UUID`);
         }
       }
-      
-      console.log(`[DEBUG SEARCH] Final categoryId for query: "${categoryId}"`);
       
       const result = await storage.searchListings(q as string, {
         categoryId,
         limit: parseInt(limit as string),
         offset: parseInt(offset as string)
       });
-      
-      console.log(`[DEBUG SEARCH] Result: ${result.total} items found`);
       
       res.json(result);
     } catch (error) {
