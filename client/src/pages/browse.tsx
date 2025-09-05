@@ -260,6 +260,18 @@ export default function Browse() {
               </div>
             </div>
 
+            {/* Debug React Query Data */}
+            <div className="text-xs text-cyan-400 mb-2 font-mono">
+              React Query Debug: {JSON.stringify({
+                isLoading,
+                hasData: !!searchResults,
+                total: searchResults?.total,
+                listingsLength: searchResults?.listings?.length,
+                firstListingId: searchResults?.listings?.[0]?.id,
+                queryKey: JSON.stringify(queryKey)
+              })}
+            </div>
+
             {/* Results Grid */}
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
