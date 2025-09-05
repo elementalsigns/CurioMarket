@@ -187,15 +187,6 @@ export default function Browse() {
                 
                 <span className="text-foreground/70" data-testid="results-count">
                   {searchResults?.total || 0} results found
-                  {/* Debug info */}
-                  <div className="text-xs text-yellow-400 mt-1">
-                    Debug: {JSON.stringify({ 
-                      total: searchResults?.total, 
-                      listingsLength: searchResults?.listings?.length,
-                      isLoading,
-                      category: filters.category 
-                    })}
-                  </div>
                 </span>
               </div>
 
@@ -270,9 +261,6 @@ export default function Browse() {
             </div>
 
             {/* Results Grid */}
-            <div className="text-xs text-red-400 mb-2">
-              Render Debug: isLoading={isLoading.toString()}, hasListings={!!searchResults?.listings?.length}, listingsCount={searchResults?.listings?.length}
-            </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -286,9 +274,6 @@ export default function Browse() {
                 }
                 data-testid="results-grid"
               >
-                <div className="text-green-400 text-sm mb-4">
-                  SHOWING RESULTS: {searchResults.listings.length} items
-                </div>
                 {searchResults.listings.map((listing: any) => (
                   <ProductCard 
                     key={listing.id} 
