@@ -2323,7 +2323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== SEARCH & DISCOVERY ====================
-  // VERSION: Category filtering fix v2.2 - FORCE DEPLOYMENT - Sep 5, 2025
+  // VERSION: Category filtering fix v2.3 - EMERGENCY DEPLOYMENT - Sep 5, 2025
+  // CRITICAL FIX: Category filtering was broken - showing all products instead of filtering
   
   // Search listings - FIXED CATEGORY FILTERING
   app.get('/api/search', async (req, res) => {
@@ -2353,7 +2354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const debugInfo = {
         originalCategory: category,
         resolvedCategoryId: categoryId,
-        version: "v2.2-FORCE-DEPLOYMENT",
+        version: "v2.3-EMERGENCY-DEPLOYMENT",
         timestamp: new Date().toISOString()
       };
       
