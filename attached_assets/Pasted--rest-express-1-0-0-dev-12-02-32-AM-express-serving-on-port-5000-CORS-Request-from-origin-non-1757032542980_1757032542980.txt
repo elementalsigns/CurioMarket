@@ -1,0 +1,26 @@
+
+> rest-express@1.0.0 dev
+12:02:32 AM [express] serving on port 5000
+[CORS] Request from origin: none, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev, host: c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit.dev
+[CORS] Request from origin: https://c816b041-a6c3-4cdd-9dbb-dc724b0c3961-00-16ym6l13klbes.kirk.replit

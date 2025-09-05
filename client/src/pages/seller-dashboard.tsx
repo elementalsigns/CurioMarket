@@ -30,7 +30,7 @@ export default function SellerDashboard() {
   const queryClient = useQueryClient();
 
   const { data: dashboardData, isLoading, error } = useQuery({
-    queryKey: ["/api/seller/dashboard"],
+    queryKey: ["/api/seller/dashboard", "v2"],
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
     refetchOnWindowFocus: true,
