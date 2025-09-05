@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SearchFilters } from "@/components/search-filters";
-import { ProductCard } from "@/components/product-card";
+import SearchFilters from "@/components/search-filters";
+import ProductCard from "@/components/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Grid, List, Filter, Save, Heart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
@@ -104,7 +104,11 @@ export default function Browse() {
             <SearchFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              categories={categories || []}
+              onClearFilters={() => {
+                setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
+                setSearchQuery("");
+                navigate('/browse');
+              }}
             />
           </div>
 
@@ -228,11 +232,6 @@ export default function Browse() {
                   <ProductCard
                     key={listing.id}
                     listing={listing}
-                    viewMode={viewMode}
-                    onAddToWishlist={() => {
-                      setSelectedListing(listing.id);
-                      setShowWishlistDialog(true);
-                    }}
                   />
                 ))}
               </div>
