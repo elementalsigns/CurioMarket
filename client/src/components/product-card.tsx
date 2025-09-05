@@ -8,6 +8,24 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Convert Google Cloud Storage URL to local object URL
+function convertImageUrl(url: string): string {
+  if (!url || !url.startsWith('https://storage.googleapis.com/')) {
+    return url;
+  }
+  
+  const urlParts = url.split('/');
+  const bucketIndex = urlParts.findIndex(part => part.includes('replit-objstore'));
+  if (bucketIndex === -1) return url;
+  
+  const pathAfterBucket = urlParts.slice(bucketIndex + 1).join('/');
+  const objectPath = pathAfterBucket.startsWith('.private/') 
+    ? pathAfterBucket.replace('.private/', '') 
+    : pathAfterBucket;
+  
+  return `/objects/${objectPath}`;
+}
+
 interface ProductCardProps {
   listing: {
     id: string;
@@ -68,7 +86,7 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
           <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted relative">
             {listing.images?.[0] ? (
               <img
-                src={`${listing.images[0].url}${listing.images[0].url.includes('?') ? '&' : '?'}cache=${Date.now()}`}
+                src={convertImageUrl(listing.images[0].url)}
                 alt={listing.images[0].alt || listing.title}
                 className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                 data-testid={`product-image-${listing.id}`}
