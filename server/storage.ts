@@ -352,7 +352,8 @@ export class DatabaseStorage implements IStorage {
     const conditions = [];
     
     if (filters?.categoryId) {
-      conditions.push(eq(listings.categoryId, filters.categoryId));
+      // Check if the category ID is in the category_ids array
+      conditions.push(sql`${filters.categoryId} = ANY(${listings.categoryIds})`);
     }
     
     if (filters?.sellerId) {
