@@ -2255,6 +2255,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== PRODUCT DISPLAY ORDER ====================
+  
+  // Update single listing display order
+  app.put('/api/listings/:id/display-order', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(403).json({ error: "Seller profile required" });
+      }
+
+      const { displayOrder } = req.body;
+      
+      if (typeof displayOrder !== 'number') {
+        return res.status(400).json({ error: "Display order must be a number" });
+      }
+
+      // Verify the listing belongs to this seller
+      const listing = await storage.getListing(req.params.id);
+      if (!listing || listing.sellerId !== seller.id) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+
+      const updatedListing = await storage.updateListingDisplayOrder(req.params.id, displayOrder);
+      res.json(updatedListing);
+    } catch (error) {
+      console.error("Error updating listing display order:", error);
+      res.status(500).json({ error: "Failed to update display order" });
+    }
+  });
+
+  // Update multiple listings display order (for drag-and-drop reordering)
+  app.put('/api/seller/listings/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(403).json({ error: "Seller profile required" });
+      }
+
+      const { updates } = req.body; // Array of { id: string, displayOrder: number }
+      
+      if (!Array.isArray(updates)) {
+        return res.status(400).json({ error: "Updates must be an array" });
+      }
+
+      // Verify all listings belong to this seller
+      for (const update of updates) {
+        const listing = await storage.getListing(update.id);
+        if (!listing || listing.sellerId !== seller.id) {
+          return res.status(403).json({ error: `Listing ${update.id} not found or not owned by seller` });
+        }
+      }
+
+      await storage.updateMultipleListingsDisplayOrder(updates);
+      res.json({ success: true, updatedCount: updates.length });
+    } catch (error) {
+      console.error("Error reordering listings:", error);
+      res.status(500).json({ error: "Failed to reorder listings" });
+    }
+  });
+
   // ==================== SEARCH & DISCOVERY ====================
   
   // Search listings

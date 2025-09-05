@@ -162,6 +162,7 @@ export const listings = pgTable("listings", {
   isPromoted: boolean("is_promoted").default(false), // Featured/promoted listing
   promotedUntil: timestamp("promoted_until"), // When promotion expires
   views: integer("views").default(0), // View counter
+  displayOrder: integer("display_order").default(0), // Custom order for seller's shop display
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

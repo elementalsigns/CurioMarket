@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -23,11 +23,140 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import ShopPage from "@/pages/shop";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Sortable listing item component
+function SortableListingItem({ listing, deleteListingMutation }: { listing: any; deleteListingMutation: any }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: listing.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={`glass-effect ${isDragging ? 'shadow-lg' : ''}`}
+      data-testid={`listing-${listing.id}`}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {/* Drag handle */}
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-2 hover:bg-muted rounded-lg transition-colors"
+              data-testid={`drag-handle-${listing.id}`}
+            >
+              <GripVertical className="text-foreground/40" size={20} />
+            </div>
+            
+            <div className="w-20 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
+              {listing.images?.[0]?.url ? (
+                <img
+                  src={`${listing.images[0].url}?cache=${Date.now()}`}
+                  alt={listing.title}
+                  className="w-full h-full object-cover rounded-lg"
+                  style={{ 
+                    aspectRatio: '1/1',
+                    objectFit: 'cover',
+                    objectPosition: 'center'
+                  }}
+                />
+              ) : (
+                <Package className="text-foreground/40" size={28} />
+              )}
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-lg" data-testid={`listing-title-${listing.id}`}>
+                {listing.title}
+              </h3>
+              <p className="text-foreground/60 text-sm line-clamp-1">
+                {listing.description}
+              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <span className="text-gothic-red font-bold" data-testid={`listing-price-${listing.id}`}>
+                  ${listing.price}
+                </span>
+                <Badge
+                  variant={listing.state === 'published' ? 'default' : 'secondary'}
+                  data-testid={`listing-status-${listing.id}`}
+                >
+                  {listing.state}
+                </Badge>
+                <span className="text-xs text-foreground/40">
+                  Order: {listing.displayOrder || 0}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Link to={`/product/${listing.slug}`}>
+              <Button variant="outline" size="sm" data-testid={`button-view-${listing.id}`}>
+                <Eye size={16} className="mr-1" />
+                View
+              </Button>
+            </Link>
+            <Link to={`/seller/listings/edit/${listing.id}`}>
+              <Button variant="outline" size="sm" data-testid={`button-edit-${listing.id}`}>
+                <Edit size={16} className="mr-1" />
+                Edit
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteListingMutation.mutate(listing.id)}
+              className="text-destructive hover:text-destructive"
+              data-testid={`button-delete-${listing.id}`}
+            >
+              <Trash2 size={16} />
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // State for drag-and-drop reordering
+  const [sortedListings, setSortedListings] = useState<any[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard", "v2"],
@@ -42,7 +171,7 @@ export default function SellerDashboard() {
     retry: 3,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always fetch fresh data
-    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
   }) as { data: { seller: any; listings: any[]; orders: any[]; stats: any; promotions: any[] } | undefined; isLoading: boolean; error: any };
 
   useEffect(() => {
@@ -96,6 +225,77 @@ export default function SellerDashboard() {
         title: "Listing Deleted",
         description: "Your listing has been deleted successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/dashboard"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Initialize sorted listings when dashboard data loads
+  useEffect(() => {
+    if (dashboardData?.listings) {
+      // Sort listings by displayOrder (ascending), then by creation date (descending) as fallback
+      const sorted = [...dashboardData.listings].sort((a, b) => {
+        const orderA = a.displayOrder || 0;
+        const orderB = b.displayOrder || 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        // Fallback to creation date
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      setSortedListings(sorted);
+    }
+  }, [dashboardData?.listings]);
+
+  // Handle drag end event
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setSortedListings((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over?.id);
+        
+        const reorderedItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Mark as having unsaved changes
+        setHasUnsavedChanges(true);
+        
+        return reorderedItems;
+      });
+    }
+  }
+
+  // Save display order mutation
+  const saveDisplayOrderMutation = useMutation({
+    mutationFn: async () => {
+      const updates = sortedListings.map((listing, index) => ({
+        id: listing.id,
+        displayOrder: index + 1
+      }));
+      
+      return apiRequest("PUT", "/api/seller/listings/reorder", { updates });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Product Order Saved",
+        description: "Your product display order has been updated successfully.",
+      });
+      setHasUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: ["/api/seller/dashboard"] });
     },
     onError: (error) => {
@@ -275,78 +475,55 @@ export default function SellerDashboard() {
               </Link>
             </div>
 
-            {listings.length > 0 ? (
-              <div className="space-y-4" data-testid="listings-list">
-                {listings.map((listing: any) => (
-                  <Card key={listing.id} className="glass-effect" data-testid={`listing-${listing.id}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-20 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
-                            {listing.images?.[0]?.url ? (
-                              <img
-                                src={`${listing.images[0].url}?cache=${Date.now()}`}
-                                alt={listing.title}
-                                className="w-full h-full object-cover rounded-lg"
-                                style={{ 
-                                  aspectRatio: '1/1',
-                                  objectFit: 'cover',
-                                  objectPosition: 'center'
-                                }}
-                              />
-                            ) : (
-                              <Package className="text-foreground/40" size={28} />
-                            )}
-                          </div>
-                          <div>
-                            <h3 className="font-serif font-bold text-lg" data-testid={`listing-title-${listing.id}`}>
-                              {listing.title}
-                            </h3>
-                            <p className="text-foreground/60 text-sm line-clamp-1">
-                              {listing.description}
-                            </p>
-                            <div className="flex items-center gap-4 mt-2">
-                              <span className="text-gothic-red font-bold" data-testid={`listing-price-${listing.id}`}>
-                                ${listing.price}
-                              </span>
-                              <Badge
-                                variant={listing.state === 'published' ? 'default' : 'secondary'}
-                                data-testid={`listing-status-${listing.id}`}
-                              >
-                                {listing.state}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Link to={`/product/${listing.slug}`}>
-                            <Button variant="outline" size="sm" data-testid={`button-view-${listing.id}`}>
-                              <Eye size={16} className="mr-1" />
-                              View
-                            </Button>
-                          </Link>
-                          <Link to={`/seller/listings/edit/${listing.id}`}>
-                            <Button variant="outline" size="sm" data-testid={`button-edit-${listing.id}`}>
-                              <Edit size={16} className="mr-1" />
-                              Edit
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => deleteListingMutation.mutate(listing.id)}
-                            className="text-destructive hover:text-destructive"
-                            data-testid={`button-delete-${listing.id}`}
-                          >
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            {/* Save Changes Button */}
+            {hasUnsavedChanges && (
+              <div className="flex justify-between items-center mb-4 p-4 bg-muted/50 rounded-lg border-l-4 border-gothic-red">
+                <div>
+                  <p className="font-medium text-foreground">You have unsaved changes to your product order</p>
+                  <p className="text-sm text-foreground/60">Drag products to reorder them, then save your changes</p>
+                </div>
+                <Button 
+                  onClick={() => saveDisplayOrderMutation.mutate()}
+                  disabled={saveDisplayOrderMutation.isPending}
+                  className="bg-gothic-red hover:bg-gothic-red/80"
+                  data-testid="button-save-product-order"
+                >
+                  {saveDisplayOrderMutation.isPending ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2" size={16} />
+                      Save Order
+                    </>
+                  )}
+                </Button>
               </div>
+            )}
+
+            {sortedListings.length > 0 ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={sortedListings.map(listing => listing.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4" data-testid="listings-list">
+                    {sortedListings.map((listing: any) => (
+                      <SortableListingItem 
+                        key={listing.id} 
+                        listing={listing} 
+                        deleteListingMutation={deleteListingMutation}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             ) : (
               <Card className="glass-effect" data-testid="no-listings">
                 <CardContent className="p-12 text-center">

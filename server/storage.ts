@@ -348,6 +348,7 @@ export class DatabaseStorage implements IStorage {
     limit?: number; 
     offset?: number;
     state?: string;
+    sortByDisplayOrder?: boolean;
   }): Promise<{ listings: Listing[]; total: number }> {
     const conditions = [];
     
@@ -386,7 +387,12 @@ export class DatabaseStorage implements IStorage {
       countQuery = countQuery.where(whereCondition);
     }
 
-    query = query.orderBy(desc(listings.createdAt));
+    // Sort by display order for seller shops, otherwise by creation date
+    if (filters?.sellerId && filters?.sortByDisplayOrder) {
+      query = query.orderBy(asc(listings.displayOrder), desc(listings.createdAt));
+    } else {
+      query = query.orderBy(desc(listings.createdAt));
+    }
 
     if (filters?.limit) {
       query = query.limit(filters.limit);
@@ -424,6 +430,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(listings.id, id))
       .returning();
     return listing;
+  }
+
+  async updateListingDisplayOrder(id: string, displayOrder: number): Promise<Listing> {
+    const [listing] = await db
+      .update(listings)
+      .set({ displayOrder, updatedAt: new Date() })
+      .where(eq(listings.id, id))
+      .returning();
+    return listing;
+  }
+
+  async updateMultipleListingsDisplayOrder(updates: { id: string; displayOrder: number }[]): Promise<void> {
+    // Update multiple listings in a transaction
+    await db.transaction(async (tx) => {
+      for (const update of updates) {
+        await tx
+          .update(listings)
+          .set({ displayOrder: update.displayOrder, updatedAt: new Date() })
+          .where(eq(listings.id, update.id));
+      }
+    });
   }
 
   async deleteListing(id: string): Promise<void> {
