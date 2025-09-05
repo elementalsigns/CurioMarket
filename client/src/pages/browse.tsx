@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchFilters } from "@/components/search-filters";
+import { ProductCard } from "@/components/product-card";
 import { Badge } from "@/components/ui/badge";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import ProductCard from "@/components/product-card";
-import SearchFilters from "@/components/search-filters";
-import { Search, Filter, Grid, List, Save, BookmarkPlus, TrendingUp, Heart } from "lucide-react";
+import { Grid, List, Filter, Save, Heart } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -36,15 +33,11 @@ export default function Browse() {
   // Extract URL parameters whenever the location changes
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category');
-    const q = urlParams.get('q');
+    const category = urlParams.get('category') || "";
+    const q = urlParams.get('q') || "";
     
-    // Update filters synchronously to prevent race conditions
-    const newCategory = category || "";
-    const newSearchQuery = q || "";
-    
-    setFilters(prev => ({ ...prev, category: newCategory }));
-    setSearchQuery(newSearchQuery);
+    setFilters(prev => ({ ...prev, category }));
+    setSearchQuery(q);
   }, [location]);
 
   // Function to update URL when filters change
@@ -65,135 +58,98 @@ export default function Browse() {
     updateURL(newFilters);
   };
 
-  const { data: searchResults, isLoading, refetch } = useQuery({
-    queryKey: ["search", filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append("q", searchQuery);
-      if (filters.category) params.append("category", filters.category);
-      if (filters.minPrice) params.append("minPrice", filters.minPrice);
-      if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
-      
-      const response = await fetch(`/api/search?${params.toString()}`);
-      return await response.json();
-    },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnWindowFocus: false,
-  });
+  // Simple fetch function without React Query complications
+  const [searchResults, setSearchResults] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Force refetch when filters change
   useEffect(() => {
-    refetch();
-  }, [filters.category, searchQuery, refetch]);
+    const fetchResults = async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (searchQuery) params.append("q", searchQuery);
+        if (filters.category) params.append("category", filters.category);
+        if (filters.minPrice) params.append("minPrice", filters.minPrice);
+        if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+        
+        const response = await fetch(`/api/search?${params.toString()}`);
+        const result = await response.json();
+        setSearchResults(result);
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Query will automatically refetch due to dependency on searchQuery
+    updateURL(filters, searchQuery);
   };
 
+  const { data: categories } = useQuery({
+    queryKey: ["/api/categories"],
+    queryFn: () => fetch("/api/categories").then(res => res.json()),
+  });
+
   return (
-    <div className="page-layout bg-background">
-      <Header />
-      
-      <div className="page-content">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold mb-4" data-testid="browse-title">
-            Browse Oddities
-          </h1>
-          <p className="text-xl text-foreground/70" data-testid="browse-subtitle">
-            Discover unique specimens, artifacts, and curiosities from verified sellers
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="flex gap-4" data-testid="search-form">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={20} />
-              <Input
-                type="text"
-                placeholder="Search for oddities, specimens, occult art..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 bg-input border-border rounded-2xl"
-                data-testid="input-search"
-              />
-            </div>
-            <Button type="submit" size="lg" className="px-8 rounded-2xl" data-testid="button-search">
-              Search
-            </Button>
-          </div>
-        </form>
-
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="glass-effect sticky top-4" data-testid="filters-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-serif font-bold">Filters</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowFilters(false)}
-                    className="lg:hidden"
-                    data-testid="button-close-filters"
-                  >
-                    ✕
-                  </Button>
-                </div>
-                
-                <SearchFilters 
-                  filters={filters} 
-                  onFiltersChange={handleFiltersChange}
-                  onClearFilters={() => {
-                    const clearedFilters = {
-                      category: "",
-                      minPrice: "",
-                      maxPrice: "",
-                      sortBy: "newest",
-                    };
-                    setFilters(clearedFilters);
-                    updateURL(clearedFilters);
-                  }}
-                />
-              </CardContent>
-            </Card>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-purple-950/20">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar Filters */}
+          <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <SearchFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              categories={categories || []}
+            />
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Search Bar */}
+            <Card className="bg-zinc-900/50 border-zinc-800">
+              <CardContent className="p-6">
+                <form onSubmit={handleSearch} className="flex gap-4">
+                  <Input
+                    placeholder="Search for oddities, specimens, occult art..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                    data-testid="input-search"
+                  />
+                  <Button type="submit" data-testid="button-search">
+                    Search
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
             {/* Results Header */}
-            <div className="flex items-center justify-between mb-6" data-testid="results-header">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowFilters(true)}
+                  onClick={() => setShowFilters(!showFilters)}
                   className="lg:hidden"
-                  data-testid="button-show-filters"
+                  data-testid="button-toggle-filters"
                 >
                   <Filter size={16} className="mr-2" />
                   Filters
                 </Button>
                 
-                <span className="text-foreground/70" data-testid="results-count">
-                  {searchResults?.total || 0} results found
-                </span>
-              </div>
+                <div className="text-zinc-400" data-testid="text-results-count">
+                  {isLoading ? "Loading..." : `${searchResults?.total || 0} results found`}
+                </div>
 
-              <div className="flex items-center gap-2">
-                {/* Save Search Button */}
-                {searchQuery && (
+                {searchResults?.total > 0 && (
                   <Dialog open={showSaveSearchDialog} onOpenChange={setShowSaveSearchDialog}>
                     <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid="button-save-search"
-                      >
+                      <Button variant="ghost" size="sm" data-testid="button-save-search">
                         <Save size={16} className="mr-2" />
                         Save Search
                       </Button>
@@ -254,7 +210,6 @@ export default function Browse() {
               </div>
             </div>
 
-
             {/* Results Grid */}
             {isLoading ? (
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
@@ -270,61 +225,42 @@ export default function Browse() {
                 data-testid="results-grid"
               >
                 {searchResults.listings.map((listing: any) => (
-                  <ProductCard 
-                    key={listing.id} 
+                  <ProductCard
+                    key={listing.id}
                     listing={listing}
+                    viewMode={viewMode}
+                    onAddToWishlist={() => {
+                      setSelectedListing(listing.id);
+                      setShowWishlistDialog(true);
+                    }}
                   />
                 ))}
               </div>
             ) : (
-              <Card className="glass-effect" data-testid="no-results">
-                <CardContent className="p-12 text-center">
-                  <div className="text-6xl mb-4 opacity-50">🔍</div>
-                  <h3 className="text-xl font-serif font-bold mb-2">No oddities found</h3>
-                  <p className="text-foreground/70 mb-6">
-                    Try adjusting your search terms or filters to find what you're looking for.
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilters({
-                        category: "",
-                        minPrice: "",
-                        maxPrice: "",
-                        sortBy: "newest",
-                      });
-                    }}
-                    data-testid="button-clear-search"
-                  >
-                    Clear Search
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Pagination */}
-            {searchResults?.total > 20 && (
-              <div className="flex justify-center mt-12" data-testid="pagination">
-                <div className="flex gap-2">
-                  <Button variant="outline" disabled data-testid="button-prev-page">
-                    Previous
-                  </Button>
-                  <Button variant="outline" className="bg-primary text-primary-foreground" data-testid="button-current-page">
-                    1
-                  </Button>
-                  <Button variant="outline" data-testid="button-next-page">
-                    Next
-                  </Button>
+              <div className="text-center py-12" data-testid="no-results">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-zinc-800 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-zinc-700" />
                 </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No oddities found</h3>
+                <p className="text-zinc-400 mb-6">
+                  Try adjusting your search terms or filters to find what you're looking for.
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
+                    navigate('/browse');
+                  }}
+                  data-testid="button-clear-search"
+                >
+                  Clear Search
+                </Button>
               </div>
             )}
           </div>
         </div>
-        </div>
       </div>
-
-      <Footer />
     </div>
   );
 }
