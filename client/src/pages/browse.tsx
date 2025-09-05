@@ -39,9 +39,6 @@ export default function Browse() {
     const category = urlParams.get('category');
     const q = urlParams.get('q');
     
-    // Clear any existing search cache to prevent conflicts
-    queryClient.invalidateQueries({ queryKey: ["/api/search"] });
-    
     // Update filters synchronously to prevent race conditions
     const newCategory = category || "";
     const newSearchQuery = q || "";
@@ -68,7 +65,7 @@ export default function Browse() {
     updateURL(newFilters);
   };
 
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading, refetch } = useQuery({
     queryKey: ["search", filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -81,8 +78,14 @@ export default function Browse() {
       return await response.json();
     },
     staleTime: 0,
+    gcTime: 0,
     refetchOnWindowFocus: false,
   });
+
+  // Force refetch when filters change
+  useEffect(() => {
+    refetch();
+  }, [filters.category, searchQuery, refetch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
