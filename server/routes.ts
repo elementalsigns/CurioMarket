@@ -2323,10 +2323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== SEARCH & DISCOVERY ====================
-  // VERSION: Category filtering fix v2.3 - EMERGENCY DEPLOYMENT - Sep 5, 2025
-  // CRITICAL FIX: Category filtering was broken - showing all products instead of filtering
   
-  // Search listings - FIXED CATEGORY FILTERING
+  // Search listings with category filtering
   app.get('/api/search', async (req, res) => {
     try {
       const { q, category, limit = 20, offset = 0 } = req.query;
@@ -2350,25 +2348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset: parseInt(offset as string)
       });
       
-      // TEMP: Add debug info to response to verify deployment
-      const debugInfo = {
-        originalCategory: category,
-        resolvedCategoryId: categoryId,
-        version: "v2.3-EMERGENCY-DEPLOYMENT",
-        timestamp: new Date().toISOString()
-      };
-      
-      // Add cache-busting headers to prevent stale data
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
-      
-      res.json({
-        ...result,
-        _debug: debugInfo
-      });
+      res.json(result);
     } catch (error) {
       console.error("Error searching listings:", error);
       res.status(500).json({ error: "Failed to search listings" });
