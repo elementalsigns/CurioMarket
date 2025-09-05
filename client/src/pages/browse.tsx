@@ -52,13 +52,14 @@ export default function Browse() {
   }, [location]);
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ["/api/search", searchQuery, filters.category, filters.minPrice, filters.maxPrice, filters.sortBy],
+    queryKey: ["/api/search", { q: searchQuery, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice, sortBy: filters.sortBy }],
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (filters.category) params.append("category", filters.category);
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+      
       
       return fetch(`/api/search?${params.toString()}`).then(res => res.json());
     },
