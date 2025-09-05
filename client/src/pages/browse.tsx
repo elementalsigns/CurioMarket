@@ -65,7 +65,6 @@ export default function Browse() {
 
   // Enhanced filter change handler that updates URL
   const handleFiltersChange = (newFilters: typeof filters) => {
-    console.log('🔥 Filter change triggered:', { old: filters, new: newFilters });
     setFilters(newFilters);
     updateURL(newFilters);
   };
@@ -79,10 +78,8 @@ export default function Browse() {
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       
-      console.log('🚀 API Request:', `/api/search?${params.toString()}`);
       const response = await fetch(`/api/search?${params.toString()}`);
       const result = await response.json();
-      console.log('✅ API Response:', result);
       return result;
     },
     staleTime: 5000, // Cache for 5 seconds to prevent duplicate requests
@@ -258,10 +255,6 @@ export default function Browse() {
               </div>
             </div>
 
-            {/* Debug Current State */}
-            <div className="text-xs text-red-400 mb-2 font-mono">
-              URL: {location} | State: category={filters.category} | Query: {JSON.stringify({ q: searchQuery, category: filters.category })}
-            </div>
 
             {/* Results Grid */}
             {isLoading ? (
