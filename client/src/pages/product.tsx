@@ -29,7 +29,7 @@ export default function Product() {
   });
 
   const { data: favorites = [] } = useQuery({
-    queryKey: ["/api/user/favorites"],
+    queryKey: ["/api/favorites"],
     enabled: !!user,
   });
 
@@ -64,7 +64,7 @@ export default function Product() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user/favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
         title: isFavorite ? "Removed from Favorites" : "Added to Favorites",
         description: isFavorite 
@@ -213,9 +213,18 @@ export default function Product() {
                   >
                     <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
                   </Button>
-                  <Button variant="ghost" size="sm" data-testid="button-share">
-                    <Share2 size={20} />
-                  </Button>
+                  <SocialSharing 
+                    listing={{
+                      id: listing.id,
+                      title: listing.title,
+                      description: listing.description,
+                      price: listing.price,
+                      images: listing.images?.map(img => img.url) || [],
+                      sellerShopName: listing.seller?.shopName
+                    }}
+                    variant="ghost"
+                    size="sm"
+                  />
                 </div>
               </div>
 
