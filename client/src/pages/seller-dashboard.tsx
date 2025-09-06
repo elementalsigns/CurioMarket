@@ -67,8 +67,84 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
       className={`glass-effect ${isDragging ? 'shadow-lg' : ''}`}
       data-testid={`listing-${listing.id}`}
     >
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+      <CardContent className="p-4 sm:p-6">
+        {/* Mobile Layout */}
+        <div className="flex flex-col space-y-4 sm:hidden">
+          <div className="flex items-center space-x-4">
+            {/* Drag handle */}
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-2 hover:bg-muted rounded-lg transition-colors"
+              data-testid={`drag-handle-${listing.id}`}
+            >
+              <GripVertical className="text-foreground/40" size={20} />
+            </div>
+            
+            <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
+              {listing.images?.[0]?.url ? (
+                <img
+                  src={`${listing.images[0].url}?cache=${Date.now()}`}
+                  alt={listing.title}
+                  className="w-full h-full object-cover rounded-lg"
+                  style={{ 
+                    aspectRatio: '1/1',
+                    objectFit: 'cover',
+                    objectPosition: 'center'
+                  }}
+                />
+              ) : (
+                <Package className="text-foreground/40" size={24} />
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-serif font-bold text-base truncate" data-testid={`listing-title-${listing.id}`}>
+                {listing.title}
+              </h3>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span className="text-gothic-red font-bold text-sm" data-testid={`listing-price-${listing.id}`}>
+                  ${listing.price}
+                </span>
+                <Badge
+                  variant={listing.state === 'published' ? 'default' : 'secondary'}
+                  className="text-xs"
+                  data-testid={`listing-status-${listing.id}`}
+                >
+                  {listing.state}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Action Buttons */}
+          <div className="flex items-center justify-center space-x-2 pt-2 border-t border-border/20">
+            <Link to={`/product/${listing.slug}`} className="flex-1">
+              <Button variant="outline" size="sm" className="w-full text-xs" data-testid={`button-view-${listing.id}`}>
+                <Eye size={14} className="mr-1" />
+                View
+              </Button>
+            </Link>
+            <Link to={`/seller/listings/edit/${listing.id}`} className="flex-1">
+              <Button variant="outline" size="sm" className="w-full text-xs" data-testid={`button-edit-${listing.id}`}>
+                <Edit size={14} className="mr-1" />
+                Edit
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteListingMutation.mutate(listing.id)}
+              className="text-destructive hover:text-destructive px-3"
+              data-testid={`button-delete-${listing.id}`}
+            >
+              <Trash2 size={14} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden sm:flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Drag handle */}
             <div
