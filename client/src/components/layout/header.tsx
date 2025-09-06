@@ -137,6 +137,11 @@ export default function Header() {
                     Wet Specimens
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/browse?category=wholesale" className="flex items-center">
+                    Wholesale
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/browse" className="flex items-center font-medium">
