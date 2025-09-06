@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { 
   Star, 
   MapPin, 
@@ -14,12 +15,14 @@ import {
   Calendar,
   ExternalLink,
   MessageCircle,
-  Eye
+  Eye,
+  Search
 } from "lucide-react";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ProductCard from "@/components/product-card";
 import { Link } from "wouter";
+import { useState, useMemo } from "react";
 
 interface ShopPageProps {
   // For preview mode
@@ -38,6 +41,8 @@ interface ShopPageProps {
 
 export default function ShopPage({ previewData, isPreview = false }: ShopPageProps) {
   const { sellerId } = useParams();
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // In preview mode, use previewData; otherwise fetch from API
   const { data: fetchedData, isLoading } = useQuery({
@@ -48,6 +53,69 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
 
   const seller = fetchedData?.seller;
   const listings = fetchedData?.listings || [];
+
+  // Get categories used by this seller
+  const { data: categoriesData } = useQuery({
+    queryKey: ["/api/categories"],
+    enabled: !isPreview,
+  });
+
+  // Create category counts for this seller's items
+  const categoryCounts = useMemo(() => {
+    if (isPreview || !listings || !categoriesData) return [];
+    
+    const counts = new Map();
+    
+    // Count items in each category
+    (listings as any[]).forEach((listing: any) => {
+      if (listing.category_ids && Array.isArray(listing.category_ids)) {
+        listing.category_ids.forEach((categoryId: string) => {
+          const category = (categoriesData as any[]).find(c => c.id === categoryId);
+          if (category) {
+            const key = category.slug;
+            counts.set(key, (counts.get(key) || 0) + 1);
+          }
+        });
+      }
+    });
+    
+    // Convert to array with category info
+    return (categoriesData as any[]).map(category => ({
+      ...category,
+      count: counts.get(category.slug) || 0
+    })).filter(cat => cat.count > 0);
+  }, [listings, categoriesData, isPreview]);
+
+  // Filter listings based on selected category and search
+  const filteredListings = useMemo(() => {
+    if (isPreview) return [];
+    if (!listings) return [];
+    
+    let filtered = listings as any[];
+    
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      const category = categoryCounts.find(c => c.slug === selectedCategory);
+      if (category) {
+        filtered = filtered.filter((listing: any) => 
+          listing.category_ids && listing.category_ids.includes(category.id)
+        );
+      }
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((listing: any) => 
+        listing.title?.toLowerCase().includes(query) ||
+        listing.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
+  }, [listings, selectedCategory, searchQuery, categoryCounts, isPreview]);
+
+  const totalItems = isPreview ? 12 : (listings as any)?.length || 0;
 
   const displayData = isPreview ? previewData : (seller as any);
 
@@ -153,7 +221,7 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Column - Shop Info */}
           <div className="space-y-6">
             {/* About Shop */}
@@ -182,7 +250,7 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Active Listings</span>
-                  <span className="font-semibold">{isPreview ? "12" : (listings as any)?.length || 0}</span>
+                  <span className="font-semibold">{totalItems}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Member Since</span>
@@ -231,15 +299,76 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
             )}
           </div>
 
+          {/* Middle Column - Category Filters */}
+          {!isPreview && (
+            <div className="space-y-6">
+              {/* Search */}
+              <Card className="glass-effect">
+                <CardContent className="p-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <Input
+                      placeholder={`Search all ${totalItems} items`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder-zinc-400"
+                      data-testid="shop-search"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Category Filters */}
+              <Card className="glass-effect">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    {/* All Items */}
+                    <button
+                      onClick={() => setSelectedCategory('all')}
+                      className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
+                        selectedCategory === 'all'
+                          ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+                          : 'hover:bg-zinc-800/50 text-zinc-300'
+                      }`}
+                      data-testid="category-filter-all"
+                    >
+                      <span className="font-medium">All</span>
+                      <span className="text-sm">{totalItems}</span>
+                    </button>
+
+                    {/* Category Filters */}
+                    {categoryCounts.map((category) => (
+                      <button
+                        key={category.slug}
+                        onClick={() => setSelectedCategory(category.slug)}
+                        className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
+                          selectedCategory === category.slug
+                            ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+                            : 'hover:bg-zinc-800/50 text-zinc-300'
+                        }`}
+                        data-testid={`category-filter-${category.slug}`}
+                      >
+                        <span>{category.name}</span>
+                        <span className="text-sm">{category.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Right Column - Listings */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-garamond text-white">
-                Featured Items {isPreview && <span className="text-lg text-zinc-400">(Sample)</span>}
+                {selectedCategory === 'all' ? 'All Items' : categoryCounts.find(c => c.slug === selectedCategory)?.name || 'Items'}
+                {isPreview && <span className="text-lg text-zinc-400"> (Sample)</span>}
+                {searchQuery && <span className="text-lg text-zinc-400"> - "{searchQuery}"</span>}
               </h2>
               <Badge variant="outline" className="text-zinc-300">
                 <Package className="w-3 h-3 mr-1" />
-                {isPreview ? "12" : (listings as any)?.length || 0} items
+                {isPreview ? "12" : filteredListings.length} items
               </Badge>
             </div>
 
@@ -266,12 +395,47 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                   </Card>
                 ))}
               </div>
-            ) : (listings as any)?.length > 0 ? (
+            ) : filteredListings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="shop-listings">
-                {(listings as any)?.map((listing: any) => (
+                {filteredListings.map((listing: any) => (
                   <ProductCard key={listing.id} listing={listing} />
                 ))}
               </div>
+            ) : searchQuery || selectedCategory !== 'all' ? (
+              <Card className="glass-effect">
+                <CardContent className="p-12 text-center">
+                  <Package className="mx-auto mb-4 text-zinc-500" size={48} />
+                  <h3 className="text-xl font-serif text-white mb-2">No Items Found</h3>
+                  <p className="text-zinc-400 mb-4">
+                    {searchQuery 
+                      ? `No items match "${searchQuery}"` 
+                      : `No items in ${categoryCounts.find(c => c.slug === selectedCategory)?.name || 'this category'}`
+                    }
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    {searchQuery && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setSearchQuery('')}
+                        className="text-white border-white hover:bg-white/10"
+                      >
+                        Clear Search
+                      </Button>
+                    )}
+                    {selectedCategory !== 'all' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setSelectedCategory('all')}
+                        className="text-white border-white hover:bg-white/10"
+                      >
+                        View All Items
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <Card className="glass-effect">
                 <CardContent className="p-12 text-center">
