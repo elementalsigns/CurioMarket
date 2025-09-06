@@ -83,7 +83,7 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
       <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg border-border h-full flex flex-col" data-testid={`product-card-${listing.id}`}>
         <CardContent className="p-0 flex flex-col h-full">
           {/* Product Image */}
-          <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted relative">
+          <div className="aspect-[4/3] sm:aspect-square w-full overflow-hidden rounded-t-lg bg-muted relative">
             {listing.images?.[0] ? (
               <img
                 src={convertImageUrl(listing.images[0].url)}
