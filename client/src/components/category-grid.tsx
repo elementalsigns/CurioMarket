@@ -33,6 +33,10 @@ const categoryImages = {
   "occult": {
     icon: "🔮",
     image: occultImage,
+  },
+  "wholesale": {
+    icon: "📦",
+    image: undefined, // Can add specific image later if needed
   }
 };
 
