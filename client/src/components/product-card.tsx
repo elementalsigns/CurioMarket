@@ -88,12 +88,8 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
               <img
                 src={convertImageUrl(listing.images[0].url)}
                 alt={listing.images[0].alt || listing.title}
-                className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                className="h-full w-full object-contain sm:object-cover transition-transform duration-200 group-hover:scale-105"
                 data-testid={`product-image-${listing.id}`}
-                style={{ 
-                  objectFit: 'cover',
-                  objectPosition: 'center'
-                }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground">
