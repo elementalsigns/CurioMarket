@@ -68,8 +68,8 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
     
     // Count items in each category
     (listings as any[]).forEach((listing: any) => {
-      if (listing.category_ids && Array.isArray(listing.category_ids)) {
-        listing.category_ids.forEach((categoryId: string) => {
+      if (listing.categoryIds && Array.isArray(listing.categoryIds)) {
+        listing.categoryIds.forEach((categoryId: string) => {
           const category = (categoriesData as any[]).find(c => c.id === categoryId);
           if (category) {
             const key = category.slug;
@@ -98,7 +98,7 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
       const category = categoryCounts.find(c => c.slug === selectedCategory);
       if (category) {
         filtered = filtered.filter((listing: any) => 
-          listing.category_ids && listing.category_ids.includes(category.id)
+          listing.categoryIds && listing.categoryIds.includes(category.id)
         );
       }
     }
