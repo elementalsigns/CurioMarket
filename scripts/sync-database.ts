@@ -80,8 +80,8 @@ async function syncDatabase() {
 }
 
 // Run sync if this script is executed directly (not imported)
-// Fixed condition to prevent exit during server startup
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop() || '')) {
+// Only exit process when explicitly running this script directly via command line
+if (import.meta.url === `file://${process.argv[1]}`) {
   syncDatabase()
     .then(() => {
       console.log('🎉 Sync completed successfully!');
