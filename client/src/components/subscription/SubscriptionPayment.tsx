@@ -148,7 +148,7 @@ function PaymentForm({ onSuccess, onCancel }: SubscriptionPaymentProps) {
             </li>
             <li className="flex items-center gap-2">
               <Check className="w-4 h-4 text-red-400" />
-              Only 3% platform fee per sale
+              Only 2.6% platform fee per sale
             </li>
           </ul>
         </div>

@@ -1,8 +1,8 @@
 import { CheckCircle, Package, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 
 export default function OrderConfirmation() {
   const handleContinueShopping = () => {

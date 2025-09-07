@@ -155,7 +155,7 @@ export default function SubscriptionStatus({ onManageSubscription }: Subscriptio
               <li>• Professional seller dashboard</li>
               <li>• Order management & analytics</li>
               <li>• Direct customer messaging</li>
-              <li>• Only 3% platform fee per sale</li>
+              <li>• Only 2.6% platform fee per sale</li>
             </ul>
           </div>
         )}

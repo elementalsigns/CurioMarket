@@ -153,7 +153,7 @@ export default function SellerSubscriptionPage() {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      <span className="text-zinc-300">Only 3% platform fee per sale</span>
+                      <span className="text-zinc-300">Only 2.6% platform fee per sale</span>
                     </div>
                   </div>
 
