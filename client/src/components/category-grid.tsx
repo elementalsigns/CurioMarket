@@ -41,19 +41,19 @@ const categoryImages = {
 };
 
 export default function CategoryGrid() {
-  // Fetch dynamic category counts
-  const { data: categoryCounts, isLoading } = useQuery({
-    queryKey: ['/api/categories/counts'],
+  // Fetch all categories (will vary based on seller listings)
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ['/api/categories'],
   });
 
-  // Combine static category data with dynamic counts
-  const categories = (categoryCounts as any[])?.map((categoryCount: any) => ({
-    id: categoryCount.slug,
-    name: categoryCount.name,
-    slug: categoryCount.slug,
-    icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
-    image: (categoryImages as any)[categoryCount.slug]?.image,
-    count: categoryCount.count
+  // Use real categories that vary based on seller listings
+  const processedCategories = (categories as any[])?.map((category: any) => ({
+    id: category.slug,
+    name: category.name,
+    slug: category.slug,
+    icon: "🏪", // Generic shop icon that works for all categories
+    image: undefined, // No static images - will vary based on seller use
+    count: 0 // Will be filled dynamically based on actual listings
   })) || [];
 
   if (isLoading) {
@@ -69,7 +69,7 @@ export default function CategoryGrid() {
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-      {categories.map((category: any) => (
+      {processedCategories.map((category: any) => (
         <Link key={category.id} to={`/browse?category=${category.slug}`}>
           <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
             <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
@@ -83,7 +83,7 @@ export default function CategoryGrid() {
                     {category.name}
                   </h3>
                   <p className="text-sm text-white/80 mt-1" data-testid={`category-count-${category.id}`}>
-                    {category.count} items
+                    Browse Category
                   </p>
                 </div>
               </div>
