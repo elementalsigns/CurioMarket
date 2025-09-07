@@ -1062,7 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[SUBSCRIPTION] Subscription ${subscription.id} is incomplete with no payment method - NOT active`);
               // PRODUCTION FAILSAFE: If user has seller role in database but incomplete subscription, treat as active
               // This handles cases where subscription setup succeeded but Stripe sync failed
-              if (user.role === 'seller') {
+              if (user.role === 'seller' as any) {
                 console.log(`[SUBSCRIPTION] User ${user.id} has seller role despite incomplete subscription - treating as active (failsafe)`);
                 isActive = true;
               } else {
