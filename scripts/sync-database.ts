@@ -80,8 +80,8 @@ async function syncDatabase() {
 }
 
 // Run sync if this script is executed directly (not imported)
-// Only exit process when explicitly running this script directly via command line
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Use environment variable approach to avoid build system issues
+if (process.env.RUN_SYNC_SCRIPT === 'true') {
   syncDatabase()
     .then(() => {
       console.log('🎉 Sync completed successfully!');
