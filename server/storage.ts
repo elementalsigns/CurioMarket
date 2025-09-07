@@ -354,6 +354,7 @@ export class DatabaseStorage implements IStorage {
     
     if (filters?.categoryId) {
       // Check if the category ID is in the category_ids array
+      console.log('[STORAGE DEBUG] Filtering by categoryId:', filters.categoryId);
       conditions.push(sql`${filters.categoryId} = ANY(${listings.categoryIds})`);
     }
     
