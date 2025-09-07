@@ -60,22 +60,22 @@ export class EmailService {
       <html>
       <head>
         <style>
-          body { font-family: Georgia, serif; color: #1a1a1a; background: #f8f9fa; margin: 0; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-          .header { text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #dc2626; margin-bottom: 10px; }
-          .order-details { background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+          .order-details { background: hsl(0, 0%, 16%); padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid hsl(0, 0%, 20%); }
           .items { margin: 20px 0; }
-          .item { border-bottom: 1px solid #e5e7eb; padding: 10px 0; display: flex; justify-content: space-between; }
-          .total { font-weight: bold; font-size: 18px; color: #dc2626; text-align: right; margin-top: 15px; border-top: 2px solid #dc2626; padding-top: 15px; }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px; }
+          .item { border-bottom: 1px solid hsl(0, 0%, 20%); padding: 10px 0; display: flex; justify-content: space-between; color: hsl(0, 0%, 100%); }
+          .total { font-weight: bold; font-size: 18px; color: hsl(0, 77%, 26%); text-align: right; margin-top: 15px; border-top: 2px solid hsl(0, 77%, 26%); padding-top: 15px; }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
             <div class="logo">Curio Market</div>
-            <h1 style="margin: 0; color: #1a1a1a;">Order Confirmation</h1>
+            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">Order Confirmation</h1>
           </div>
           
           <p>Dear ${data.customerName},</p>
@@ -140,20 +140,20 @@ export class EmailService {
       <html>
       <head>
         <style>
-          body { font-family: Georgia, serif; color: #1a1a1a; background: #f8f9fa; margin: 0; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-          .header { text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #dc2626; margin-bottom: 10px; }
-          .shipping-info { background: #f0fdf4; border: 1px solid #16a34a; padding: 20px; border-radius: 6px; margin: 20px 0; }
-          .tracking-button { display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px; }
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+          .shipping-info { background: hsl(0, 0%, 16%); border: 1px solid hsl(0, 77%, 26%); padding: 20px; border-radius: 6px; margin: 20px 0; }
+          .tracking-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
             <div class="logo">Curio Market</div>
-            <h1 style="margin: 0; color: #1a1a1a;">📦 Your Order Has Shipped!</h1>
+            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">📦 Your Order Has Shipped!</h1>
           </div>
           
           <p>Dear ${data.customerName},</p>
@@ -161,7 +161,7 @@ export class EmailService {
           <p>Great news! Your order from ${data.shopName} is on its way.</p>
           
           <div class="shipping-info">
-            <h3 style="margin-top: 0; color: #16a34a;">Shipping Information</h3>
+            <h3 style="margin-top: 0; color: hsl(0, 77%, 26%);">Shipping Information</h3>
             <p><strong>Order Number:</strong> ${data.orderNumber}</p>
             <p><strong>Carrier:</strong> ${data.carrier}</p>
             <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
@@ -201,26 +201,26 @@ export class EmailService {
       <html>
       <head>
         <style>
-          body { font-family: Georgia, serif; color: #1a1a1a; background: #f8f9fa; margin: 0; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-          .header { text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #dc2626; margin-bottom: 10px; }
-          .delivery-info { background: #f0fdf4; border: 1px solid #16a34a; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center; }
-          .review-button { display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px; }
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+          .delivery-info { background: hsl(0, 0%, 16%); border: 1px solid hsl(0, 77%, 26%); padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center; }
+          .review-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
             <div class="logo">Curio Market</div>
-            <h1 style="margin: 0; color: #1a1a1a;">✅ Order Delivered!</h1>
+            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">✅ Order Delivered!</h1>
           </div>
           
           <p>Dear ${data.customerName},</p>
           
           <div class="delivery-info">
-            <h3 style="margin-top: 0; color: #16a34a;">🎉 Your order has been delivered!</h3>
+            <h3 style="margin-top: 0; color: hsl(0, 77%, 26%);">🎉 Your order has been delivered!</h3>
             <p><strong>Order Number:</strong> ${data.orderNumber}</p>
             <p><strong>Delivered on:</strong> ${new Date().toLocaleDateString()}</p>
           </div>
