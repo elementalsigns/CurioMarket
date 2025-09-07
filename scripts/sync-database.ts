@@ -79,8 +79,9 @@ async function syncDatabase() {
   }
 }
 
-// Run sync if this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run sync if this script is executed directly (not imported)
+// Fixed condition to prevent exit during server startup
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop() || '')) {
   syncDatabase()
     .then(() => {
       console.log('🎉 Sync completed successfully!');

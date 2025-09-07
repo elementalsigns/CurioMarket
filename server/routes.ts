@@ -328,6 +328,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
+  // Health check endpoint for deployment monitoring
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Auth middleware  
   await setupAuth(app);
 
