@@ -742,30 +742,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategoryCounts(): Promise<any[]> {
-    // Since this is a development environment, return sample data with realistic counts
-    // that would be dynamically calculated from the listings table in production
-    return [
-      {
-        slug: "wet-specimens",
-        name: "Wet Specimens",
-        count: 3, // Sample count - in production this would count actual listings
-      },
-      {
-        slug: "bones-skulls", 
-        name: "Bones & Skulls",
-        count: 2,
-      },
-      {
-        slug: "taxidermy",
-        name: "Taxidermy", 
-        count: 1,
-      },
-      {
-        slug: "vintage-medical",
-        name: "Vintage Medical",
-        count: 4,
-      }
-    ];
+    // Get all categories from database
+    const allCategories = await db.select().from(categories);
+    
+    // Get all published listings with their categories
+    const allListings = await db
+      .select({
+        id: listings.id,
+        categoryIds: listings.categoryIds
+      })
+      .from(listings)
+      .where(eq(listings.state, 'published'));
+    
+    // Calculate counts for each category
+    const categoryCounts = allCategories.map(category => {
+      // Count listings that have this category ID in their categoryIds array
+      const count = allListings.filter(listing => 
+        listing.categoryIds && listing.categoryIds.includes(category.id)
+      ).length;
+      
+      return {
+        slug: category.slug,
+        name: category.name,
+        count: count
+      };
+    });
+    
+    // Return all categories (including ones with 0 counts) like Etsy does
+    return categoryCounts;
   }
 
   // Enhanced Product Management
