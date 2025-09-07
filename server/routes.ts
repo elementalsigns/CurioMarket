@@ -2342,15 +2342,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If category is provided and looks like a slug (not a UUID), convert it to ID
       if (category && typeof category === 'string') {
-        console.log('[SEARCH DEBUG] Input category:', category);
         // Check if it's a UUID format (8-4-4-4-12 pattern)
         const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (!uuidPattern.test(category)) {
           // It's a slug, convert to ID
           const categoryRecord = await storage.getCategoryBySlug(category);
-          console.log('[SEARCH DEBUG] Category record found:', categoryRecord);
           categoryId = categoryRecord?.id || '';
-          console.log('[SEARCH DEBUG] Final categoryId:', categoryId);
         }
       }
       
