@@ -30,7 +30,9 @@ export default function Browse() {
   const [searchName, setSearchName] = useState("");
   const { toast } = useToast();
 
-  // Extract URL parameters whenever the location changes
+  // Initialize filters from URL parameters on component mount
+  const [initialized, setInitialized] = useState(false);
+  
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category') || "";
@@ -38,6 +40,7 @@ export default function Browse() {
     
     setFilters(prev => ({ ...prev, category }));
     setSearchQuery(q);
+    setInitialized(true);
   }, [location]);
 
   // Function to update URL when filters change
@@ -63,6 +66,9 @@ export default function Browse() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Don't fetch until URL parameters are initialized
+    if (!initialized) return;
+    
     const fetchResults = async () => {
       setIsLoading(true);
       try {
@@ -89,7 +95,7 @@ export default function Browse() {
     };
 
     fetchResults();
-  }, [filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
+  }, [initialized, filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
