@@ -42,7 +42,7 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: categories } = useQuery({
-    queryKey: ["/api/categories"],
+    queryKey: ["/api/categories/counts"],
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -126,7 +126,7 @@ export default function SearchFilters({ filters, onFiltersChange, onClearFilters
               <SelectItem value="all">All Categories</SelectItem>
               {Array.isArray(categories) && categories.map((category: any) => (
                 <SelectItem key={category.slug} value={category.slug}>
-                  {category.name}
+                  {category.name} ({category.count})
                 </SelectItem>
               ))}
             </SelectContent>
