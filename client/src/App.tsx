@@ -49,6 +49,7 @@ import SignInOnly from "@/pages/signin-only";
 import SellerSubscription from "@/pages/SellerSubscription";
 import IncognitoAuth from "@/pages/incognito-auth";
 import ShopPage from "@/pages/shop";
+import OrderConfirmation from "@/pages/order-confirmation";
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -193,6 +194,7 @@ function Router() {
           <Route path="/seller/listings/create" component={CreateListing} />
           <Route path="/seller/listings/edit/:id" component={EditListing} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/order-confirmation" component={OrderConfirmation} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
           <Route path="/account" component={AccountManager} />
