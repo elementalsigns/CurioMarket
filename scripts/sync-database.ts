@@ -79,18 +79,7 @@ async function syncDatabase() {
   }
 }
 
-// Run sync if this script is executed directly (not imported)
-// Use environment variable approach to avoid build system issues
-if (process.env.RUN_SYNC_SCRIPT === 'true') {
-  syncDatabase()
-    .then(() => {
-      console.log('🎉 Sync completed successfully!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('💥 Sync failed:', error);
-      process.exit(1);
-    });
-}
+// This script is only used as an import by startup.ts, never run directly
+// Removed process.exit() calls to prevent deployment issues
 
 export { syncDatabase };
