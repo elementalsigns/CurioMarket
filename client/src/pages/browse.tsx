@@ -79,13 +79,8 @@ export default function Browse() {
         if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
         
         const apiUrl = `/api/search?${params.toString()}`;
-        console.log('[BROWSE DEBUG] Making API call:', apiUrl);
-        console.log('[BROWSE DEBUG] Current filters:', filters);
-        
         const response = await fetch(apiUrl);
         const result = await response.json();
-        
-        console.log('[BROWSE DEBUG] API response:', result);
         setSearchResults(result);
       } catch (error) {
         console.error('Search failed:', error);

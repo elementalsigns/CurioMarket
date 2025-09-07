@@ -2347,10 +2347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!uuidPattern.test(category)) {
           // It's a slug, convert to ID
           const categoryRecord = await storage.getCategoryBySlug(category);
-          console.log('[SEARCH DEBUG] Category slug:', category);
-          console.log('[SEARCH DEBUG] Category record:', categoryRecord);
           categoryId = categoryRecord?.id || '';
-          console.log('[SEARCH DEBUG] Final categoryId:', categoryId);
         }
       }
       
