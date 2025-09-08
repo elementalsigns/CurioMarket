@@ -2412,14 +2412,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== PAYMENT PROCESSING ====================
   
   // Create payment intent for purchase
-  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
+  app.post("/api/create-payment-intent", async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
 
     try {
       const { cartItems, shippingAddress } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.isAuthenticated() ? req.user.claims.sub : null;
+      
+      console.log('[PAYMENT-INTENT] Creating payment intent for', cartItems?.length || 0, 'items');
       
       // Calculate totals
       let subtotal = 0;
@@ -2440,12 +2442,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: Math.round(total * 100), // Convert to cents
         currency: "usd",
         metadata: {
-          userId,
+          userId: userId || 'guest',
           subtotal: subtotal.toString(),
           shippingCost: shippingCost.toString(),
           platformFee: platformFee.toString(),
         },
       });
+      
+      console.log('[PAYMENT-INTENT] Successfully created payment intent:', paymentIntent.id);
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
