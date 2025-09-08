@@ -319,13 +319,13 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
-                      <span>${cartData.items.reduce((sum: number, item: any) => 
+                      <span>${items.reduce((sum: number, item: any) => 
                         sum + parseFloat(item.listing?.shippingCost || '0'), 0
                       ).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Platform Fee (2.6%)</span>
-                      <span>${(cartData.items.reduce((sum: number, item: any) => 
+                      <span>${(items.reduce((sum: number, item: any) => 
                         sum + (parseFloat(item.listing?.price || '0') * item.quantity), 0
                       ) * 0.026).toFixed(2)}</span>
                     </div>
@@ -333,7 +333,7 @@ export default function Checkout() {
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
                       <span className="text-gothic-red">
-                        ${(cartData.items.reduce((sum: number, item: any) => {
+                        ${(items.reduce((sum: number, item: any) => {
                           const itemTotal = parseFloat(item.listing?.price || '0') * item.quantity;
                           const shipping = parseFloat(item.listing?.shippingCost || '0');
                           return sum + itemTotal + shipping;
@@ -348,7 +348,7 @@ export default function Checkout() {
             {/* Checkout Form */}
             <div className="lg:col-span-2">
               <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <CheckoutForm cartId={cartData.cart.id} onSuccess={handleSuccess} />
+                <CheckoutForm cartId={(cartData as any)?.cart?.id} onSuccess={handleSuccess} />
               </Elements>
             </div>
           </div>
