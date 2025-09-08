@@ -20,6 +20,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   const { data: cartData, isLoading } = useQuery({
     queryKey: ["/api/cart"],
+    staleTime: 0, // Always refetch when component mounts
+    gcTime: 0, // Don't cache results  
+    refetchInterval: 2000, // Refetch every 2 seconds
   });
 
   const removeFromCartMutation = useMutation({
