@@ -60,8 +60,8 @@ export default function EnhancedProductPage() {
 
   // Get seller info
   const { data: seller } = useQuery({
-    queryKey: ["/api/seller/profile"],
-    enabled: !!user && !!product?.sellerId,
+    queryKey: ["/api/seller/public", product?.sellerId],
+    enabled: !!product?.sellerId,
   });
 
   // Check if product is favorited
