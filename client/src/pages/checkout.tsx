@@ -46,7 +46,6 @@ const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSucc
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/order-confirmation`,
         shipping: {
           name: shippingAddress.name,
           address: {
