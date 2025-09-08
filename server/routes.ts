@@ -2742,7 +2742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const orderId = req.params.orderId;
       
-      const order = await storage.getOrder(orderId);
+      const order = await storage.getOrderWithDetails(orderId);
       
       if (!order) {
         return res.status(404).json({ error: "Order not found" });

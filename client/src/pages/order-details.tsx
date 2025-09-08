@@ -155,9 +155,9 @@ export default function OrderDetails() {
                   <div className="space-y-4">
                     {order.items?.map((item: any, index: number) => (
                       <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
-                        {item.image && (
+                        {item.image && item.image.length > 0 && (
                           <img 
-                            src={item.image} 
+                            src={item.image[0]} 
                             alt={item.title}
                             className="w-16 h-16 object-cover rounded"
                           />
@@ -168,12 +168,12 @@ export default function OrderDetails() {
                             Quantity: {item.quantity}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            ${item.price} each
+                            ${parseFloat(item.price).toFixed(2)} each
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </div>

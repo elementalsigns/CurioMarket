@@ -1049,7 +1049,8 @@ export class DatabaseStorage implements IStorage {
       .select({
         title: listings.title,
         price: orderItems.price,
-        quantity: orderItems.quantity
+        quantity: orderItems.quantity,
+        image: listings.images
       })
       .from(orderItems)
       .leftJoin(listings, eq(orderItems.listingId, listings.id))
