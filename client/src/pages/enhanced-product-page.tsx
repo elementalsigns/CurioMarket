@@ -36,7 +36,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function EnhancedProductPage() {
   const { id } = useParams();
-  const [location, navigate] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedVariation, setSelectedVariation] = useState("");
