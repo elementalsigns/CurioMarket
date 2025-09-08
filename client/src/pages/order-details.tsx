@@ -154,30 +154,61 @@ export default function OrderDetails() {
                 <CardContent>
                   <div className="space-y-4">
                     {order.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
-                        {item.image && item.image.length > 0 && (
-                          <img 
-                            src={item.image[0]} 
-                            alt={item.title}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h3 className="font-medium">{item.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Quantity: {item.quantity}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            ${parseFloat(item.price).toFixed(2)} each
-                          </p>
+                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
+                        {/* Product Image */}
+                        <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
+                          {item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
+                            <img 
+                              src={item.image[0].url} 
+                              alt={item.image[0].alt || item.title}
+                              className="w-full h-full object-cover"
+                              data-testid={`order-item-image-${index}`}
+                            />
+                          ) : item.image && typeof item.image === 'string' ? (
+                            <img 
+                              src={item.image} 
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              data-testid={`order-item-image-${index}`}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                              No Image
+                            </div>
+                          )}
                         </div>
+                        
+                        {/* Product Details */}
+                        <div className="flex-1">
+                          <h3 className="font-medium" data-testid={`order-item-title-${index}`}>
+                            {item.title}
+                          </h3>
+                          <div className="mt-1 space-y-1">
+                            <p className="text-sm text-muted-foreground" data-testid={`order-item-quantity-${index}`}>
+                              Quantity: {item.quantity}
+                            </p>
+                            <p className="text-sm text-muted-foreground" data-testid={`order-item-unit-price-${index}`}>
+                              ${parseFloat(item.price || 0).toFixed(2)} each
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Total Price */}
                         <div className="text-right">
-                          <p className="font-medium">
-                            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                          <p className="font-semibold text-lg" data-testid={`order-item-total-${index}`}>
+                            ${(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
                           </p>
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Handle case where no items exist */}
+                    {(!order.items || order.items.length === 0) && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No items found for this order</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
