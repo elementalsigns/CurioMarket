@@ -44,7 +44,7 @@ export default function EnhancedProductPage() {
 
   // Get product details
   const { data: product, isLoading: productLoading } = useQuery({
-    queryKey: ["/api/products", id],
+    queryKey: ["/api/listings", id],
   });
 
   // Get product reviews
@@ -54,13 +54,13 @@ export default function EnhancedProductPage() {
 
   // Get product variations
   const { data: variations } = useQuery({
-    queryKey: ["/api/products", id, "variations"],
+    queryKey: ["/api/listings", id, "variations"],
   });
 
   // Get seller info
   const { data: seller } = useQuery({
-    queryKey: ["/api/sellers", product?.sellerId],
-    enabled: !!product?.sellerId,
+    queryKey: ["/api/seller/profile"],
+    enabled: !!user && !!product?.sellerId,
   });
 
   // Check if product is favorited
@@ -101,10 +101,10 @@ export default function EnhancedProductPage() {
   // Track product view
   useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", `/api/products/${id}/view`);
+      return await apiRequest("POST", `/api/listings/${id}/view`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/listings", id] });
     },
   });
 
