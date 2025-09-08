@@ -58,10 +58,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   });
 
   // Type safety check - move this first
-  if (!cartData || !isOpen) return null;
+  if (!isOpen) return null;
   
-  const cart = cartData.cart;
-  const items = cartData.items || [];
+  const cart = (cartData as any)?.cart;
+  const items = (cartData as any)?.items || [];
   
   const subtotal = items.reduce((sum: number, item: any) => {
     return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
@@ -174,7 +174,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="outline"
                                 className="w-6 h-6"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   if (item.quantity > 1) {
                                     updateQuantityMutation.mutate({
                                       listingId: item.listingId,
@@ -193,10 +194,13 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="outline"
                                 className="w-6 h-6"
-                                onClick={() => updateQuantityMutation.mutate({
-                                  listingId: item.listingId,
-                                  quantity: item.quantity + 1
-                                })}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateQuantityMutation.mutate({
+                                    listingId: item.listingId,
+                                    quantity: item.quantity + 1
+                                  });
+                                }}
                                 data-testid={`button-increase-${item.id}`}
                               >
                                 <Plus className="w-3 h-3" />
@@ -212,7 +216,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="ghost"
                                 className="w-6 h-6 text-destructive"
-                                onClick={() => removeFromCartMutation.mutate(item.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeFromCartMutation.mutate(item.id);
+                                }}
                                 data-testid={`button-remove-${item.id}`}
                               >
                                 <Trash2 className="w-3 h-3" />
