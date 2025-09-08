@@ -299,7 +299,7 @@ export default function Product() {
                         className="bg-input border border-border rounded-lg px-3 py-2 w-20"
                         data-testid="select-quantity"
                       >
-                        {[...Array(Math.min(listing.quantity || 1, 10))].map((_, i) => (
+                        {[...Array(Math.min(listing.stockQuantity || 0, 10))].map((_, i) => (
                           <option key={i + 1} value={i + 1}>
                             {i + 1}
                           </option>
@@ -308,19 +308,19 @@ export default function Product() {
                     </div>
 
                     <div className="text-sm text-foreground/70">
-                      {listing.quantity || 0} available
+                      {listing.stockQuantity || 0} available
                     </div>
                   </div>
 
                   <div className="flex gap-3">
                     <Button
                       onClick={handleAddToCart}
-                      disabled={addToCartMutation.isPending || (listing.quantity || 0) < 1}
-                      className="flex-1 bg-gothic-red hover:bg-gothic-red/80 text-white rounded-2xl"
+                      disabled={addToCartMutation.isPending || (listing.stockQuantity || 0) < 1}
+                      className="flex-1 bg-gothic-red hover:bg-gothic-red/80 text-white rounded-2xl disabled:bg-muted disabled:text-muted-foreground"
                       data-testid="button-add-to-cart"
                     >
                       <ShoppingCart size={16} className="mr-2" />
-                      Add to Cart
+                      {(listing.stockQuantity || 0) < 1 ? 'Sold Out' : 'Add to Cart'}
                     </Button>
                     <SocialSharing 
                       listing={{
