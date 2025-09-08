@@ -1022,44 +1022,87 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrderWithDetails(orderId: string): Promise<any> {
-    const order = await db
-      .select({
-        id: orders.id,
-        buyerId: orders.buyerId,
-        sellerId: orders.sellerId,
-        total: orders.total,
-        status: orders.status,
-        shippingAddress: orders.shippingAddress,
-        createdAt: orders.createdAt,
-        buyerEmail: users.email,
-        buyerFirstName: users.firstName,
-        buyerLastName: users.lastName,
-        sellerShopName: sellers.shopName,
-        sellerEmail: sql<string>`(SELECT email FROM ${users} WHERE id = ${sellers.userId})`
-      })
-      .from(orders)
-      .leftJoin(users, eq(orders.buyerId, users.id))
-      .leftJoin(sellers, eq(orders.sellerId, sellers.id))
-      .where(eq(orders.id, orderId))
-      .limit(1);
+    try {
+      console.log(`[STORAGE] getOrderWithDetails: Starting fetch for order ${orderId}`);
+      
+      // First, let's try a simpler query without the complex subquery
+      const order = await db
+        .select({
+          id: orders.id,
+          buyerId: orders.buyerId,
+          sellerId: orders.sellerId,
+          total: orders.total,
+          status: orders.status,
+          shippingAddress: orders.shippingAddress,
+          createdAt: orders.createdAt,
+          buyerEmail: users.email,
+          buyerFirstName: users.firstName,
+          buyerLastName: users.lastName,
+          sellerShopName: sellers.shopName,
+          sellerUserId: sellers.userId
+        })
+        .from(orders)
+        .leftJoin(users, eq(orders.buyerId, users.id))
+        .leftJoin(sellers, eq(orders.sellerId, sellers.id))
+        .where(eq(orders.id, orderId))
+        .limit(1);
 
-    if (!order.length) return null;
+      console.log(`[STORAGE] getOrderWithDetails: Order query returned ${order.length} results`);
+      
+      if (!order.length) {
+        console.log(`[STORAGE] getOrderWithDetails: No order found with ID ${orderId}`);
+        return null;
+      }
 
-    const items = await db
-      .select({
-        title: listings.title,
-        price: orderItems.price,
-        quantity: orderItems.quantity,
-        image: listings.images
-      })
-      .from(orderItems)
-      .leftJoin(listings, eq(orderItems.listingId, listings.id))
-      .where(eq(orderItems.orderId, orderId));
+      console.log(`[STORAGE] getOrderWithDetails: Order found - buyerId: ${order[0].buyerId}, sellerId: ${order[0].sellerId}`);
 
-    return {
-      ...order[0],
-      items
-    };
+      // Get seller email separately if needed
+      let sellerEmail = null;
+      if (order[0].sellerUserId) {
+        try {
+          const sellerUserQuery = await db
+            .select({ email: users.email })
+            .from(users)
+            .where(eq(users.id, order[0].sellerUserId))
+            .limit(1);
+          
+          if (sellerUserQuery.length > 0) {
+            sellerEmail = sellerUserQuery[0].email;
+          }
+          console.log(`[STORAGE] getOrderWithDetails: Seller email found: ${sellerEmail}`);
+        } catch (sellerError) {
+          console.log(`[STORAGE] getOrderWithDetails: Error fetching seller email:`, sellerError);
+        }
+      }
+
+      // Fetch order items
+      console.log(`[STORAGE] getOrderWithDetails: Fetching order items for ${orderId}`);
+      const items = await db
+        .select({
+          title: listings.title,
+          price: orderItems.price,
+          quantity: orderItems.quantity,
+          image: listings.images
+        })
+        .from(orderItems)
+        .leftJoin(listings, eq(orderItems.listingId, listings.id))
+        .where(eq(orderItems.orderId, orderId));
+
+      console.log(`[STORAGE] getOrderWithDetails: Found ${items.length} order items`);
+
+      const result = {
+        ...order[0],
+        sellerEmail,
+        items
+      };
+      
+      console.log(`[STORAGE] getOrderWithDetails: Successfully returning order with ${items.length} items`);
+      return result;
+      
+    } catch (error) {
+      console.error(`[STORAGE] getOrderWithDetails: Error fetching order ${orderId}:`, error);
+      throw error;
+    }
   }
 
   async getOrderMessages(orderId: string): Promise<Message[]> {
