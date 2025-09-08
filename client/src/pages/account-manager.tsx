@@ -50,6 +50,8 @@ export default function AccountManager() {
   const getInitialTab = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
+    // Handle 'orders' as 'purchases' for backward compatibility
+    if (tabParam === 'orders') return 'purchases';
     return tabParam || "overview";
   };
   
