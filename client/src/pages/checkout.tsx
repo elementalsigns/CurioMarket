@@ -184,39 +184,37 @@ export default function Checkout() {
   const items = (cartData as any)?.items || [];
 
   useEffect(() => {
+    // Allow checkout for both authenticated and guest users
+    // Only redirect if user is explicitly needed for the payment intent
     if (!authLoading && !user && items?.length > 0) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to complete your purchase",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 1000);
-      return;
+      console.log('[CHECKOUT] Guest user with items, attempting checkout...');
+      // Don't redirect immediately - try to create payment intent first
     }
   }, [user, authLoading, toast, items]);
 
   useEffect(() => {
-    if (user && items?.length > 0) {
-      // Create PaymentIntent when user is authenticated and cart has items
+    // Create PaymentIntent when cart has items (works for both authenticated and guest users)
+    if (items?.length > 0) {
+      console.log('[CHECKOUT] Creating payment intent for items:', items.length);
       apiRequest("POST", "/api/create-payment-intent", { 
         cartItems: items,
         shippingAddress: {} // Will be collected in the form
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log('[CHECKOUT] Payment intent created successfully');
           setClientSecret(data.clientSecret);
         })
         .catch((error) => {
+          console.error('[CHECKOUT] Failed to create payment intent:', error);
           toast({
-            title: "Error",
-            description: "Failed to initialize checkout",
+            title: "Error", 
+            description: "Failed to initialize checkout. Please try again.",
             variant: "destructive",
           });
         });
     }
-  }, [user, items, toast]);
+  }, [items, toast]);
 
   const handleSuccess = () => {
     // Redirect to success page or clear cart
