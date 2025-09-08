@@ -1092,6 +1092,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`[STORAGE] getOrderWithDetails: Fetching images for ${items.length} items`);
       const itemsWithImages = await Promise.all(
         items.map(async (item) => {
+          console.log(`[STORAGE] Fetching images for listing: ${item.listingId}`);
           const images = await db
             .select({ url: listingImages.url })
             .from(listingImages)
@@ -1099,10 +1100,15 @@ export class DatabaseStorage implements IStorage {
             .orderBy(listingImages.sortOrder)
             .limit(1);
           
-          return {
+          console.log(`[STORAGE] Found ${images.length} images for listing ${item.listingId}:`, images);
+          
+          const result = {
             ...item,
             image: images[0]?.url || null
           };
+          
+          console.log(`[STORAGE] Item with image:`, result);
+          return result;
         })
       );
 
