@@ -191,23 +191,31 @@ export default function OrderDetails() {
                         <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
                         {/* Product Image */}
                         <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
-                          {item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
+                          {item.image && typeof item.image === 'string' && item.image.length > 0 ? (
+                            <img 
+                              src={item.image} 
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              data-testid={`order-item-image-${index}`}
+                              onError={(e) => {
+                                console.log('[ORDER-DETAILS] Image failed to load:', item.image);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              onLoad={() => {
+                                console.log('[ORDER-DETAILS] Image loaded successfully:', item.image);
+                              }}
+                            />
+                          ) : item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
                             <img 
                               src={item.image[0].url} 
                               alt={item.image[0].alt || item.title}
                               className="w-full h-full object-cover"
                               data-testid={`order-item-image-${index}`}
                             />
-                          ) : item.image && typeof item.image === 'string' ? (
-                            <img 
-                              src={item.image} 
-                              alt={item.title}
-                              className="w-full h-full object-cover"
-                              data-testid={`order-item-image-${index}`}
-                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              No Image
+                              {console.log('[ORDER-DETAILS] No valid image found for item:', item)}
+                              <Package className="h-8 w-8 text-muted-foreground" />
                             </div>
                           )}
                         </div>
