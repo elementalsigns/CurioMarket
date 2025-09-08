@@ -191,7 +191,15 @@ export default function OrderDetails() {
                         <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
                         {/* Product Image */}
                         <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
-                          {item.image && typeof item.image === 'string' && item.image.length > 0 ? (
+                          {(() => {
+                            console.log('[ORDER-DETAILS] Evaluating image condition:', {
+                              hasImage: !!item.image,
+                              imageType: typeof item.image,
+                              imageLength: item.image ? item.image.length : 0,
+                              imageUrl: item.image
+                            });
+                            return item.image && typeof item.image === 'string' && item.image.length > 0;
+                          })() ? (
                             <img 
                               src={item.image} 
                               alt={item.title}
