@@ -44,28 +44,28 @@ export default function EnhancedProductPage() {
   const [showMessaging, setShowMessaging] = useState(false);
 
   // Get product details
-  const { data: product, isLoading: productLoading } = useQuery({
+  const { data: product, isLoading: productLoading } = useQuery<any>({
     queryKey: ["/api/listings", id],
   });
 
   // Get product reviews
-  const { data: reviews } = useQuery({
+  const { data: reviews } = useQuery<any>({
     queryKey: ["/api/products", id, "reviews"],
   });
 
   // Get product variations
-  const { data: variations } = useQuery({
+  const { data: variations } = useQuery<any>({
     queryKey: ["/api/listings", id, "variations"],
   });
 
   // Get seller info
-  const { data: seller } = useQuery({
+  const { data: seller } = useQuery<any>({
     queryKey: ["/api/seller/public", product?.sellerId],
     enabled: !!product?.sellerId,
   });
 
   // Check if product is favorited
-  const { data: isFavorited } = useQuery({
+  const { data: isFavorited } = useQuery<any>({
     queryKey: ["/api/products", id, "favorited"],
     enabled: !!user,
   });
