@@ -280,42 +280,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   }
 
-  // URGENT: PRODUCTION FIX FOR USER 46848882 - CHECK DOMAIN FIRST
-  if (hostname.includes('curiosities.market')) {
-    console.log('[AUTH] 🎯 PRODUCTION DOMAIN BYPASS ACTIVATED for curiosities.market');
-    req.user = {
-      claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-      access_token: 'production-domain-bypass',
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-    };
-    return next();
-  }
-
-  // Development bypass for hardcoded user
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[AUTH] Using development bypass in isAuthenticated middleware');
-    req.user = {
-      claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-      access_token: 'dev-token',
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-    };
-    return next();
-  }
-
-  // Production fix for specific user ID 46848882 - handle session auth issues
-  // Check if user exists in session but not properly formatted
-  if (req.session && (req.session as any).passport && (req.session as any).passport.user) {
-    const sessionUser = (req.session as any).passport.user as any;
-    if (sessionUser.claims?.sub === "46848882" || sessionUser.id === "46848882") {
-      console.log('[AUTH] Using production session bypass for user 46848882');
-      req.user = {
-        claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-        access_token: sessionUser.access_token || 'production-session',
-        expires_at: sessionUser.expires_at || Math.floor(Date.now() / 1000) + 3600,
-      };
-      return next();
-    }
-  }
+  // Allow normal Replit authentication to work
 
 
   // Try Authorization header first (for incognito/cookieless requests)

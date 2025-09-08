@@ -231,20 +231,7 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         }
       }
 
-      // Method 3: Check for hardcoded development user (temporary)
-      if (process.env.NODE_ENV === 'development') {
-        const devUserId = "46848882";
-        const devUser = await storage.getUser(devUserId);
-        if (devUser) {
-          console.log('[AUTH] Using development user bypass');
-          req.user = {
-            claims: { sub: devUser.id, email: devUser.email },
-            access_token: 'dev-token',
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-          };
-          return next();
-        }
-      }
+      // Method 3: Use normal Replit authentication (no hardcoded users)
 
       console.log('[AUTH] All authentication methods failed');
       return res.status(401).json({ message: "Unauthorized" });
