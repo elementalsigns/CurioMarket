@@ -177,14 +177,14 @@ export default function Checkout() {
 
   const { data: cartData } = useQuery({
     queryKey: ["/api/cart"],
-    enabled: !!user,
+    // Cart works for both authenticated and guest users
   });
 
   const cart = (cartData as any)?.cart;
   const items = (cartData as any)?.items || [];
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && items?.length > 0) {
       toast({
         title: "Login Required",
         description: "Please log in to complete your purchase",
@@ -192,10 +192,10 @@ export default function Checkout() {
       });
       setTimeout(() => {
         window.location.href = "/api/login";
-      }, 500);
+      }, 1000);
       return;
     }
-  }, [user, authLoading, toast]);
+  }, [user, authLoading, toast, items]);
 
   useEffect(() => {
     if (cart && items?.length > 0) {
