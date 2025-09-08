@@ -6,6 +6,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { authService } from "./auth-service";
 import { insertSellerSchema, insertListingSchema } from "@shared/schema";
 import { verificationService } from "./verificationService";
 import { emailService } from "./emailService";
@@ -368,35 +369,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const token = authHeader.substring(7);
         console.log('[AUTH] Validating Bearer token...');
         
-        // For development, accept any reasonable-looking token
-        if (token && token.length > 10) {
-          // Create mock user for development
-          req.user = {
-            claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-            access_token: token,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-          };
-          console.log('[AUTH] Bearer token accepted');
-          return next();
+        try {
+          // Use actual token validation instead of hardcoded user
+          const authUser = await authService.validateToken(token);
+          if (authUser) {
+            req.user = {
+              claims: { sub: authUser.id, email: authUser.email },
+              access_token: token,
+              expires_at: authUser.expiresAt,
+            };
+            console.log('[AUTH] Bearer token validated for user:', authUser.id);
+            return next();
+          }
+        } catch (error) {
+          console.log('[AUTH] Bearer token validation failed:', error.message);
         }
       }
 
       // Method 2: Check session authentication
       if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        console.log('[AUTH] Session authentication valid');
+        console.log('[AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
         return next();
       }
 
-      // Method 3: Development bypass for specific user
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[AUTH] Using development bypass');
-        req.user = {
-          claims: { sub: "46848882", email: "elementalsigns@gmail.com" },
-          access_token: 'dev-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600,
-        };
-        return next();
-      }
+      // Method 3: Use normal Replit authentication (no development bypass)
 
       console.log('[AUTH] Authentication failed');
       return res.status(401).json({ message: "Unauthorized" });
