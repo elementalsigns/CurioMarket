@@ -929,11 +929,11 @@ export class DatabaseStorage implements IStorage {
 
     // Get categories from user favorites
     const favoriteListings = await db
-      .select({ categoryId: listings.categoryId })
+      .select({ categoryIds: listings.categoryIds })
       .from(listings)
       .where(sql`${listings.id} IN (${userFavorites.map(f => `'${f.listingId}'`).join(',')})`);
 
-    const categoryIds = Array.from(new Set(favoriteListings.map(l => l.categoryId).filter(Boolean)));
+    const categoryIds = Array.from(new Set(favoriteListings.flatMap(l => l.categoryIds || []).filter(Boolean)));
 
     if (categoryIds.length === 0) {
       return this.getFeaturedListings(limit);
@@ -945,7 +945,7 @@ export class DatabaseStorage implements IStorage {
       .from(listings)
       .where(
         and(
-          sql`${listings.categoryId} IN (${categoryIds.map(id => `'${id}'`).join(',')})`,
+          sql`${listings.categoryIds} && ARRAY[${categoryIds.map(id => `'${id}'`).join(',')}]`,
           eq(listings.state, 'published'),
           sql`${listings.id} NOT IN (${userFavorites.map(f => `'${f.listingId}'`).join(',')})`
         )
@@ -1666,7 +1666,7 @@ export class DatabaseStorage implements IStorage {
         title: listings.title,
         description: listings.description,
         price: listings.price,
-        categoryId: listings.categoryId,
+        categoryIds: listings.categoryIds,
         condition: listings.condition,
         state: listings.state,
         views: listings.views,
@@ -1730,7 +1730,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(listings)
       .leftJoin(sellers, eq(listings.sellerId, sellers.id))
-      .leftJoin(categories, eq(listings.categoryId, categories.id))
+      .leftJoin(categories, sql`categories.id = ANY(${listings.categoryIds})`)
       .where(eq(listings.state, 'published'))
       .orderBy(desc(listings.createdAt));
 
