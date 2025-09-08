@@ -278,29 +278,20 @@ export default function Checkout() {
                   <CardTitle className="font-serif">Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {items.map((item: any) => {
-                    // Debug logging for image data
-                    console.log('Cart item:', item);
-                    console.log('Listing:', item.listing);
-                    console.log('Images:', item.listing?.images);
-                    console.log('Image URL:', item.listing?.images?.[0]?.url);
-                    
-                    return (
-                      <div key={item.id} className="flex items-center space-x-4" data-testid={`cart-item-${item.id}`}>
-                        <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center">
-                          {item.listing?.images?.[0]?.url ? (
-                            <img
-                              src={item.listing.images[0].url}
-                              alt={item.listing.title}
-                              className="w-full h-full object-cover rounded-lg"
-                              onError={(e) => console.log('Image failed to load:', e)}
-                              onLoad={() => console.log('Image loaded successfully')}
-                            />
-                          ) : (
-                            <div className="text-2xl opacity-50">📦</div>
-                          )}
-                        </div>
-                        <div className="flex-1">
+                  {items.map((item: any) => (
+                    <div key={item.id} className="flex items-center space-x-4" data-testid={`cart-item-${item.id}`}>
+                      <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center">
+                        {item.listing?.images?.[0]?.url ? (
+                          <img
+                            src={item.listing.images[0].url}
+                            alt={item.listing.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="text-2xl opacity-50">📦</div>
+                        )}
+                      </div>
+                      <div className="flex-1">
                         <h4 className="font-medium line-clamp-1" data-testid={`item-title-${item.id}`}>
                           {item.listing?.title}
                         </h4>
@@ -310,10 +301,9 @@ export default function Checkout() {
                         <p className="text-gothic-red font-bold" data-testid={`item-price-${item.id}`}>
                           ${(parseFloat(item.listing?.price || '0') * item.quantity).toFixed(2)}
                         </p>
-                        </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
 
                   <Separator />
 
@@ -331,12 +321,6 @@ export default function Checkout() {
                         sum + parseFloat(item.listing?.shippingCost || '0'), 0
                       ).toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Platform Fee (2.6%)</span>
-                      <span>${(items.reduce((sum: number, item: any) => 
-                        sum + (parseFloat(item.listing?.price || '0') * item.quantity), 0
-                      ) * 0.026).toFixed(2)}</span>
-                    </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
@@ -345,7 +329,7 @@ export default function Checkout() {
                           const itemTotal = parseFloat(item.listing?.price || '0') * item.quantity;
                           const shipping = parseFloat(item.listing?.shippingCost || '0');
                           return sum + itemTotal + shipping;
-                        }, 0) * 1.026).toFixed(2)}
+                        }, 0)).toFixed(2)}
                       </span>
                     </div>
                   </div>
