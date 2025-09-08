@@ -42,10 +42,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   });
 
   const updateQuantityMutation = useMutation({
-    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => 
-      apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity }),
-    onSuccess: () => {
+    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => {
+      console.log('API call made:', { itemId, quantity });
+      return apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity });
+    },
+    onSuccess: (data) => {
+      console.log('API success:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.refetchQueries({ queryKey: ["/api/cart"] });
     },
     onError: (error: any) => {
       console.error("Update quantity error:", error);
