@@ -2469,8 +2469,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create order after successful payment
   app.post('/api/orders/create', async (req: any, res) => {
     try {
-      const { paymentIntentId, cartItems, shippingAddress } = req.body;
+      const { paymentIntentId, cartItems, shippingAddress, testMode } = req.body;
       console.log('[ORDER CREATE] Processing order creation request');
+      console.log('[ORDER CREATE] Request body:', { paymentIntentId, cartItems: cartItems?.length, shippingAddress, testMode });
+      
+      // Handle test mode for debugging
+      if (testMode && process.env.NODE_ENV === 'development') {
+        console.log('[ORDER CREATE] Test mode - skipping payment verification');
+        // Create a fake payment intent for testing
+        const fakePaymentIntent = {
+          id: `test_${Date.now()}`,
+          status: 'succeeded',
+          receipt_email: 'test@example.com'
+        };
+        
+        // Continue with order creation using fake payment intent
+        const userId = `test_user_${Date.now()}`;
+        const userEmail = shippingAddress?.email || 'test@example.com';
+        
+        console.log('[ORDER CREATE] Test mode - creating order with fake data');
+        
+        // Skip to order creation logic
+        const ordersBySeller: { [sellerId: string]: any[] } = {};
+        let totalAmount = 0;
+        
+        for (const item of cartItems) {
+          const listing = await storage.getListing(item.listingId);
+          if (!listing) continue;
+          
+          const sellerId = listing.sellerId;
+          if (!ordersBySeller[sellerId]) {
+            ordersBySeller[sellerId] = [];
+          }
+          
+          const itemTotal = parseFloat(listing.price) * (item.quantity || 1);
+          totalAmount += itemTotal;
+          
+          ordersBySeller[sellerId].push({
+            listing,
+            quantity: item.quantity || 1,
+            price: listing.price,
+            itemTotal
+          });
+        }
+        
+        const createdOrders = [];
+        
+        // Create orders for each seller
+        for (const [sellerId, items] of Object.entries(ordersBySeller)) {
+          const orderTotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
+          const orderShippingCost = items.reduce((sum, item) => sum + parseFloat(item.listing.shippingCost || '0'), 0);
+          
+          // Create order
+          const order = await storage.createOrder({
+            buyerId: userId,
+            sellerId,
+            total: (orderTotal + orderShippingCost).toString(),
+            subtotal: orderTotal.toString(),
+            shippingCost: orderShippingCost.toString(),
+            platformFee: (orderTotal * (PLATFORM_FEE_PERCENT / 100)).toString(),
+            status: 'paid',
+            stripePaymentIntentId: fakePaymentIntent.id,
+            shippingAddress
+          });
+          
+          // Create order items
+          for (const item of items) {
+            await storage.createOrderItem({
+              orderId: order.id,
+              listingId: item.listing.id,
+              quantity: item.quantity,
+              price: item.price,
+              title: item.listing.title
+            });
+          }
+          
+          createdOrders.push(order);
+        }
+        
+        // Test cart clearing
+        if (req.sessionID) {
+          const cart = await storage.getOrCreateCart(undefined, req.sessionID);
+          await storage.clearCart(cart.id);
+          console.log('[ORDER CREATE] Test mode - cart cleared');
+        }
+        
+        console.log('[ORDER CREATE] Test mode - orders created successfully');
+        return res.json({ orders: createdOrders, success: true, testMode: true });
+      }
+      
+      // Validate required fields for real payments
+      if (!paymentIntentId) {
+        console.error('[ORDER CREATE] Missing paymentIntentId');
+        return res.status(400).json({ error: "Payment intent ID is required" });
+      }
+      
+      if (!cartItems || cartItems.length === 0) {
+        console.error('[ORDER CREATE] Missing or empty cartItems');
+        return res.status(400).json({ error: "Cart items are required" });
+      }
       
       // Extract user information from payment intent or session
       let userId = null;
@@ -2488,7 +2585,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify payment intent is successful
+      console.log('[ORDER CREATE] Retrieving payment intent:', paymentIntentId);
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      console.log('[ORDER CREATE] Payment intent status:', paymentIntent.status);
+      
       if (paymentIntent.status !== 'succeeded') {
         return res.status(400).json({ error: "Payment not completed" });
       }
