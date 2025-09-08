@@ -722,8 +722,8 @@ export class DatabaseStorage implements IStorage {
       state: 'published'
     });
     
-    // Add images to each listing with URL conversion
-    const listingsWithImages = await Promise.all(
+    // Add images and seller information to each listing with URL conversion
+    const listingsWithImagesAndSeller = await Promise.all(
       result.listings.map(async (listing) => {
         const images = await this.getListingImages(listing.id);
         // Convert Google Cloud Storage URLs to /objects/ format
@@ -737,11 +737,21 @@ export class DatabaseStorage implements IStorage {
           }
           return { ...image, url: convertedUrl };
         });
-        return { ...listing, images: convertedImages };
+        
+        // Get seller information
+        const seller = await db.query.sellers.findFirst({
+          where: eq(sellers.id, listing.sellerId)
+        });
+        
+        return { 
+          ...listing, 
+          images: convertedImages,
+          seller: seller ? { shopName: seller.shopName } : null
+        };
       })
     );
     
-    return listingsWithImages;
+    return listingsWithImagesAndSeller;
   }
 
   async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }> {
