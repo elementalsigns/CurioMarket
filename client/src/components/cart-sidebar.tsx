@@ -177,6 +177,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="outline"
                                 className="w-6 h-6"
+                                disabled={updateQuantityMutation.isPending || item.quantity <= 1}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (item.quantity > 1) {
@@ -197,6 +198,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="outline"
                                 className="w-6 h-6"
+                                disabled={updateQuantityMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   updateQuantityMutation.mutate({
@@ -219,6 +221,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="ghost"
                                 className="w-6 h-6 text-destructive"
+                                disabled={removeFromCartMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   removeFromCartMutation.mutate(item.id);
