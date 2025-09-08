@@ -391,6 +391,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== PAYMENT PROCESSING (BEFORE AUTH) ====================
+  
+  // Create payment intent for purchase - works for both authenticated and guest users
+  app.post("/api/create-payment-intent", async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const { cartItems, shippingAddress } = req.body;
+      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      
+      console.log('[PAYMENT-INTENT] Creating payment intent for', cartItems?.length || 0, 'items');
+      
+      // Calculate totals
+      let subtotal = 0;
+      let shippingCost = 0;
+      
+      for (const item of cartItems) {
+        const listing = await storage.getListing(item.listingId);
+        if (listing) {
+          subtotal += parseFloat(listing.price) * (item.quantity || 1);
+          shippingCost += parseFloat(listing.shippingCost || '0');
+        }
+      }
+      
+      const platformFee = subtotal * (PLATFORM_FEE_PERCENT / 100);
+      const total = subtotal + shippingCost;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(total * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          userId: userId || 'guest',
+          subtotal: subtotal.toString(),
+          shippingCost: shippingCost.toString(),
+          platformFee: platformFee.toString(),
+        },
+      });
+      
+      console.log('[PAYMENT-INTENT] Successfully created payment intent:', paymentIntent.id);
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        total,
+        subtotal,
+        shippingCost,
+        platformFee
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Auth middleware  
   await setupAuth(app);
 
@@ -2410,59 +2465,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== PAYMENT PROCESSING ====================
-  
-  // Create payment intent for purchase
-  app.post("/api/create-payment-intent", async (req: any, res) => {
-    if (!stripe) {
-      return res.status(500).json({ error: "Stripe not configured" });
-    }
-
-    try {
-      const { cartItems, shippingAddress } = req.body;
-      const userId = req.isAuthenticated() ? req.user.claims.sub : null;
-      
-      console.log('[PAYMENT-INTENT] Creating payment intent for', cartItems?.length || 0, 'items');
-      
-      // Calculate totals
-      let subtotal = 0;
-      let shippingCost = 0;
-      
-      for (const item of cartItems) {
-        const listing = await storage.getListing(item.listingId);
-        if (listing) {
-          subtotal += parseFloat(listing.price) * (item.quantity || 1);
-          shippingCost += parseFloat(listing.shippingCost || '0');
-        }
-      }
-      
-      const platformFee = subtotal * (PLATFORM_FEE_PERCENT / 100);
-      const total = subtotal + shippingCost;
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(total * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          userId: userId || 'guest',
-          subtotal: subtotal.toString(),
-          shippingCost: shippingCost.toString(),
-          platformFee: platformFee.toString(),
-        },
-      });
-      
-      console.log('[PAYMENT-INTENT] Successfully created payment intent:', paymentIntent.id);
-
-      res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        total,
-        subtotal,
-        shippingCost,
-        platformFee
-      });
-    } catch (error: any) {
-      console.error("Error creating payment intent:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
 
   // Create order after successful payment
   app.post('/api/orders/create', isAuthenticated, async (req: any, res) => {
