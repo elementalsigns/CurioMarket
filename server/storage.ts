@@ -522,18 +522,22 @@ export class DatabaseStorage implements IStorage {
   async getCartItems(cartId: string): Promise<any[]> {
     const items = await db.select().from(cartItems).where(eq(cartItems.cartId, cartId));
     
-    // Manually join the data
+    // Manually join the data with images
     const enrichedItems = [];
     for (const item of items) {
       const [listing] = await db.select().from(listings).where(eq(listings.id, item.listingId));
       let seller = null;
+      let images = [];
+      
       if (listing) {
         [seller] = await db.select().from(sellers).where(eq(sellers.id, listing.sellerId));
+        // Load images for the listing
+        images = await this.getListingImages(listing.id);
       }
       
       enrichedItems.push({
         ...item,
-        listing: listing || null,
+        listing: listing ? { ...listing, images } : null,
         seller: seller || null
       });
     }
