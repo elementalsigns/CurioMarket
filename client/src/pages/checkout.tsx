@@ -19,7 +19,7 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const CheckoutForm = ({ cartId, onSuccess }: { cartId: string; onSuccess: () => void }) => {
+const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSuccess: () => void; cartItems: any[] }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -42,7 +42,7 @@ const CheckoutForm = ({ cartId, onSuccess }: { cartId: string; onSuccess: () => 
       return;
     }
 
-    const { error } = await stripe.confirmPayment({
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/order-confirmation`,
@@ -57,6 +57,7 @@ const CheckoutForm = ({ cartId, onSuccess }: { cartId: string; onSuccess: () => 
           },
         },
       },
+      redirect: 'if_required',
     });
 
     if (error) {
@@ -65,12 +66,32 @@ const CheckoutForm = ({ cartId, onSuccess }: { cartId: string; onSuccess: () => 
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Payment Successful",
-        description: "Thank you for your purchase!",
-      });
-      onSuccess();
+      setIsProcessing(false);
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // Create the order after successful payment
+      try {
+        await apiRequest("POST", "/api/orders/create", {
+          paymentIntentId: paymentIntent.id,
+          cartItems: cartItems,
+          shippingAddress: shippingAddress
+        });
+        
+        toast({
+          title: "Payment Successful",
+          description: "Thank you for your purchase!",
+        });
+        onSuccess();
+      } catch (orderError) {
+        console.error('Order creation failed:', orderError);
+        toast({
+          title: "Warning",
+          description: "Payment succeeded but order creation failed. Please contact support.",
+          variant: "destructive",
+        });
+      }
     }
 
     setIsProcessing(false);
@@ -340,7 +361,7 @@ export default function Checkout() {
             {/* Checkout Form */}
             <div className="lg:col-span-2">
               <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <CheckoutForm cartId={(cartData as any)?.cart?.id} onSuccess={handleSuccess} />
+                <CheckoutForm cartId={(cartData as any)?.cart?.id} onSuccess={handleSuccess} cartItems={items} />
               </Elements>
             </div>
           </div>
