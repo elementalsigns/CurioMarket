@@ -31,6 +31,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         description: "Item has been removed from your cart.",
       });
     },
+    onError: (error: any) => {
+      console.error("Remove from cart error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove item from cart. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const updateQuantityMutation = useMutation({
@@ -38,6 +46,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       apiRequest("POST", "/api/cart/add", { listingId, quantity }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+    onError: (error: any) => {
+      console.error("Update quantity error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update quantity. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -63,7 +79,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       />
       
       {/* Sidebar */}
-      <div className="ml-auto w-full max-w-md bg-background border-l border-border shadow-xl">
+      <div 
+        className="ml-auto w-full max-w-md bg-background border-l border-border shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border">
