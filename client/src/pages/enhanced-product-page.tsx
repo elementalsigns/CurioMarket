@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function EnhancedProductPage() {
   const { id } = useParams();
+  const [location, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedVariation, setSelectedVariation] = useState("");
