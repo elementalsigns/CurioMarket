@@ -252,7 +252,7 @@ export default function Header() {
             >
               <ShoppingCart size={20} />
               {cartItemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium" data-testid="cart-count-mobile">
+                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-[11px] font-medium shadow-lg" data-testid="cart-count-mobile">
                   {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               )}
@@ -374,7 +374,7 @@ export default function Header() {
             >
               <ShoppingCart size={20} />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="cart-count">
                   {cartItemCount}
                 </span>
               )}
