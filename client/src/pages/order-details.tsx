@@ -184,8 +184,11 @@ export default function OrderDetails() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {order.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
+                    {order.items?.map((item: any, index: number) => {
+                      console.log(`[ORDER-DETAILS] Item ${index}:`, item);
+                      console.log(`[ORDER-DETAILS] Item image:`, item.image, typeof item.image);
+                      return (
+                        <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
                         {/* Product Image */}
                         <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
                           {item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
@@ -231,7 +234,8 @@ export default function OrderDetails() {
                           </p>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                     
                     {/* Handle case where no items exist */}
                     {(!order.items || order.items.length === 0) && (
