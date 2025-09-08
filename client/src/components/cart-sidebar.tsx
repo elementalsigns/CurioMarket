@@ -67,7 +67,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
   }, 0);
 
-  // Buyer only pays the item price - platform fee is deducted from seller payout
+  // Buyer only pays the item price - platform fee is deducted from seller payout  
   const total = subtotal;
 
 
