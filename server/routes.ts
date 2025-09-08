@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return next();
           }
         } catch (error) {
-          console.log('[AUTH] Bearer token validation failed:', error.message);
+          console.log('[AUTH] Bearer token validation failed:', error);
         }
       }
 
