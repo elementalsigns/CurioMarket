@@ -225,6 +225,45 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Image proxy endpoint for private images
+  app.get("/api/image-proxy/:imageId", async (req, res) => {
+    try {
+      const { imageId } = req.params;
+      
+      // Reconstruct the private image URL
+      const privateImageUrl = `https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/${imageId}`;
+      
+      console.log(`[IMAGE-PROXY] Fetching private image: ${privateImageUrl}`);
+      
+      // Fetch the image from private storage
+      const imageResponse = await fetch(privateImageUrl);
+      
+      if (!imageResponse.ok) {
+        console.log(`[IMAGE-PROXY] Failed to fetch image: ${imageResponse.status}`);
+        return res.status(404).json({ error: "Image not found" });
+      }
+      
+      // Get the image data and content type
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+      
+      console.log(`[IMAGE-PROXY] Successfully fetched image, size: ${imageBuffer.byteLength} bytes, type: ${contentType}`);
+      
+      // Set appropriate headers and stream the image
+      res.set({
+        'Content-Type': contentType,
+        'Content-Length': imageBuffer.byteLength.toString(),
+        'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+      });
+      
+      res.send(Buffer.from(imageBuffer));
+      
+    } catch (error) {
+      console.error('[IMAGE-PROXY] Error proxying image:', error);
+      res.status(500).json({ error: "Failed to proxy image" });
+    }
+  });
+
   // CORS configuration - CRITICAL for production authentication
   app.use((req, res, next) => {
     const origin = req.headers.origin;

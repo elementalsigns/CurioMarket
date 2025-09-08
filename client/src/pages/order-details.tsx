@@ -200,19 +200,34 @@ export default function OrderDetails() {
                             });
                             return item.image && typeof item.image === 'string' && item.image.length > 0;
                           })() ? (
-                            <img 
-                              src={item.image} 
-                              alt={item.title}
-                              className="w-full h-full object-cover"
-                              data-testid={`order-item-image-${index}`}
-                              onError={(e) => {
-                                console.log('[ORDER-DETAILS] Image failed to load:', item.image);
-                                e.currentTarget.style.display = 'none';
-                              }}
-                              onLoad={() => {
-                                console.log('[ORDER-DETAILS] Image loaded successfully:', item.image);
-                              }}
-                            />
+                            (() => {
+                              // Extract image ID from the full Google Cloud Storage URL
+                              const imageId = item.image.includes('/.private/uploads/') 
+                                ? item.image.split('/.private/uploads/').pop() 
+                                : item.image;
+                              
+                              const proxyUrl = imageId !== item.image 
+                                ? `/api/image-proxy/${imageId}` 
+                                : item.image;
+                              
+                              console.log('[ORDER-DETAILS] Using proxy URL:', proxyUrl, 'for original:', item.image);
+                              
+                              return (
+                                <img 
+                                  src={proxyUrl} 
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  data-testid={`order-item-image-${index}`}
+                                  onError={(e) => {
+                                    console.log('[ORDER-DETAILS] Image failed to load:', proxyUrl);
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                  onLoad={() => {
+                                    console.log('[ORDER-DETAILS] Image loaded successfully:', proxyUrl);
+                                  }}
+                                />
+                              );
+                            })()
                           ) : item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
                             <img 
                               src={item.image[0].url} 
