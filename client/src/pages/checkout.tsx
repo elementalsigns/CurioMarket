@@ -197,8 +197,8 @@ export default function Checkout() {
   useEffect(() => {
     if (cartData?.cart && cartData?.items?.length > 0) {
       // Create PaymentIntent when cart is loaded
-      apiRequest("POST", "/api/checkout/create-payment-intent", { 
-        cartId: cartData.cart.id,
+      apiRequest("POST", "/api/create-payment-intent", { 
+        cartItems: cartData.items,
         shippingAddress: {} // Will be collected in the form
       })
         .then((res) => res.json())
