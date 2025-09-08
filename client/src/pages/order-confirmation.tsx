@@ -10,7 +10,7 @@ export default function OrderConfirmation() {
   };
 
   const handleViewOrders = () => {
-    window.location.href = "/account-manager?tab=orders";
+    window.location.href = "/account?tab=orders";
   };
 
   return (

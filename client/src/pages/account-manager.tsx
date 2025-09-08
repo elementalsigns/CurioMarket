@@ -45,7 +45,15 @@ export default function AccountManager() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Get initial tab from URL parameter
+  const getInitialTab = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    return tabParam || "overview";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
 
   const form = useForm({
     defaultValues: {
