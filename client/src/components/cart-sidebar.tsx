@@ -183,7 +183,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                   if (item.quantity > 1) {
                                     updateQuantityMutation.mutate({
                                       listingId: item.listingId,
-                                      quantity: item.quantity - 1
+                                      quantity: -1  // Decrease by 1
                                     });
                                   }
                                 }}
@@ -203,7 +203,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                   e.stopPropagation();
                                   updateQuantityMutation.mutate({
                                     listingId: item.listingId,
-                                    quantity: item.quantity + 1
+                                    quantity: 1  // Increase by 1
                                   });
                                 }}
                                 data-testid={`button-increase-${item.id}`}

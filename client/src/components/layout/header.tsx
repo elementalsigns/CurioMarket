@@ -251,7 +251,7 @@ export default function Header() {
               data-testid="button-cart-mobile"
             >
               <ShoppingCart size={20} />
-              {isAuthenticated && cartItemCount > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium" data-testid="cart-count-mobile">
                   {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
