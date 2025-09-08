@@ -36,7 +36,7 @@ export default function Header() {
 
   const { data: cartData } = useQuery({
     queryKey: ["/api/cart"],
-    enabled: isAuthenticated,
+    // Cart works for both authenticated and guest users
   });
 
   const { data: sellerData } = useQuery({
@@ -373,7 +373,7 @@ export default function Header() {
               data-testid="button-cart" 
             >
               <ShoppingCart size={20} />
-              {isAuthenticated && cartItemCount > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full h-5 w-5 flex items-center justify-center" data-testid="cart-count">
                   {cartItemCount}
                 </span>

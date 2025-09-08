@@ -82,7 +82,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       
       {/* Sidebar */}
       <div 
-        className="ml-auto w-full max-w-md bg-background border-l border-border shadow-xl"
+        className="ml-auto w-full max-w-md bg-background border-l border-border shadow-xl relative z-10"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col h-full">
