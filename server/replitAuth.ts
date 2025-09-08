@@ -41,10 +41,10 @@ export function getSession() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Always use secure for cross-domain
         maxAge: sessionTtl,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        domain: process.env.NODE_ENV === 'production' ? undefined : undefined, // Allow cross-domain
+        sameSite: 'none', // Required for cross-domain
+        domain: undefined, // Allow cross-domain
       },
     });
   } catch (error) {
@@ -56,10 +56,10 @@ export function getSession() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Always use secure for cross-domain
         maxAge: sessionTtl,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        domain: process.env.NODE_ENV === 'production' ? undefined : undefined, // Allow cross-domain
+        sameSite: 'none', // Required for cross-domain
+        domain: undefined, // Allow cross-domain
       },
     });
   }
@@ -275,14 +275,18 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
   const hostname = req.get('host') || '';
+  const origin = req.headers.origin || '';
 
   console.log('====== AUTHENTICATION DEBUG ======');
   console.log('Auth check - hostname:', hostname);
+  console.log('Auth check - origin:', origin);
   console.log('Auth check - isAuthenticated():', req.isAuthenticated());
   console.log('Auth check - user:', user ? 'exists' : 'null');
   console.log('Auth check - user.expires_at:', user?.expires_at);
   console.log('Auth check - Authorization header:', req.headers.authorization);
   console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
+  console.log('Auth check - cookies:', Object.keys(req.cookies || {}));
+  console.log('Auth check - session ID:', req.sessionID);
   console.log('===================================');
 
   // Check if this is a logout request - don't bypass auth for logout
@@ -333,6 +337,18 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Fall back to session-based auth
   if (!req.isAuthenticated() || !user?.expires_at) {
     console.log('Auth failed - missing authentication or expires_at');
+    console.log('Session details:', {
+      sessionID: req.sessionID,
+      session: req.session ? 'exists' : 'null',
+      passport: (req.session as any)?.passport ? 'exists' : 'null'
+    });
+    
+    // For production cross-domain issues, provide better error details
+    if (origin.includes('curiosities.market')) {
+      console.log('PRODUCTION AUTH ISSUE: Cross-domain authentication failing');
+      console.log('Suggestion: User may need to login directly on backend domain first');
+    }
+    
     return res.status(401).json({ message: "Unauthorized" });
   }
 
