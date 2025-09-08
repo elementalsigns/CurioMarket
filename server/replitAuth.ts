@@ -111,8 +111,16 @@ export async function setupAuth(app: Express) {
       }
     };
 
-    for (const domain of process.env
-      .REPLIT_DOMAINS!.split(",")) {
+    // Get configured domains and add production domain if not present
+    const configuredDomains = process.env.REPLIT_DOMAINS?.split(",") || [];
+    const productionDomain = "www.curiosities.market";
+    
+    // Add production domain if not in configured domains
+    if (!configuredDomains.includes(productionDomain)) {
+      configuredDomains.push(productionDomain);
+    }
+    
+    for (const domain of configuredDomains) {
       const strategy = new Strategy(
         {
           name: `replitauth:${domain}`,
@@ -123,6 +131,7 @@ export async function setupAuth(app: Express) {
         verify,
       );
       passport.use(strategy);
+      console.log(`[AUTH] Configured authentication strategy for domain: ${domain}`);
     }
 
     passport.serializeUser((user: Express.User, cb) => cb(null, user));
