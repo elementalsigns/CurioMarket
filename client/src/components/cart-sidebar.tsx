@@ -102,7 +102,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               data-testid="button-close-cart"
             >
               <X className="w-5 h-5" />
