@@ -48,8 +48,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
   }, 0);
 
-  const platformFee = subtotal * 0.026; // 2.6% platform fee
-  const total = subtotal + platformFee;
+  // Buyer only pays the item price - platform fee is deducted from seller payout
+  const total = subtotal;
 
   if (!isOpen) return null;
 
@@ -211,15 +211,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           {items.length > 0 && (
             <div className="p-6 border-t border-border bg-muted/50">
               <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span data-testid="cart-subtotal">${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Platform Fee (2.6%)</span>
-                  <span data-testid="cart-platform-fee">${platformFee.toFixed(2)}</span>
-                </div>
-                <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
                   <span data-testid="cart-total">${total.toFixed(2)}</span>
