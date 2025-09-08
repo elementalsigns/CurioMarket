@@ -1,0 +1,52 @@
+index-BlBLRbov.js:48 [AUTH] Token found in URL and stored
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:463 [PRODUCTION AUTH] User loaded: Object
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:463 [PRODUCTION AUTH] User loaded: Object
+index-BlBLRbov.js:503 [PRODUCTION REDIRECT] User loaded: Object
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:463 [PRODUCTION AUTH] User loaded: Object
+index-BlBLRbov.js:817 [PRODUCTION REDIRECT] User loaded: Object
+/api/seller/profile:1  Failed to load resource: the server responded with a status of 404 ()
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:463 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-08T15:55:31.316Z'}
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
+index-BlBLRbov.js:463 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-08T15:55:31.318Z'}
+index-BlBLRbov.js:521 [CHECKOUT] Creating payment intent for items: 1
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Adding Bearer token to request
+index-BlBLRbov.js:48  GET https://www.curiosities.market/api/seller/profile 404 (Not Found)
+(anonymous) @ index-BlBLRbov.js:48
+a @ index-BlBLRbov.js:48
+g @ index-BlBLRbov.js:48
+start @ index-BlBLRbov.js:48
+fetch @ index-BlBLRbov.js:48
+Bd @ index-BlBLRbov.js:48
+onSubscribe @ index-BlBLRbov.js:48
+subscribe @ index-BlBLRbov.js:48
+(anonymous) @ index-BlBLRbov.js:48
+D4 @ index-BlBLRbov.js:38
+Jx @ index-BlBLRbov.js:40
+mc @ index-BlBLRbov.js:40
+d9 @ index-BlBLRbov.js:40
+ko @ index-BlBLRbov.js:40
+XC @ index-BlBLRbov.js:40
+go @ index-BlBLRbov.js:38
+(anonymous) @ index-BlBLRbov.js:40
+index-BlBLRbov.js:521 [CHECKOUT] Payment intent created successfully
+/checkout:1 Each dictionary in the list "icons" should contain a non-empty UTF8 string field "sizes".
+/checkout:1 Each dictionary in the list "icons" should contain a non-empty UTF8 string field "type".
+/checkout:1 Each dictionary in the list "icons" should contain a non-empty UTF8 string field "sizes".
+/checkout:1 Each dictionary in the list "icons" should contain a non-empty UTF8 string field "type".
+index-BlBLRbov.js:48 [AUTH] Getting token from localStorage: Found
+index-BlBLRbov.js:48 [AUTH] Using Bearer token for API call
