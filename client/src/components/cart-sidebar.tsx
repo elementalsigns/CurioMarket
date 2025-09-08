@@ -60,6 +60,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const cart = cartData?.cart;
   const items = cartData?.items || [];
   
+  // Type safety check
+  if (!cartData) {
+    return null;
+  }
+  
   const subtotal = items.reduce((sum: number, item: any) => {
     return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
   }, 0);
