@@ -1075,28 +1075,46 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Fetch order items
+      // Fetch order items with their images
       console.log(`[STORAGE] getOrderWithDetails: Fetching order items for ${orderId}`);
       const items = await db
         .select({
           title: listings.title,
           price: orderItems.price,
           quantity: orderItems.quantity,
-          image: listings.images
+          listingId: orderItems.listingId
         })
         .from(orderItems)
         .leftJoin(listings, eq(orderItems.listingId, listings.id))
         .where(eq(orderItems.orderId, orderId));
 
-      console.log(`[STORAGE] getOrderWithDetails: Found ${items.length} order items`);
+      // Get images for each item separately
+      console.log(`[STORAGE] getOrderWithDetails: Fetching images for ${items.length} items`);
+      const itemsWithImages = await Promise.all(
+        items.map(async (item) => {
+          const images = await db
+            .select({ url: listingImages.url })
+            .from(listingImages)
+            .where(eq(listingImages.listingId, item.listingId))
+            .orderBy(listingImages.sortOrder)
+            .limit(1);
+          
+          return {
+            ...item,
+            image: images[0]?.url || null
+          };
+        })
+      );
+
+      console.log(`[STORAGE] getOrderWithDetails: Found ${itemsWithImages.length} order items with images`);
 
       const result = {
         ...order[0],
         sellerEmail,
-        items
+        items: itemsWithImages
       };
       
-      console.log(`[STORAGE] getOrderWithDetails: Successfully returning order with ${items.length} items`);
+      console.log(`[STORAGE] getOrderWithDetails: Successfully returning order with ${itemsWithImages.length} items`);
       return result;
       
     } catch (error) {
