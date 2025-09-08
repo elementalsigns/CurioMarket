@@ -170,6 +170,21 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             by {item.listing?.seller?.shopName}
                           </p>
                           
+                          {/* Stock Validation Warnings */}
+                          {item.listing && (
+                            <>
+                              {(item.listing.stockQuantity || 0) < 1 ? (
+                                <div className="text-xs text-red-600 font-medium mb-1" data-testid={`cart-item-out-of-stock-${item.id}`}>
+                                  ⚠️ This item is now sold out
+                                </div>
+                              ) : item.quantity > (item.listing.stockQuantity || 0) ? (
+                                <div className="text-xs text-orange-600 font-medium mb-1" data-testid={`cart-item-low-stock-${item.id}`}>
+                                  ⚠️ Only {item.listing.stockQuantity} available (you have {item.quantity} in cart)
+                                </div>
+                              ) : null}
+                            </>
+                          )}
+                          
                           <div className="flex items-center justify-between">
                             {/* Quantity Controls */}
                             <div className="flex items-center gap-2">
@@ -198,13 +213,15 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 size="icon"
                                 variant="outline"
                                 className="w-6 h-6"
-                                disabled={updateQuantityMutation.isPending}
+                                disabled={updateQuantityMutation.isPending || item.quantity >= (item.listing?.stockQuantity || 0)}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  updateQuantityMutation.mutate({
-                                    itemId: item.id,
-                                    quantity: item.quantity + 1
-                                  });
+                                  if (item.quantity < (item.listing?.stockQuantity || 0)) {
+                                    updateQuantityMutation.mutate({
+                                      itemId: item.id,
+                                      quantity: item.quantity + 1
+                                    });
+                                  }
                                 }}
                                 data-testid={`button-increase-${item.id}`}
                               >
