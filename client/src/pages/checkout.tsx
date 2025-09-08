@@ -180,6 +180,9 @@ export default function Checkout() {
     enabled: !!user,
   });
 
+  const cart = (cartData as any)?.cart;
+  const items = (cartData as any)?.items || [];
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -195,10 +198,10 @@ export default function Checkout() {
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (cartData?.cart && cartData?.items?.length > 0) {
+    if (cart && items?.length > 0) {
       // Create PaymentIntent when cart is loaded
       apiRequest("POST", "/api/create-payment-intent", { 
-        cartItems: cartData.items,
+        cartItems: items,
         shippingAddress: {} // Will be collected in the form
       })
         .then((res) => res.json())
@@ -232,7 +235,7 @@ export default function Checkout() {
     );
   }
 
-  if (!cartData?.items || cartData.items.length === 0) {
+  if (!items || items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -277,7 +280,7 @@ export default function Checkout() {
                   <CardTitle className="font-serif">Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {cartData.items.map((item: any) => (
+                  {items.map((item: any) => (
                     <div key={item.id} className="flex items-center space-x-4" data-testid={`cart-item-${item.id}`}>
                       <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center">
                         {item.listing?.images?.[0]?.url ? (
@@ -310,7 +313,7 @@ export default function Checkout() {
                   <div className="space-y-2" data-testid="order-totals">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${cartData.items.reduce((sum: number, item: any) => 
+                      <span>${items.reduce((sum: number, item: any) => 
                         sum + (parseFloat(item.listing?.price || '0') * item.quantity), 0
                       ).toFixed(2)}</span>
                     </div>
