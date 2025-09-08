@@ -173,6 +173,9 @@ export interface IStorage {
   getSellerPromotions(sellerId: string): Promise<Promotion[]>;
   updatePromotion(id: string, updates: Partial<InsertPromotion>): Promise<Promotion>;
   getSellerEarnings(sellerId: string, period: 'week' | 'month' | 'year'): Promise<any>;
+  
+  // Health check
+  healthCheck(): Promise<void>;
 
   // Admin Management
   getAllListingsForAdmin(params: { page: number; limit: number; search: string; status: string }): Promise<any[]>;
@@ -1750,6 +1753,12 @@ export class DatabaseStorage implements IStorage {
       withMpn: Number(stats.withMpn || 0),
       complete: Number(stats.complete || 0)
     };
+  }
+
+  // Health check method
+  async healthCheck(): Promise<void> {
+    // Simple query to test database connectivity
+    await db.select({ count: sql`1` }).from(users).limit(1);
   }
 }
 

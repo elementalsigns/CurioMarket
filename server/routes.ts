@@ -329,13 +329,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  // Health check endpoint for deployment monitoring
-  app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  // Health check endpoints for deployment monitoring
+  app.get('/health', async (req, res) => {
+    try {
+      const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        server: 'running',
+        database: 'unknown'
+      };
+
+      // Quick database connectivity test
+      try {
+        await storage.healthCheck();
+        health.database = 'connected';
+      } catch (dbError) {
+        console.log('[HEALTH] Database check failed (non-critical):', dbError);
+        health.database = 'disconnected';
+        // Don't fail health check if database is temporarily unavailable
+        // This allows the service to remain "healthy" for deployment purposes
+      }
+
+      res.status(200).json(health);
+    } catch (error) {
+      console.error('[HEALTH] Health check error:', error);
+      res.status(503).json({ 
+        status: 'error', 
+        timestamp: new Date().toISOString(),
+        error: 'Health check failed'
+      });
+    }
   });
 
-  app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  app.get('/api/health', async (req, res) => {
+    try {
+      const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        server: 'running',
+        database: 'unknown'
+      };
+
+      // Quick database connectivity test
+      try {
+        await storage.healthCheck();
+        health.database = 'connected';
+      } catch (dbError) {
+        console.log('[HEALTH] Database check failed (non-critical):', dbError);
+        health.database = 'disconnected';
+        // Don't fail health check if database is temporarily unavailable
+      }
+
+      res.status(200).json(health);
+    } catch (error) {
+      console.error('[HEALTH] Health check error:', error);
+      res.status(503).json({ 
+        status: 'error', 
+        timestamp: new Date().toISOString(),
+        error: 'Health check failed'
+      });
+    }
   });
 
   // Auth middleware  
