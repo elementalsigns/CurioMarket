@@ -527,7 +527,7 @@ export class DatabaseStorage implements IStorage {
     for (const item of items) {
       const [listing] = await db.select().from(listings).where(eq(listings.id, item.listingId));
       let seller = null;
-      let images = [];
+      let images: any[] = [];
       
       if (listing) {
         [seller] = await db.select().from(sellers).where(eq(sellers.id, listing.sellerId));
