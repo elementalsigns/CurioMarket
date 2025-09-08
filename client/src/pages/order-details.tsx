@@ -54,19 +54,50 @@ export default function OrderDetails() {
   }
 
   if (error || !order) {
+    const errorMessage = error?.message || 'Unknown error';
+    const isAuthError = errorMessage.includes('Unauthorized') || errorMessage.includes('401');
+    
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-4xl mx-auto text-center">
             <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h1 className="text-2xl font-bold mb-4">Order Not Found</h1>
+            <h1 className="text-2xl font-bold mb-4">
+              {isAuthError ? 'Authentication Required' : 'Order Not Found'}
+            </h1>
             <p className="text-muted-foreground mb-6">
-              We couldn't find the order you're looking for.
+              {isAuthError ? (
+                <>
+                  You need to be logged in to view order details.
+                  <br />
+                  <small className="text-xs">
+                    Note: If you're testing on the production domain, try accessing via the development URL for full functionality.
+                  </small>
+                </>
+              ) : (
+                "We couldn't find the order you're looking for."
+              )}
             </p>
-            <Link to="/account?tab=purchases">
-              <Button>Back to Orders</Button>
-            </Link>
+            <div className="space-y-3">
+              {isAuthError && (
+                <Link to="/api/login">
+                  <Button className="bg-gothic-red hover:bg-gothic-red/80 mr-3">
+                    Log In
+                  </Button>
+                </Link>
+              )}
+              <Link to="/account?tab=purchases">
+                <Button variant="outline">Back to Orders</Button>
+              </Link>
+            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-6 p-4 bg-muted rounded-lg text-sm text-left">
+                <p className="font-medium mb-2">Debug Info:</p>
+                <p>Error: {errorMessage}</p>
+                <p>Order ID: {orderId}</p>
+              </div>
+            )}
           </div>
         </div>
         <Footer />

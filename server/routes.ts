@@ -237,6 +237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       origin.includes('replit.dev')
     )) {
       res.header('Access-Control-Allow-Origin', origin);
+    } else if (!origin) {
+      // Allow same-origin requests (when origin header is not present)
+      res.header('Access-Control-Allow-Origin', '*');
     }
     
     // Essential for cookie-based authentication
@@ -2774,17 +2777,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const orderId = req.params.orderId;
       
+      console.log(`[ORDER DETAILS] Fetching order ${orderId} for user ${userId}`);
+      
       const order = await storage.getOrderWithDetails(orderId);
       
       if (!order) {
+        console.log(`[ORDER DETAILS] Order ${orderId} not found in database`);
         return res.status(404).json({ error: "Order not found" });
       }
       
       // Verify the order belongs to the authenticated user
       if (order.buyerId !== userId) {
+        console.log(`[ORDER DETAILS] Access denied: order belongs to ${order.buyerId}, user is ${userId}`);
         return res.status(403).json({ error: "Access denied" });
       }
       
+      console.log(`[ORDER DETAILS] Successfully retrieved order ${orderId} with ${order.items?.length || 0} items`);
       res.json(order);
     } catch (error) {
       console.error("Error fetching order:", error);

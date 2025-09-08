@@ -44,6 +44,7 @@ export function getSession() {
         secure: process.env.NODE_ENV === 'production',
         maxAge: sessionTtl,
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        domain: process.env.NODE_ENV === 'production' ? undefined : undefined, // Allow cross-domain
       },
     });
   } catch (error) {
@@ -58,6 +59,7 @@ export function getSession() {
         secure: process.env.NODE_ENV === 'production',
         maxAge: sessionTtl,
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        domain: process.env.NODE_ENV === 'production' ? undefined : undefined, // Allow cross-domain
       },
     });
   }
