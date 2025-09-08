@@ -532,7 +532,18 @@ export class DatabaseStorage implements IStorage {
       if (listing) {
         [seller] = await db.select().from(sellers).where(eq(sellers.id, listing.sellerId));
         // Load images for the listing
-        images = await this.getListingImages(listing.id);
+        const rawImages = await this.getListingImages(listing.id);
+        // Convert Google Cloud Storage URLs to /objects/ format
+        images = rawImages.map(image => {
+          let convertedUrl = image.url;
+          if (image.url.startsWith('https://storage.googleapis.com/')) {
+            // Extract the upload ID from the Google Cloud Storage URL
+            const parts = image.url.split('/');
+            const uploadId = parts[parts.length - 1];
+            convertedUrl = `/objects/uploads/${uploadId}`;
+          }
+          return { ...image, url: convertedUrl };
+        });
       }
       
       enrichedItems.push({
