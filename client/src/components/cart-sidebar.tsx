@@ -20,9 +20,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   const { data: cartData, isLoading } = useQuery({
     queryKey: ["/api/cart"],
-    staleTime: 0, // Always refetch when component mounts
-    gcTime: 0, // Don't cache results  
-    refetchInterval: 5000, // Refetch every 5 seconds
   });
 
   const removeFromCartMutation = useMutation({
@@ -45,14 +42,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   });
 
   const updateQuantityMutation = useMutation({
-    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => {
-      console.log('API call made:', { itemId, quantity });
-      return apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity });
-    },
-    onSuccess: (data) => {
-      console.log('API success:', data);
+    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => 
+      apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      queryClient.refetchQueries({ queryKey: ["/api/cart"] });
     },
     onError: (error: any) => {
       console.error("Update quantity error:", error);
@@ -187,11 +180,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 disabled={updateQuantityMutation.isPending || item.quantity <= 1}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  console.log('Decrease clicked:', { itemId: item.id, currentQuantity: item.quantity, newQuantity: item.quantity - 1 });
                                   if (item.quantity > 1) {
                                     updateQuantityMutation.mutate({
                                       itemId: item.id,
-                                      quantity: item.quantity - 1  // Set absolute quantity
+                                      quantity: item.quantity - 1
                                     });
                                   }
                                 }}
@@ -209,10 +201,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 disabled={updateQuantityMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  console.log('Increase clicked:', { itemId: item.id, currentQuantity: item.quantity, newQuantity: item.quantity + 1 });
                                   updateQuantityMutation.mutate({
                                     itemId: item.id,
-                                    quantity: item.quantity + 1  // Set absolute quantity
+                                    quantity: item.quantity + 1
                                   });
                                 }}
                                 data-testid={`button-increase-${item.id}`}

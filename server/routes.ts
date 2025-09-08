@@ -2249,6 +2249,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
       const sessionId = req.sessionID;
       
+      // Ensure session is saved for guest users
+      if (!userId) {
+        req.session.save();
+      }
+      
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const items = await storage.getCartItems(cart.id);
       
@@ -2265,6 +2270,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
       const sessionId = req.sessionID;
       const { listingId, quantity = 1 } = req.body;
+      
+      // Ensure session is saved for guest users
+      if (!userId) {
+        req.session.save();
+      }
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const cartItem = await storage.addToCart(cart.id, listingId, quantity);
