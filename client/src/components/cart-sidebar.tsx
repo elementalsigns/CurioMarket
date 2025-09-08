@@ -57,13 +57,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     },
   });
 
-  const cart = cartData?.cart;
-  const items = cartData?.items || [];
+  // Type safety check - move this first
+  if (!cartData || !isOpen) return null;
   
-  // Type safety check
-  if (!cartData) {
-    return null;
-  }
+  const cart = cartData.cart;
+  const items = cartData.items || [];
   
   const subtotal = items.reduce((sum: number, item: any) => {
     return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
@@ -72,7 +70,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   // Buyer only pays the item price - platform fee is deducted from seller payout
   const total = subtotal;
 
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex">
