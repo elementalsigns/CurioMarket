@@ -2467,10 +2467,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== PAYMENT PROCESSING ====================
 
   // Create order after successful payment
-  app.post('/api/orders/create', isAuthenticated, async (req: any, res) => {
+  app.post('/api/orders/create', async (req: any, res) => {
     try {
       const { paymentIntentId, cartItems, shippingAddress } = req.body;
-      const userId = req.user.claims.sub;
+      console.log('[ORDER CREATE] Processing order creation request');
+      
+      // Extract user information from payment intent or session
+      let userId = null;
+      let userEmail = null;
+      
+      // Try to get authenticated user first
+      if (req.isAuthenticated() && req.user?.claims?.sub) {
+        userId = req.user.claims.sub;
+        userEmail = req.user.claims.email;
+        console.log('[ORDER CREATE] Authenticated user found:', userId);
+      }
       
       if (!stripe) {
         return res.status(500).json({ error: "Stripe not configured" });
@@ -2480,6 +2491,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       if (paymentIntent.status !== 'succeeded') {
         return res.status(400).json({ error: "Payment not completed" });
+      }
+      
+      // If no user from session, try to extract from payment intent metadata or shipping
+      if (!userId && shippingAddress?.name) {
+        console.log('[ORDER CREATE] No authenticated user, using guest order flow');
+        // For guest orders, we'll use email from shipping
+        userEmail = shippingAddress.email || paymentIntent.receipt_email || 'guest@curiosities.market';
+        // For now, we'll use a special guest user ID or create a temporary one
+        userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log('[ORDER CREATE] Guest user email:', userEmail);
+      }
+      
+      if (!userId) {
+        console.log('[ORDER CREATE] No user information available');
+        return res.status(400).json({ error: "User information required for order creation" });
       }
       
       // Group items by seller to create separate orders
@@ -2542,20 +2568,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send order confirmation email
         try {
           const orderDetails = await storage.getOrderWithDetails(order.id);
-          if (orderDetails && orderDetails.buyerEmail) {
+          // Use available email sources: user email, shipping email, or payment intent email
+          const emailAddress = userEmail || shippingAddress?.email || paymentIntent.receipt_email;
+          
+          if (orderDetails && emailAddress) {
             const emailData = {
-              customerEmail: orderDetails.buyerEmail,
-              customerName: `${orderDetails.buyerFirstName} ${orderDetails.buyerLastName}`,
+              customerEmail: emailAddress,
+              customerName: shippingAddress?.name || `${orderDetails.buyerFirstName || ''} ${orderDetails.buyerLastName || ''}`.trim() || 'Customer',
               orderId: orderDetails.id,
               orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
               orderTotal: orderDetails.total,
-              orderItems: orderDetails.items,
-              shippingAddress: orderDetails.shippingAddress,
-              shopName: orderDetails.sellerShopName,
-              sellerEmail: orderDetails.sellerEmail
+              orderItems: orderDetails.items || [],
+              shippingAddress: orderDetails.shippingAddress || shippingAddress,
+              shopName: orderDetails.sellerShopName || 'Curio Market Seller',
+              sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
             };
             
+            console.log('[ORDER CREATE] Sending confirmation email to:', emailAddress);
             await emailService.sendOrderConfirmation(emailData);
+            console.log('[ORDER CREATE] Confirmation email sent successfully');
+          } else {
+            console.log('[ORDER CREATE] No email address available for order confirmation');
           }
         } catch (emailError) {
           console.error('Failed to send order confirmation email:', emailError);
@@ -2564,7 +2597,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Clear the cart after successful order creation
-      await storage.clearCart(userId);
+      try {
+        // Try to clear cart based on user ID if authenticated
+        if (req.isAuthenticated() && req.user?.claims?.sub) {
+          const cart = await storage.getOrCreateCart(req.user.claims.sub);
+          await storage.clearCart(cart.id);
+          console.log('[ORDER CREATE] Cart cleared for authenticated user');
+        } 
+        // Fallback: clear cart based on session ID
+        else if (req.sessionID) {
+          const cart = await storage.getOrCreateCart(undefined, req.sessionID);
+          await storage.clearCart(cart.id);
+          console.log('[ORDER CREATE] Cart cleared for session user');
+        }
+      } catch (cartError) {
+        console.error('[ORDER CREATE] Failed to clear cart:', cartError);
+        // Don't fail the entire order creation if cart clearing fails
+      }
       
       res.json({ orders: createdOrders, success: true });
     } catch (error: any) {
