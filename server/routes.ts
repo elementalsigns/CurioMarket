@@ -2736,6 +2736,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single order by ID (for order details page)
+  app.get('/api/orders/:orderId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const orderId = req.params.orderId;
+      
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      // Verify the order belongs to the authenticated user
+      if (order.buyerId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ error: "Failed to fetch order" });
+    }
+  });
+
   // Get seller orders
   app.get('/api/seller/orders', isAuthenticated, async (req: any, res) => {
     try {

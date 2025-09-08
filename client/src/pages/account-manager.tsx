@@ -557,9 +557,11 @@ export default function AccountManager() {
                               </div>
                               <div className="text-right">
                                 <p className="font-medium">${order.total}</p>
-                                <Button variant="outline" size="sm" className="mt-2">
-                                  View Details
-                                </Button>
+                                <Link to={`/orders/${order.id}`}>
+                                  <Button variant="outline" size="sm" className="mt-2" data-testid={`button-view-details-${order.id}`}>
+                                    View Details
+                                  </Button>
+                                </Link>
                               </div>
                             </div>
                           </CardContent>

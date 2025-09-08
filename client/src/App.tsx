@@ -50,6 +50,7 @@ import SellerSubscription from "@/pages/SellerSubscription";
 import IncognitoAuth from "@/pages/incognito-auth";
 import ShopPage from "@/pages/shop";
 import OrderConfirmation from "@/pages/order-confirmation";
+import OrderDetails from "@/pages/order-details";
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -195,6 +196,7 @@ function Router() {
           <Route path="/seller/listings/edit/:id" component={EditListing} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/order-confirmation" component={OrderConfirmation} />
+          <Route path="/orders/:orderId" component={OrderDetails} />
           <Route path="/subscribe" component={Subscribe} />
           <Route path="/profile" component={UserProfile} />
           <Route path="/account" component={AccountManager} />
