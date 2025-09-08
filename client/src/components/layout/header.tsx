@@ -370,7 +370,7 @@ export default function Header() {
               variant="ghost" 
               className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
               onClick={() => setCartOpen(true)}
-              data-testid="button-cart"
+              data-testid="button-cart" 
             >
               <ShoppingCart size={20} />
               {isAuthenticated && cartItemCount > 0 && (
