@@ -42,8 +42,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   });
 
   const updateQuantityMutation = useMutation({
-    mutationFn: ({ listingId, quantity }: { listingId: string; quantity: number }) => 
-      apiRequest("POST", "/api/cart/add", { listingId, quantity }),
+    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => 
+      apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
@@ -182,8 +182,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                   e.stopPropagation();
                                   if (item.quantity > 1) {
                                     updateQuantityMutation.mutate({
-                                      listingId: item.listingId,
-                                      quantity: -1  // Decrease by 1
+                                      itemId: item.id,
+                                      quantity: item.quantity - 1  // Set absolute quantity
                                     });
                                   }
                                 }}
@@ -202,8 +202,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   updateQuantityMutation.mutate({
-                                    listingId: item.listingId,
-                                    quantity: 1  // Increase by 1
+                                    itemId: item.id,
+                                    quantity: item.quantity + 1  // Set absolute quantity
                                   });
                                 }}
                                 data-testid={`button-increase-${item.id}`}
