@@ -90,15 +90,7 @@ export async function setupAuthRoutes(app: Express) {
           return res.status(404).json({ message: 'User not found' });
         }
         
-        // PRODUCTION FIX: Force user 46848882 to be seller regardless of database
-        if (userId === '46848882') {
-          console.log('[PRODUCTION USER FIX] Forcing user 46848882 to seller role');
-          const fixedUser = {
-            ...user,
-            role: 'seller'
-          };
-          return res.json(fixedUser);
-        }
+        // User role returned from database
         
         res.json(user);
       } catch (error) {
