@@ -19,6 +19,8 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 
 const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "2.6");
 
+const objectStorageService = new ObjectStorageService();
+
 // Helper function to create seller subscription price if it doesn't exist
 async function createSellerSubscriptionPrice(stripe: Stripe): Promise<string> {
   try {
@@ -225,42 +227,31 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Image proxy endpoint for private images
+  // Image proxy endpoint for private images using ObjectStorageService
   app.get("/api/image-proxy/:imageId", async (req, res) => {
     try {
       const { imageId } = req.params;
       
-      // Reconstruct the private image URL
-      const privateImageUrl = `https://storage.googleapis.com/replit-objstore-cd506ca3-4b1b-46ba-933e-b48e63538595/.private/uploads/${imageId}`;
+      // Construct the object path using the existing service pattern
+      const objectPath = `/objects/uploads/${imageId}`;
       
-      console.log(`[IMAGE-PROXY] Fetching private image: ${privateImageUrl}`);
+      console.log(`[IMAGE-PROXY] Fetching private image with path: ${objectPath}`);
       
-      // Fetch the image from private storage
-      const imageResponse = await fetch(privateImageUrl);
+      // Use the existing ObjectStorageService to get the file
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
       
-      if (!imageResponse.ok) {
-        console.log(`[IMAGE-PROXY] Failed to fetch image: ${imageResponse.status}`);
-        return res.status(404).json({ error: "Image not found" });
-      }
+      console.log(`[IMAGE-PROXY] Successfully retrieved file object for: ${imageId}`);
       
-      // Get the image data and content type
-      const imageBuffer = await imageResponse.arrayBuffer();
-      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
-      
-      console.log(`[IMAGE-PROXY] Successfully fetched image, size: ${imageBuffer.byteLength} bytes, type: ${contentType}`);
-      
-      // Set appropriate headers and stream the image
-      res.set({
-        'Content-Type': contentType,
-        'Content-Length': imageBuffer.byteLength.toString(),
-        'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
-      });
-      
-      res.send(Buffer.from(imageBuffer));
+      // Stream the file using the existing downloadObject method
+      await objectStorageService.downloadObject(objectFile, res, 3600); // 1 hour cache
       
     } catch (error) {
       console.error('[IMAGE-PROXY] Error proxying image:', error);
-      res.status(500).json({ error: "Failed to proxy image" });
+      if (error.message?.includes('ObjectNotFoundError') || error.name === 'ObjectNotFoundError') {
+        res.status(404).json({ error: "Image not found" });
+      } else {
+        res.status(500).json({ error: "Failed to proxy image" });
+      }
     }
   });
 
