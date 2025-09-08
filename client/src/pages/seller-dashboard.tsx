@@ -113,6 +113,15 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
                 >
                   {listing.state}
                 </Badge>
+                {(listing.stockQuantity || 0) < 1 ? (
+                  <Badge variant="destructive" className="text-xs" data-testid={`listing-sold-out-${listing.id}`}>
+                    Sold Out
+                  </Badge>
+                ) : (
+                  <span className="text-xs text-muted-foreground" data-testid={`listing-stock-${listing.id}`}>
+                    {listing.stockQuantity} in stock
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -189,6 +198,15 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
                 >
                   {listing.state}
                 </Badge>
+                {(listing.stockQuantity || 0) < 1 ? (
+                  <Badge variant="destructive" className="text-xs" data-testid={`listing-sold-out-${listing.id}`}>
+                    Sold Out
+                  </Badge>
+                ) : (
+                  <span className="text-xs text-muted-foreground" data-testid={`listing-stock-${listing.id}`}>
+                    {listing.stockQuantity} in stock
+                  </span>
+                )}
                 <span className="text-xs text-foreground/40">
                   Order: {listing.displayOrder || 0}
                 </span>

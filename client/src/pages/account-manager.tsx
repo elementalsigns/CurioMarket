@@ -644,6 +644,15 @@ export default function AccountManager() {
                               </div>
                               <div className="text-right">
                                 <p className="font-medium">${listing.price}</p>
+                                {(listing.stockQuantity || 0) < 1 ? (
+                                  <Badge variant="destructive" className="text-xs mt-1" data-testid={`listing-sold-out-${listing.id}`}>
+                                    Sold Out
+                                  </Badge>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground mt-1" data-testid={`listing-stock-${listing.id}`}>
+                                    {listing.stockQuantity} in stock
+                                  </p>
+                                )}
                                 <div className="flex space-x-2 mt-2">
                                   <Button variant="outline" size="sm">
                                     <Eye className="h-4 w-4" />

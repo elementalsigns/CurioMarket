@@ -116,7 +116,7 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
                   variant="secondary"
                   className="w-8 h-8 rounded-full"
                   onClick={handleAddToCart}
-                  disabled={isAddingToCart || addToCartMutation.isPending}
+                  disabled={isAddingToCart || addToCartMutation.isPending || (listing.stockQuantity || 0) < 1}
                   data-testid={`button-add-to-cart-${listing.id}`}
                 >
                   <ShoppingCart className="w-4 h-4" />
@@ -132,9 +132,16 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
                 <h3 className="font-semibold text-sm leading-tight line-clamp-2 flex-1" data-testid={`product-title-${listing.id}`}>
                   {listing.title}
                 </h3>
-                <span className="font-bold text-primary shrink-0" data-testid={`product-price-${listing.id}`}>
-                  ${listing.price}
-                </span>
+                <div className="text-right shrink-0">
+                  <span className="font-bold text-primary" data-testid={`product-price-${listing.id}`}>
+                    ${listing.price}
+                  </span>
+                  {(listing.stockQuantity || 0) < 1 && (
+                    <div className="text-xs text-red-600 font-medium mt-1" data-testid={`product-sold-out-${listing.id}`}>
+                      Sold Out
+                    </div>
+                  )}
+                </div>
               </div>
               
               {listing.seller && (
