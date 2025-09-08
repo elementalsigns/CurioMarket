@@ -524,16 +524,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Full request body:', req.body);
       console.log('================================');
 
-      // HARD-CODED USER ID for production user to prevent auth issues
-      let userId = "46848882";
-      
-      // Try to get user ID from auth if available, but fall back to hard-coded
-      if (req.user?.claims?.sub) {
-        userId = req.user.claims.sub;
-        console.log('[PROFILE-SAVE] Using authenticated user ID:', userId);
-      } else {
-        console.log('[PROFILE-SAVE] Using fallback user ID:', userId);
+      // Use authenticated user ID only
+      if (!req.user?.claims?.sub) {
+        return res.status(401).json({ error: "Authentication required" });
       }
+      
+      const userId = req.user.claims.sub;
+      console.log('[PROFILE-SAVE] Using authenticated user ID:', userId);
       const seller = await storage.getSellerByUserId(userId);
       
       if (!seller) {
@@ -567,16 +564,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('Request received for image processing');
     console.log('Request body:', req.body);
     try {
-      // HARD-CODED USER ID for production user to prevent auth issues
-      let userId = "46848882";
-      
-      // Try to get user ID from auth if available, but fall back to hard-coded
-      if (req.user?.claims?.sub) {
-        userId = req.user.claims.sub;
-        console.log('[SELLER-IMAGES] Using authenticated user ID:', userId);
-      } else {
-        console.log('[SELLER-IMAGES] Using fallback user ID:', userId);
+      // Use authenticated user ID only
+      if (!req.user?.claims?.sub) {
+        return res.status(401).json({ error: "Authentication required" });
       }
+      
+      const userId = req.user.claims.sub;
+      console.log('[SELLER-IMAGES] Using authenticated user ID:', userId);
       
       const seller = await storage.getSellerByUserId(userId);
       
