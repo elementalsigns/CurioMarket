@@ -22,7 +22,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     queryKey: ["/api/cart"],
     staleTime: 0, // Always refetch when component mounts
     gcTime: 0, // Don't cache results  
-    refetchInterval: 2000, // Refetch every 2 seconds
+    refetchInterval: 5000, // Refetch every 5 seconds
   });
 
   const removeFromCartMutation = useMutation({
