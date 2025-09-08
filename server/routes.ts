@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create a basic user if doesn't exist
         const newUser = {
           id: userId,
-          email: req.user.claims.email || "elementalsigns@gmail.com",
+          email: req.user.claims.email,
           firstName: "Elemental",
           lastName: "Signs",
           role: "buyer" as const
