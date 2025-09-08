@@ -180,6 +180,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 disabled={updateQuantityMutation.isPending || item.quantity <= 1}
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  console.log('Decrease clicked:', { itemId: item.id, currentQuantity: item.quantity, newQuantity: item.quantity - 1 });
                                   if (item.quantity > 1) {
                                     updateQuantityMutation.mutate({
                                       itemId: item.id,
@@ -201,6 +202,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 disabled={updateQuantityMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  console.log('Increase clicked:', { itemId: item.id, currentQuantity: item.quantity, newQuantity: item.quantity + 1 });
                                   updateQuantityMutation.mutate({
                                     itemId: item.id,
                                     quantity: item.quantity + 1  // Set absolute quantity
