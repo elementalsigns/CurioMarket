@@ -2497,17 +2497,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const listing = await storage.getListing(item.listingId);
           if (!listing) continue;
           
+          // Stock validation - check if enough stock is available
+          const requestedQuantity = item.quantity || 1;
+          const availableStock = listing.stockQuantity || 0;
+          
+          if (requestedQuantity > availableStock) {
+            console.log(`[ORDER CREATE] [TEST MODE] Insufficient stock for ${listing.title}: requested ${requestedQuantity}, available ${availableStock}`);
+            return res.status(400).json({ 
+              error: `Insufficient stock for "${listing.title}". Only ${availableStock} available.` 
+            });
+          }
+          
           const sellerId = listing.sellerId;
           if (!ordersBySeller[sellerId]) {
             ordersBySeller[sellerId] = [];
           }
           
-          const itemTotal = parseFloat(listing.price) * (item.quantity || 1);
+          const itemTotal = parseFloat(listing.price) * requestedQuantity;
           totalAmount += itemTotal;
           
           ordersBySeller[sellerId].push({
             listing,
-            quantity: item.quantity || 1,
+            quantity: requestedQuantity,
             price: listing.price,
             itemTotal
           });
@@ -2533,7 +2544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             shippingAddress
           });
           
-          // Create order items
+          // Create order items and deduct inventory
           for (const item of items) {
             await storage.createOrderItem({
               orderId: order.id,
@@ -2542,6 +2553,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               price: item.price,
               title: item.listing.title
             });
+            
+            // Deduct inventory after successful order item creation
+            const newStockQuantity = (item.listing.stockQuantity || 0) - item.quantity;
+            await storage.updateListingStock(item.listing.id, Math.max(0, newStockQuantity));
+            console.log(`[ORDER CREATE] [TEST MODE] Inventory updated for ${item.listing.title}: ${item.listing.stockQuantity} -> ${newStockQuantity}`);
           }
           
           createdOrders.push(order);
@@ -2616,17 +2632,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const listing = await storage.getListing(item.listingId);
         if (!listing) continue;
         
+        // Stock validation - check if enough stock is available
+        const requestedQuantity = item.quantity || 1;
+        const availableStock = listing.stockQuantity || 0;
+        
+        if (requestedQuantity > availableStock) {
+          console.log(`[ORDER CREATE] Insufficient stock for ${listing.title}: requested ${requestedQuantity}, available ${availableStock}`);
+          return res.status(400).json({ 
+            error: `Insufficient stock for "${listing.title}". Only ${availableStock} available.` 
+          });
+        }
+        
         const sellerId = listing.sellerId;
         if (!ordersBySeller[sellerId]) {
           ordersBySeller[sellerId] = [];
         }
         
-        const itemTotal = parseFloat(listing.price) * (item.quantity || 1);
+        const itemTotal = parseFloat(listing.price) * requestedQuantity;
         totalAmount += itemTotal;
         
         ordersBySeller[sellerId].push({
           listing,
-          quantity: item.quantity || 1,
+          quantity: requestedQuantity,
           price: listing.price,
           itemTotal
         });
@@ -2652,7 +2679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           shippingAddress
         });
         
-        // Create order items
+        // Create order items and deduct inventory
         for (const item of items) {
           await storage.createOrderItem({
             orderId: order.id,
@@ -2661,6 +2688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             price: item.price,
             title: item.listing.title
           });
+          
+          // Deduct inventory after successful order item creation
+          const newStockQuantity = (item.listing.stockQuantity || 0) - item.quantity;
+          await storage.updateListingStock(item.listing.id, Math.max(0, newStockQuantity));
+          console.log(`[ORDER CREATE] Inventory updated for ${item.listing.title}: ${item.listing.stockQuantity} -> ${newStockQuantity}`);
         }
         
         createdOrders.push(order);
