@@ -198,8 +198,8 @@ export default function Checkout() {
   }, [user, authLoading, toast, items]);
 
   useEffect(() => {
-    if (cart && items?.length > 0) {
-      // Create PaymentIntent when cart is loaded
+    if (user && items?.length > 0) {
+      // Create PaymentIntent when user is authenticated and cart has items
       apiRequest("POST", "/api/create-payment-intent", { 
         cartItems: items,
         shippingAddress: {} // Will be collected in the form
@@ -216,7 +216,7 @@ export default function Checkout() {
           });
         });
     }
-  }, [cartData, toast]);
+  }, [user, items, toast]);
 
   const handleSuccess = () => {
     // Redirect to success page or clear cart
