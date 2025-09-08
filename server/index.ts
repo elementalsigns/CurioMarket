@@ -36,9 +36,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Run startup scripts (database sync, etc.)
-  await startup();
-  
+  // Register routes first (including health checks)
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -69,5 +67,14 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Run startup scripts (database sync, etc.) in background after server starts
+    // This ensures the HTTP server can respond to health checks immediately
+    startup().then(() => {
+      log('Background initialization completed');
+    }).catch((error) => {
+      log('Background initialization failed:', error);
+      // Don't crash the server - let it continue serving requests
+    });
   });
 })();
