@@ -42,6 +42,7 @@ const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSucc
       return;
     }
 
+    console.log('[CHECKOUT] Starting payment confirmation...');
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -60,7 +61,10 @@ const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSucc
       redirect: 'if_required',
     });
 
+    console.log('[CHECKOUT] Payment confirmation result:', { error, paymentIntent });
+
     if (error) {
+      console.error('[CHECKOUT] Payment failed:', error);
       toast({
         title: "Payment Failed",
         description: error.message,
@@ -71,13 +75,22 @@ const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSucc
     }
 
     if (paymentIntent && paymentIntent.status === 'succeeded') {
+      console.log('[CHECKOUT] Payment succeeded, creating order...');
       // Create the order after successful payment
       try {
-        await apiRequest("POST", "/api/orders/create", {
+        console.log('[CHECKOUT] Calling order creation API with:', {
           paymentIntentId: paymentIntent.id,
           cartItems: cartItems,
           shippingAddress: shippingAddress
         });
+        
+        const orderResponse = await apiRequest("POST", "/api/orders/create", {
+          paymentIntentId: paymentIntent.id,
+          cartItems: cartItems,
+          shippingAddress: shippingAddress
+        });
+        
+        console.log('[CHECKOUT] Order creation successful:', orderResponse);
         
         toast({
           title: "Payment Successful",
@@ -85,13 +98,15 @@ const CheckoutForm = ({ cartId, onSuccess, cartItems }: { cartId: string; onSucc
         });
         onSuccess();
       } catch (orderError) {
-        console.error('Order creation failed:', orderError);
+        console.error('[CHECKOUT] Order creation failed:', orderError);
         toast({
           title: "Warning",
           description: "Payment succeeded but order creation failed. Please contact support.",
           variant: "destructive",
         });
       }
+    } else {
+      console.log('[CHECKOUT] Payment status not succeeded:', paymentIntent?.status);
     }
 
     setIsProcessing(false);
