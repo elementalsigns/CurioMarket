@@ -2788,7 +2788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         createdOrders.push(order);
         
-        // Send order confirmation email
+        // Send order confirmation email to buyer and notification email to seller
         try {
           const orderDetails = await storage.getOrderWithDetails(order.id);
           // Use available email sources: user email, shipping email, or payment intent email
@@ -2807,14 +2807,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
               sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
             };
             
-            console.log('[ORDER CREATE] Sending confirmation email to:', emailAddress);
-            await emailService.sendOrderConfirmation(emailData);
-            console.log('[ORDER CREATE] Confirmation email sent successfully');
+            // Send buyer confirmation email
+            console.log('[ORDER CREATE] Sending confirmation email to buyer:', emailAddress);
+            console.log('[ORDER CREATE] Email data:', JSON.stringify(emailData, null, 2));
+            const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
+            if (buyerEmailResult) {
+              console.log('[ORDER CREATE] ✅ Buyer confirmation email sent successfully');
+            } else {
+              console.error('[ORDER CREATE] ❌ Buyer confirmation email failed to send');
+            }
+            
+            // Send seller notification email
+            if (orderDetails.sellerEmail && orderDetails.sellerEmail !== 'seller@curiosities.market') {
+              console.log('[ORDER CREATE] Sending order notification to seller:', orderDetails.sellerEmail);
+              const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
+              if (sellerEmailResult) {
+                console.log('[ORDER CREATE] ✅ Seller notification email sent successfully');
+              } else {
+                console.error('[ORDER CREATE] ❌ Seller notification email failed to send');
+              }
+            } else {
+              console.log('[ORDER CREATE] ⚠️ No valid seller email found for order notification');
+            }
+            
           } else {
-            console.log('[ORDER CREATE] No email address available for order confirmation');
+            console.log('[ORDER CREATE] ❌ No email address available for order confirmation');
+            console.log('[ORDER CREATE] Debug - userEmail:', userEmail);
+            console.log('[ORDER CREATE] Debug - shippingAddress?.email:', shippingAddress?.email);
+            console.log('[ORDER CREATE] Debug - paymentIntent.receipt_email:', paymentIntent.receipt_email);
           }
         } catch (emailError) {
-          console.error('Failed to send order confirmation email:', emailError);
+          console.error('[ORDER CREATE] ❌ Email sending failed with error:', emailError);
+          console.error('[ORDER CREATE] Email error stack:', emailError.stack);
           // Continue processing even if email fails
         }
       }
@@ -3184,6 +3208,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { trackingInfo } = req.body;
       const order = await storage.updateOrderTracking(req.params.id, trackingInfo);
+      
+      // Send shipping notification email to buyer when tracking is added
+      if (trackingInfo && trackingInfo.trackingNumber && trackingInfo.carrier) {
+        try {
+          const orderDetails = await storage.getOrderWithDetails(req.params.id);
+          
+          if (orderDetails && orderDetails.buyerEmail) {
+            const emailData = {
+              customerEmail: orderDetails.buyerEmail,
+              customerName: orderDetails.buyerFirstName && orderDetails.buyerLastName 
+                ? `${orderDetails.buyerFirstName} ${orderDetails.buyerLastName}` 
+                : 'Customer',
+              orderId: orderDetails.id,
+              orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
+              orderTotal: orderDetails.total,
+              orderItems: orderDetails.items || [],
+              shippingAddress: orderDetails.shippingAddress,
+              trackingNumber: trackingInfo.trackingNumber,
+              carrier: trackingInfo.carrier,
+              shopName: orderDetails.sellerShopName || 'Curio Market Seller',
+              sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
+            };
+            
+            console.log('[TRACKING UPDATE] Sending shipping notification to buyer:', orderDetails.buyerEmail);
+            const emailResult = await emailService.sendShippingNotification(emailData);
+            if (emailResult) {
+              console.log('[TRACKING UPDATE] ✅ Shipping notification email sent successfully');
+            } else {
+              console.error('[TRACKING UPDATE] ❌ Shipping notification email failed to send');
+            }
+          } else {
+            console.log('[TRACKING UPDATE] ⚠️ No buyer email found for shipping notification');
+          }
+        } catch (emailError) {
+          console.error('[TRACKING UPDATE] ❌ Failed to send shipping notification email:', emailError);
+          // Continue processing even if email fails
+        }
+      }
+      
       res.json(order);
     } catch (error) {
       console.error("Error updating order tracking:", error);

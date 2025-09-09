@@ -250,6 +250,92 @@ export class EmailService {
     });
   }
 
+  async sendSellerOrderNotification(data: OrderEmailData): Promise<boolean> {
+    const subject = `New Order Received - ${data.orderNumber}`;
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+          .order-details { background: hsl(0, 0%, 16%); padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid hsl(0, 0%, 20%); }
+          .items { margin: 20px 0; }
+          .item { border-bottom: 1px solid hsl(0, 0%, 20%); padding: 10px 0; display: flex; justify-content: space-between; color: hsl(0, 0%, 100%); }
+          .total { font-weight: bold; font-size: 18px; color: hsl(0, 77%, 26%); text-align: right; margin-top: 15px; border-top: 2px solid hsl(0, 77%, 26%); padding-top: 15px; }
+          .action-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">Curio Market</div>
+            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">💰 New Order Received!</h1>
+          </div>
+          
+          <p>Dear ${data.shopName},</p>
+          
+          <p>Congratulations! You've received a new order from ${data.customerName}. Please prepare the items for shipping as soon as possible.</p>
+          
+          <div class="order-details">
+            <h3 style="margin-top: 0;">Order Details</h3>
+            <p><strong>Order Number:</strong> ${data.orderNumber}</p>
+            <p><strong>Order Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p><strong>Customer:</strong> ${data.customerName}</p>
+          </div>
+          
+          <div class="items">
+            <h3>Items Sold</h3>
+            ${data.orderItems.map(item => `
+              <div class="item">
+                <div>${item.title} (Qty: ${item.quantity})</div>
+                <div>$${item.price}</div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="total">
+            Your Earnings: $${(parseFloat(data.orderTotal) * 0.97).toFixed(2)} (after 3% platform fee)
+          </div>
+          
+          ${data.shippingAddress ? `
+          <div class="order-details">
+            <h3 style="margin-top: 0;">Shipping Address</h3>
+            <p>${data.shippingAddress.name}<br>
+            ${data.shippingAddress.line1}<br>
+            ${data.shippingAddress.line2 ? data.shippingAddress.line2 + '<br>' : ''}
+            ${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.postal_code}<br>
+            ${data.shippingAddress.country}</p>
+          </div>
+          ` : ''}
+          
+          <div style="text-align: center;">
+            <a href="https://curiosities.market/seller/orders" class="action-button">Manage Orders</a>
+          </div>
+          
+          <p>Please log into your seller dashboard to add tracking information once the order ships. This will automatically notify the customer.</p>
+          
+          <div class="footer">
+            <p>Questions? Visit our <a href="https://curiosities.market/help">Seller Help Center</a></p>
+            <p>Thank you for being part of the Curio Market community</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: data.sellerEmail,
+      from: this.fromEmail,
+      subject,
+      html
+    });
+  }
+
   private getTrackingUrl(carrier?: string, trackingNumber?: string): string | null {
     if (!carrier || !trackingNumber) return null;
     
