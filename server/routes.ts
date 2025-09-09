@@ -3357,35 +3357,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Additional messaging endpoints for conversation system
   app.get('/api/messages/conversations', requireAuth, async (req: any, res) => {
     try {
-      // Mock received conversations data
-      const mockConversations = [
-        {
-          id: "conv-1",
-          participantId: "seller-123",
-          participantName: "Gothic Artifacts Shop",
-          participantAvatar: null,
-          lastMessage: "Thank you for your interest in our Victorian skull collection!",
-          lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          unreadCount: 2,
-          listingId: "listing-456",
-          listingTitle: "Victorian Taxidermy Skull",
-          listingImage: "/api/placeholder/80/80"
-        },
-        {
-          id: "conv-2", 
-          participantId: "seller-456",
-          participantName: "Mystique Curiosities",
-          participantAvatar: null,
-          lastMessage: "The specimen is still available. Would you like to see more photos?",
-          lastMessageTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          unreadCount: 0,
-          listingId: "listing-789",
-          listingTitle: "Preserved Butterfly Collection",
-          listingImage: "/api/placeholder/80/80"
-        }
-      ];
+      const userId = req.user.claims.sub;
+      console.log('[MESSAGES] User', userId, 'requesting conversations');
       
-      res.json(mockConversations);
+      // Return empty array instead of mock data to fix reappearing messages issue
+      // User will have no fake conversations to delete that keep coming back
+      console.log('[MESSAGES] Returning empty conversations array (no mock data)');
+      
+      res.json([]);
     } catch (error) {
       console.error("Error fetching conversations:", error);
       res.status(500).json({ error: "Failed to fetch conversations" });
@@ -3395,35 +3374,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get sent conversations
   app.get('/api/messages/sent-conversations', requireAuth, async (req: any, res) => {
     try {
-      // Mock sent conversations data
-      const mockSentConversations = [
-        {
-          id: "sent-conv-1",
-          participantId: "buyer-789",
-          participantName: "Sarah M.",
-          participantAvatar: null,
-          lastMessage: "Hi! I'm interested in purchasing this piece. Is it still available?",
-          lastMessageTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
-          unreadCount: 0,
-          listingId: "listing-101",
-          listingTitle: "Antique Pocket Watch Collection",
-          listingImage: "/api/placeholder/80/80"
-        },
-        {
-          id: "sent-conv-2",
-          participantId: "buyer-321", 
-          participantName: "Michael R.",
-          participantAvatar: null,
-          lastMessage: "Could you provide more details about the condition?",
-          lastMessageTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-          unreadCount: 0,
-          listingId: "listing-202",
-          listingTitle: "Victorian Medical Instruments",
-          listingImage: "/api/placeholder/80/80"
-        }
-      ];
+      const userId = req.user.claims.sub;
+      console.log('[MESSAGES] User', userId, 'requesting sent conversations');
       
-      res.json(mockSentConversations);
+      // Return empty array instead of mock data to fix reappearing messages issue
+      console.log('[MESSAGES] Returning empty sent conversations array (no mock data)');
+      
+      res.json([]);
     } catch (error) {
       console.error("Error fetching sent conversations:", error);
       res.status(500).json({ error: "Failed to fetch sent conversations" });
