@@ -1,0 +1,64 @@
+index-CPagQ179.js:48 [AUTH] Getting token from localStorage: Found
+index-CPagQ179.js:48 [AUTH] Using Bearer token for API call
+index-CPagQ179.js:48 [AUTH] Getting token from localStorage: Found
+index-CPagQ179.js:48 [AUTH] Using Bearer token for API call
+index-CPagQ179.js:483 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-09T17:08:35.156Z'}
+index-CPagQ179.js:48 [AUTH] Getting token from localStorage: Found
+index-CPagQ179.js:48 [AUTH] Using Bearer token for API call
+index-CPagQ179.js:48 [AUTH] Getting token from localStorage: Found
+index-CPagQ179.js:48 [AUTH] Using Bearer token for API call
+index-CPagQ179.js:483 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-09T17:08:35.158Z'}
+index-CPagQ179.js:546 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'buyer', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: false, isLoading: true, …}
+index-CPagQ179.js:483 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxpENVxYS0J1An', timestamp: '2025-09-09T17:08:35.160Z'}
+index-CPagQ179.js:843 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'buyer', path: '/seller/dashboard', timestamp: '2025-09-09T17:08:35.160Z', isProduction: true}
+index-CPagQ179.js:546  GET https://www.curiosities.market/api/seller/dashboard 403 (Forbidden)
+queryFn @ index-CPagQ179.js:546
+a @ index-CPagQ179.js:48
+g @ index-CPagQ179.js:48
+start @ index-CPagQ179.js:48
+fetch @ index-CPagQ179.js:48
+Kd @ index-CPagQ179.js:48
+onSubscribe @ index-CPagQ179.js:48
+subscribe @ index-CPagQ179.js:48
+(anonymous) @ index-CPagQ179.js:48
+J4 @ index-CPagQ179.js:38
+lv @ index-CPagQ179.js:40
+bc @ index-CPagQ179.js:40
+eB @ index-CPagQ179.js:40
+Lo @ index-CPagQ179.js:40
+uP @ index-CPagQ179.js:40
+Eo @ index-CPagQ179.js:38
+(anonymous) @ index-CPagQ179.js:40
+setTimeout
+i @ index-CPagQ179.js:48
+o @ index-CPagQ179.js:48
+batch @ index-CPagQ179.js:48
+Di @ index-CPagQ179.js:48
+setData @ index-CPagQ179.js:48
+onSuccess @ index-CPagQ179.js:48
+d @ index-CPagQ179.js:48
+Promise.then
+g @ index-CPagQ179.js:48
+start @ index-CPagQ179.js:48
+fetch @ index-CPagQ179.js:48
+Kd @ index-CPagQ179.js:48
+onSubscribe @ index-CPagQ179.js:48
+subscribe @ index-CPagQ179.js:48
+(anonymous) @ index-CPagQ179.js:48
+J4 @ index-CPagQ179.js:38
+lv @ index-CPagQ179.js:40
+bc @ index-CPagQ179.js:40
+uP @ index-CPagQ179.js:40
+Eo @ index-CPagQ179.js:38
+eB @ index-CPagQ179.js:40
+Lo @ index-CPagQ179.js:40
+_M @ index-CPagQ179.js:40
+w @ index-CPagQ179.js:25
+T @ index-CPagQ179.js:25
+index-CPagQ179.js:546 [SELLER-DASHBOARD] ERROR: Seller should have access but no seller data found
+index-CPagQ179.js:546 [SELLER-DASHBOARD] Dashboard API Response: {message: 'Active subscription required'}
+index-CPagQ179.js:546 [SELLER-DASHBOARD] User ID: 46848882
+index-CPagQ179.js:546 [SELLER-DASHBOARD] User data: {userId: '46848882', role: 'buyer', stripeCustomerId: 'cus_SxpENVxYS0J1An', hasSellerData: false, isLoading: false, …}
+index-CPagQ179.js:546 [SELLER-DASHBOARD] ERROR: Seller should have access but no seller data found
+index-CPagQ179.js:546 [SELLER-DASHBOARD] Dashboard API Response: {message: 'Active subscription required'}
+index-CPagQ179.js:546 [SELLER-DASHBOARD] User ID: 46848882

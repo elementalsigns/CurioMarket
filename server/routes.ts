@@ -592,9 +592,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth user route  
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Force fresh user data from database (fix for stale auth cache)
+      console.log(`[AUTH-USER] Fetching fresh user data for ID: ${userId}`);
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -609,6 +612,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.upsertUser(newUser);
         res.json(newUser);
       } else {
+        console.log(`[AUTH-USER] Returning fresh user data:`, {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          stripeCustomerId: user.stripeCustomerId,
+          stripeSubscriptionId: user.stripeSubscriptionId
+        });
         res.json(user);
       }
     } catch (error) {
