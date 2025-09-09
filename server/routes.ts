@@ -2231,12 +2231,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         active: listings.active,
         createdAt: listings.createdAt,
         updatedAt: listings.updatedAt,
-        seller: {
-          id: sellers.id,
-          shopName: sellers.shopName,
-          bio: sellers.bio,
-          location: sellers.location,
-        }
+        // Seller fields flattened
+        sellerShopName: sellers.shopName,
+        sellerBio: sellers.bio,
+        sellerLocation: sellers.location,
+        sellerIdFromJoin: sellers.id,
       })
       .from(listings)
       .leftJoin(sellers, eq(listings.sellerId, sellers.id))
@@ -2254,7 +2253,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...image,
         url: objectStorageService.normalizeObjectEntityPath(image.url)
       }));
-      res.json({ ...result, images: convertedImages });
+      // Restructure the response to match expected format
+      const response = {
+        ...result,
+        seller: result.sellerShopName ? {
+          id: result.sellerIdFromJoin,
+          shopName: result.sellerShopName,
+          bio: result.sellerBio,
+          location: result.sellerLocation,
+        } : null,
+        images: convertedImages
+      };
+      
+      // Remove the flattened seller fields
+      delete response.sellerShopName;
+      delete response.sellerBio;
+      delete response.sellerLocation;
+      delete response.sellerIdFromJoin;
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching listing by slug:", error);
       res.status(500).json({ error: "Failed to fetch listing" });
