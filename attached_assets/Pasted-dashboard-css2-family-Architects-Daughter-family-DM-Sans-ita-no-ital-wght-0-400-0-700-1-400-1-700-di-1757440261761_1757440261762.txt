@@ -1,0 +1,76 @@
+dashboard
+css2?family=Architects+Daughter&family=DM+Sans:ita…no:ital,wght@0,400;0,700;1,400;1,700&display=swap
+replit-dev-banner.js
+index-CPagQ179.js
+index-BRSYzZ3e.css
+css2?family=Playfair+Display:wght@400;500;600;700&…t@400;500;600;700&family=Great+Vibes&display=swap
+nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2
+SlGUmQSNjdsmc35JDF1K5GR1SDk_YAPI.woff2
+RWmMoKWR9v4ksMfaWd_JN9XFiaQoDmlr.woff2
+UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2
+nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2
+stripe.js
+user
+controller-with-preconnect-51cf8b2489c8609c5c38592bfdccdea6.html
+shared-bc07c828a5b5f4798f341fa4686653dd.js
+controller-with-preconnect-826a494bc906df1fb594f9368864085a.js
+.deploy_status_henson.json
+32 requests
+1.5 kB transferred
+4.8 MB resources
+Finish: 5.68 s
+DOMContentLoaded: 442 ms
+Request URL
+https://www.curiosities.market/seller/dashboard
+Request Method
+GET
+Status Code
+304 Not Modified
+Remote Address
+34.111.179.208:443
+Referrer Policy
+strict-origin-when-cross-origin
+:authority
+www.curiosities.market
+:method
+GET
+:path
+/seller/dashboard
+:scheme
+https
+accept
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9
+cache-control
+max-age=0
+cookie
+__stripe_mid=9524ce33-2843-4fbb-b162-fad119add9c937369b; __stripe_sid=e7782267-c828-41f7-87fd-09610b32d3e0694f75; connect.sid=s%3A8zTFiXXuYu9OlV_Qxn75ZJUSxsEMQrtc.bZWzBE0A8QTB4uC2t%2B55hi4JGIy3c2%2FBBVKWw0S4KcM
+if-modified-since
+Tue, 09 Sep 2025 17:45:08 GMT
+if-none-match
+W/"925-1992f94d8a0"
+priority
+u=0, i
+referer
+https://www.curiosities.market/seller/dashboard
+sec-ch-ua
+"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"macOS"
+sec-fetch-dest
+document
+sec-fetch-mode
+navigate
+sec-fetch-site
+same-origin
+sec-fetch-user
+?1
+upgrade-insecure-requests
+1
+user-agent
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
