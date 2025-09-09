@@ -130,7 +130,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     mutationFn: async (conversationData: any) => {
       return await apiRequest("POST", "/api/messages/conversations", conversationData);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
       setSelectedConversation(data.id);
       setMessageText("");
@@ -264,7 +264,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   // Handle select all/none
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const allIds = new Set(filteredConversations.map((conv: Conversation) => conv.id));
+      const allIds = new Set(filteredConversations?.map((conv: Conversation) => conv.id) || []);
       setSelectedConversations(allIds);
     } else {
       setSelectedConversations(new Set());

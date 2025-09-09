@@ -1266,7 +1266,7 @@ export class DatabaseStorage implements IStorage {
       .delete(messages)
       .where(
         and(
-          inArray(messages.threadId, conversationIds),
+          sql`${messages.threadId} = ANY(${conversationIds})`,
           eq(messages.senderId, userId)
         )
       );
