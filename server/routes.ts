@@ -7,7 +7,9 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authService } from "./auth-service";
-import { insertSellerSchema, insertListingSchema } from "@shared/schema";
+import { insertSellerSchema, insertListingSchema, listings, sellers } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { verificationService } from "./verificationService";
 import { emailService } from "./emailService";
 import { ObjectStorageService } from "./objectStorage";
@@ -2210,20 +2212,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get single listing by slug (public)
   app.get('/api/listings/by-slug/:slug', async (req, res) => {
     try {
-      const listing = await storage.getListingBySlug(req.params.slug);
-      if (!listing) {
+      // Get listing with seller information
+      const [result] = await db.select({
+        id: listings.id,
+        title: listings.title,
+        slug: listings.slug,
+        description: listings.description,
+        price: listings.price,
+        stockQuantity: listings.stockQuantity,
+        sku: listings.sku,
+        mpn: listings.mpn,
+        speciesOrMaterial: listings.speciesOrMaterial,
+        provenance: listings.provenance,
+        shippingCost: listings.shippingCost,
+        sellerId: listings.sellerId,
+        categoryIds: listings.categoryIds,
+        tags: listings.tags,
+        active: listings.active,
+        createdAt: listings.createdAt,
+        updatedAt: listings.updatedAt,
+        seller: {
+          id: sellers.id,
+          shopName: sellers.shopName,
+          bio: sellers.bio,
+          location: sellers.location,
+        }
+      })
+      .from(listings)
+      .leftJoin(sellers, eq(listings.sellerId, sellers.id))
+      .where(eq(listings.slug, req.params.slug));
+
+      if (!result) {
         return res.status(404).json({ error: "Listing not found" });
       }
 
       // Fetch associated images
-      const images = await storage.getListingImages(listing.id);
+      const images = await storage.getListingImages(result.id);
       // Convert cloud storage URLs to object URLs for proper serving
       const objectStorageService = new ObjectStorageService();
       const convertedImages = images.map(image => ({
         ...image,
         url: objectStorageService.normalizeObjectEntityPath(image.url)
       }));
-      res.json({ ...listing, images: convertedImages });
+      res.json({ ...result, images: convertedImages });
     } catch (error) {
       console.error("Error fetching listing by slug:", error);
       res.status(500).json({ error: "Failed to fetch listing" });
