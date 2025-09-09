@@ -289,7 +289,7 @@ export default function Product() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h4 className="font-semibold text-gothic-red mb-1" data-testid="shop-name">
-                            {listing.seller.shopName}
+                            {listing.seller.shopName || 'Shop Name Not Set'}
                           </h4>
                           {listing.seller.location && (
                             <div className="flex items-center gap-1 text-sm text-foreground/70 mb-2" data-testid="shop-location">
