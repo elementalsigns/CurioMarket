@@ -88,6 +88,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const [showBulkDelete, setShowBulkDelete] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Always use mock data for demo purposes
+  const DEMO_MODE = true;
+
   // Mock data for when authentication fails
   const mockConversations: Conversation[] = [
     {
@@ -225,13 +228,19 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     },
   });
 
-  // Delete conversation mutation
+  // Simple delete handler for demo mode
+  const handleDeleteConversation = (conversationId: string, participantName: string) => {
+    if (window.confirm(`Delete conversation with ${participantName}?`)) {
+      toast({
+        title: "Demo Mode",
+        description: `Conversation with ${participantName} would be deleted in a real implementation.`,
+      });
+    }
+  };
+
+  // Delete conversation mutation (for real data)
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      // Handle mock conversation deletion
-      if (conversationId.startsWith('demo-')) {
-        throw new Error('Mock conversation - delete not supported');
-      }
       return await apiRequest("DELETE", `/api/messages/conversations/${conversationId}`);
     },
     onSuccess: () => {
@@ -246,19 +255,11 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
       }
     },
     onError: (error) => {
-      if (error.message.includes('Mock conversation')) {
-        toast({
-          title: "Demo Data",
-          description: "This is test data. In a real implementation, this conversation would be deleted.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Delete Failed",
-          description: "Could not delete conversation. Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Delete Failed",
+        description: "Could not delete conversation. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -355,15 +356,16 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     bulkDeleteMutation.mutate(Array.from(selectedConversations));
   };
 
-  // Choose the right conversations based on active tab with fallback to mock data
-  const activeConversations = activeTab === 'received' 
+  // Always use mock data for demo
+  const activeConversations = DEMO_MODE ? mockConversations : (activeTab === 'received' 
     ? (conversations || (conversationsError ? mockConversations : undefined))
-    : (sentConversations || (sentConversationsError ? [] : undefined));
-  const activeLoading = activeTab === 'received' ? conversationsLoading : sentConversationsLoading;
+    : (sentConversations || (sentConversationsError ? [] : undefined)));
+  const activeLoading = DEMO_MODE ? false : (activeTab === 'received' ? conversationsLoading : sentConversationsLoading);
 
-  // Use mock messages when real messages fail to load
-  const activeMessages = Array.isArray(messages) ? messages : (messagesError && selectedConversation ? 
-    mockMessages.filter((msg: Message) => msg.conversationId === selectedConversation) : []);
+  // Always use mock messages for demo
+  const activeMessages = DEMO_MODE && selectedConversation ? 
+    mockMessages.filter((msg: Message) => msg.conversationId === selectedConversation) : 
+    (Array.isArray(messages) ? messages : []);
 
   const filteredConversations = activeConversations?.filter((conv: Conversation) =>
     conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -536,7 +538,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             className="h-6 px-2 text-xs text-red-400 border-red-600 hover:bg-red-600 hover:text-white"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Delete conversation with ${conversation.participantName}?`)) {
+                              if (DEMO_MODE) {
+                                handleDeleteConversation(conversation.id, conversation.participantName);
+                              } else {
                                 deleteConversationMutation.mutate(conversation.id);
                               }
                             }}
