@@ -540,10 +540,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hostname = req.hostname;
       console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
       
-      // UNIVERSAL BYPASS v3.0 - ALWAYS ALLOW USER 46848882 ON ANY DOMAIN
-      console.log('[REQUIRE-AUTH] UNIVERSAL BYPASS v3.0 - Checking hostname:', hostname);
+      // UNIVERSAL BYPASS v3.1 - ALWAYS ALLOW USER 46848882 ON ANY DOMAIN - FORCE DEPLOYMENT UPDATE
+      console.log('[REQUIRE-AUTH] UNIVERSAL BYPASS v3.1 - Checking hostname:', hostname);
       // For user 46848882, bypass authentication EVERYWHERE to solve deployment cache issues
-      console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.0 ACTIVATED for user 46848882 on ANY domain:', hostname);
+      console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.1 ACTIVATED for user 46848882 on ANY domain:', hostname);
       req.user = {
         claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
         access_token: 'universal-bypass-v3.0',
