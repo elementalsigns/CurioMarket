@@ -83,6 +83,13 @@ export default function AccountManager() {
     enabled: !!user,
   });
 
+  // Get unread message count
+  const { data: unreadData } = useQuery({
+    queryKey: ["/api/messages/unread-count"],
+    enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   const { data: favorites } = useQuery({
     queryKey: ["/api/user/favorites"],
     enabled: !!user,
@@ -239,6 +246,11 @@ export default function AccountManager() {
                   >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Messages
+                    {unreadData?.count > 0 && (
+                      <Badge variant="destructive" className="ml-auto">
+                        {unreadData.count}
+                      </Badge>
+                    )}
                   </Button>
                 </>
               )}
@@ -272,6 +284,11 @@ export default function AccountManager() {
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Messages
+                  {unreadData?.count > 0 && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {unreadData.count}
+                    </Badge>
+                  )}
                 </Button>
               )}
 
@@ -848,12 +865,17 @@ export default function AccountManager() {
                             </div>
                             <div className="flex items-center justify-between">
                               <div>
-                                <Label className="text-base">Customer messages</Label>
-                                <p className="text-sm text-muted-foreground">New buyer inquiries</p>
+                                <Label className="text-base">Message notifications</Label>
+                                <p className="text-sm text-muted-foreground">New messages from {isSeller ? 'customers' : 'sellers'}</p>
                               </div>
-                              <Button variant="outline" size="sm">
-                                Email
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm" className="bg-red-600 text-white">
+                                  Dashboard
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  Email
+                                </Button>
+                              </div>
                             </div>
                             <div className="flex items-center justify-between">
                               <div>

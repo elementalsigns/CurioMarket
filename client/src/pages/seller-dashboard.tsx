@@ -269,6 +269,13 @@ export default function SellerDashboard() {
     gcTime: 5 * 60 * 1000, // Cache for 5 minutes
   }) as { data: { seller: any; listings: any[]; orders: any[]; stats: any; promotions: any[] } | undefined; isLoading: boolean; error: any };
 
+  // Get unread message count
+  const { data: unreadData } = useQuery({
+    queryKey: ["/api/messages/unread-count"],
+    enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -698,7 +705,7 @@ export default function SellerDashboard() {
               <h2 className="text-2xl font-serif font-bold">Customer Messages</h2>
               <Badge variant="secondary" className="bg-red-600 text-white">
                 <MessageSquare className="mr-1 h-3 w-3" />
-                0 Unread
+                {unreadData?.count || 0} Unread
               </Badge>
             </div>
             

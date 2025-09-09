@@ -24,7 +24,8 @@ import {
   LogOut,
   Plus,
   ChevronDown,
-  CreditCard
+  CreditCard,
+  MessageSquare
 } from "lucide-react";
 
 export default function Header() {
@@ -42,6 +43,12 @@ export default function Header() {
   const { data: sellerData } = useQuery({
     queryKey: ["/api/seller/profile"],
     enabled: isAuthenticated,
+  });
+
+  const { data: unreadData } = useQuery({
+    queryKey: ["/api/messages/unread-count"],
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const cartItemCount = (cartData && Array.isArray((cartData as any).items)) ? (cartData as any).items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
@@ -243,32 +250,68 @@ export default function Header() {
               </h1>
             </Link>
 
-            {/* Mobile Cart */}
-            <Button 
-              variant="ghost" 
-              className="text-foreground hover:text-red-600 hover:bg-transparent p-1.5 relative transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
-              onClick={() => setCartOpen(true)}
-              data-testid="button-cart-mobile"
-            >
-              <ShoppingCart size={20} />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-[11px] font-medium shadow-lg" data-testid="cart-count-mobile">
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
-                </span>
+            {/* Mobile Right Icons */}
+            <div className="flex items-center gap-1">
+              {isAuthenticated && (
+                <Link to="/account?tab=messages">
+                  <Button 
+                    variant="ghost" 
+                    className="text-foreground hover:text-red-600 hover:bg-transparent p-1.5 relative transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+                    data-testid="button-messages-mobile"
+                  >
+                    <MessageSquare size={18} />
+                    {unreadData?.count > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium shadow-lg" data-testid="messages-count-mobile">
+                        {unreadData.count > 9 ? '9+' : unreadData.count}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
               )}
-            </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-red-600 hover:bg-transparent p-1.5 relative transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+                onClick={() => setCartOpen(true)}
+                data-testid="button-cart-mobile"
+              >
+                <ShoppingCart size={20} />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-[11px] font-medium shadow-lg" data-testid="cart-count-mobile">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Desktop Right Side Icons & User Menu */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && (
-              <Button 
-                variant="ghost" 
-                className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
-                data-testid="button-favorites"
-              >
-                <Heart size={20} />
-              </Button>
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
+                  data-testid="button-favorites"
+                >
+                  <Heart size={20} />
+                </Button>
+                
+                <Link to="/account?tab=messages">
+                  <Button 
+                    variant="ghost" 
+                    className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
+                    data-testid="button-messages"
+                  >
+                    <MessageSquare size={20} />
+                    {unreadData?.count > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="messages-count">
+                        {unreadData.count}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              </>
             )}
 
             {/* User Menu */}

@@ -3251,7 +3251,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a simple conversation ID and send the first message
       const conversationId = `conv-${Date.now()}`;
       
-      // For basic implementation, just return success
+      // Send email notification to recipient
+      try {
+        const recipient = await storage.getUserById(recipientId);
+        if (recipient?.email) {
+          // Email notification would be sent here in production
+          console.log(`Would send email to ${recipient.email} about new message from ${userId}`);
+        }
+      } catch (emailError) {
+        console.warn("Failed to send email notification:", emailError);
+        // Don't fail the message send if email fails
+      }
+      
       res.json({ 
         id: conversationId,
         message: "Conversation started successfully" 
@@ -3268,7 +3279,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { conversationId, content } = req.body;
       
-      // For basic implementation, just return success
+      // Send email notification (simplified - in real implementation, 
+      // we'd need to identify the recipient from the conversation)
+      try {
+        // This is a simplified implementation
+        console.log("Would send email notification for new message");
+      } catch (emailError) {
+        console.warn("Failed to send email notification:", emailError);
+      }
+      
       res.json({ 
         id: `msg-${Date.now()}`,
         conversationId,
