@@ -8,40 +8,11 @@ import { formatDistanceToNow } from "date-fns";
 export default function MessagingSystemSimple() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
-  // Simple mock data
-  const conversations = [
-    {
-      id: 'demo-1',
-      participantName: 'Sarah M.',
-      lastMessage: 'Hi! I\'m interested in purchasing the Victorian skull specimen.',
-      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 2,
-    },
-    {
-      id: 'demo-2', 
-      participantName: 'Michael R.',
-      lastMessage: 'The specimen is still available. Would you like to see more photos?',
-      lastMessageTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 0,
-    }
-  ];
+  // No mock data - show empty conversations
+  const conversations: any[] = [];
 
-  const messages = [
-    {
-      id: 'msg-1',
-      conversationId: 'demo-1',
-      content: 'Hi! I\'m interested in purchasing the Victorian skull specimen. Could you provide more details?',
-      isOwn: false,
-      senderName: 'Sarah M.',
-    },
-    {
-      id: 'msg-2',
-      conversationId: 'demo-1',
-      content: 'Thank you for your interest! This Victorian skull is from a 1890s medical collection.',
-      isOwn: true,
-      senderName: 'You',
-    }
-  ];
+  // No mock messages - show empty messages
+  const messages: any[] = [];
 
   const handleDelete = (conversationId: string, participantName: string) => {
     if (window.confirm(`Delete conversation with ${participantName}?`)) {

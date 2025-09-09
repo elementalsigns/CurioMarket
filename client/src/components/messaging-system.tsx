@@ -88,96 +88,13 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const [showBulkDelete, setShowBulkDelete] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Always use mock data for demo purposes
-  const DEMO_MODE = true;
+  // Real mode - no more fake demo conversations
+  const DEMO_MODE = false;
 
-  // State for demo conversations that can be deleted
-  const [demoConversations, setDemoConversations] = useState<Conversation[]>([
-    {
-      id: 'demo-1',
-      participantId: 'user1',
-      participantName: 'Sarah M.',
-      participantAvatar: '/api/placeholder/32/32',
-      lastMessage: 'Hi! I\'m interested in purchasing the Victorian skull specimen. Could you provide more details about its provenance?',
-      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 2,
-      listingId: 'listing1',
-      listingTitle: 'Antique Pocket Watch Collection',
-      listingImage: '/api/placeholder/50/50'
-    },
-    {
-      id: 'demo-2', 
-      participantId: 'user2',
-      participantName: 'Michael R.',
-      participantAvatar: '/api/placeholder/32/32',
-      lastMessage: 'The specimen is still available. Would you like to see more photos?',
-      lastMessageTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 0,
-      listingId: 'listing2',
-      listingTitle: 'Victorian Medical Instruments',
-      listingImage: '/api/placeholder/50/50'
-    }
-  ]);
+  // No more static mock data - will use real API data only
 
-  // Static mock data for fallback
-  const mockConversations: Conversation[] = [
-    {
-      id: 'demo-1',
-      participantId: 'user1',
-      participantName: 'Sarah M.',
-      participantAvatar: '/api/placeholder/32/32',
-      lastMessage: 'Hi! I\'m interested in purchasing the Victorian skull specimen. Could you provide more details about its provenance?',
-      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 2,
-      listingId: 'listing1',
-      listingTitle: 'Antique Pocket Watch Collection',
-      listingImage: '/api/placeholder/50/50'
-    },
-    {
-      id: 'demo-2', 
-      participantId: 'user2',
-      participantName: 'Michael R.',
-      participantAvatar: '/api/placeholder/32/32',
-      lastMessage: 'The specimen is still available. Would you like to see more photos?',
-      lastMessageTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 0,
-      listingId: 'listing2',
-      listingTitle: 'Victorian Medical Instruments',
-      listingImage: '/api/placeholder/50/50'
-    }
-  ];
-
-  const mockMessages: Message[] = [
-    {
-      id: 'msg-1',
-      conversationId: 'demo-1',
-      senderId: 'user1',
-      senderName: 'Sarah M.',
-      senderAvatar: '/api/placeholder/32/32',
-      content: 'Hi! I\'m interested in purchasing the Victorian skull specimen. Could you provide more details about its provenance?',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      isRead: false
-    },
-    {
-      id: 'msg-2',
-      conversationId: 'demo-1',
-      senderId: (user as any)?.id || 'current-user',
-      senderName: (user as any)?.username || 'You',
-      content: 'Thank you for your interest! This Victorian skull is from a 1890s medical collection. It comes with provenance documentation.',
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      isRead: true
-    },
-    {
-      id: 'msg-3',
-      conversationId: 'demo-2',
-      senderId: 'user2',
-      senderName: 'Michael R.',
-      senderAvatar: '/api/placeholder/32/32',
-      content: 'The specimen is still available. Would you like to see more photos?',
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      isRead: true
-    }
-  ];
+  // No more mock messages - will fetch real messages from API
+  const mockMessages: Message[] = [];
 
   // Get conversations
   // Get received conversations 
