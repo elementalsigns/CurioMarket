@@ -593,30 +593,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
-  // Auth user route - fixed to use fresh database data
+  // Auth user route - properly handle all users
   app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
       
-      // Force fresh user data from database - FIX FOR USER 46848882
-      console.log(`[AUTH-USER] Fetching fresh user data for ID: ${userId}`);
-      
-      // For user 46848882, return correct seller data directly from database
-      if (userId === '46848882') {
-        const user = await storage.getUser(userId);
-        console.log(`[AUTH-USER] Database user data for 46848882:`, user);
-        
-        if (user) {
-          console.log(`[AUTH-USER] Returning FRESH database user data for seller:`, {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            stripeCustomerId: user.stripeCustomerId,
-            stripeSubscriptionId: user.stripeSubscriptionId
-          });
-          return res.json(user);
-        }
-      }
+      console.log(`[AUTH-USER] Fetching user data for ID: ${userId}, email: ${userEmail}`);
       
       const user = await storage.getUser(userId);
       
@@ -624,15 +607,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create a basic user if doesn't exist
         const newUser = {
           id: userId,
-          email: req.user.claims.email,
-          firstName: "Elemental",
-          lastName: "Signs",
+          email: userEmail,
+          firstName: null,
+          lastName: null,
           role: "buyer" as const
         };
+        console.log(`[AUTH-USER] Creating new user:`, newUser);
         await storage.upsertUser(newUser);
         res.json(newUser);
       } else {
-        console.log(`[AUTH-USER] Returning user data:`, {
+        console.log(`[AUTH-USER] Returning user data for ${user.email}:`, {
           id: user.id,
           email: user.email,
           role: user.role,
