@@ -145,8 +145,8 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
               </div>
               
               {listing.seller && (
-                <p className="text-xs text-muted-foreground" data-testid={`product-seller-${listing.id}`}>
-                  by {listing.seller.shopName}
+                <p className="text-sm font-medium text-gothic-red" data-testid={`product-seller-${listing.id}`}>
+                  {listing.seller.shopName}
                 </p>
               )}
             </div>
