@@ -853,7 +853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller dashboard (aggregated data)
-  app.get('/api/seller/dashboard', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/dashboard', requireAuth, async (req: any, res) => {
     // Force no-cache headers to ensure fresh data with converted URLs
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
