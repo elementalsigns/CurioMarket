@@ -451,42 +451,22 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
                           </span>
                           
-                          {/* Direct delete button with confirmation */}
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 text-zinc-400 hover:text-red-400 hover:bg-red-600/10"
-                                onClick={(e) => e.stopPropagation()}
-                                data-testid={`button-delete-conversation-${conversation.id}`}
-                                title="Delete conversation"
-                              >
-                                <Trash2 size={12} />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-zinc-900 border-zinc-800">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white">Delete Conversation</AlertDialogTitle>
-                                <AlertDialogDescription className="text-zinc-400">
-                                  Are you sure you want to delete your conversation with {conversation.participantName}? 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteConversationMutation.mutate(conversation.id)}
-                                  className="bg-red-600 text-white hover:bg-red-700"
-                                  data-testid={`button-confirm-delete-conversation-${conversation.id}`}
-                                >
-                                  Delete Conversation
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          {/* Simple delete button - always visible */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-xs text-red-400 border-red-600 hover:bg-red-600 hover:text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Delete conversation with ${conversation.participantName}?`)) {
+                                deleteConversationMutation.mutate(conversation.id);
+                              }
+                            }}
+                            data-testid={`button-delete-conversation-${conversation.id}`}
+                            title="Delete conversation"
+                          >
+                            🗑️ Delete
+                          </Button>
                         </div>
                       </div>
                       
