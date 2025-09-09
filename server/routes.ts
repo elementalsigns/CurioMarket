@@ -228,6 +228,7 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
+// CACHE BUST v3.3: 2025-09-09 19:58 FORCE NEW DEPLOYMENT SNAPSHOT
 export async function registerRoutes(app: Express): Promise<Server> {
   // Image proxy endpoint for private images using ObjectStorageService
   app.get("/api/image-proxy/:imageId", async (req, res) => {

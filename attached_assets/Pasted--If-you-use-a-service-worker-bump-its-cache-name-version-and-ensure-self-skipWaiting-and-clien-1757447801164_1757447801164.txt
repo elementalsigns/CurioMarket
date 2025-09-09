@@ -1,0 +1,40 @@
+	•	If you use a service worker, bump its cache name/version, and ensure self.skipWaiting() and clients.claim() are present so new SWs take over immediately on deploy.
+	•	Why: Replit Production + any CDN + a SW can lock old JS bundles even after a successful deploy. Replit’s static deploys also add caching for speed.  ￼
+
+	2.	Force a brand-new snapshot
+	•	Make a harmless file change (e.g., bump package.json version or add a comment to a server file that’s in the build output), then “Publish/Deploy” again to generate a truly new artifact.
+	•	If that doesn’t flip it: delete the Production deployment and create a new deployment (same repo, same commands). This guarantees a fresh image rather than a reused snapshot. (Replit deploys are snapshot-based artifacts.)  ￼
+	3.	Purge the CDN in front of Replit (if using a custom domain)
+	•	If your domain sits behind Cloudflare (or another CDN), purge the cache for your main HTML and JS chunk URLs (or, if needed, a temporary “purge everything”). Then reload.  ￼
+
+Configuration things to double-check (common gotchas)
+	4.	Deployment type & commands
+	•	Confirm Production uses the same build and start commands as your Preview run (Preview = workspace run; Production = deployment run). A different start script (e.g., serving an old dist/) will look like “new in Preview, old in Prod.”  ￼
+	•	If you’re doing a Static Deployment, be aware it serves files with aggressive caching. Consider adding Cache-Control: no-cache on index.html while keeping hashes for JS/CSS for long caching.  ￼
+	5.	Environment variables / secrets
+	•	Preview and Production may have different secrets. If your app conditionally renders (e.g., shows “Active subscription required”) based on an env var that’s missing/old in Production, it’ll look like “old code.” Re-check the deployment’s Environment Variables panel.
+	6.	Start command path
+	•	If you’re serving from dist/, ensure your build actually updated that folder in the snapshot the deployment uses. A stale dist/ checked into the repo or generated to the wrong path yields “old site in Prod.”
+	7.	Service worker scope
+	•	If your SW’s scope covers /, the SW can keep serving old assets even when HTML is new. Tighten scope or implement a robust update strategy (versioned caches + skipWaiting/clients.claim) as above.
+	8.	Multiple deployments / wrong URL
+	•	In Deployments → Monitoring, verify the production URL you’re visiting is the one tied to your newest deployment ID. If you attached a custom domain, confirm its DNS (CNAME/AAAA) points to the current deployment target and that TTL isn’t delaying changes.  ￼
+	9.	Rebuild from scratch
+	•	NPM: delete node_modules and lockfile corruption by running npm ci locally in the repl before publishing; ensure the build step runs cleanly inside the deploy.
+	•	Python/others: clear venv/build artifacts before publish. (This avoids bundling stale artifacts into the snapshot.)
+	10.	Asset versioning
+
+	•	Use hashed filenames for JS/CSS (Vite, Next, etc. already do this). Make index.html non-immutable (no long cache) so browsers always fetch a fresh HTML that references the newest hashed assets. This pattern breaks “stuck old bundle” issues with CDNs.  ￼ ￼
+
+If it’s truly a Replit infra hiccup
+
+Sometimes Production takes a brief moment to roll; recent community notes suggest short delays do happen. But if multiple republishes don’t change the artifact you see, treat it like a stuck snapshot and recreate the deployment as above. If it persists, open a ticket with: deployment ID, exact production URL, the latest publish time, and the expected commit hash/string (e.g., a unique console.log) that proves which build you expect to see. Include a note that Preview shows “Universal Bypass v3.0” while Production shows “Active subscription required.”  ￼
+
+A minimal “prove it’s cache” test
+	•	Add a unique string to your index.html title (e.g., <!-- build: 2025-09-09 15:30 ET -->), redeploy, then:
+	1.	curl -I https://your-prod (look for Cache-Control, possible CDN headers)
+	2.	curl https://your-prod and confirm the comment appears
+	3.	Open in a private window and hit Ctrl/Cmd+Shift+R
+If the HTML updates but the JS behavior doesn’t, it’s almost certainly a service worker or CDN asset caching issue.
+
+If you want, paste your deploy type, build/start commands, and whether you’re using a custom domain with Cloudflare. I’ll map the exact headers/SW strategy to your setup and give you the precise cache-control + SW snippet to end this once and for all.
