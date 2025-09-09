@@ -40,7 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import MessagingSystemSimple from "@/components/messaging-system-simple";
+import MessagingSystem from "@/components/messaging-system";
 
 export default function AccountManager() {
   const { user, isLoading } = useAuth();
@@ -748,7 +748,7 @@ export default function AccountManager() {
                   </h2>
                   <Card className="glass-effect">
                     <CardContent className="p-0">
-                      <MessagingSystemSimple />
+                      <MessagingSystem />
                     </CardContent>
                   </Card>
                 </div>

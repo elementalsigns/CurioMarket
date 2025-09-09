@@ -362,7 +362,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const activeLoading = activeTab === 'received' ? conversationsLoading : sentConversationsLoading;
 
   // Use mock messages when real messages fail to load
-  const activeMessages = (messages as Message[]) || (messagesError && selectedConversation ? 
+  const activeMessages = Array.isArray(messages) ? messages : (messagesError && selectedConversation ? 
     mockMessages.filter((msg: Message) => msg.conversationId === selectedConversation) : []);
 
   const filteredConversations = activeConversations?.filter((conv: Conversation) =>
