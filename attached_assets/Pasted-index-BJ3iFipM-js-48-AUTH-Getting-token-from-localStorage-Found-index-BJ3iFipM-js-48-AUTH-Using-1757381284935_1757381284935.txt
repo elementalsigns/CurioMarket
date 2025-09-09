@@ -1,0 +1,140 @@
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Using Bearer token for API call
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Using Bearer token for API call
+index-BJ3iFipM.js:478 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-09T01:26:48.947Z'}
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Using Bearer token for API call
+index-BJ3iFipM.js:478 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-09T01:26:48.952Z'}
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Adding Bearer token to request
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Using Bearer token for API call
+index-BJ3iFipM.js:478 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-09T01:26:48.975Z'}
+index-BJ3iFipM.js:832 [PRODUCTION REDIRECT] User loaded: {userId: '47345443', role: 'buyer', path: '/product/test-purchase', timestamp: '2025-09-09T01:26:48.978Z', isProduction: true}
+index-BJ3iFipM.js:48  GET https://www.curiosities.market/api/seller/profile 404 (Not Found)
+(anonymous) @ index-BJ3iFipM.js:48
+a @ index-BJ3iFipM.js:48
+g @ index-BJ3iFipM.js:48
+start @ index-BJ3iFipM.js:48
+fetch @ index-BJ3iFipM.js:48
+Wd @ index-BJ3iFipM.js:48
+onSubscribe @ index-BJ3iFipM.js:48
+subscribe @ index-BJ3iFipM.js:48
+(anonymous) @ index-BJ3iFipM.js:48
+U4 @ index-BJ3iFipM.js:38
+sv @ index-BJ3iFipM.js:40
+xc @ index-BJ3iFipM.js:40
+g9 @ index-BJ3iFipM.js:40
+Io @ index-BJ3iFipM.js:40
+eP @ index-BJ3iFipM.js:40
+No @ index-BJ3iFipM.js:38
+(anonymous) @ index-BJ3iFipM.js:40
+setTimeout
+s @ index-BJ3iFipM.js:48
+o @ index-BJ3iFipM.js:48
+batch @ index-BJ3iFipM.js:48
+Rs @ index-BJ3iFipM.js:48
+setData @ index-BJ3iFipM.js:48
+onSuccess @ index-BJ3iFipM.js:48
+d @ index-BJ3iFipM.js:48
+Promise.then
+g @ index-BJ3iFipM.js:48
+start @ index-BJ3iFipM.js:48
+fetch @ index-BJ3iFipM.js:48
+Wd @ index-BJ3iFipM.js:48
+onSubscribe @ index-BJ3iFipM.js:48
+subscribe @ index-BJ3iFipM.js:48
+(anonymous) @ index-BJ3iFipM.js:48
+U4 @ index-BJ3iFipM.js:38
+sv @ index-BJ3iFipM.js:40
+xc @ index-BJ3iFipM.js:40
+eP @ index-BJ3iFipM.js:40
+No @ index-BJ3iFipM.js:38
+g9 @ index-BJ3iFipM.js:40
+Io @ index-BJ3iFipM.js:40
+bM @ index-BJ3iFipM.js:40
+N @ index-BJ3iFipM.js:25
+E @ index-BJ3iFipM.js:25Understand this error
+index-BJ3iFipM.js:478 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: null, timestamp: '2025-09-09T01:26:49.284Z'}
+index-BJ3iFipM.js:48 [AUTH] Getting token from localStorage: Found
+index-BJ3iFipM.js:48 [AUTH] Using Bearer token for API call
+index-BJ3iFipM.js:48  GET https://www.curiosities.market/api/seller/profile 404 (Not Found)
+(anonymous) @ index-BJ3iFipM.js:48
+a @ index-BJ3iFipM.js:48
+g @ index-BJ3iFipM.js:48
+start @ index-BJ3iFipM.js:48
+fetch @ index-BJ3iFipM.js:48
+Wd @ index-BJ3iFipM.js:48
+onSubscribe @ index-BJ3iFipM.js:48
+subscribe @ index-BJ3iFipM.js:48
+(anonymous) @ index-BJ3iFipM.js:48
+U4 @ index-BJ3iFipM.js:38
+sv @ index-BJ3iFipM.js:40
+xc @ index-BJ3iFipM.js:40
+g9 @ index-BJ3iFipM.js:40
+Io @ index-BJ3iFipM.js:40
+eP @ index-BJ3iFipM.js:40
+No @ index-BJ3iFipM.js:38
+(anonymous) @ index-BJ3iFipM.js:40
+setTimeout
+s @ index-BJ3iFipM.js:48
+o @ index-BJ3iFipM.js:48
+batch @ index-BJ3iFipM.js:48
+Rs @ index-BJ3iFipM.js:48
+setData @ index-BJ3iFipM.js:48
+onSuccess @ index-BJ3iFipM.js:48
+d @ index-BJ3iFipM.js:48
+Promise.then
+g @ index-BJ3iFipM.js:48
+start @ index-BJ3iFipM.js:48
+fetch @ index-BJ3iFipM.js:48
+Wd @ index-BJ3iFipM.js:48
+onSubscribe @ index-BJ3iFipM.js:48
+subscribe @ index-BJ3iFipM.js:48
+(anonymous) @ index-BJ3iFipM.js:48
+U4 @ index-BJ3iFipM.js:38
+sv @ index-BJ3iFipM.js:40
+xc @ index-BJ3iFipM.js:40
+g9 @ index-BJ3iFipM.js:40
+Io @ index-BJ3iFipM.js:40
+eP @ index-BJ3iFipM.js:40
+No @ index-BJ3iFipM.js:38
+(anonymous) @ index-BJ3iFipM.js:40
+setTimeout
+s @ index-BJ3iFipM.js:48
+o @ index-BJ3iFipM.js:48
+batch @ index-BJ3iFipM.js:48
+Rs @ index-BJ3iFipM.js:48
+setData @ index-BJ3iFipM.js:48
+onSuccess @ index-BJ3iFipM.js:48
+d @ index-BJ3iFipM.js:48
+Promise.then
+g @ index-BJ3iFipM.js:48
+start @ index-BJ3iFipM.js:48
+fetch @ index-BJ3iFipM.js:48
+Wd @ index-BJ3iFipM.js:48
+onSubscribe @ index-BJ3iFipM.js:48
+subscribe @ index-BJ3iFipM.js:48
+(anonymous) @ index-BJ3iFipM.js:48
+U4 @ index-BJ3iFipM.js:38
+sv @ index-BJ3iFipM.js:40
+xc @ index-BJ3iFipM.js:40
+eP @ index-BJ3iFipM.js:40
+No @ index-BJ3iFipM.js:38
+g9 @ index-BJ3iFipM.js:40
+Io @ index-BJ3iFipM.js:40
+bM @ index-BJ3iFipM.js:40
+N @ index-BJ3iFipM.js:25
+E @ index-BJ3iFipM.js:25Understand this error
+index-BJ3iFipM.js:526 Uncaught ReferenceError: setLocation is not defined
+    at onClick (index-BJ3iFipM.js:526:10798)
+    at Object.RF (index-BJ3iFipM.js:37:9864)
+    at DF (index-BJ3iFipM.js:37:10018)
+    at zF (index-BJ3iFipM.js:37:10075)
+    at SC (index-BJ3iFipM.js:37:31462)
+    at P4 (index-BJ3iFipM.js:37:31879)
+    at index-BJ3iFipM.js:37:36792
+    at uN (index-BJ3iFipM.js:40:36957)
+    at XT (index-BJ3iFipM.js:37:8999)
+    at e0 (index-BJ3iFipM.js:37:33166)

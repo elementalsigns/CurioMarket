@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function Product() {
   const { slug } = useParams();
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -277,6 +278,48 @@ export default function Product() {
             )}
 
             <Separator />
+
+            {/* Seller Information Section */}
+            {listing.seller && (
+              <>
+                <div>
+                  <h3 className="text-lg font-serif font-bold mb-3">Shop Information</h3>
+                  <Card className="glass-effect border border-gothic-purple/20" data-testid="seller-info">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gothic-red mb-1" data-testid="shop-name">
+                            {listing.seller.shopName}
+                          </h4>
+                          {listing.seller.location && (
+                            <div className="flex items-center gap-1 text-sm text-foreground/70 mb-2" data-testid="shop-location">
+                              <MapPin size={14} />
+                              <span>{listing.seller.location}</span>
+                            </div>
+                          )}
+                          {listing.seller.bio && (
+                            <p className="text-sm text-foreground/80 line-clamp-2" data-testid="shop-bio">
+                              {listing.seller.bio}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLocation(`/shop/${listing.seller.id}`)}
+                          className="ml-4 whitespace-nowrap"
+                          data-testid="button-visit-shop"
+                        >
+                          Visit Shop
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Separator />
+              </>
+            )}
 
             {/* Purchase Section */}
             <Card className="glass-effect border border-gothic-purple/30" data-testid="purchase-card">
