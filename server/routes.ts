@@ -683,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller profile
-  app.get('/api/seller/profile', async (req: any, res) => {
+  app.get('/api/seller/profile', requireAuth, async (req: any, res) => {
     try {
       // Use same authentication method as PUT endpoint
       if (!req.user?.claims?.sub) {
@@ -703,7 +703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update seller profile - SPECIAL VERSION FOR PRODUCTION USER
-  app.put('/api/seller/profile', async (req: any, res) => {
+  app.put('/api/seller/profile', requireAuth, async (req: any, res) => {
     try {
       console.log('====== PROFILE SAVE DEBUG ======');
       console.log('Host:', req.get('host'));
