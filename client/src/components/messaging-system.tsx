@@ -91,7 +91,35 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   // Always use mock data for demo purposes
   const DEMO_MODE = true;
 
-  // Mock data for when authentication fails
+  // State for demo conversations that can be deleted
+  const [demoConversations, setDemoConversations] = useState<Conversation[]>([
+    {
+      id: 'demo-1',
+      participantId: 'user1',
+      participantName: 'Sarah M.',
+      participantAvatar: '/api/placeholder/32/32',
+      lastMessage: 'Hi! I\'m interested in purchasing the Victorian skull specimen. Could you provide more details about its provenance?',
+      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      unreadCount: 2,
+      listingId: 'listing1',
+      listingTitle: 'Antique Pocket Watch Collection',
+      listingImage: '/api/placeholder/50/50'
+    },
+    {
+      id: 'demo-2', 
+      participantId: 'user2',
+      participantName: 'Michael R.',
+      participantAvatar: '/api/placeholder/32/32',
+      lastMessage: 'The specimen is still available. Would you like to see more photos?',
+      lastMessageTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      unreadCount: 0,
+      listingId: 'listing2',
+      listingTitle: 'Victorian Medical Instruments',
+      listingImage: '/api/placeholder/50/50'
+    }
+  ]);
+
+  // Static mock data for fallback
   const mockConversations: Conversation[] = [
     {
       id: 'demo-1',
@@ -231,9 +259,17 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   // Simple delete handler for demo mode
   const handleDeleteConversation = (conversationId: string, participantName: string) => {
     if (window.confirm(`Delete conversation with ${participantName}?`)) {
+      // Actually remove the conversation from demo state
+      setDemoConversations(prev => prev.filter(conv => conv.id !== conversationId));
+      
+      // Clear selected conversation if it was deleted
+      if (selectedConversation === conversationId) {
+        setSelectedConversation(null);
+      }
+      
       toast({
-        title: "Demo Mode",
-        description: `Conversation with ${participantName} would be deleted in a real implementation.`,
+        title: "Conversation Deleted",
+        description: `Conversation with ${participantName} has been removed.`,
       });
     }
   };
@@ -357,7 +393,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   };
 
   // Always use mock data for demo
-  const activeConversations = DEMO_MODE ? mockConversations : (activeTab === 'received' 
+  const activeConversations = DEMO_MODE ? demoConversations : (activeTab === 'received' 
     ? (conversations || (conversationsError ? mockConversations : undefined))
     : (sentConversations || (sentConversationsError ? [] : undefined)));
   const activeLoading = DEMO_MODE ? false : (activeTab === 'received' ? conversationsLoading : sentConversationsLoading);
