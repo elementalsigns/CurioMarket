@@ -2212,66 +2212,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get single listing by slug (public)
   app.get('/api/listings/by-slug/:slug', async (req, res) => {
     try {
-      // Get listing with seller information
-      const [result] = await db.select({
-        id: listings.id,
-        title: listings.title,
-        slug: listings.slug,
-        description: listings.description,
-        price: listings.price,
-        stockQuantity: listings.stockQuantity,
-        sku: listings.sku,
-        mpn: listings.mpn,
-        speciesOrMaterial: listings.speciesOrMaterial,
-        provenance: listings.provenance,
-        shippingCost: listings.shippingCost,
-        sellerId: listings.sellerId,
-        categoryIds: listings.categoryIds,
-        tags: listings.tags,
-        active: listings.active,
-        createdAt: listings.createdAt,
-        updatedAt: listings.updatedAt,
-        // Seller fields flattened
-        sellerShopName: sellers.shopName,
-        sellerBio: sellers.bio,
-        sellerLocation: sellers.location,
-        sellerIdFromJoin: sellers.id,
-      })
-      .from(listings)
-      .leftJoin(sellers, eq(listings.sellerId, sellers.id))
-      .where(eq(listings.slug, req.params.slug));
-
-      if (!result) {
+      // Get the listing first using the existing method
+      const listing = await storage.getListingBySlug(req.params.slug);
+      if (!listing) {
         return res.status(404).json({ error: "Listing not found" });
       }
 
+      // Get seller information separately
+      let seller = null;
+      if (listing.sellerId) {
+        seller = await storage.getSeller(listing.sellerId);
+      }
+
       // Fetch associated images
-      const images = await storage.getListingImages(result.id);
+      const images = await storage.getListingImages(listing.id);
       // Convert cloud storage URLs to object URLs for proper serving
       const objectStorageService = new ObjectStorageService();
       const convertedImages = images.map(image => ({
         ...image,
         url: objectStorageService.normalizeObjectEntityPath(image.url)
       }));
-      // Restructure the response to match expected format
-      const response = {
-        ...result,
-        seller: result.sellerShopName ? {
-          id: result.sellerIdFromJoin,
-          shopName: result.sellerShopName,
-          bio: result.sellerBio,
-          location: result.sellerLocation,
+      
+      res.json({ 
+        ...listing, 
+        seller: seller ? {
+          id: seller.id,
+          shopName: seller.shopName,
+          bio: seller.bio,
+          location: seller.location,
         } : null,
-        images: convertedImages
-      };
-      
-      // Remove the flattened seller fields
-      delete response.sellerShopName;
-      delete response.sellerBio;
-      delete response.sellerLocation;
-      delete response.sellerIdFromJoin;
-      
-      res.json(response);
+        images: convertedImages 
+      });
     } catch (error) {
       console.error("Error fetching listing by slug:", error);
       res.status(500).json({ error: "Failed to fetch listing" });
