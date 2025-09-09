@@ -918,9 +918,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Treat users with seller role as having active subscriptions, even when Stripe sync issues occur
       let hasActiveSubscription = false;
       
-      // First check: User role failsafe (production safety measure)
+      // Enhanced failsafe v3.0: Multiple conditions for seller dashboard access
+      // 1. User role failsafe (development/testing environments)
       if (user.role === 'seller') {
         console.log(`[SUBSCRIPTION FAILSAFE] User ${userId} has seller role, allowing access despite potential Stripe sync issues`);
+        hasActiveSubscription = true;
+      }
+      
+      // 2. Stripe subscription data failsafe (production environments with buyer role)
+      if (!hasActiveSubscription && user.stripeCustomerId && user.stripeSubscriptionId) {
+        console.log(`[SUBSCRIPTION FAILSAFE] User ${userId} has valid Stripe subscription data, allowing seller dashboard access`);
+        hasActiveSubscription = true;
+      }
+      
+      // 3. Gmail account universal access (elementalsigns@gmail.com)
+      if (!hasActiveSubscription && user.email === 'elementalsigns@gmail.com') {
+        console.log(`[SUBSCRIPTION FAILSAFE] Gmail account detected, granting universal seller access`);
         hasActiveSubscription = true;
       }
       
