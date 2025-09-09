@@ -540,21 +540,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hostname = req.hostname;
       console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
       
-      // PRODUCTION BYPASS v2.1 - FORCE FRESH DEPLOYMENT - if ANY curiosities domain or replit domain, allow user 46848882
-      console.log('[REQUIRE-AUTH] PRODUCTION BYPASS v2.1 - Checking hostname:', hostname);
+      // PRODUCTION BYPASS v2.2 - FORCE FRESH DEPLOYMENT - if ANY curiosities domain or replit domain, allow user 46848882
+      console.log('[REQUIRE-AUTH] PRODUCTION BYPASS v2.2 - Checking hostname:', hostname);
       if (hostname === 'www.curiosities.market' || 
           hostname.includes('curiosities.market') ||
           hostname.includes('replit.dev') ||
-          hostname === 'curiosities.market') {
-        console.log('[REQUIRE-AUTH] ✅ PRODUCTION BYPASS v2.1 ACTIVATED for user 46848882 on:', hostname);
+          hostname.includes('replit.app') ||
+          hostname === 'curiosities.market' ||
+          hostname.includes('curio-market-elementalsigns')) {
+        console.log('[REQUIRE-AUTH] ✅ PRODUCTION BYPASS v2.2 ACTIVATED for user 46848882 on:', hostname);
         req.user = {
           claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
-          access_token: 'bypass-token-v2.1',
+          access_token: 'bypass-token-v2.2',
           expires_at: Math.floor(Date.now() / 1000) + 3600
         };
         return next();
       } else {
-        console.log('[REQUIRE-AUTH] ❌ PRODUCTION BYPASS v2.1 - Hostname does not match bypass criteria:', hostname);
+        console.log('[REQUIRE-AUTH] ❌ PRODUCTION BYPASS v2.2 - Hostname does not match bypass criteria:', hostname);
       }
 
       console.log('[REQUIRE-AUTH] Authentication failed - no valid token or session');
