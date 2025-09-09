@@ -187,10 +187,11 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         console.log('[REQUIRE-AUTH] 🚫 BYPASS DISABLED for logout request:', requestUrl);
       }
       
-      // Check if this is our production domain or any Replit domain - apply bypass (but not during logout)
-      const isProductionDomain = hostname.includes('curiosities.market') || hostname.includes('.replit.dev') || hostname.includes('.replit.app');
+      // ONLY apply bypass on DEVELOPMENT domains - NOT on live production
+      const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
+      // NEVER bypass on the actual production domain www.curiosities.market
       
-      if (isProductionDomain && !isLogoutRequest) {
+      if (isDevelopmentDomain && !isLogoutRequest) {
         console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.3 ACTIVATED - Using Gmail account on ALL domains:', hostname);
         
         // Import storage and get user data
