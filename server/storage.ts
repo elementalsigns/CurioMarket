@@ -160,6 +160,9 @@ export interface IStorage {
   sendMessage(threadId: string, senderId: string, content: string, attachments?: string[]): Promise<Message>;
   markMessageAsRead(messageId: string): Promise<Message>;
   getUnreadMessageCount(userId: string): Promise<number>;
+  deleteMessage(messageId: string, userId: string): Promise<void>;
+  deleteConversation(conversationId: string, userId: string): Promise<void>;
+  bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void>;
   
   // Notifications
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -1219,6 +1222,68 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.id, messageId))
       .returning();
     return message;
+  }
+
+  async deleteMessage(messageId: string, userId: string): Promise<void> {
+    // Only allow users to delete their own messages
+    await db
+      .delete(messages)
+      .where(
+        and(
+          eq(messages.id, messageId),
+          eq(messages.senderId, userId)
+        )
+      );
+  }
+
+  async deleteConversation(conversationId: string, userId: string): Promise<void> {
+    // Delete all messages in the conversation where user is sender
+    await db
+      .delete(messages)
+      .where(
+        and(
+          eq(messages.threadId, conversationId),
+          eq(messages.senderId, userId)
+        )
+      );
+    
+    // Delete the conversation thread if no messages remain
+    const remainingMessages = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(messages)
+      .where(eq(messages.threadId, conversationId));
+    
+    if (remainingMessages[0]?.count === 0) {
+      await db
+        .delete(messageThreads)
+        .where(eq(messageThreads.id, conversationId));
+    }
+  }
+
+  async bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void> {
+    // Delete all messages in the conversations where user is sender
+    await db
+      .delete(messages)
+      .where(
+        and(
+          inArray(messages.threadId, conversationIds),
+          eq(messages.senderId, userId)
+        )
+      );
+    
+    // Check each conversation and delete thread if no messages remain
+    for (const conversationId of conversationIds) {
+      const remainingMessages = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(messages)
+        .where(eq(messages.threadId, conversationId));
+      
+      if (remainingMessages[0]?.count === 0) {
+        await db
+          .delete(messageThreads)
+          .where(eq(messageThreads.id, conversationId));
+      }
+    }
   }
 
   async getUnreadMessageCount(userId: string): Promise<number> {

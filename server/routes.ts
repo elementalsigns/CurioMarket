@@ -3392,6 +3392,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete individual message
+  app.delete('/api/messages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteMessage(req.params.id, userId);
+      res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ error: "Failed to delete message" });
+    }
+  });
+
+  // Delete conversation
+  app.delete('/api/messages/conversations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteConversation(req.params.id, userId);
+      res.json({ message: "Conversation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      res.status(500).json({ error: "Failed to delete conversation" });
+    }
+  });
+
+  // Bulk delete conversations
+  app.delete('/api/messages/conversations/bulk', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { conversationIds } = req.body;
+      
+      if (!Array.isArray(conversationIds) || conversationIds.length === 0) {
+        return res.status(400).json({ error: "conversationIds must be a non-empty array" });
+      }
+      
+      await storage.bulkDeleteConversations(conversationIds, userId);
+      res.json({ message: "Conversations deleted successfully" });
+    } catch (error) {
+      console.error("Error bulk deleting conversations:", error);
+      res.status(500).json({ error: "Failed to delete conversations" });
+    }
+  });
+
   // =================== SOCIAL SHARING ANALYTICS ===================
 
   app.post('/api/analytics/share', async (req, res) => {
