@@ -537,20 +537,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      // Method 3: For user 46848882, bypass auth EVERYWHERE (temporary fix)
+      // Method 3: Development-only bypass for testing (NOT on production)
       const hostname = req.hostname;
       console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
       
-      // UNIVERSAL BYPASS v3.3 - FINAL DEPLOYMENT FIX
-      console.log('[REQUIRE-AUTH] UNIVERSAL BYPASS v3.3 - Checking hostname:', hostname);
-      // Always use Gmail account to avoid database conflicts
-      console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.3 ACTIVATED - Using Gmail account on ALL domains:', hostname);
-      req.user = {
-        claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
-        access_token: 'universal-bypass-v3.3',
-        expires_at: Math.floor(Date.now() / 1000) + 3600
-      };
-      return next();
+      // ONLY apply bypass on DEVELOPMENT domains - NOT on live production
+      const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app') || hostname.includes('localhost');
+      
+      if (isDevelopmentDomain) {
+        console.log('[REQUIRE-AUTH] ✅ Development bypass activated for:', hostname);
+        req.user = {
+          claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
+          access_token: 'dev-bypass-token',
+          expires_at: Math.floor(Date.now() / 1000) + 3600
+        };
+        return next();
+      } else {
+        console.log('[REQUIRE-AUTH] 🚫 Production domain - bypass DISABLED for:', hostname);
+      }
 
       console.log('[REQUIRE-AUTH] Authentication failed - no valid token or session');
       return res.status(401).json({ message: "Unauthorized" });
