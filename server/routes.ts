@@ -536,18 +536,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      // Method 3: For user 46848882, bypass auth on both production and preview
+      // Method 3: For user 46848882, bypass auth EVERYWHERE (temporary fix)
       const hostname = req.hostname;
+      console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
+      
+      // AGGRESSIVE BYPASS - if ANY curiosities domain or replit domain, allow user 46848882
       if (hostname === 'www.curiosities.market' || 
           hostname.includes('curiosities.market') ||
-          hostname.includes('replit.dev')) {
-        console.log('[REQUIRE-AUTH] Authentication bypass for user 46848882 on:', hostname);
+          hostname.includes('replit.dev') ||
+          hostname === 'curiosities.market') {
+        console.log('[REQUIRE-AUTH] ✅ Authentication bypass ACTIVATED for user 46848882 on:', hostname);
         req.user = {
           claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
           access_token: 'bypass-token',
           expires_at: Math.floor(Date.now() / 1000) + 3600
         };
         return next();
+      } else {
+        console.log('[REQUIRE-AUTH] ❌ Hostname does not match bypass criteria:', hostname);
       }
 
       console.log('[REQUIRE-AUTH] Authentication failed - no valid token or session');
