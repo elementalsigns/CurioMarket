@@ -743,10 +743,161 @@ export default function AccountManager() {
                 <div data-testid="notifications">
                   <h2 className="text-xl font-bold mb-4">Notification Settings</h2>
                   <Card>
-                    <CardContent className="p-8 text-center">
-                      <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Notification Preferences</h3>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Bell className="mr-2" />
+                        Notification Preferences
+                      </CardTitle>
                       <p className="text-muted-foreground">Customize how you receive updates and alerts.</p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      
+                      {/* Order & Purchase Notifications */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Order Updates</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Order confirmations</Label>
+                              <p className="text-sm text-muted-foreground">Get notified when your orders are confirmed</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Shipping updates</Label>
+                              <p className="text-sm text-muted-foreground">Track when your items ship</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Delivery notifications</Label>
+                              <p className="text-sm text-muted-foreground">Know when your orders arrive</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Marketplace Activity */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Marketplace Activity</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">New items from favorite sellers</Label>
+                              <p className="text-sm text-muted-foreground">Be first to know about new listings</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Price drops on wishlisted items</Label>
+                              <p className="text-sm text-muted-foreground">Alert when favorited items go on sale</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Messages from sellers</Label>
+                              <p className="text-sm text-muted-foreground">Get notified of new conversations</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {isSeller && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-medium">Seller Notifications</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label className="text-base">New orders</Label>
+                                <p className="text-sm text-muted-foreground">Instant alerts for new sales</p>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                Email
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label className="text-base">Customer messages</Label>
+                                <p className="text-sm text-muted-foreground">New buyer inquiries</p>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                Email
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label className="text-base">Low inventory alerts</Label>
+                                <p className="text-sm text-muted-foreground">When items are running low</p>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                Email
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label className="text-base">Payment notifications</Label>
+                                <p className="text-sm text-muted-foreground">Payouts and billing updates</p>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                Email
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Marketing & Updates */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Marketing & Updates</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Weekly newsletter</Label>
+                              <p className="text-sm text-muted-foreground">Curated oddities and market trends</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Platform updates</Label>
+                              <p className="text-sm text-muted-foreground">New features and improvements</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label className="text-base">Special offers</Label>
+                              <p className="text-sm text-muted-foreground">Exclusive deals and promotions</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Email
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
                     </CardContent>
                   </Card>
                 </div>
