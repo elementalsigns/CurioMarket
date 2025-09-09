@@ -247,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Stream the file using the existing downloadObject method
       await objectStorageService.downloadObject(objectFile, res, 3600); // 1 hour cache
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('[IMAGE-PROXY] Error proxying image:', error);
       if (error.message?.includes('ObjectNotFoundError') || error.name === 'ObjectNotFoundError') {
         res.status(404).json({ error: "Image not found" });
@@ -2836,7 +2836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log('[ORDER CREATE] Debug - shippingAddress?.email:', shippingAddress?.email);
             console.log('[ORDER CREATE] Debug - paymentIntent.receipt_email:', paymentIntent.receipt_email);
           }
-        } catch (emailError) {
+        } catch (emailError: any) {
           console.error('[ORDER CREATE] ❌ Email sending failed with error:', emailError);
           console.error('[ORDER CREATE] Email error stack:', emailError.stack);
           // Continue processing even if email fails
@@ -3396,11 +3396,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // Email notification would be sent here in production
         console.log(`Would send email notification for new conversation with ${recipientId}`);
-        if (recipient?.email) {
-          // Email notification would be sent here in production
-          console.log(`Would send email to ${recipient.email} about new message from ${userId}`);
-        }
-      } catch (emailError) {
+        // Note: recipient email would need to be fetched from storage in real implementation
+        console.log(`Would send email notification about new message from ${userId}`);
+      } catch (emailError: any) {
         console.warn("Failed to send email notification:", emailError);
         // Don't fail the message send if email fails
       }
@@ -3426,7 +3424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // This is a simplified implementation
         console.log("Would send email notification for new message");
-      } catch (emailError) {
+      } catch (emailError: any) {
         console.warn("Failed to send email notification:", emailError);
       }
       
