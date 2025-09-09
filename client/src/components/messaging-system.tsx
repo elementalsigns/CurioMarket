@@ -130,8 +130,8 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     {
       id: 'msg-2',
       conversationId: 'demo-1',
-      senderId: user?.id || 'current-user',
-      senderName: user?.username || 'You',
+      senderId: (user as any)?.id || 'current-user',
+      senderName: (user as any)?.username || 'You',
       content: 'Thank you for your interest! This Victorian skull is from a 1890s medical collection. It comes with provenance documentation.',
       timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
       isRead: true
@@ -342,8 +342,8 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   // Handle select all/none
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const allIds = new Set(filteredConversations?.map((conv: Conversation) => conv.id) || []);
-      setSelectedConversations(allIds);
+      const allIds = filteredConversations?.map((conv: Conversation) => conv.id) || [];
+      setSelectedConversations(new Set(allIds));
     } else {
       setSelectedConversations(new Set());
     }
@@ -362,8 +362,8 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const activeLoading = activeTab === 'received' ? conversationsLoading : sentConversationsLoading;
 
   // Use mock messages when real messages fail to load
-  const activeMessages = messages || (messagesError && selectedConversation ? 
-    mockMessages.filter(msg => msg.conversationId === selectedConversation) : []);
+  const activeMessages = (messages as Message[]) || (messagesError && selectedConversation ? 
+    mockMessages.filter((msg: Message) => msg.conversationId === selectedConversation) : []);
 
   const filteredConversations = activeConversations?.filter((conv: Conversation) =>
     conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -659,7 +659,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                 ) : (activeMessages as Message[])?.length > 0 ? (
                   <>
                     {(activeMessages as Message[]).map((message: Message, index: number) => {
-                      const isOwn = message.senderId === user?.id;
+                      const isOwn = message.senderId === (user as any)?.id;
                       const showAvatar = index === 0 || (activeMessages as Message[])[index - 1]?.senderId !== message.senderId;
                       
                       return (
