@@ -88,7 +88,7 @@ export default function AccountManager() {
     queryKey: ["/api/messages/unread-count"],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
-  });
+  }) as { data: { count: number } | undefined };
 
   const { data: favorites } = useQuery({
     queryKey: ["/api/user/favorites"],

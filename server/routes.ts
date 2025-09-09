@@ -3253,7 +3253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send email notification to recipient
       try {
-        const recipient = await storage.getUserById(recipientId);
+        // Email notification would be sent here in production
+        console.log(`Would send email notification for new conversation with ${recipientId}`);
         if (recipient?.email) {
           // Email notification would be sent here in production
           console.log(`Would send email to ${recipient.email} about new message from ${userId}`);

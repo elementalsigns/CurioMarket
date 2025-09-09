@@ -49,7 +49,7 @@ export default function Header() {
     queryKey: ["/api/messages/unread-count"],
     enabled: isAuthenticated,
     refetchInterval: 30000, // Refresh every 30 seconds
-  });
+  }) as { data: { count: number } | undefined };
 
   const cartItemCount = (cartData && Array.isArray((cartData as any).items)) ? (cartData as any).items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
 
