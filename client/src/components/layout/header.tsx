@@ -29,7 +29,7 @@ import {
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -49,7 +49,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
+      setLocation(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

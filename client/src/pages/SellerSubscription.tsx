@@ -8,7 +8,7 @@ import SubscriptionPayment from "@/components/subscription/SubscriptionPayment";
 import SubscriptionStatus from "@/components/subscription/SubscriptionStatus";
 
 export default function SellerSubscriptionPage() {
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const [showPayment, setShowPayment] = useState(false);
 
   // IMMEDIATE scroll to top when component loads
@@ -43,7 +43,7 @@ export default function SellerSubscriptionPage() {
   const handleSubscriptionSuccess = () => {
     setShowPayment(false);
     // Redirect to seller onboarding
-    navigate('/seller/setup');
+    setLocation('/seller/setup');
   };
 
   const handleStartSubscription = () => {
@@ -69,7 +69,7 @@ export default function SellerSubscriptionPage() {
           <CardContent className="p-6 text-center">
             <p className="text-zinc-400 mb-4">Please sign in to access seller subscription.</p>
             <Button 
-              onClick={() => navigate('/signin')}
+              onClick={() => setLocation('/signin')}
               className="bg-red-800 hover:bg-red-700 text-white"
             >
               Sign In
@@ -86,9 +86,9 @@ export default function SellerSubscriptionPage() {
   // Auto-redirect paid sellers to dashboard
   useEffect(() => {
     if (hasActiveSubscription && !showPayment) {
-      navigate('/seller/dashboard');
+      setLocation('/seller/dashboard');
     }
-  }, [hasActiveSubscription, showPayment, navigate]);
+  }, [hasActiveSubscription, showPayment, setLocation]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 to-zinc-900">
@@ -99,7 +99,7 @@ export default function SellerSubscriptionPage() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => navigate('/')}
+              onClick={() => setLocation('/')}
               className="text-zinc-400 hover:text-white"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -197,7 +197,7 @@ export default function SellerSubscriptionPage() {
           {hasActiveSubscription && (
             <div className="mt-8 text-center">
               <Button 
-                onClick={() => navigate('/seller/dashboard')}
+                onClick={() => setLocation('/seller/dashboard')}
                 className="bg-red-800 hover:bg-red-700 text-white"
               >
                 Go to Seller Dashboard

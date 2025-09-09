@@ -32,7 +32,7 @@ type SellerOnboardingForm = z.infer<typeof sellerOnboardingSchema>;
 export default function SellerOnboarding() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const [bannerUrl, setBannerUrl] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
@@ -76,18 +76,18 @@ export default function SellerOnboarding() {
               description: "Please complete your seller subscription.",
               variant: "destructive",
             });
-            navigate("/subscribe");
+            setLocation("/subscribe");
           }
         } catch (error) {
           console.error("Error checking subscription:", error);
           setHasSubscription(false);
-          navigate("/subscribe");
+          setLocation("/subscribe");
         }
       }
     };
     
     checkSubscriptionStatus();
-  }, [user, hasSubscription, toast, navigate]);
+  }, [user, hasSubscription, toast, setLocation]);
 
   // FORCE immediate redirect for sellers
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function SellerOnboarding() {
         title: "Seller Profile Created",
         description: "Your seller profile has been created successfully!",
       });
-      navigate("/seller/dashboard");
+      setLocation("/seller/dashboard");
     },
     onError: (error: any) => {
       if (error?.status === 403 && error?.data?.error?.includes("subscription")) {
@@ -115,7 +115,7 @@ export default function SellerOnboarding() {
           description: "Please complete your seller subscription first.",
           variant: "destructive",
         });
-        navigate("/subscribe");
+        setLocation("/subscribe");
         return;
       }
       if (isUnauthorizedError(error)) {
@@ -187,7 +187,7 @@ export default function SellerOnboarding() {
               </div>
               <p className="text-lg font-semibold">Step 1: Only $10/month subscription</p>
               <Button 
-                onClick={() => navigate("/subscribe")}
+                onClick={() => setLocation("/subscribe")}
                 className="w-full bg-gothic-red hover:bg-gothic-red/80"
                 data-testid="button-subscribe-step1"
               >
@@ -222,7 +222,7 @@ export default function SellerOnboarding() {
                   
                   {!hasSubscription ? (
                     <Button 
-                      onClick={() => navigate("/subscribe")}
+                      onClick={() => setLocation("/subscribe")}
                       className="bg-gothic-red hover:bg-gothic-red/80 text-white px-8 py-3 text-lg"
                       data-testid="button-start-subscription"
                     >

@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation, useRoute } from "wouter";
 
 export default function Browse() {
-  const [location, navigate] = useLocation();
+  const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     category: "",
@@ -52,7 +52,7 @@ export default function Browse() {
     if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
     
     const newURL = params.toString() ? `/browse?${params.toString()}` : '/browse';
-    navigate(newURL, { replace: true });
+    setLocation(newURL, { replace: true });
   };
 
   // Enhanced filter change handler that updates URL
@@ -114,7 +114,7 @@ export default function Browse() {
               onClearFilters={() => {
                 setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
                 setSearchQuery("");
-                navigate('/browse');
+                setLocation('/browse');
               }}
             />
           </div>
@@ -144,7 +144,7 @@ export default function Browse() {
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/')}
+                  onClick={() => setLocation('/')}
                   className="text-zinc-400 hover:text-white"
                   data-testid="button-back-home"
                 >
@@ -274,7 +274,7 @@ export default function Browse() {
                   onClick={() => {
                     setSearchQuery("");
                     setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
-                    navigate('/browse');
+                    setLocation('/browse');
                   }}
                   data-testid="button-clear-search"
                 >

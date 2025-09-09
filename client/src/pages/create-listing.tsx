@@ -48,7 +48,7 @@ export default function CreateListing() {
   
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const [previewMode, setPreviewMode] = useState(false);
   const [images, setImages] = useState<string[]>([]);
 
@@ -186,7 +186,7 @@ export default function CreateListing() {
       // Navigate back to seller dashboard after successful creation
       console.log('[CREATE-SUCCESS] Response data:', data);
       console.log('[CREATE-SUCCESS] Redirecting to dashboard');
-      navigate('/seller/dashboard');
+      setLocation('/seller/dashboard');
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

@@ -338,7 +338,7 @@ export default function Product() {
                       variant="outline" 
                       className="rounded-2xl" 
                       data-testid="button-message"
-                      onClick={() => navigate(`/messages/new?sellerId=${listing.sellerId}&sellerName=${listing.seller?.shopName || 'Seller'}&listingId=${listing.id}&listingTitle=${listing.title}`)}
+                      onClick={() => setLocation(`/messages/new?sellerId=${listing.sellerId}&sellerName=${listing.seller?.shopName || 'Seller'}&listingId=${listing.id}&listingTitle=${listing.title}`)}
                     >
                       <MessageCircle size={16} className="mr-2" />
                       Message

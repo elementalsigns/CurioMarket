@@ -40,7 +40,7 @@ export default function EditListing() {
   const { id } = useParams();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -154,7 +154,7 @@ export default function EditListing() {
       // Navigate back to the seller dashboard
       console.log('[EDIT-SUCCESS] Mutation response:', data);
       console.log('[EDIT-SUCCESS] Redirecting to dashboard');
-      navigate('/seller/dashboard');
+      setLocation('/seller/dashboard');
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
     },
     onError: (error) => {
@@ -192,7 +192,7 @@ export default function EditListing() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Listing Not Found</h1>
-            <Button onClick={() => navigate("/seller/dashboard")}>
+            <Button onClick={() => setLocation("/seller/dashboard")}>
               Back to Dashboard
             </Button>
           </div>
@@ -211,7 +211,7 @@ export default function EditListing() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/seller/dashboard")}
+              onClick={() => setLocation("/seller/dashboard")}
             >
               <ArrowLeft className="mr-2" size={16} />
               Back to Dashboard
@@ -384,7 +384,7 @@ export default function EditListing() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/seller/dashboard")}
+                    onClick={() => setLocation("/seller/dashboard")}
                   >
                     Cancel
                   </Button>
