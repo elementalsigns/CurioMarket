@@ -35,6 +35,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -445,41 +451,54 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
                           </span>
                           
-                          {/* Individual delete button */}
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                          {/* Dropdown menu for conversation actions */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0 text-zinc-400 hover:text-red-400 hover:bg-red-600/10"
+                                className="h-6 w-6 p-0 text-zinc-400 hover:text-white hover:bg-zinc-700"
                                 onClick={(e) => e.stopPropagation()}
-                                data-testid={`button-delete-conversation-${conversation.id}`}
+                                data-testid={`button-conversation-menu-${conversation.id}`}
                               >
-                                <Trash2 size={12} />
+                                <MoreVertical size={12} />
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-zinc-900 border-zinc-800">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white">Delete Conversation</AlertDialogTitle>
-                                <AlertDialogDescription className="text-zinc-400">
-                                  Are you sure you want to delete your conversation with {conversation.participantName}? 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteConversationMutation.mutate(conversation.id)}
-                                  className="bg-red-600 text-white hover:bg-red-700"
-                                  data-testid={`button-confirm-delete-conversation-${conversation.id}`}
-                                >
-                                  Delete Conversation
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-zinc-800 border-zinc-700">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem 
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-600/10 cursor-pointer"
+                                    onSelect={(e) => e.preventDefault()}
+                                  >
+                                    <Trash2 size={14} className="mr-2" />
+                                    Delete Conversation
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-white">Delete Conversation</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-zinc-400">
+                                      Are you sure you want to delete your conversation with {conversation.participantName}? 
+                                      This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteConversationMutation.mutate(conversation.id)}
+                                      className="bg-red-600 text-white hover:bg-red-700"
+                                      data-testid={`button-confirm-delete-conversation-${conversation.id}`}
+                                    >
+                                      Delete Conversation
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                       
