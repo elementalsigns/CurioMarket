@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SearchFilters from "@/components/search-filters";
 import ProductCard from "@/components/product-card";
+import { ShopCard } from "@/components/shop-card";
 import { Badge } from "@/components/ui/badge";
 import { Grid, List, Filter, Save, Heart, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
@@ -172,7 +173,16 @@ export default function Browse() {
                 </Button>
                 
                 <div className="text-zinc-400" data-testid="text-results-count">
-                  {isLoading ? "Loading..." : `${searchResults?.total || 0} results found`}
+                  {isLoading ? "Loading..." : (
+                    <>
+                      {searchResults?.total || 0} results found
+                      {searchResults?.listingsTotal && searchResults?.shopsTotal && (
+                        <span className="ml-2">
+                          ({searchResults.listingsTotal} products, {searchResults.shopsTotal} shops)
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 {searchResults?.total > 0 && (
@@ -244,30 +254,66 @@ export default function Browse() {
               <div className="flex items-center justify-center py-12" data-testid="loading-spinner">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
-            ) : searchResults?.listings?.length > 0 ? (
-              <div 
-                className={
-                  viewMode === "grid" 
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                    : "space-y-4"
-                }
-                data-testid="results-grid"
-              >
-                {searchResults.listings.map((listing: any) => (
-                  <ProductCard
-                    key={listing.id}
-                    listing={listing}
-                  />
-                ))}
+            ) : (searchResults?.listings?.length > 0 || searchResults?.shops?.length > 0) ? (
+              <div className="space-y-8">
+                {/* Shop Results */}
+                {searchResults?.shops?.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      Shops ({searchResults.shops.length})
+                    </h3>
+                    <div 
+                      className={
+                        viewMode === "grid" 
+                          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                          : "space-y-4"
+                      }
+                      data-testid="shops-grid"
+                    >
+                      {searchResults.shops.map((shop: any) => (
+                        <ShopCard
+                          key={shop.id}
+                          shop={shop}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Results */}
+                {searchResults?.listings?.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      Products ({searchResults.listings.length})
+                    </h3>
+                    <div 
+                      className={
+                        viewMode === "grid" 
+                          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                          : "space-y-4"
+                      }
+                      data-testid="results-grid"
+                    >
+                      {searchResults.listings.map((listing: any) => (
+                        <ProductCard
+                          key={listing.id}
+                          listing={listing}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12" data-testid="no-results">
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-zinc-800 flex items-center justify-center">
                   <div className="w-12 h-12 rounded-full bg-zinc-700" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">No oddities found</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
                 <p className="text-zinc-400 mb-6">
-                  Try adjusting your search terms or filters to find what you're looking for.
+                  No products or shops match your search. Try adjusting your search terms or filters.
                 </p>
                 <Button 
                   variant="outline" 
