@@ -2505,15 +2505,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const result = await storage.searchListings(q as string, {
-        categoryId,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string)
-      });
+      // Search for both products and shops
+      const [productResult, shopResult] = await Promise.all([
+        // Search listings/products
+        storage.searchListings(q as string, {
+          categoryId,
+          limit: parseInt(limit as string),
+          offset: parseInt(offset as string)
+        }),
+        
+        // Search shops by name if query exists
+        q ? storage.searchShops(q as string, {
+          limit: parseInt(limit as string),
+          offset: parseInt(offset as string)
+        }) : { shops: [], total: 0 }
+      ]);
       
       // Add seller information to each listing
       const listingsWithSellers = await Promise.all(
-        result.listings.map(async (listing: any) => {
+        productResult.listings.map(async (listing: any) => {
           let seller = null;
           if (listing.sellerId) {
             seller = await storage.getSeller(listing.sellerId);
@@ -2534,11 +2544,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         listings: listingsWithSellers,
-        total: result.total
+        listingsTotal: productResult.total,
+        shops: shopResult.shops || [],
+        shopsTotal: shopResult.total || 0,
+        total: productResult.total + (shopResult.total || 0)
       });
     } catch (error) {
-      console.error("Error searching listings:", error);
-      res.status(500).json({ error: "Failed to search listings" });
+      console.error("Error searching:", error);
+      res.status(500).json({ error: "Failed to search" });
     }
   });
 
