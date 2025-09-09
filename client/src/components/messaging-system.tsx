@@ -16,8 +16,11 @@ import {
   User,
   Image as ImageIcon,
   AlertTriangle,
-  MoreHorizontal
+  MoreHorizontal,
+  Inbox,
+  SendIcon
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -60,12 +63,22 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const [messageText, setMessageText] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get conversations
+  // Get received conversations 
   const { data: conversations, isLoading: conversationsLoading } = useQuery({
     queryKey: ["/api/messages/conversations"],
+    enabled: activeTab === 'received',
     refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Get sent conversations
+  const { data: sentConversations, isLoading: sentConversationsLoading } = useQuery({
+    queryKey: ["/api/messages/sent-conversations"],
+    enabled: activeTab === 'sent',
+    refetchInterval: 30000,
   });
 
   // Get messages for selected conversation
@@ -169,7 +182,11 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     }
   };
 
-  const filteredConversations = conversations?.filter((conv: Conversation) =>
+  // Choose the right conversations based on active tab
+  const activeConversations = activeTab === 'received' ? conversations : sentConversations;
+  const activeLoading = activeTab === 'received' ? conversationsLoading : sentConversationsLoading;
+
+  const filteredConversations = activeConversations?.filter((conv: Conversation) =>
     conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.listingTitle?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -183,10 +200,28 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
           <CardTitle className="text-white flex items-center justify-between">
             <span>Messages</span>
             <Badge variant="secondary" className="bg-red-600 text-white">
-              {conversations?.reduce((acc: number, conv: Conversation) => acc + conv.unreadCount, 0) || 0}
+              {activeTab === 'received' 
+                ? (conversations?.reduce((acc: number, conv: Conversation) => acc + conv.unreadCount, 0) || 0)
+                : 0
+              }
             </Badge>
           </CardTitle>
-          <div className="relative">
+          
+          {/* Tabs for Received/Sent */}
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'received' | 'sent')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-800">
+              <TabsTrigger value="received" className="flex items-center gap-2">
+                <Inbox size={16} />
+                Received
+              </TabsTrigger>
+              <TabsTrigger value="sent" className="flex items-center gap-2">
+                <SendIcon size={16} />
+                Sent
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <div className="relative mt-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={16} />
             <Input
               placeholder="Search conversations..."
@@ -197,7 +232,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {conversationsLoading ? (
+          {activeLoading ? (
             <div className="space-y-4 p-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse flex space-x-4">
@@ -270,7 +305,14 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
           ) : (
             <div className="p-8 text-center">
               <MessageCircle size={48} className="text-zinc-600 mx-auto mb-4" />
-              <p className="text-zinc-400">No conversations yet</p>
+              <p className="text-zinc-400">
+                {activeTab === 'received' ? 'No messages received yet' : 'No messages sent yet'}
+              </p>
+              {activeTab === 'received' && (
+                <p className="text-zinc-500 text-sm mt-2">
+                  Start a conversation by messaging a seller from their product page
+                </p>
+              )}
             </div>
           )}
         </CardContent>
