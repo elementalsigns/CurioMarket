@@ -18,9 +18,23 @@ import {
   AlertTriangle,
   MoreHorizontal,
   Inbox,
-  SendIcon
+  SendIcon,
+  Trash2,
+  MoreVertical
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -64,6 +78,8 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const [searchTerm, setSearchTerm] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
+  const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get conversations
@@ -143,6 +159,58 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     },
   });
 
+  // Delete conversation mutation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      return await apiRequest("DELETE", `/api/messages/conversations/${conversationId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent-conversations"] });
+      toast({
+        title: "Conversation Deleted",
+        description: "The conversation has been deleted successfully.",
+      });
+      if (selectedConversation) {
+        setSelectedConversation(null);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: "Could not delete conversation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Bulk delete conversations mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (conversationIds: string[]) => {
+      return await apiRequest("DELETE", "/api/messages/conversations/bulk", { conversationIds });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent-conversations"] });
+      setSelectedConversations(new Set());
+      setShowBulkDelete(false);
+      toast({
+        title: "Conversations Deleted",
+        description: `${selectedConversations.size} conversations have been deleted successfully.`,
+      });
+      if (selectedConversation && selectedConversations.has(selectedConversation)) {
+        setSelectedConversation(null);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: "Could not delete conversations. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -180,6 +248,33 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
         variant: "destructive",
       });
     }
+  };
+
+  // Handle conversation selection for bulk delete
+  const handleConversationSelect = (conversationId: string, checked: boolean) => {
+    const newSelected = new Set(selectedConversations);
+    if (checked) {
+      newSelected.add(conversationId);
+    } else {
+      newSelected.delete(conversationId);
+    }
+    setSelectedConversations(newSelected);
+  };
+
+  // Handle select all/none
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(filteredConversations.map((conv: Conversation) => conv.id));
+      setSelectedConversations(allIds);
+    } else {
+      setSelectedConversations(new Set());
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = () => {
+    if (selectedConversations.size === 0) return;
+    bulkDeleteMutation.mutate(Array.from(selectedConversations));
   };
 
   // Choose the right conversations based on active tab
@@ -230,6 +325,61 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
               className="pl-10 bg-zinc-800 border-zinc-700 text-white"
             />
           </div>
+
+          {/* Bulk Delete Controls */}
+          {filteredConversations.length > 0 && (
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedConversations.size === filteredConversations.length && filteredConversations.length > 0}
+                  onCheckedChange={handleSelectAll}
+                  className="border-zinc-600"
+                />
+                <span className="text-sm text-zinc-400">
+                  {selectedConversations.size === 0 
+                    ? "Select conversations" 
+                    : `${selectedConversations.size} selected`}
+                </span>
+              </div>
+              
+              {selectedConversations.size > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={bulkDeleteMutation.isPending}
+                      data-testid="button-bulk-delete"
+                    >
+                      <Trash2 size={14} className="mr-1" />
+                      Delete ({selectedConversations.size})
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white">Delete Conversations</AlertDialogTitle>
+                      <AlertDialogDescription className="text-zinc-400">
+                        Are you sure you want to delete {selectedConversations.size} conversation{selectedConversations.size > 1 ? 's' : ''}? 
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleBulkDelete}
+                        className="bg-red-600 text-white hover:bg-red-700"
+                        data-testid="button-confirm-bulk-delete"
+                      >
+                        Delete {selectedConversations.size} Conversations
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           {activeLoading ? (
@@ -249,20 +399,33 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
               {filteredConversations.map((conversation: Conversation) => (
                 <div
                   key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation.id)}
-                  className={`p-4 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800 transition-colors ${
+                  className={`p-4 border-b border-zinc-700 hover:bg-zinc-800 transition-colors ${
                     selectedConversation === conversation.id ? "bg-zinc-800" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <Avatar>
+                    {/* Checkbox for bulk selection */}
+                    <Checkbox
+                      checked={selectedConversations.has(conversation.id)}
+                      onCheckedChange={(checked) => handleConversationSelect(conversation.id, checked as boolean)}
+                      className="border-zinc-600"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    
+                    <Avatar
+                      className="cursor-pointer"
+                      onClick={() => setSelectedConversation(conversation.id)}
+                    >
                       <AvatarImage src={conversation.participantAvatar} />
                       <AvatarFallback className="bg-zinc-700 text-white">
                         {conversation.participantName.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     
-                    <div className="flex-1 min-w-0">
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => setSelectedConversation(conversation.id)}
+                    >
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex-1 min-w-0">
                           <h4 className="text-white font-medium truncate">
@@ -281,6 +444,42 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                           <span className="text-xs text-zinc-400">
                             {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
                           </span>
+                          
+                          {/* Individual delete button */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-zinc-400 hover:text-red-400 hover:bg-red-600/10"
+                                onClick={(e) => e.stopPropagation()}
+                                data-testid={`button-delete-conversation-${conversation.id}`}
+                              >
+                                <Trash2 size={12} />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-white">Delete Conversation</AlertDialogTitle>
+                                <AlertDialogDescription className="text-zinc-400">
+                                  Are you sure you want to delete your conversation with {conversation.participantName}? 
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteConversationMutation.mutate(conversation.id)}
+                                  className="bg-red-600 text-white hover:bg-red-700"
+                                  data-testid={`button-confirm-delete-conversation-${conversation.id}`}
+                                >
+                                  Delete Conversation
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                       
