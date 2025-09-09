@@ -381,7 +381,13 @@ export default function Product() {
                       variant="outline" 
                       className="rounded-2xl" 
                       data-testid="button-message"
-                      onClick={() => setLocation(`/messages/new?sellerId=${listing.sellerId}&sellerName=${listing.seller?.shopName || 'Seller'}&listingId=${listing.id}&listingTitle=${listing.title}`)}
+                      onClick={() => {
+                        if (user) {
+                          setLocation(`/messages/new?sellerId=${listing.sellerId}&sellerName=${listing.seller?.shopName || 'Seller'}&listingId=${listing.id}&listingTitle=${listing.title}`);
+                        } else {
+                          setLocation('/signin');
+                        }
+                      }}
                     >
                       <MessageCircle size={16} className="mr-2" />
                       Message
