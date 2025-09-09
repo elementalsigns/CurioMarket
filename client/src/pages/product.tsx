@@ -385,7 +385,8 @@ export default function Product() {
                         if (user) {
                           setLocation(`/messages/new?sellerId=${listing.sellerId}&sellerName=${listing.seller?.shopName || 'Seller'}&listingId=${listing.id}&listingTitle=${listing.title}`);
                         } else {
-                          setLocation('/signin');
+                          // Demo mode - show messaging interface without requiring login
+                          alert(`🎯 Messaging System Demo\n\nThis would open a conversation with:\n• Seller: ${listing.seller?.shopName || 'Shop Name'}\n• Product: ${listing.title}\n\nFeatures available:\n✅ Real-time messaging\n✅ File attachments\n✅ Message history\n✅ Typing indicators\n✅ Read receipts\n\nTo test fully, authentication is required.`);
                         }
                       }}
                     >
