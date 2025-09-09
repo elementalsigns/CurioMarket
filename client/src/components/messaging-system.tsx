@@ -302,7 +302,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
             <span>Messages</span>
             <Badge variant="secondary" className="bg-red-600 text-white">
               {activeTab === 'received' 
-                ? (conversations?.reduce((acc: number, conv: Conversation) => acc + conv.unreadCount, 0) || 0)
+                ? ((conversations as Conversation[])?.reduce((acc: number, conv: Conversation) => acc + conv.unreadCount, 0) || 0)
                 : 0
               }
             </Badge>
@@ -551,14 +551,14 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Avatar>
-                      <AvatarImage src={activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantAvatar} />
+                      <AvatarImage src={(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantAvatar} />
                       <AvatarFallback className="bg-zinc-700 text-white">
-                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName.charAt(0)}
+                        {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantName.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="text-white font-medium">
-                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName}
+                        {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantName}
                       </h3>
                       <p className="text-zinc-400 text-sm">
                         {activeTab === 'received' ? 'Shop Owner' : 'Buyer'} • Online recently
@@ -576,11 +576,11 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                 </div>
                 
                 {/* Show product context if available */}
-                {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle && (
+                {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle && (
                   <div className="mt-3 p-3 bg-zinc-800 rounded-lg flex items-center gap-3">
-                    {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingImage && (
+                    {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.listingImage && (
                       <img 
-                        src={activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingImage}
+                        src={(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.listingImage}
                         alt="Product"
                         className="w-12 h-12 object-cover rounded"
                       />
@@ -590,7 +590,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                         Discussion about:
                       </p>
                       <p className="text-zinc-300 text-sm">
-                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle}
+                        {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle}
                       </p>
                     </div>
                   </div>
@@ -610,9 +610,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                       </div>
                     ))}
                   </div>
-                ) : messages?.length > 0 ? (
+                ) : (messages as Message[])?.length > 0 ? (
                   <>
-                    {messages.map((message: Message, index: number) => {
+                    {(messages as Message[]).map((message: Message, index: number) => {
                       const isOwn = message.senderId === user?.id;
                       const showAvatar = index === 0 || messages[index - 1]?.senderId !== message.senderId;
                       
