@@ -264,11 +264,16 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-white font-medium truncate">
-                          {conversation.participantName}
-                        </h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white font-medium truncate">
+                            {conversation.participantName}
+                          </h4>
+                          <p className="text-xs text-zinc-500">
+                            {activeTab === 'received' ? 'Shop Owner' : 'Buyer'}
+                          </p>
+                        </div>
                         <div className="flex items-center gap-2">
-                          {conversation.unreadCount > 0 && (
+                          {conversation.unreadCount > 0 && activeTab === 'received' && (
                             <Badge variant="destructive" className="text-xs">
                               {conversation.unreadCount}
                             </Badge>
@@ -328,22 +333,50 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Avatar>
-                      <AvatarImage src={conversations?.find((c: Conversation) => c.id === selectedConversation)?.participantAvatar} />
+                      <AvatarImage src={activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantAvatar} />
                       <AvatarFallback className="bg-zinc-700 text-white">
-                        {conversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName.charAt(0)}
+                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="text-white font-medium">
-                        {conversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName}
+                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.participantName}
                       </h3>
-                      <p className="text-zinc-400 text-sm">Online recently</p>
+                      <p className="text-zinc-400 text-sm">
+                        {activeTab === 'received' ? 'Shop Owner' : 'Buyer'} • Online recently
+                      </p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white">
-                    <MoreHorizontal size={20} />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-zinc-400 border-zinc-600">
+                      {activeTab === 'received' ? 'From Seller' : 'To Buyer'}
+                    </Badge>
+                    <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white">
+                      <MoreHorizontal size={20} />
+                    </Button>
+                  </div>
                 </div>
+                
+                {/* Show product context if available */}
+                {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle && (
+                  <div className="mt-3 p-3 bg-zinc-800 rounded-lg flex items-center gap-3">
+                    {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingImage && (
+                      <img 
+                        src={activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingImage}
+                        alt="Product"
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    )}
+                    <div>
+                      <p className="text-white text-sm font-medium">
+                        Discussion about:
+                      </p>
+                      <p className="text-zinc-300 text-sm">
+                        {activeConversations?.find((c: Conversation) => c.id === selectedConversation)?.listingTitle}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
 
               {/* Messages */}
