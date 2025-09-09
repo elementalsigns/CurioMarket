@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import MessagingSystem from "@/components/messaging-system";
 
 export default function AccountManager() {
   const { user, isLoading } = useAuth();
@@ -261,6 +262,18 @@ export default function AccountManager() {
                 <Heart className="mr-2 h-4 w-4" />
                 Favorites
               </Button>
+
+              {!isSeller && (
+                <Button
+                  variant={activeTab === "messages" ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab("messages")}
+                  data-testid="nav-messages-buyer"
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Messages
+                </Button>
+              )}
 
               <Button
                 variant={activeTab === "profile" ? "default" : "ghost"}
@@ -713,12 +726,12 @@ export default function AccountManager() {
 
               {activeTab === "messages" && (
                 <div data-testid="messages">
-                  <h2 className="text-xl font-bold mb-4">Messages</h2>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No messages</h3>
-                      <p className="text-muted-foreground">Customer messages will appear here.</p>
+                  <h2 className="text-xl font-bold mb-4">
+                    {isSeller ? "Customer Messages" : "Your Messages"}
+                  </h2>
+                  <Card className="glass-effect">
+                    <CardContent className="p-0">
+                      <MessagingSystem />
                     </CardContent>
                   </Card>
                 </div>

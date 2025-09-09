@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import ShopPage from "@/pages/shop";
+import MessagingSystem from "@/components/messaging-system";
 import {
   DndContext,
   closestCenter,
@@ -550,9 +551,10 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
+            <TabsTrigger value="messages" data-testid="tab-messages">Messages</TabsTrigger>
             <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">Shop Profile</TabsTrigger>
           </TabsList>
@@ -688,6 +690,23 @@ export default function SellerDashboard() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages" className="space-y-4" data-testid="content-messages">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Customer Messages</h2>
+              <Badge variant="secondary" className="bg-red-600 text-white">
+                <MessageSquare className="mr-1 h-3 w-3" />
+                0 Unread
+              </Badge>
+            </div>
+            
+            <Card className="glass-effect">
+              <CardContent className="p-0">
+                <MessagingSystem />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Promotions Tab */}
