@@ -636,8 +636,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller profile
-  app.get('/api/seller/profile', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/profile', async (req: any, res) => {
     try {
+      // Use same authentication method as PUT endpoint
+      if (!req.user?.claims?.sub) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
       if (!seller) {
@@ -2506,8 +2511,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         offset: parseInt(offset as string)
       });
       
+      // Add seller information to each listing
+      const listingsWithSellers = await Promise.all(
+        result.listings.map(async (listing: any) => {
+          let seller = null;
+          if (listing.sellerId) {
+            seller = await storage.getSeller(listing.sellerId);
+          }
+          
+          return {
+            ...listing,
+            sellerName: seller?.shopName || 'Shop Name Not Set',
+            seller: seller ? {
+              id: seller.id,
+              shopName: seller.shopName,
+              bio: seller.bio,
+              location: seller.location,
+            } : null
+          };
+        })
+      );
+      
       res.json({
-        listings: result.listings,
+        listings: listingsWithSellers,
         total: result.total
       });
     } catch (error) {
