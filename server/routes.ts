@@ -587,24 +587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Logout route
-  app.get('/api/logout', (req: any, res) => {
-    console.log('[LOGOUT] User signing out');
-    
-    req.logout((err: any) => {
-      if (err) {
-        console.error('[LOGOUT] Error during logout:', err);
-      }
-      req.session.destroy((sessionErr: any) => {
-        if (sessionErr) {
-          console.error('[LOGOUT] Error destroying session:', sessionErr);
-        }
-        res.clearCookie('connect.sid'); // Clear the session cookie
-        console.log('[LOGOUT] Session destroyed, redirecting to logout complete');
-        res.redirect('/logout-complete');
-      });
-    });
-  });
+  // Logout route handled by replitAuth.ts - no duplicate needed here
 
   // Auth user route - fixed to use fresh database data
   app.get('/api/auth/user', requireAuth, async (req: any, res) => {

@@ -179,10 +179,18 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
       console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
       console.log('[REQUIRE-AUTH] UNIVERSAL BYPASS v3.3 - Checking hostname:', hostname);
       
-      // Check if this is our production domain or any Replit domain - apply bypass
+      // Check for logout-related paths - DISABLE BYPASS during logout
+      const requestUrl = req.originalUrl || req.url || '';
+      const isLogoutRequest = requestUrl.includes('/logout') || requestUrl.includes('/logout-complete') || requestUrl.includes('clear_tokens=true');
+      
+      if (isLogoutRequest) {
+        console.log('[REQUIRE-AUTH] 🚫 BYPASS DISABLED for logout request:', requestUrl);
+      }
+      
+      // Check if this is our production domain or any Replit domain - apply bypass (but not during logout)
       const isProductionDomain = hostname.includes('curiosities.market') || hostname.includes('.replit.dev') || hostname.includes('.replit.app');
       
-      if (isProductionDomain) {
+      if (isProductionDomain && !isLogoutRequest) {
         console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.3 ACTIVATED - Using Gmail account on ALL domains:', hostname);
         
         // Import storage and get user data
