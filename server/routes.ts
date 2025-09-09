@@ -506,42 +506,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a better auth middleware that works everywhere
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      // Method 1: Check Authorization header (Bearer token)
+      // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
-        console.log('[AUTH] Validating Bearer token...');
+        console.log('[REQUIRE-AUTH] Validating Bearer token for user...');
         
         try {
-          // Use actual token validation instead of hardcoded user
-          const authUser = await authService.validateToken(token);
-          if (authUser) {
+          // For production users, validate token with Replit userinfo
+          const response = await fetch('https://replit.com/api/userinfo', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            const userinfo = await response.json();
             req.user = {
-              claims: { sub: authUser.id, email: authUser.email },
+              claims: { sub: userinfo.sub || userinfo.id, email: userinfo.email },
               access_token: token,
-              expires_at: authUser.expiresAt,
+              expires_at: Math.floor(Date.now() / 1000) + 3600
             };
-            console.log('[AUTH] Bearer token validated for user:', authUser.id);
+            console.log('[REQUIRE-AUTH] Bearer token validated for user:', userinfo.sub || userinfo.id);
             return next();
           }
         } catch (error) {
-          console.log('[AUTH] Bearer token validation failed:', error);
+          console.log('[REQUIRE-AUTH] Bearer token validation failed:', error);
         }
       }
 
-      // Method 2: Check session authentication
+      // Method 2: Check session authentication 
       if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        console.log('[AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
+        console.log('[REQUIRE-AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
+        
+        // Handle cases where user is authenticated but missing expires_at
+        if (!req.user.expires_at) {
+          req.user.expires_at = Math.floor(Date.now() / 1000) + 3600;
+        }
+        
         return next();
       }
 
-      // Method 3: Use normal Replit authentication (no development bypass)
-
-      console.log('[AUTH] Authentication failed');
+      console.log('[REQUIRE-AUTH] Authentication failed - no valid token or session');
       return res.status(401).json({ message: "Unauthorized" });
 
     } catch (error) {
-      console.error('[AUTH] Auth middleware error:', error);
+      console.error('[REQUIRE-AUTH] Auth middleware error:', error);
       return res.status(500).json({ message: "Authentication error" });
     }
   };
