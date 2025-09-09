@@ -125,6 +125,7 @@ export interface IStorage {
   
   // Search and discovery
   searchListings(query: string, filters?: any): Promise<{ listings: Listing[]; total: number }>;
+  searchShops(query: string, filters?: any): Promise<{ shops: Seller[]; total: number }>;
   getFeaturedListings(limit?: number): Promise<Listing[]>;
   getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }>;
   
@@ -714,6 +715,50 @@ export class DatabaseStorage implements IStorage {
     );
     
     return { listings: listingsWithImages, total: result.total };
+  }
+
+  async searchShops(query: string, filters?: any): Promise<{ shops: Seller[]; total: number }> {
+    if (!query) return { shops: [], total: 0 };
+
+    const limit = filters?.limit || 20;
+    const offset = filters?.offset || 0;
+
+    // Search sellers by shop name using PostgreSQL pattern matching
+    const shops = await db
+      .select()
+      .from(sellers)
+      .where(
+        and(
+          eq(sellers.isActive, true),
+          or(
+            ilike(sellers.shopName, `%${query}%`),
+            ilike(sellers.bio, `%${query}%`),
+            ilike(sellers.location, `%${query}%`)
+          )
+        )
+      )
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count for pagination
+    const totalQuery = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(sellers)
+      .where(
+        and(
+          eq(sellers.isActive, true),
+          or(
+            ilike(sellers.shopName, `%${query}%`),
+            ilike(sellers.bio, `%${query}%`),
+            ilike(sellers.location, `%${query}%`)
+          )
+        )
+      );
+
+    return {
+      shops,
+      total: totalQuery[0]?.count || 0
+    };
   }
 
   async getFeaturedListings(limit: number = 8): Promise<any[]> {
