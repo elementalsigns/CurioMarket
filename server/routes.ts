@@ -3321,7 +3321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+  app.post('/api/messages', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { threadId, content, attachments } = req.body;
@@ -3333,7 +3333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/messages/:id/read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/messages/:id/read', requireAuth, async (req: any, res) => {
     try {
       const message = await storage.markMessageAsRead(req.params.id);
       res.json(message);
@@ -3343,7 +3343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages/unread-count', isAuthenticated, async (req: any, res) => {
+  app.get('/api/messages/unread-count', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const count = await storage.getUnreadMessageCount(userId);
@@ -3355,7 +3355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Additional messaging endpoints for conversation system
-  app.get('/api/messages/conversations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/messages/conversations', requireAuth, async (req: any, res) => {
     try {
       // Mock received conversations data
       const mockConversations = [
@@ -3393,7 +3393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get sent conversations
-  app.get('/api/messages/sent-conversations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/messages/sent-conversations', requireAuth, async (req: any, res) => {
     try {
       // Mock sent conversations data
       const mockSentConversations = [
@@ -3440,7 +3440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/messages/conversations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/messages/conversations', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { recipientId, content, listingId } = req.body;
@@ -3470,7 +3470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/messages/send', isAuthenticated, async (req: any, res) => {
+  app.post('/api/messages/send', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { conversationId, content } = req.body;
@@ -3499,7 +3499,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/messages/conversations/:id/read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/messages/conversations/:id/read', requireAuth, async (req: any, res) => {
     try {
       // For basic implementation, just return success
       res.json({ message: "Conversation marked as read" });
@@ -3510,7 +3510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete individual message
-  app.delete('/api/messages/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/messages/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       await storage.deleteMessage(req.params.id, userId);
@@ -3522,7 +3522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete conversation
-  app.delete('/api/messages/conversations/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/messages/conversations/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       await storage.deleteConversation(req.params.id, userId);
@@ -3534,7 +3534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk delete conversations
-  app.delete('/api/messages/conversations/bulk', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/messages/conversations/bulk', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { conversationIds } = req.body;
