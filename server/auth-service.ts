@@ -187,46 +187,14 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         console.log('[REQUIRE-AUTH] 🚫 BYPASS DISABLED for logout request:', requestUrl);
       }
       
-      // ONLY apply bypass on DEVELOPMENT domains - NOT on live production
+      // DISABLE ALL AUTHENTICATION BYPASSES - Use real authentication only
       const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
       // NEVER bypass on the actual production domain www.curiosities.market
       
-      if (isDevelopmentDomain && !isLogoutRequest) {
+      // BYPASSES COMPLETELY DISABLED to fix authentication issues
+      if (false && isDevelopmentDomain && !isLogoutRequest) {
         console.log('[REQUIRE-AUTH] ✅ UNIVERSAL BYPASS v3.3 ACTIVATED - Using Gmail account on ALL domains:', hostname);
-        
-        // Import storage and get user data
-        const { storage } = await import('./storage');
-        
-        try {
-          console.log('[AUTH-USER] Fetching fresh user data for ID: 46848882');
-          const dbUser = await storage.getUser('46848882');
-          
-          if (dbUser) {
-            console.log('[AUTH-USER] Database user data for 46848882:', dbUser);
-            console.log('[AUTH-USER] Returning FRESH database user data for seller:', {
-              id: dbUser.id,
-              email: dbUser.email,
-              role: dbUser.role,
-              stripeCustomerId: dbUser.stripeCustomerId,
-              stripeSubscriptionId: dbUser.stripeSubscriptionId
-            });
-            
-            // Set user in request object with proper structure
-            req.user = {
-              claims: { 
-                sub: dbUser.id,
-                email: dbUser.email,
-                name: `${dbUser.firstName || ''} ${dbUser.lastName || ''}`.trim() || dbUser.email
-              },
-              access_token: 'bypass-token',
-              expires_at: Math.floor(Date.now() / 1000) + 3600
-            };
-            
-            return next();
-          }
-        } catch (dbError) {
-          console.error('[AUTH-USER] Database error in bypass:', dbError);
-        }
+        console.log('[REQUIRE-AUTH] BYPASSES DISABLED - Using real authentication');
       }
 
       // Method 1: Check Authorization header (Bearer token)

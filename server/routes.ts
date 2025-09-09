@@ -511,17 +511,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
-        console.log('[REQUIRE-AUTH] Found Bearer token, accepting for user 46848882');
+        console.log('[REQUIRE-AUTH] Found Bearer token, validating...');
         
-        // For user 46848882, accept any reasonable token
+        // Validate token properly (don't hardcode user ID)
         if (token && token.length > 10) {
-          req.user = {
-            claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
-            access_token: token,
-            expires_at: Math.floor(Date.now() / 1000) + 3600
-          };
-          console.log('[REQUIRE-AUTH] Bearer token accepted for user: 46848882');
-          return next();
+          // TODO: Implement proper token validation
+          console.log('[REQUIRE-AUTH] Bearer token validation needed - skipping for now');
         }
       }
 
@@ -544,7 +539,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // ONLY apply bypass on DEVELOPMENT domains - NOT on live production
       const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app') || hostname.includes('localhost');
       
-      if (isDevelopmentDomain) {
+      // DISABLE ALL BYPASSES - Use real authentication only
+      if (false && isDevelopmentDomain) {
         console.log('[REQUIRE-AUTH] ✅ Development bypass activated for:', hostname);
         req.user = {
           claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
