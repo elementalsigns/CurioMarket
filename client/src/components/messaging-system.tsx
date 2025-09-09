@@ -87,17 +87,40 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
       setIsComposing(false);
       scrollToBottom();
     },
+    onError: (error) => {
+      console.error("Failed to send message:", error);
+      toast({
+        title: "Message Failed",
+        description: "Could not send your message. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Start new conversation mutation
   const startConversationMutation = useMutation({
     mutationFn: async (conversationData: any) => {
+      console.log("Starting conversation with data:", conversationData);
       return await apiRequest("POST", "/api/messages/conversations", conversationData);
     },
     onSuccess: (data) => {
+      console.log("Conversation started successfully:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
       setSelectedConversation(data.id);
+      setMessageText("");
       setIsComposing(false);
+      toast({
+        title: "Message Sent",
+        description: "Your conversation has been started successfully!",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to start conversation:", error);
+      toast({
+        title: "Message Failed",
+        description: "Could not start conversation. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -128,18 +151,34 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
 
+    console.log("handleSendMessage called:", {
+      selectedConversation,
+      sellerId,
+      listingId,
+      messageText: messageText.trim()
+    });
+
     if (selectedConversation) {
       // Send message to existing conversation
+      console.log("Sending to existing conversation:", selectedConversation);
       sendMessageMutation.mutate({
         conversationId: selectedConversation,
         content: messageText,
       });
     } else if (sellerId) {
       // Start new conversation
+      console.log("Starting new conversation with seller:", sellerId);
       startConversationMutation.mutate({
         recipientId: sellerId,
         content: messageText,
         listingId,
+      });
+    } else {
+      console.error("No conversation selected and no sellerId provided");
+      toast({
+        title: "Cannot Send Message",
+        description: "Missing conversation or seller information.",
+        variant: "destructive",
       });
     }
   };
