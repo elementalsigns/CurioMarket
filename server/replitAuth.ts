@@ -335,8 +335,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   // Fall back to session-based auth
-  if (!req.isAuthenticated() || !user?.expires_at) {
-    console.log('Auth failed - missing authentication or expires_at');
+  if (!req.isAuthenticated()) {
+    console.log('Auth failed - not authenticated');
     console.log('Session details:', {
       sessionID: req.sessionID,
       session: req.session ? 'exists' : 'null',
@@ -350,6 +350,13 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
     
     return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Handle cases where user is authenticated but missing expires_at (production fix)
+  if (!user?.expires_at) {
+    console.log('Auth success - user authenticated but missing expires_at, setting default');
+    // Set a default expires_at for existing authenticated sessions
+    user.expires_at = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
   }
 
   const now = Math.floor(Date.now() / 1000);
