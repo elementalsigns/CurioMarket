@@ -152,6 +152,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
+          <Route path="/shop/:sellerId" component={() => <ShopPage />} />
           <Route path="/seller/terms" component={SellerTerms} />
           <Route path="/seller/guide" component={SellerGuideStandalone} />
           <Route path="/help" component={HelpCenter} />
