@@ -96,25 +96,25 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   // No more mock messages - will fetch real messages from API
   const mockMessages: Message[] = [];
 
-  // Get conversations
+  // Get conversations - Gate queries by authentication status
   // Get received conversations 
   const { data: conversations, isLoading: conversationsLoading, error: conversationsError } = useQuery({
     queryKey: ["/api/messages/conversations"],
-    enabled: activeTab === 'received',
+    enabled: !!user && activeTab === 'received', // Only run when authenticated
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Get sent conversations
   const { data: sentConversations, isLoading: sentConversationsLoading, error: sentConversationsError } = useQuery({
     queryKey: ["/api/messages/sent-conversations"],
-    enabled: activeTab === 'sent',
+    enabled: !!user && activeTab === 'sent', // Only run when authenticated
     refetchInterval: 30000,
   });
 
   // Get messages for selected conversation
   const { data: messages, isLoading: messagesLoading, error: messagesError } = useQuery({
     queryKey: ["/api/messages/conversation", selectedConversation],
-    enabled: !!selectedConversation,
+    enabled: !!user && !!selectedConversation, // Only run when authenticated and conversation selected
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
@@ -308,9 +308,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
   const activeMessages = Array.isArray(messages) ? messages : [];
 
   const filteredConversations = (activeConversations as Conversation[] | undefined)?.filter((conv: Conversation) =>
-    conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.listingTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+    (conv.participantName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.lastMessage || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.listingTitle || '').toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   return (

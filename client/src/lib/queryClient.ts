@@ -30,7 +30,7 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
+): Promise<any> {
   const token = getAuthToken();
   const headers: HeadersInit = data ? { "Content-Type": "application/json" } : {};
   
@@ -56,12 +56,19 @@ export async function apiRequest(
     if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
       console.log('[AUTH] Redirecting to login...');
       window.location.href = '/api/login';
-      return new Response(); // Return empty response to prevent further processing
+      return {}; // Return empty object instead of Response
     }
   }
 
   await throwIfResNotOk(res);
-  return res;
+  
+  // Parse JSON response automatically for mutations
+  try {
+    return await res.json();
+  } catch (error) {
+    // If response is not JSON (e.g., 204 No Content), return empty object
+    return {};
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
