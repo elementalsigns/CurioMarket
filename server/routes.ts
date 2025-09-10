@@ -3038,7 +3038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/variations/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/variations/:id', requireAuth, async (req: any, res) => {
     try {
       const variation = await storage.updateListingVariation(req.params.id, req.body);
       res.json(variation);
@@ -3048,7 +3048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/variations/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/variations/:id', requireAuth, async (req: any, res) => {
     try {
       await storage.deleteListingVariation(req.params.id);
       res.json({ success: true });
@@ -3058,11 +3058,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stock management - FIXED: Using unified authentication
+  // Stock management - FIXED: Using unified authentication with ownership verification
   app.put('/api/listings/:id/stock', requireAuth, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      // Verify listing ownership BEFORE updating stock
+      const existingListing = await storage.getListing(req.params.id);
+      if (!existingListing) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+      if (existingListing.sellerId !== seller.id) {
+        return res.status(403).json({ error: "Not authorized to update this listing's stock" });
+      }
+
       const { quantity } = req.body;
       const listing = await storage.updateListingStock(req.params.id, quantity);
+      console.log(`[STOCK-UPDATE] Successfully updated stock for listing ${req.params.id} to quantity ${quantity} by seller ${seller.id}`);
       res.json(listing);
     } catch (error) {
       console.error("Error updating stock:", error);
