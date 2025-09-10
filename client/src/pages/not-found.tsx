@@ -8,7 +8,33 @@ export default function NotFound() {
   // Don't render NotFound on specific pages to prevent overlay issues
   if (typeof window !== 'undefined') {
     const path = window.location.pathname;
-    if (path === '/' || path === '/seller/guide' || path === '/safety' || path === '/contact' || path === '/privacy' || path === '/terms' || path === '/prohibited' || path === '/browse' || path === '/account' || path.startsWith('/seller/') || path.startsWith('/orders/') || path.startsWith('/favorites') || path.startsWith('/cart') || path.startsWith('/checkout') || path.startsWith('/product/')) {
+    if (path === '/' || 
+        path === '/seller/guide' || 
+        path === '/safety' || 
+        path === '/contact' || 
+        path === '/privacy' || 
+        path === '/terms' || 
+        path === '/prohibited' || 
+        path === '/browse' || 
+        path === '/account' || 
+        path === '/messages' ||
+        path === '/signin' ||
+        path === '/help' ||
+        path === '/events' ||
+        path.startsWith('/seller/') || 
+        path.startsWith('/orders/') || 
+        path.startsWith('/favorites') || 
+        path.startsWith('/cart') || 
+        path.startsWith('/checkout') || 
+        path.startsWith('/product/') ||
+        path.startsWith('/messages/') ||
+        path.startsWith('/shop/') ||
+        path.startsWith('/wishlists') ||
+        path.startsWith('/reviews') ||
+        path.startsWith('/verification') ||
+        path.startsWith('/admin') ||
+        path.startsWith('/subscribe') ||
+        path.startsWith('/api/')) {
       return null;
     }
   }
