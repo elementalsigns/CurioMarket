@@ -558,8 +558,9 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
+            <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-messages">Messages</TabsTrigger>
             <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
@@ -643,6 +644,34 @@ export default function SellerDashboard() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Inventory Tab */}
+          <TabsContent value="inventory" className="space-y-4" data-testid="content-inventory">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Inventory Management</h2>
+              <Link to="/seller/inventory-management">
+                <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-full-inventory">
+                  <Package className="mr-2" size={16} />
+                  Full Inventory Manager
+                </Button>
+              </Link>
+            </div>
+            
+            <Card className="glass-effect">
+              <CardContent className="p-8 text-center">
+                <Package className="mx-auto mb-4 text-gothic-red" size={48} />
+                <h3 className="text-xl font-serif font-bold mb-2">Stock Management</h3>
+                <p className="text-foreground/70 mb-6">
+                  Manage your inventory levels, track low stock items, and update quantities in bulk.
+                </p>
+                <Link to="/seller/inventory-management">
+                  <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-manage-inventory">
+                    Manage Inventory
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Orders Tab */}
