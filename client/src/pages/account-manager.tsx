@@ -246,7 +246,7 @@ export default function AccountManager() {
                   >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Messages
-                    {unreadData?.count > 0 && (
+                    {unreadData?.count && unreadData.count > 0 && (
                       <Badge variant="destructive" className="ml-auto">
                         {unreadData.count}
                       </Badge>
@@ -284,7 +284,7 @@ export default function AccountManager() {
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Messages
-                  {unreadData?.count > 0 && (
+                  {unreadData?.count && unreadData.count > 0 && (
                     <Badge variant="destructive" className="ml-auto">
                       {unreadData.count}
                     </Badge>
@@ -476,7 +476,7 @@ export default function AccountManager() {
                               <div>
                                 <p className="text-sm font-medium">Member Since</p>
                                 <p className="text-sm font-bold">
-                                  {user.createdAt ? new Date(user.createdAt).getFullYear() : "2024"}
+                                  {(user as any)?.createdAt ? new Date((user as any).createdAt).getFullYear() : "2024"}
                                 </p>
                               </div>
                             </div>
@@ -622,7 +622,7 @@ export default function AccountManager() {
                   {favorites && (favorites as any).length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {(favorites as any).map((item: any) => (
-                        <ProductCard key={item.id} item={item} />
+                        <ProductCard key={item.id} listing={item} />
                       ))}
                     </div>
                   ) : (

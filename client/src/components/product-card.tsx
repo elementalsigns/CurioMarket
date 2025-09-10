@@ -32,6 +32,7 @@ interface ProductCardProps {
     title: string;
     slug: string;
     price: string;
+    stockQuantity?: number;
     images?: { url: string; alt?: string }[];
     seller?: { shopName: string };
     category?: { name: string };
