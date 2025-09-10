@@ -7,7 +7,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authService } from "./auth-service";
-import { insertSellerSchema, insertListingSchema, listings, sellers, orders, orderItems } from "@shared/schema";
+import { insertSellerSchema, insertListingSchema, listings, sellers, orders, orderItems, users } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, sql } from "drizzle-orm";
 import { verificationService } from "./verificationService";
@@ -4712,6 +4712,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/cleanup-failed-orders", async (req, res) => {
     try {
       console.log('[CLEANUP] Starting failed order cleanup...');
+      
+      // First, ensure elementalsigns@yahoo.com has admin role
+      await db
+        .update(users)
+        .set({ role: 'admin' as any })
+        .where(eq(users.email, 'elementalsigns@yahoo.com'));
+      console.log('[CLEANUP] Ensured admin role for elementalsigns@yahoo.com');
       
       // Find orders that have items but no successful payment
       const failedOrders = await db
