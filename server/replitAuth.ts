@@ -38,12 +38,12 @@ export function getSession() {
       secret: process.env.SESSION_SECRET!,
       store: sessionStore,
       resave: false,
-      saveUninitialized: false,
+      saveUninitialized: true, // Allow session creation for guest users
       cookie: {
         httpOnly: true,
-        secure: true, // Always use secure for cross-domain
+        secure: process.env.NODE_ENV === 'production', // Only secure in production
         maxAge: sessionTtl,
-        sameSite: 'none', // Required for cross-domain
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Lax for development
         domain: undefined, // Allow cross-domain
       },
     });
@@ -53,12 +53,12 @@ export function getSession() {
     return session({
       secret: process.env.SESSION_SECRET!,
       resave: false,
-      saveUninitialized: false,
+      saveUninitialized: true, // Allow session creation for guest users
       cookie: {
         httpOnly: true,
-        secure: true, // Always use secure for cross-domain
+        secure: process.env.NODE_ENV === 'production', // Only secure in production
         maxAge: sessionTtl,
-        sameSite: 'none', // Required for cross-domain
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Lax for development
         domain: undefined, // Allow cross-domain
       },
     });
