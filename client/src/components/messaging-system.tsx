@@ -468,7 +468,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             </Badge>
                           )}
                           <span className="text-xs text-zinc-400">
-                            {formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })}
+                            {conversation.lastMessageTime && !isNaN(new Date(conversation.lastMessageTime).getTime()) 
+                              ? formatDistanceToNow(new Date(conversation.lastMessageTime), { addSuffix: true })
+                              : 'No date'}
                           </span>
                           
                           {/* Simple delete button - always visible */}
