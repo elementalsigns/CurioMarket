@@ -52,11 +52,19 @@ export async function apiRequest(
   // Handle authentication failures specifically
   if (res.status === 401 || res.status === 403) {
     console.log('[AUTH] Authentication failed, status:', res.status);
-    // Trigger re-authentication for production users
+    // For production users, only redirect to login if not already on auth pages
     if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
-      console.log('[AUTH] Redirecting to login...');
-      window.location.href = '/api/login';
-      return {}; // Return empty object instead of Response
+      // Prevent auth loops - don't redirect if already on auth/login pages
+      const currentPath = window.location.pathname;
+      const isAuthPage = currentPath.includes('/signin') || currentPath.includes('/login') || currentPath.includes('/callback');
+      
+      if (!isAuthPage) {
+        console.log('[AUTH] Redirecting to login from:', currentPath);
+        window.location.href = '/api/login';
+        return {}; // Return empty object instead of Response
+      } else {
+        console.log('[AUTH] Already on auth page, not redirecting to prevent loop');
+      }
     }
   }
 
@@ -98,14 +106,21 @@ export const getQueryFn: <T>(options: {
       console.log('[AUTH] API call failed with status:', res.status);
       console.log('[AUTH] URL:', queryKey.join("/"));
       
-      if (unauthorizedBehavior === "returnNull") {
-        return null;
+      // For production, redirect to login but prevent loops
+      if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
+        const currentPath = window.location.pathname;
+        const isAuthPage = currentPath.includes('/signin') || currentPath.includes('/login') || currentPath.includes('/callback');
+        
+        if (!isAuthPage) {
+          console.log('[AUTH] Query failed, redirecting to login from:', currentPath);
+          window.location.href = '/api/login';
+          return null;
+        } else {
+          console.log('[AUTH] Query failed on auth page, not redirecting to prevent loop');
+        }
       }
       
-      // For production users without tokens, try re-authentication
-      if (!token && window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
-        console.log('[AUTH] Production auth failure, redirecting to login...');
-        window.location.href = '/api/login';
+      if (unauthorizedBehavior === "returnNull") {
         return null;
       }
     }
