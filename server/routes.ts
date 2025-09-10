@@ -583,6 +583,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth user route - properly handle all users
   app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
+      if (!req.user || !req.user.claims) {
+        return res.status(401).json({ message: "No user authenticated" });
+      }
       const userId = req.user.claims.sub;
       const userEmail = req.user.claims.email;
       
