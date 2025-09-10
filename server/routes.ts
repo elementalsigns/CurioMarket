@@ -4708,6 +4708,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ADMIN: Cleanup failed orders and restore inventory
+  app.post("/api/admin/cleanup-failed-orders", async (req, res) => {
+    try {
+      console.log('[CLEANUP] Starting failed order cleanup...');
+      
+      // Find orders that have items but no successful payment
+      const failedOrders = await db
+        .select()
+        .from(orders)
+        .where(
+          or(
+            eq(orders.stripePaymentIntentId, ''),
+            eq(orders.stripePaymentIntentId, null as any),
+            eq(orders.status, 'pending')
+          )
+        );
+
+      console.log(`[CLEANUP] Found ${failedOrders.length} potentially failed orders`);
+      
+      let cleanedOrderCount = 0;
+      let restoredInventory = 0;
+
+      for (const order of failedOrders) {
+        console.log(`[CLEANUP] Processing order ${order.id} - Status: ${order.status}, Total: ${order.total}`);
+        
+        // Get order items to restore inventory
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.id));
+
+        // Restore inventory for each item
+        for (const item of items) {
+          await db
+            .update(listings)
+            .set({
+              quantity: sql`COALESCE(${listings.quantity}, 0) + ${item.quantity}`,
+              stockQuantity: sql`COALESCE(${listings.stockQuantity}, 0) + ${item.quantity}`
+            })
+            .where(eq(listings.id, item.listingId));
+          
+          console.log(`[CLEANUP] Restored ${item.quantity} units to listing ${item.listingId}`);
+          restoredInventory += item.quantity;
+        }
+
+        // Delete order items first (foreign key constraint)
+        await db.delete(orderItems).where(eq(orderItems.orderId, order.id));
+        
+        // Delete the order
+        await db.delete(orders).where(eq(orders.id, order.id));
+        
+        console.log(`[CLEANUP] Deleted order ${order.id} and its ${items.length} items`);
+        cleanedOrderCount++;
+      }
+
+      const result = {
+        success: true,
+        message: `Cleanup completed successfully`,
+        stats: {
+          ordersRemoved: cleanedOrderCount,
+          inventoryRestored: restoredInventory,
+          failedOrdersFound: failedOrders.length
+        }
+      };
+
+      console.log('[CLEANUP] Cleanup completed:', result.stats);
+      res.json(result);
+
+    } catch (error) {
+      console.error('[CLEANUP] Error during cleanup:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Cleanup failed', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
