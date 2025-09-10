@@ -641,7 +641,9 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             </div>
                             
                             <div className={`mt-1 text-xs text-zinc-400 ${isOwn ? "text-right" : "text-left"} ${!showAvatar && !isOwn ? "ml-10" : ""}`}>
-                              {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+                              {message.timestamp && !isNaN(new Date(message.timestamp).getTime()) 
+                                ? formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })
+                                : 'Just now'}
                             </div>
                           </div>
                         </div>
