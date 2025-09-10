@@ -444,7 +444,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                     >
                       <AvatarImage src={conversation.participantAvatar} />
                       <AvatarFallback className="bg-zinc-700 text-white">
-                        {conversation.participantName.charAt(0)}
+                        {conversation.participantName?.charAt(0) || '?'}
                       </AvatarFallback>
                     </Avatar>
                     
@@ -539,7 +539,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                     <Avatar>
                       <AvatarImage src={(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantAvatar} />
                       <AvatarFallback className="bg-zinc-700 text-white">
-                        {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantName.charAt(0)}
+                        {(activeConversations as Conversation[])?.find((c: Conversation) => c.id === selectedConversation)?.participantName?.charAt(0) || '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
@@ -610,7 +610,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                                 <Avatar className="w-8 h-8">
                                   <AvatarImage src={message.senderAvatar} />
                                   <AvatarFallback className="bg-zinc-700 text-white text-xs">
-                                    {message.senderName.charAt(0)}
+                                    {message.senderName?.charAt(0) || '?'}
                                   </AvatarFallback>
                                 </Avatar>
                               )}

@@ -25,8 +25,8 @@ export default function Product() {
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ["/api/listings/by-slug", slug],
-    queryFn: () => 
-      apiRequest("GET", `/api/listings/by-slug/${slug}`).then(res => res.json()),
+    enabled: !!slug,
+    queryFn: () => fetch(`/api/listings/by-slug/${slug}`).then(res => res.json()),
   });
 
   const { data: favorites = [] } = useQuery({
@@ -34,7 +34,7 @@ export default function Product() {
     enabled: !!user,
   });
 
-  const isFavorite = favorites.includes(listing?.id);
+  const isFavorite = Array.isArray(favorites) && favorites.includes(listing?.id);
 
   const addToCartMutation = useMutation({
     mutationFn: async (data: { listingId: string; quantity: number }) => {

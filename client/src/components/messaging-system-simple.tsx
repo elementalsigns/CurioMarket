@@ -100,7 +100,7 @@ export default function MessagingSystemSimple() {
                   <div className="flex items-center space-x-3">
                     <Avatar>
                       <AvatarFallback className="bg-zinc-700 text-white">
-                        {conversations.find(c => c.id === selectedConversation)?.participantName.charAt(0)}
+                        {conversations.find(c => c.id === selectedConversation)?.participantName?.charAt(0) || '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
