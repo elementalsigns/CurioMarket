@@ -233,6 +233,20 @@ export const messageThreads = pgTable("message_threads", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Message thread participants - tracks per-user conversation states
+export const messageThreadParticipants = pgTable("message_thread_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadId: varchar("thread_id").references(() => messageThreads.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  role: varchar("role").notNull(), // 'buyer' or 'seller'
+  deletedAt: timestamp("deleted_at"), // Soft delete timestamp
+  archivedAt: timestamp("archived_at"), // Archive timestamp
+  mutedUntil: timestamp("muted_until"), // Mute until timestamp
+  pinned: boolean("pinned").default(false), // Pinned conversation
+  lastReadAt: timestamp("last_read_at"), // Last read timestamp
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Messages - Enhanced with status tracking
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -670,6 +684,7 @@ export type Cart = typeof carts.$inferSelect;
 export type CartItem = typeof cartItems.$inferSelect;
 export type ListingImage = typeof listingImages.$inferSelect;
 export type MessageThread = typeof messageThreads.$inferSelect;
+export type MessageThreadParticipant = typeof messageThreadParticipants.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Flag = typeof flags.$inferSelect;
 export type SavedSearch = typeof savedSearches.$inferSelect;

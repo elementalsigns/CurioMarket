@@ -10,6 +10,7 @@ import {
   carts,
   listingImages,
   messageThreads,
+  messageThreadParticipants,
   messages,
   favorites,
   shopFollows,
@@ -37,6 +38,7 @@ import {
   type CartItem,
   type ListingImage,
   type MessageThread,
+  type MessageThreadParticipant,
   type Message,
   type SavedSearch,
   type InsertSavedSearch,
@@ -1243,6 +1245,31 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
+  // Helper method to ensure participant records exist for backward compatibility
+  async ensureParticipantRecords(threadId: string, buyerId: string, sellerId: string): Promise<void> {
+    // Check if participant records already exist
+    const existingParticipants = await db
+      .select()
+      .from(messageThreadParticipants)
+      .where(eq(messageThreadParticipants.threadId, threadId));
+    
+    if (existingParticipants.length === 0) {
+      // Create participant records for both buyer and seller
+      await db.insert(messageThreadParticipants).values([
+        {
+          threadId,
+          userId: buyerId,
+          role: 'buyer',
+        },
+        {
+          threadId,
+          userId: sellerId,
+          role: 'seller',
+        }
+      ]);
+    }
+  }
+
   async deleteConversation(conversationId: string, userId: string): Promise<void> {
     // Verify the user is a participant in this conversation
     const conversation = await db
@@ -1262,15 +1289,30 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Conversation not found or user not authorized");
     }
     
-    // Delete ALL messages in the conversation (from both participants)
+    // For now, keep current behavior to preserve functionality
+    // TODO: Implement per-user conversation deletion with participant states
+    // Delete only messages where user is the sender
     await db
       .delete(messages)
+      .where(
+        and(
+          eq(messages.threadId, conversationId),
+          eq(messages.senderId, userId)
+        )
+      );
+    
+    // Check if any messages remain from either participant
+    const remainingMessages = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(messages)
       .where(eq(messages.threadId, conversationId));
     
-    // Delete the conversation thread completely
-    await db
-      .delete(messageThreads)
-      .where(eq(messageThreads.id, conversationId));
+    // Only delete the thread if no messages remain from either participant
+    if (remainingMessages[0]?.count === 0) {
+      await db
+        .delete(messageThreads)
+        .where(eq(messageThreads.id, conversationId));
+    }
   }
 
   async bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void> {
