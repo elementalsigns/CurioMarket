@@ -220,7 +220,6 @@ export default function OrderDetails() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              {console.log('[ORDER-DETAILS] No valid image found for item:', item)}
                               <Package className="h-8 w-8 text-muted-foreground" />
                             </div>
                           )}
