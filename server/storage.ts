@@ -1342,18 +1342,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUnreadMessageCount(userId: string): Promise<number> {
-    const [result] = await db
-      .select({ count: count(messages.id) })
-      .from(messages)
-      .leftJoin(messageThreads, eq(messages.threadId, messageThreads.id))
-      .where(
-        and(
-          or(eq(messageThreads.buyerId, userId), eq(messageThreads.sellerId, userId)),
-          eq(messages.status, 'unread'),
-          sql`${messages.senderId} != ${userId}`
-        )
-      );
-    return Number(result.count);
+    // Get all conversations for the user
+    const conversations = await this.getUserMessageThreads(userId);
+    
+    // Only count unread messages in conversations where the LATEST message was sent TO the user
+    // This makes the header count match the "Received" tab and sidebar logic
+    const receivedConversations = conversations.filter(conversation => {
+      return conversation.latestMessage?.senderId !== userId; // Latest message sent TO user
+    });
+    
+    // Count total unread messages in these filtered conversations
+    let totalUnread = 0;
+    for (const conversation of receivedConversations) {
+      totalUnread += conversation.unreadCount || 0;
+    }
+    
+    return totalUnread;
   }
 
   async getUserMessageThreads(userId: string): Promise<any[]> {
