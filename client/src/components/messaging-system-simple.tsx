@@ -45,7 +45,7 @@ export default function MessagingSystemSimple() {
                     onClick={() => setSelectedConversation(conversation.id)}
                   >
                     <AvatarFallback className="bg-zinc-700 text-white">
-                      {conversation.participantName.charAt(0)}
+                      {conversation.participantName?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
                   

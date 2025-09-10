@@ -52,18 +52,19 @@ export async function apiRequest(
   // Handle authentication failures specifically
   if (res.status === 401 || res.status === 403) {
     console.log('[AUTH] Authentication failed, status:', res.status);
-    // For production users, only redirect to login if not already on auth pages
+    // For production users, only redirect to login if accessing protected routes
     if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
-      // Prevent auth loops - don't redirect if already on auth/login pages
       const currentPath = window.location.pathname;
       const isAuthPage = currentPath.includes('/signin') || currentPath.includes('/login') || currentPath.includes('/callback');
+      const isProtectedRoute = currentPath.includes('/account') || currentPath.includes('/seller') || currentPath.includes('/admin');
       
-      if (!isAuthPage) {
-        console.log('[AUTH] Redirecting to login from:', currentPath);
+      // Only redirect to login for protected routes, not for homepage/public browsing
+      if (!isAuthPage && isProtectedRoute) {
+        console.log('[AUTH] Redirecting to login from protected route:', currentPath);
         window.location.href = '/api/login';
         return {}; // Return empty object instead of Response
       } else {
-        console.log('[AUTH] Already on auth page, not redirecting to prevent loop');
+        console.log('[AUTH] Public route or auth page, not redirecting to login');
       }
     }
   }
@@ -106,17 +107,19 @@ export const getQueryFn: <T>(options: {
       console.log('[AUTH] API call failed with status:', res.status);
       console.log('[AUTH] URL:', queryKey.join("/"));
       
-      // For production, redirect to login but prevent loops
+      // For production, only redirect to login if accessing protected routes
       if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('replit.dev')) {
         const currentPath = window.location.pathname;
         const isAuthPage = currentPath.includes('/signin') || currentPath.includes('/login') || currentPath.includes('/callback');
+        const isProtectedRoute = currentPath.includes('/account') || currentPath.includes('/seller') || currentPath.includes('/admin');
         
-        if (!isAuthPage) {
-          console.log('[AUTH] Query failed, redirecting to login from:', currentPath);
+        // Only redirect to login for protected routes, not for homepage/public browsing
+        if (!isAuthPage && isProtectedRoute) {
+          console.log('[AUTH] Query failed, redirecting to login from protected route:', currentPath);
           window.location.href = '/api/login';
           return null;
         } else {
-          console.log('[AUTH] Query failed on auth page, not redirecting to prevent loop');
+          console.log('[AUTH] Public route or auth page, not redirecting to login');
         }
       }
       
