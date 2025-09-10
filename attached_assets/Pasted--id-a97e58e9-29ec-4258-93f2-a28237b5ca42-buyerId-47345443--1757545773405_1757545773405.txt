@@ -1,0 +1,61 @@
+[
+    {
+        "id": "a97e58e9-29ec-4258-93f2-a28237b5ca42",
+        "buyerId": "47345443",
+        "sellerId": "46848882",
+        "orderId": null,
+        "listingId": "39482d65-72bb-4336-b707-5cc7e35d857f",
+        "subject": "About your listing",
+        "createdAt": "2025-09-10T23:02:14.303Z",
+        "updatedAt": "2025-09-10T23:02:14.303Z",
+        "otherUser": {
+            "id": "47345443",
+            "firstName": "Marisol",
+            "lastName": "Mora",
+            "profileImageUrl": null
+        },
+        "latestMessage": {
+            "id": "14f3f3f4-62a1-4c5c-ae1a-b6ce0457cb84",
+            "threadId": "a97e58e9-29ec-4258-93f2-a28237b5ca42",
+            "senderId": "47345443",
+            "content": "test. 7:02",
+            "status": "unread",
+            "attachments": [],
+            "createdAt": "2025-09-10T23:02:14.330Z",
+            "readAt": null
+        },
+        "unreadCount": 1,
+        "listing": {
+            "id": "39482d65-72bb-4336-b707-5cc7e35d857f",
+            "sellerId": "b23d9c45-dbf1-40a0-aeca-1eb89eefd4c2",
+            "title": "Test Purchase",
+            "slug": "test-purchase",
+            "description": "Test PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest PurchaseTest Purchase",
+            "price": "0.65",
+            "quantity": 1,
+            "stockQuantity": 1,
+            "lowStockThreshold": 1,
+            "sku": "",
+            "mpn": "",
+            "provenance": "Test PurchaseTest PurchaseTest PurchaseTest Purchase",
+            "speciesOrMaterial": "Test PurchaseTest PurchaseTest PurchaseTest PurchaseTest Purchase",
+            "condition": null,
+            "age": null,
+            "dimensions": null,
+            "weight": null,
+            "origin": null,
+            "categoryIds": [
+                "cat2"
+            ],
+            "state": "published",
+            "tags": [],
+            "shippingCost": "0.00",
+            "isPromoted": false,
+            "promotedUntil": null,
+            "views": 0,
+            "displayOrder": 0,
+            "createdAt": "2025-09-07T22:06:44.649Z",
+            "updatedAt": "2025-09-10T18:32:15.353Z"
+        }
+    }
+]

@@ -1375,6 +1375,22 @@ export class DatabaseStorage implements IStorage {
     // Fetch additional data for each thread
     const threadsWithDetails = await Promise.all(
       threads.map(async (thread) => {
+        // Check if the user has any messages left in this conversation
+        const [userMessageCount] = await db
+          .select({ count: count(messages.id) })
+          .from(messages)
+          .where(
+            and(
+              eq(messages.threadId, thread.id),
+              eq(messages.senderId, userId)
+            )
+          );
+        
+        // If user has no messages left, skip this conversation (they "deleted" it)
+        if (userMessageCount.count === 0) {
+          return null;
+        }
+        
         // Get the other participant (buyer or seller)
         const otherUserId = thread.buyerId === userId ? thread.sellerId : thread.buyerId;
         const [otherUser] = await db.select().from(users).where(eq(users.id, otherUserId));
@@ -1439,7 +1455,8 @@ export class DatabaseStorage implements IStorage {
       })
     );
     
-    return threadsWithDetails;
+    // Filter out null results (conversations where user has no messages left)
+    return threadsWithDetails.filter(thread => thread !== null);
   }
 
   async getConversationMessages(threadId: string): Promise<Message[]> {

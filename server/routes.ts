@@ -3645,10 +3645,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/messages/conversations/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      await storage.deleteConversation(req.params.id, userId);
+      const conversationId = req.params.id;
+      
+      console.log(`[DELETE-CONVERSATION] User ${userId} attempting to delete conversation ${conversationId}`);
+      
+      await storage.deleteConversation(conversationId, userId);
+      
+      console.log(`[DELETE-CONVERSATION] Successfully deleted conversation ${conversationId} for user ${userId}`);
       res.json({ message: "Conversation deleted successfully" });
     } catch (error) {
-      console.error("Error deleting conversation:", error);
+      console.error(`[DELETE-CONVERSATION] Error deleting conversation ${req.params.id} for user ${req.user.claims.sub}:`, error);
       res.status(500).json({ error: "Failed to delete conversation" });
     }
   });
