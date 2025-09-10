@@ -379,32 +379,36 @@ export class DatabaseStorage implements IStorage {
 
     const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-    let query = db.select().from(listings);
-    let countQuery = db.select({ count: count() }).from(listings);
+    // Build the main query
+    const baseQuery = db.select().from(listings);
+    const baseCountQuery = db.select({ count: count() }).from(listings);
+
+    let finalQuery = baseQuery;
+    let finalCountQuery = baseCountQuery;
 
     if (whereCondition) {
-      query = query.where(whereCondition);
-      countQuery = countQuery.where(whereCondition);
+      finalQuery = finalQuery.where(whereCondition) as any;
+      finalCountQuery = finalCountQuery.where(whereCondition) as any;
     }
 
     // Sort by display order for seller shops, otherwise by creation date
     if (filters?.sellerId && filters?.sortByDisplayOrder) {
-      query = query.orderBy(asc(listings.displayOrder), desc(listings.createdAt));
+      finalQuery = finalQuery.orderBy(asc(listings.displayOrder), desc(listings.createdAt)) as any;
     } else {
-      query = query.orderBy(desc(listings.createdAt));
+      finalQuery = finalQuery.orderBy(desc(listings.createdAt)) as any;
     }
 
     if (filters?.limit) {
-      query = query.limit(filters.limit);
+      finalQuery = finalQuery.limit(filters.limit) as any;
     }
 
     if (filters?.offset) {
-      query = query.offset(filters.offset);
+      finalQuery = finalQuery.offset(filters.offset) as any;
     }
 
     const [listingsResult, totalResult] = await Promise.all([
-      query.execute(),
-      countQuery.execute()
+      finalQuery.execute(),
+      finalCountQuery.execute()
     ]);
 
     return {
@@ -1879,34 +1883,35 @@ export class DatabaseStorage implements IStorage {
 
   // Events operations
   async getEvents(filters?: { search?: string; status?: string; page?: number; limit?: number }): Promise<Event[]> {
-    let query = db.select().from(events);
+    const baseQuery = db.select().from(events);
+    let finalQuery = baseQuery;
     
     if (filters?.search) {
-      query = query.where(
+      finalQuery = finalQuery.where(
         or(
           ilike(events.title, `%${filters.search}%`),
           ilike(events.description, `%${filters.search}%`),
           ilike(events.location, `%${filters.search}%`)
         )
-      );
+      ) as any;
     }
     
     if (filters?.status) {
-      query = query.where(eq(events.status, filters.status as any));
+      finalQuery = finalQuery.where(eq(events.status, filters.status as any)) as any;
     }
     
-    query = query.orderBy(asc(events.eventDate));
+    finalQuery = finalQuery.orderBy(asc(events.eventDate)) as any;
     
     if (filters?.limit) {
-      query = query.limit(filters.limit);
+      finalQuery = finalQuery.limit(filters.limit) as any;
     }
     
     if (filters?.page && filters?.limit) {
       const offset = (filters.page - 1) * filters.limit;
-      query = query.offset(offset);
+      finalQuery = finalQuery.offset(offset) as any;
     }
     
-    return await query;
+    return await finalQuery;
   }
 
   async getEventById(id: string): Promise<Event | undefined> {
@@ -1980,7 +1985,7 @@ export class DatabaseStorage implements IStorage {
     const { page, limit, search, status } = params;
     const offset = (page - 1) * limit;
 
-    let query = db
+    const baseQuery = db
       .select({
         id: listings.id,
         title: listings.title,
@@ -2005,23 +2010,25 @@ export class DatabaseStorage implements IStorage {
       .from(listings)
       .leftJoin(sellers, eq(listings.sellerId, sellers.id));
 
+    let finalQuery = baseQuery;
+
     // Add search filter
     if (search && search.trim() !== '') {
-      query = query.where(
+      finalQuery = finalQuery.where(
         or(
           ilike(listings.title, `%${search}%`),
           ilike(listings.description, `%${search}%`),
           ilike(sellers.shopName, `%${search}%`)
         )
-      );
+      ) as any;
     }
 
     // Add status filter
     if (status && status !== 'all') {
-      query = query.where(eq(listings.state, status));
+      finalQuery = finalQuery.where(eq(listings.state, status as any)) as any;
     }
 
-    const results = await query
+    const results = await finalQuery
       .orderBy(desc(listings.createdAt))
       .limit(limit)
       .offset(offset);
