@@ -42,21 +42,25 @@ export default function InventoryManagementPage() {
   const { toast } = useToast();
 
   // Fetch seller listings
-  const { data: listings = [], isLoading: listingsLoading } = useQuery({
+  const { data: listings = [], isLoading: listingsLoading } = useQuery<Listing[]>({
     queryKey: ['/api/seller/listings'],
   });
 
   // Fetch low stock items
-  const { data: lowStockItems = [], isLoading: lowStockLoading } = useQuery({
+  const { data: lowStockItems = [], isLoading: lowStockLoading } = useQuery<Listing[]>({
     queryKey: ['/api/seller/low-stock'],
   });
 
   // Update stock mutation
   const updateStockMutation = useMutation({
     mutationFn: async ({ listingId, quantity }: { listingId: string; quantity: number }) => {
-      return await apiRequest('PUT', `/api/listings/${listingId}/stock`, { quantity });
+      console.log('[INVENTORY] Sending PUT request:', { listingId, quantity });
+      const response = await apiRequest('PUT', `/api/listings/${listingId}/stock`, { quantity });
+      console.log('[INVENTORY] PUT request successful');
+      return response;
     },
     onSuccess: () => {
+      console.log('[INVENTORY] Mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['/api/seller/listings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/seller/low-stock'] });
       toast({
@@ -64,10 +68,11 @@ export default function InventoryManagementPage() {
         description: "Stock quantity updated successfully.",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.log('[INVENTORY] Mutation failed:', error);
       toast({
         title: "Error",
-        description: "Failed to update stock quantity.",
+        description: `Failed to update stock quantity: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -109,6 +114,7 @@ export default function InventoryManagementPage() {
   });
 
   const handleStockUpdate = (listingId: string, newQuantity: number) => {
+    console.log('[INVENTORY] Updating stock:', { listingId, newQuantity });
     updateStockMutation.mutate({ listingId, quantity: newQuantity });
   };
 
