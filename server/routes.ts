@@ -228,8 +228,17 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v3.3: 2025-09-09 19:58 FORCE NEW DEPLOYMENT SNAPSHOT
+// CACHE BUST v3.4: 2025-09-10 15:06 INVENTORY FIX WITH UNIFIED AUTH
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Version endpoint to verify which backend version is running
+  app.get('/api/version', (req, res) => {
+    res.json({ 
+      version: 'v3.4-2025-09-10-15:06-INVENTORY-FIX-WITH-UNIFIED-AUTH',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // Image proxy endpoint for private images using ObjectStorageService
   app.get("/api/image-proxy/:imageId", async (req, res) => {
     try {
@@ -3061,27 +3070,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stock management - FIXED: Using unified authentication with ownership verification
   app.put('/api/listings/:id/stock', requireAuth, async (req: any, res) => {
     try {
+      console.log(`[STOCK-UPDATE] Received request - listingId: ${req.params.id}, body:`, req.body);
+      
       const userId = req.user.claims.sub;
+      console.log(`[STOCK-UPDATE] Authenticated user: ${userId}`);
+      
       const seller = await storage.getSellerByUserId(userId);
       if (!seller) {
+        console.log(`[STOCK-UPDATE] No seller profile found for user ${userId}`);
         return res.status(404).json({ error: "Seller profile not found" });
       }
+      console.log(`[STOCK-UPDATE] Found seller: ${seller.id}`);
 
       // Verify listing ownership BEFORE updating stock
       const existingListing = await storage.getListing(req.params.id);
       if (!existingListing) {
+        console.log(`[STOCK-UPDATE] Listing not found: ${req.params.id}`);
         return res.status(404).json({ error: "Listing not found" });
       }
       if (existingListing.sellerId !== seller.id) {
+        console.log(`[STOCK-UPDATE] Ownership mismatch - listing seller: ${existingListing.sellerId}, authenticated seller: ${seller.id}`);
         return res.status(403).json({ error: "Not authorized to update this listing's stock" });
       }
 
       const { quantity } = req.body;
+      console.log(`[STOCK-UPDATE] Updating listing ${req.params.id} from quantity ${existingListing.stockQuantity} to ${quantity}`);
+      
       const listing = await storage.updateListingStock(req.params.id, quantity);
-      console.log(`[STOCK-UPDATE] Successfully updated stock for listing ${req.params.id} to quantity ${quantity} by seller ${seller.id}`);
+      console.log(`[STOCK-UPDATE] Successfully updated stock - Result:`, { 
+        id: listing.id, 
+        oldQuantity: existingListing.stockQuantity, 
+        newQuantity: listing.stockQuantity,
+        sellerId: seller.id 
+      });
+      
       res.json(listing);
     } catch (error) {
-      console.error("Error updating stock:", error);
+      console.error("[STOCK-UPDATE] Error updating stock:", error);
       res.status(500).json({ error: "Failed to update stock" });
     }
   });
