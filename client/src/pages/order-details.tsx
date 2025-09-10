@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import Footer from "@/components/layout/footer";
 
 export default function OrderDetails() {
   const [, params] = useRoute("/orders/:orderId");
@@ -426,6 +427,7 @@ export default function OrderDetails() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
