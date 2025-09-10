@@ -8,7 +8,7 @@ export default function NotFound() {
   // Don't render NotFound on specific pages to prevent overlay issues
   if (typeof window !== 'undefined') {
     const path = window.location.pathname;
-    if (path === '/' || path === '/seller/guide' || path === '/safety' || path === '/contact' || path === '/privacy' || path === '/terms' || path === '/prohibited' || path === '/browse' || path.startsWith('/seller/')) {
+    if (path === '/' || path === '/seller/guide' || path === '/safety' || path === '/contact' || path === '/privacy' || path === '/terms' || path === '/prohibited' || path === '/browse' || path === '/account' || path.startsWith('/seller/')) {
       return null;
     }
   }
