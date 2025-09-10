@@ -44,6 +44,7 @@ import Reviews from "@/pages/reviews";
 import Verification from "@/pages/verification";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminPage from "@/pages/admin";
+import SetAdminPage from "@/pages/set-admin";
 import Events from "@/pages/events";
 import SignIn from "@/pages/signin";
 import SignInOnly from "@/pages/signin-only";
@@ -207,6 +208,7 @@ function Router() {
           <Route path="/verification" component={Verification} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/cleanup" component={AdminPage} />
+          <Route path="/set-admin" component={SetAdminPage} />
           <Route path="/wishlists" component={Wishlists} />
           <Route path="/events" component={Events} />
           <Route path="/incognito-auth" component={IncognitoAuth} />
