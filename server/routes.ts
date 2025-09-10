@@ -4708,6 +4708,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple endpoint to set admin role
+  app.post("/api/set-admin", async (req, res) => {
+    try {
+      await db
+        .update(users)
+        .set({ role: 'admin' as any })
+        .where(eq(users.email, 'elementalsigns@yahoo.com'));
+      
+      res.json({ success: true, message: 'Admin role set successfully' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // ADMIN: Cleanup failed orders and restore inventory
   app.post("/api/admin/cleanup-failed-orders", async (req, res) => {
     try {
