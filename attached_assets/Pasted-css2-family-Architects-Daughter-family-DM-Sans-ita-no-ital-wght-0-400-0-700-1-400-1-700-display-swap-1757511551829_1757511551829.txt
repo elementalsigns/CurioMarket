@@ -1,0 +1,75 @@
+css2?family=Architects+Daughter&family=DM+Sans:ita…no:ital,wght@0,400;0,700;1,400;1,700&display=swap
+replit-dev-banner.js
+index-CKHv7Z2u.js
+index-B2nZkyir.css
+css2?family=Playfair+Display:wght@400;500;600;700&…t@400;500;600;700&family=Great+Vibes&display=swap
+nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2
+SlGUmQSNjdsmc35JDF1K5GR1SDk_YAPI.woff2
+RWmMoKWR9v4ksMfaWd_JN9XFiaQoDmlr.woff2
+UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2
+nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2
+stripe.js
+user
+controller-with-preconnect-6bf9c28dd0dc6b1e6effc700a437c614.html
+shared-df53ec9db9d9d627e90923f13bf42ff7.js
+controller-with-preconnect-e60adb867e9bee9ff089bec27aa3aced.js
+.deploy_status_henson.json
+35 requests
+219 kB transferred
+5.4 MB resources
+Finish: 7.20 s
+DOMContentLoaded: 586 ms
+Request URL
+https://www.curiosities.market/product/test-purchase
+Request Method
+GET
+Status Code
+304 Not Modified
+Remote Address
+34.111.179.208:443
+Referrer Policy
+strict-origin-when-cross-origin
+:authority
+www.curiosities.market
+:method
+GET
+:path
+/product/test-purchase
+:scheme
+https
+accept
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9
+cache-control
+max-age=0
+cookie
+__stripe_mid=553f7098-0431-478e-a25b-1e07cc3a2d79d462f4; __stripe_sid=dec314aa-1d02-4d38-b2a6-01bfd46e2fe674be86; connect.sid=s%3A7nRBcNPAlnZkl1Y35fCeWtlZJf6RkT-9.7WpDiHe6x3FYxFgA9CJzRQO68H4rC6RqWKJ%2FqiWlbf8
+if-modified-since
+Wed, 10 Sep 2025 13:32:14 GMT
+if-none-match
+W/"925-19933d3ab30"
+priority
+u=0, i
+referer
+https://replit.com/
+sec-ch-ua
+"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"macOS"
+sec-fetch-dest
+document
+sec-fetch-mode
+navigate
+sec-fetch-site
+same-origin
+sec-fetch-user
+?1
+upgrade-insecure-requests
+1
+user-agent
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
