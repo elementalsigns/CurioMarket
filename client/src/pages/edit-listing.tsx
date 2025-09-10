@@ -231,7 +231,6 @@ export default function EditListing() {
                     <Label htmlFor="edit-title">Title *</Label>
                     <Input
                       id="edit-title"
-                      name="title"
                       {...form.register("title")}
                       className="bg-zinc-900 border-zinc-700"
                       placeholder="Enter listing title"
@@ -245,7 +244,6 @@ export default function EditListing() {
                     <Label htmlFor="edit-price">Price ($) *</Label>
                     <Input
                       id="edit-price"
-                      name="price"
                       {...form.register("price")}
                       className="bg-zinc-900 border-zinc-700"
                       placeholder="0.00"

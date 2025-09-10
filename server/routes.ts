@@ -3068,6 +3068,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Full listing update
+  app.put('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      // Verify listing ownership
+      const existingListing = await storage.getListing(req.params.id);
+      if (!existingListing) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+      if (existingListing.sellerId !== seller.id) {
+        return res.status(403).json({ error: "Not authorized to update this listing" });
+      }
+
+      const listingData = {
+        ...req.body,
+        id: req.params.id,
+        sellerId: seller.id
+      };
+
+      const listing = await storage.updateListing(req.params.id, listingData);
+      res.json(listing);
+    } catch (error) {
+      console.error("Error updating listing:", error);
+      res.status(500).json({ error: "Failed to update listing" });
+    }
+  });
+
   app.get('/api/seller/low-stock', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
