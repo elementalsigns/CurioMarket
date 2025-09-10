@@ -1244,27 +1244,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteConversation(conversationId: string, userId: string): Promise<void> {
-    // Delete all messages in the conversation where user is sender
-    await db
-      .delete(messages)
+    // Verify the user is a participant in this conversation
+    const conversation = await db
+      .select()
+      .from(messageThreads)
       .where(
         and(
-          eq(messages.threadId, conversationId),
-          eq(messages.senderId, userId)
+          eq(messageThreads.id, conversationId),
+          or(
+            eq(messageThreads.buyerId, userId),
+            eq(messageThreads.sellerId, userId)
+          )
         )
       );
     
-    // Delete the conversation thread if no messages remain
-    const remainingMessages = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(messages)
+    if (conversation.length === 0) {
+      throw new Error("Conversation not found or user not authorized");
+    }
+    
+    // Delete ALL messages in the conversation (from both participants)
+    await db
+      .delete(messages)
       .where(eq(messages.threadId, conversationId));
     
-    if (remainingMessages[0]?.count === 0) {
-      await db
-        .delete(messageThreads)
-        .where(eq(messageThreads.id, conversationId));
-    }
+    // Delete the conversation thread completely
+    await db
+      .delete(messageThreads)
+      .where(eq(messageThreads.id, conversationId));
   }
 
   async bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void> {
