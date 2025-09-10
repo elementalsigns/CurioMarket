@@ -456,6 +456,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const platformFee = subtotal * (PLATFORM_FEE_PERCENT / 100);
       const total = subtotal + shippingCost;
 
+      // Stripe minimum amount validation
+      const STRIPE_MINIMUM_USD = 0.50;
+      if (total < STRIPE_MINIMUM_USD) {
+        console.log(`[PAYMENT-INTENT] Amount $${total} is below Stripe minimum $${STRIPE_MINIMUM_USD}`);
+        return res.status(400).json({ 
+          error: `Order total must be at least $${STRIPE_MINIMUM_USD} USD. Current total: $${total.toFixed(2)}` 
+        });
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(total * 100), // Convert to cents
         currency: "usd",
