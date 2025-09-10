@@ -1419,17 +1419,24 @@ export class DatabaseStorage implements IStorage {
           .orderBy(desc(messages.createdAt))
           .limit(1);
         
-        // Get unread count for this thread
-        const [unreadResult] = await db
-          .select({ count: count(messages.id) })
-          .from(messages)
-          .where(
-            and(
-              eq(messages.threadId, thread.id),
-              eq(messages.status, 'unread'),
-              sql`${messages.senderId} != ${userId}`
-            )
-          );
+        // Get unread count for this thread - only count if this conversation would appear in "Received" tab
+        // This means the latest message was sent TO the user (not BY the user)
+        const shouldCountUnread = latestMessage?.senderId !== userId;
+        
+        let unreadResult = { count: 0 };
+        if (shouldCountUnread) {
+          const [result] = await db
+            .select({ count: count(messages.id) })
+            .from(messages)
+            .where(
+              and(
+                eq(messages.threadId, thread.id),
+                eq(messages.status, 'unread'),
+                sql`${messages.senderId} != ${userId}`
+              )
+            );
+          unreadResult = result;
+        }
         
         // Get listing info if applicable
         let listing = null;
