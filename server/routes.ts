@@ -3143,7 +3143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/seller/low-stock', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/low-stock', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -3160,7 +3160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk operations
-  app.put('/api/seller/listings/bulk', isAuthenticated, async (req: any, res) => {
+  app.put('/api/seller/listings/bulk', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
