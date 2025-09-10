@@ -3411,11 +3411,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       console.log('[MESSAGES] User', userId, 'requesting conversations');
       
-      // Return empty array instead of mock data to fix reappearing messages issue
-      // User will have no fake conversations to delete that keep coming back
-      console.log('[MESSAGES] Returning empty conversations array (no mock data)');
+      // Retrieve actual conversations from the database
+      const conversations = await storage.getUserMessageThreads(userId);
+      console.log(`[MESSAGES] Found ${conversations.length} conversations for user ${userId}`);
       
-      res.json([]);
+      res.json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
       res.status(500).json({ error: "Failed to fetch conversations" });
@@ -3428,20 +3428,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       console.log('[MESSAGES] User', userId, 'requesting sent conversations');
       
-      // Return empty array instead of mock data to fix reappearing messages issue
-      console.log('[MESSAGES] Returning empty sent conversations array (no mock data)');
+      // Get all conversations and filter for ones where this user sent messages
+      const allConversations = await storage.getUserMessageThreads(userId);
       
-      res.json([]);
+      // Filter for conversations where the user has sent messages
+      const sentConversations = [];
+      for (const conversation of allConversations) {
+        if (conversation.latestMessage?.senderId === userId) {
+          sentConversations.push(conversation);
+        }
+      }
+      
+      console.log(`[MESSAGES] Found ${sentConversations.length} sent conversations for user ${userId}`);
+      res.json(sentConversations);
     } catch (error) {
       console.error("Error fetching sent conversations:", error);
       res.status(500).json({ error: "Failed to fetch sent conversations" });
     }
   });
 
-  app.get('/api/messages/conversation/:id', async (req: any, res) => {
+  app.get('/api/messages/conversation/:id', requireAuth, async (req: any, res) => {
     try {
-      // For now, return empty array - basic implementation  
-      res.json([]);
+      const userId = req.user.claims.sub;
+      const conversationId = req.params.id;
+      
+      console.log(`[MESSAGES] User ${userId} requesting messages for conversation ${conversationId}`);
+      
+      // First verify the user has access to this conversation
+      const threads = await storage.getUserMessageThreads(userId);
+      const hasAccess = threads.some(thread => thread.id === conversationId);
+      
+      if (!hasAccess) {
+        console.log(`[MESSAGES] User ${userId} does not have access to conversation ${conversationId}`);
+        return res.status(403).json({ error: "Access denied to this conversation" });
+      }
+      
+      // Retrieve messages for this conversation
+      const messages = await storage.getConversationMessages(conversationId);
+      console.log(`[MESSAGES] Found ${messages.length} messages in conversation ${conversationId}`);
+      
+      res.json(messages);
     } catch (error) {
       console.error("Error fetching conversation messages:", error);
       res.status(500).json({ error: "Failed to fetch conversation messages" });
@@ -3453,23 +3479,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { recipientId, content, listingId } = req.body;
       
-      // Create a simple conversation ID and send the first message
-      const conversationId = `conv-${Date.now()}`;
+      console.log(`[MESSAGES] Starting conversation between ${userId} and ${recipientId}`);
+      
+      // Determine if this user is buyer or seller based on the context
+      // If they're messaging about a listing, the listing owner is the seller
+      let buyerId = userId;
+      let sellerId = recipientId;
+      
+      if (listingId) {
+        // Check who owns the listing to determine roles correctly
+        const listing = await storage.getListing(listingId);
+        if (listing) {
+          const seller = await storage.getSeller(listing.sellerId);
+          if (seller) {
+            // If the current user owns the listing, they're the seller
+            if (seller.userId === userId) {
+              sellerId = userId;
+              buyerId = recipientId;
+            } else {
+              // Otherwise, they're the buyer
+              sellerId = seller.userId;
+              buyerId = userId;
+            }
+          }
+        }
+      }
+      
+      // Create or get message thread
+      const thread = await storage.createOrGetMessageThread(buyerId, sellerId, listingId);
+      console.log(`[MESSAGES] Created/found thread: ${thread.id}`);
+      
+      // Send the first message if content is provided
+      let message = null;
+      if (content && content.trim()) {
+        message = await storage.sendMessage(thread.id, userId, content.trim());
+        console.log(`[MESSAGES] Sent initial message: ${message.id}`);
+      }
       
       // Send email notification to recipient
       try {
-        // Email notification would be sent here in production
-        console.log(`Would send email notification for new conversation with ${recipientId}`);
-        // Note: recipient email would need to be fetched from storage in real implementation
-        console.log(`Would send email notification about new message from ${userId}`);
+        const recipient = await storage.getUser(recipientId);
+        if (recipient?.email) {
+          console.log(`[MESSAGES] Would send email notification to ${recipient.email} about new message from ${userId}`);
+          // Email notification would be sent here in production using emailService
+          // await emailService.sendMessageNotification(recipient.email, userId, content);
+        }
       } catch (emailError: any) {
         console.warn("Failed to send email notification:", emailError);
         // Don't fail the message send if email fails
       }
       
       res.json({ 
-        id: conversationId,
-        message: "Conversation started successfully" 
+        id: thread.id,
+        thread,
+        message,
+        success: true
       });
       
     } catch (error) {
@@ -3483,23 +3547,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { conversationId, content } = req.body;
       
-      // Send email notification (simplified - in real implementation, 
-      // we'd need to identify the recipient from the conversation)
-      try {
-        // This is a simplified implementation
-        console.log("Would send email notification for new message");
-      } catch (emailError: any) {
-        console.warn("Failed to send email notification:", emailError);
+      console.log(`[MESSAGES] User ${userId} sending message to conversation ${conversationId}`);
+      
+      // Validate inputs
+      if (!conversationId || !content?.trim()) {
+        return res.status(400).json({ error: "conversationId and content are required" });
       }
       
-      res.json({ 
-        id: `msg-${Date.now()}`,
-        conversationId,
-        senderId: userId,
-        content,
-        timestamp: new Date().toISOString(),
-        message: "Message sent successfully" 
-      });
+      // Verify user has access to this conversation
+      const threads = await storage.getUserMessageThreads(userId);
+      const hasAccess = threads.some(thread => thread.id === conversationId);
+      
+      if (!hasAccess) {
+        console.log(`[MESSAGES] User ${userId} does not have access to conversation ${conversationId}`);
+        return res.status(403).json({ error: "Access denied to this conversation" });
+      }
+      
+      // Send the message using storage
+      const message = await storage.sendMessage(conversationId, userId, content.trim());
+      console.log(`[MESSAGES] Message sent successfully: ${message.id}`);
+      
+      // Send email notification to the recipient
+      try {
+        const thread = threads.find(t => t.id === conversationId);
+        if (thread?.otherUser?.id) {
+          const recipient = await storage.getUser(thread.otherUser.id);
+          if (recipient?.email) {
+            console.log(`[MESSAGES] Would send email notification to ${recipient.email} about new message from ${userId}`);
+            // Email notification would be sent here in production using emailService
+            // await emailService.sendMessageNotification(recipient.email, userId, content);
+          }
+        }
+      } catch (emailError: any) {
+        console.warn("Failed to send email notification:", emailError);
+        // Don't fail the message send if email fails
+      }
+      
+      res.json(message);
       
     } catch (error) {
       console.error("Error sending message:", error);

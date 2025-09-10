@@ -163,6 +163,9 @@ export interface IStorage {
   deleteMessage(messageId: string, userId: string): Promise<void>;
   deleteConversation(conversationId: string, userId: string): Promise<void>;
   bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void>;
+  getUserMessageThreads(userId: string): Promise<any[]>;
+  getConversationMessages(threadId: string): Promise<Message[]>;
+  createOrGetMessageThread(buyerId: string, sellerId: string, listingId?: string, orderId?: string): Promise<MessageThread>;
   
   // Notifications
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -1299,6 +1302,120 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return Number(result.count);
+  }
+
+  async getUserMessageThreads(userId: string): Promise<any[]> {
+    const threads = await db
+      .select({
+        id: messageThreads.id,
+        buyerId: messageThreads.buyerId,
+        sellerId: messageThreads.sellerId,
+        orderId: messageThreads.orderId,
+        listingId: messageThreads.listingId,
+        subject: messageThreads.subject,
+        createdAt: messageThreads.createdAt,
+        updatedAt: messageThreads.updatedAt
+      })
+      .from(messageThreads)
+      .where(or(eq(messageThreads.buyerId, userId), eq(messageThreads.sellerId, userId)))
+      .orderBy(desc(messageThreads.updatedAt));
+    
+    // Fetch additional data for each thread
+    const threadsWithDetails = await Promise.all(
+      threads.map(async (thread) => {
+        // Get the other participant (buyer or seller)
+        const otherUserId = thread.buyerId === userId ? thread.sellerId : thread.buyerId;
+        const [otherUser] = await db.select().from(users).where(eq(users.id, otherUserId));
+        
+        // Get the latest message
+        const [latestMessage] = await db
+          .select()
+          .from(messages)
+          .where(eq(messages.threadId, thread.id))
+          .orderBy(desc(messages.createdAt))
+          .limit(1);
+        
+        // Get unread count for this thread
+        const [unreadResult] = await db
+          .select({ count: count(messages.id) })
+          .from(messages)
+          .where(
+            and(
+              eq(messages.threadId, thread.id),
+              eq(messages.status, 'unread'),
+              sql`${messages.senderId} != ${userId}`
+            )
+          );
+        
+        // Get listing info if applicable
+        let listing = null;
+        if (thread.listingId) {
+          const [listingResult] = await db.select().from(listings).where(eq(listings.id, thread.listingId));
+          listing = listingResult;
+        }
+        
+        return {
+          ...thread,
+          otherUser: otherUser ? {
+            id: otherUser.id,
+            firstName: otherUser.firstName,
+            lastName: otherUser.lastName,
+            profileImageUrl: otherUser.profileImageUrl
+          } : null,
+          latestMessage,
+          unreadCount: Number(unreadResult.count),
+          listing
+        };
+      })
+    );
+    
+    return threadsWithDetails;
+  }
+
+  async getConversationMessages(threadId: string): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(eq(messages.threadId, threadId))
+      .orderBy(asc(messages.createdAt));
+  }
+
+  async createOrGetMessageThread(buyerId: string, sellerId: string, listingId?: string, orderId?: string): Promise<MessageThread> {
+    // First check if a thread already exists between these users for this listing/order
+    let conditions = [
+      eq(messageThreads.buyerId, buyerId),
+      eq(messageThreads.sellerId, sellerId)
+    ];
+    
+    if (listingId) {
+      conditions.push(eq(messageThreads.listingId, listingId));
+    } else if (orderId) {
+      conditions.push(eq(messageThreads.orderId, orderId));
+    }
+    
+    const [existingThread] = await db
+      .select()
+      .from(messageThreads)
+      .where(and(...conditions))
+      .limit(1);
+    
+    if (existingThread) {
+      return existingThread;
+    }
+    
+    // Create new thread if none exists
+    const [newThread] = await db
+      .insert(messageThreads)
+      .values({
+        buyerId,
+        sellerId,
+        listingId,
+        orderId,
+        subject: listingId ? 'About your listing' : (orderId ? 'About your order' : 'Message')
+      })
+      .returning();
+    
+    return newThread;
   }
 
   // Notifications
