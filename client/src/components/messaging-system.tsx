@@ -173,22 +173,11 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     },
   });
 
-  // Simple delete handler for demo mode
+  // Simple delete handler for demo mode (deprecated - using real API now)
   const handleDeleteConversation = (conversationId: string, participantName: string) => {
-    if (window.confirm(`Delete conversation with ${participantName}?`)) {
-      // Actually remove the conversation from demo state
-      setDemoConversations(prev => prev.filter(conv => conv.id !== conversationId));
-      
-      // Clear selected conversation if it was deleted
-      if (selectedConversation === conversationId) {
-        setSelectedConversation(null);
-      }
-      
-      toast({
-        title: "Conversation Deleted",
-        description: `Conversation with ${participantName} has been removed.`,
-      });
-    }
+    // Since DEMO_MODE is false, this function is no longer used
+    // All deletion now goes through deleteConversationMutation
+    deleteConversationMutation.mutate(conversationId);
   };
 
   // Delete conversation mutation (for real data)
@@ -309,18 +298,16 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     bulkDeleteMutation.mutate(Array.from(selectedConversations));
   };
 
-  // Always use mock data for demo
-  const activeConversations = DEMO_MODE ? demoConversations : (activeTab === 'received' 
-    ? (conversations || (conversationsError ? mockConversations : undefined))
-    : (sentConversations || (sentConversationsError ? [] : undefined)));
+  // Use real API data only (DEMO_MODE is false)
+  const activeConversations = activeTab === 'received' 
+    ? (conversations || [])
+    : (sentConversations || []);
   const activeLoading = DEMO_MODE ? false : (activeTab === 'received' ? conversationsLoading : sentConversationsLoading);
 
-  // Always use mock messages for demo
-  const activeMessages = DEMO_MODE && selectedConversation ? 
-    mockMessages.filter((msg: Message) => msg.conversationId === selectedConversation) : 
-    (Array.isArray(messages) ? messages : []);
+  // Use real API messages only (DEMO_MODE is false)
+  const activeMessages = Array.isArray(messages) ? messages : [];
 
-  const filteredConversations = activeConversations?.filter((conv: Conversation) =>
+  const filteredConversations = (activeConversations as Conversation[] | undefined)?.filter((conv: Conversation) =>
     conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conv.listingTitle?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -491,11 +478,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
                             className="h-6 px-2 text-xs text-red-400 border-red-600 hover:bg-red-600 hover:text-white"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (DEMO_MODE) {
-                                handleDeleteConversation(conversation.id, conversation.participantName);
-                              } else {
-                                deleteConversationMutation.mutate(conversation.id);
-                              }
+                              deleteConversationMutation.mutate(conversation.id);
                             }}
                             data-testid={`button-delete-conversation-${conversation.id}`}
                             title="Delete conversation"
