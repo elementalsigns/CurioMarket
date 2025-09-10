@@ -25,6 +25,23 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
+  // Configure session cookie settings for custom domain support
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieConfig = {
+    httpOnly: true,
+    secure: isProduction, // HTTPS required in production
+    maxAge: sessionTtl,
+    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-site in production
+    domain: isProduction ? '.curiosities.market' : undefined, // Set domain for production
+  };
+  
+  console.log('[SESSION] Cookie config:', {
+    isProduction,
+    secure: cookieConfig.secure,
+    sameSite: cookieConfig.sameSite,
+    domain: cookieConfig.domain
+  });
+  
   try {
     const pgStore = connectPg(session);
     const sessionStore = new pgStore({
@@ -39,13 +56,7 @@ export function getSession() {
       store: sessionStore,
       resave: false,
       saveUninitialized: true, // Allow session creation for guest users
-      cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Only secure in production
-        maxAge: sessionTtl,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Lax for development
-        domain: undefined, // Allow cross-domain
-      },
+      cookie: cookieConfig,
     });
   } catch (error) {
     console.error("Session store error:", error);
@@ -54,13 +65,7 @@ export function getSession() {
       secret: process.env.SESSION_SECRET!,
       resave: false,
       saveUninitialized: true, // Allow session creation for guest users
-      cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Only secure in production
-        maxAge: sessionTtl,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Lax for development
-        domain: undefined, // Allow cross-domain
-      },
+      cookie: cookieConfig,
     });
   }
 }
