@@ -1433,9 +1433,22 @@ export class DatabaseStorage implements IStorage {
         
         // Get listing info if applicable
         let listing = null;
+        let listingImage = null;
         if (thread.listingId) {
           const [listingResult] = await db.select().from(listings).where(eq(listings.id, thread.listingId));
           listing = listingResult;
+          
+          // Get the first image for this listing
+          if (listing) {
+            const [firstImage] = await db
+              .select()
+              .from(listingImages)
+              .where(eq(listingImages.listingId, thread.listingId))
+              .orderBy(listingImages.sortOrder)
+              .limit(1);
+            
+            listingImage = firstImage?.url || null;
+          }
         }
         
         return {
@@ -1450,7 +1463,8 @@ export class DatabaseStorage implements IStorage {
           participantName,
           latestMessage,
           unreadCount: Number(unreadResult.count),
-          listing
+          listing,
+          listingImage
         };
       })
     );

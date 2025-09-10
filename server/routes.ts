@@ -3409,14 +3409,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/messages/conversations', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      console.log('[MESSAGES] User', userId, 'requesting conversations');
+      console.log('[MESSAGES] User', userId, 'requesting received conversations');
       
       // Retrieve actual conversations from the database
-      const conversations = await storage.getUserMessageThreads(userId);
-      console.log(`[MESSAGES] Found ${conversations.length} conversations for user ${userId}`);
+      const allConversations = await storage.getUserMessageThreads(userId);
+      console.log(`[MESSAGES] Found ${allConversations.length} total conversations for user ${userId}`);
+      
+      // For received conversations, show where the LATEST MESSAGE was sent TO the user
+      // This works for both buyers and sellers - anyone can receive messages
+      const receivedConversations = allConversations.filter(conversation => {
+        return conversation.latestMessage?.senderId !== userId; // Latest message was sent TO the user
+      });
+      
+      console.log(`[MESSAGES] Found ${receivedConversations.length} received conversations for user ${userId}`);
       
       // Transform data for frontend compatibility
-      const transformedConversations = conversations.map(conv => ({
+      const transformedConversations = receivedConversations.map(conv => ({
         id: conv.id,
         participantName: conv.participantName,
         participantAvatar: conv.participantAvatar,
@@ -3424,7 +3432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastMessageTime: conv.latestMessage?.createdAt || conv.createdAt,
         unreadCount: conv.unreadCount || 0,
         listingTitle: conv.listing?.title || null,
-        listingImage: conv.listing?.id ? `/api/listings/${conv.listing.id}/image` : null,
+        listingImage: conv.listingImage || null, // Use actual image URL from database
         // Include all original data for backward compatibility
         ...conv
       }));
@@ -3442,16 +3450,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       console.log('[MESSAGES] User', userId, 'requesting sent conversations');
       
-      // Get all conversations and filter for ones where this user sent messages
+      // Get all conversations and filter properly for sent vs received
       const allConversations = await storage.getUserMessageThreads(userId);
       
-      // Filter for conversations where the user has sent messages
-      const sentConversations = [];
-      for (const conversation of allConversations) {
-        if (conversation.latestMessage?.senderId === userId) {
-          sentConversations.push(conversation);
-        }
-      }
+      // For sent conversations, show where the LATEST MESSAGE was sent BY the user
+      // This works for both buyers and sellers - anyone can send messages
+      const sentConversations = allConversations.filter(conversation => {
+        return conversation.latestMessage?.senderId === userId; // Latest message was sent BY the user
+      });
       
       // Transform data for frontend compatibility
       const transformedSentConversations = sentConversations.map(conv => ({
@@ -3462,7 +3468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastMessageTime: conv.latestMessage?.createdAt || conv.createdAt,
         unreadCount: conv.unreadCount || 0,
         listingTitle: conv.listing?.title || null,
-        listingImage: conv.listing?.id ? `/api/listings/${conv.listing.id}/image` : null,
+        listingImage: conv.listingImage || null, // Use actual image URL from database
         // Include all original data for backward compatibility
         ...conv
       }));
