@@ -513,25 +513,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(authInfo);
   });
   
-  // Simple auth middleware that accepts any reasonable token
+  // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
+      console.log('[UNIFIED-AUTH] Processing request:', req.method, req.path);
+      
       // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
-        console.log('[REQUIRE-AUTH] Found Bearer token, validating...');
+        console.log('[UNIFIED-AUTH] Found Bearer token, validating...');
         
-        // Validate token properly (don't hardcode user ID)
         if (token && token.length > 10) {
-          // TODO: Implement proper token validation
-          console.log('[REQUIRE-AUTH] Bearer token validation needed - skipping for now');
+          try {
+            // Simple token validation - make a request to Replit userinfo endpoint
+            const response = await fetch('https://replit.com/api/userinfo', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+              const userinfo = await response.json();
+              req.user = {
+                claims: userinfo,
+                access_token: token,
+                expires_at: Math.floor(Date.now() / 1000) + 3600
+              };
+              console.log('[UNIFIED-AUTH] Success via Bearer token for user:', userinfo.sub || userinfo.id);
+              return next();
+            }
+          } catch (error) {
+            console.log('[UNIFIED-AUTH] Bearer token validation failed:', error);
+          }
         }
       }
 
-      // Method 2: Check session authentication - BYPASS FOR LIVE SITE
+      // Method 2: Check session authentication
       if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        console.log('[REQUIRE-AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
+        console.log('[UNIFIED-AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
         
         // Handle cases where user is authenticated but missing expires_at
         if (!req.user.expires_at) {
@@ -541,13 +559,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      // TEMPORARY FIX: Allow authenticated users through
-      // The proper isAuthenticated middleware will handle the real auth check
-      console.log('[REQUIRE-AUTH] TEMP FIX - Allowing request through to main auth system');
-      return next();
+      // NO MORE BYPASSES - Require proper authentication
+      console.log('[UNIFIED-AUTH] Authentication failed - no valid token or session');
+      return res.status(401).json({ message: "Authentication required" });
 
     } catch (error) {
-      console.error('[REQUIRE-AUTH] Auth middleware error:', error);
+      console.error('[UNIFIED-AUTH] Auth middleware error:', error);
       return res.status(500).json({ message: "Authentication error" });
     }
   };
@@ -1861,7 +1878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seller onboarding route (matches frontend expectation)
-  app.post('/api/sellers/onboard', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sellers/onboard', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1938,7 +1955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get detailed subscription status
-  app.get('/api/subscription/status', isAuthenticated, async (req: any, res) => {
+  app.get('/api/subscription/status', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1974,7 +1991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cancel seller subscription
-  app.post('/api/seller/subscription/cancel', isAuthenticated, async (req: any, res) => {
+  app.post('/api/seller/subscription/cancel', requireAuth, async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
@@ -2005,7 +2022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reactivate subscription (undo cancellation)
-  app.post('/api/subscription/reactivate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscription/reactivate', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -2030,7 +2047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get billing history
-  app.get('/api/subscription/billing-history', isAuthenticated, async (req: any, res) => {
+  app.get('/api/subscription/billing-history', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -2064,7 +2081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create setup intent for payment method update
-  app.post('/api/subscription/setup-intent', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscription/setup-intent', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -2086,7 +2103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update payment method
-  app.post('/api/subscription/update-payment-method', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscription/update-payment-method', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { paymentMethodId } = req.body;
@@ -2131,7 +2148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== LISTING MANAGEMENT ====================
   
   // Create listing
-  app.post('/api/listings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/listings', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -2321,7 +2338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete listing
-  app.delete('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/listings/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -2441,7 +2458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== PRODUCT DISPLAY ORDER ====================
   
   // Update single listing display order
-  app.put('/api/listings/:id/display-order', isAuthenticated, async (req: any, res) => {
+  app.put('/api/listings/:id/display-order', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -2471,7 +2488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update multiple listings display order (for drag-and-drop reordering)
-  app.put('/api/seller/listings/reorder', isAuthenticated, async (req: any, res) => {
+  app.put('/api/seller/listings/reorder', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -3041,8 +3058,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stock management - TEMPORARY: Authentication disabled for production testing
-  app.put('/api/listings/:id/stock', async (req: any, res) => {
+  // Stock management - FIXED: Using unified authentication
+  app.put('/api/listings/:id/stock', requireAuth, async (req: any, res) => {
     try {
       const { quantity } = req.body;
       const listing = await storage.updateListingStock(req.params.id, quantity);
@@ -3053,19 +3070,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Full listing update - TEMPORARY: Authentication disabled for production testing  
-  app.put('/api/listings/:id', async (req: any, res) => {
+  // Full listing update - FIXED: Using unified authentication
+  app.put('/api/listings/:id', requireAuth, async (req: any, res) => {
     try {
-      // TEMP FIX: Skip authentication for production testing
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      // Verify listing ownership
       const existingListing = await storage.getListing(req.params.id);
       if (!existingListing) {
         return res.status(404).json({ error: "Listing not found" });
+      }
+      if (existingListing.sellerId !== seller.id) {
+        return res.status(403).json({ error: "Not authorized to update this listing" });
       }
 
       const listingData = {
         ...req.body,
         id: req.params.id,
-        sellerId: existingListing.sellerId // Keep original seller
+        sellerId: seller.id
       };
 
       const listing = await storage.updateListing(req.params.id, listingData);
