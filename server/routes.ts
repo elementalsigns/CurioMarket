@@ -3415,7 +3415,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversations = await storage.getUserMessageThreads(userId);
       console.log(`[MESSAGES] Found ${conversations.length} conversations for user ${userId}`);
       
-      res.json(conversations);
+      // Transform data for frontend compatibility
+      const transformedConversations = conversations.map(conv => ({
+        id: conv.id,
+        participantName: conv.participantName,
+        participantAvatar: conv.participantAvatar,
+        lastMessage: conv.latestMessage?.content || 'No messages yet',
+        lastMessageTime: conv.latestMessage?.createdAt || conv.createdAt,
+        unreadCount: conv.unreadCount || 0,
+        listingTitle: conv.listing?.title || null,
+        listingImage: conv.listing?.id ? `/api/listings/${conv.listing.id}/image` : null,
+        // Include all original data for backward compatibility
+        ...conv
+      }));
+      
+      res.json(transformedConversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
       res.status(500).json({ error: "Failed to fetch conversations" });
@@ -3439,8 +3453,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Transform data for frontend compatibility
+      const transformedSentConversations = sentConversations.map(conv => ({
+        id: conv.id,
+        participantName: conv.participantName,
+        participantAvatar: conv.participantAvatar,
+        lastMessage: conv.latestMessage?.content || 'No messages yet',
+        lastMessageTime: conv.latestMessage?.createdAt || conv.createdAt,
+        unreadCount: conv.unreadCount || 0,
+        listingTitle: conv.listing?.title || null,
+        listingImage: conv.listing?.id ? `/api/listings/${conv.listing.id}/image` : null,
+        // Include all original data for backward compatibility
+        ...conv
+      }));
+      
       console.log(`[MESSAGES] Found ${sentConversations.length} sent conversations for user ${userId}`);
-      res.json(sentConversations);
+      res.json(transformedSentConversations);
     } catch (error) {
       console.error("Error fetching sent conversations:", error);
       res.status(500).json({ error: "Failed to fetch sent conversations" });

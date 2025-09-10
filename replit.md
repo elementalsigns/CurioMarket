@@ -1,7 +1,10 @@
 # Overview
 Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 3% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
-## Recent Enhancement (August 31, 2025)
+## Recent Enhancement (September 10, 2025)
+- **Messaging Avatar System**: Fixed shop icon display in messaging interface. Shop owners now show their proper shop avatar images and shop names in conversations instead of generic "?" placeholders. System automatically detects seller participants and prioritizes shop avatars over user profile images for professional messaging experience.
+
+## Previous Enhancement (August 31, 2025)
 - **Complete Webhook & Domain Alignment**: Resolved critical Stripe webhook signature verification and domain mismatch issues. Fixed middleware order to ensure raw request body for webhook signature verification, corrected frontend payment flow to use `confirmCardSetup` for subscription setup intents, and aligned all backend domain references to primary custom domain `https://www.curiosities.market`. Webhook URL updated from `.replit.app` to custom domain for proper subscription activation.
 
 ## Previous Enhancement (August 30, 2025)

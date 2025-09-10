@@ -1379,6 +1379,22 @@ export class DatabaseStorage implements IStorage {
         const otherUserId = thread.buyerId === userId ? thread.sellerId : thread.buyerId;
         const [otherUser] = await db.select().from(users).where(eq(users.id, otherUserId));
         
+        // Check if the other user is a seller to get their shop avatar
+        let participantAvatar = otherUser?.profileImageUrl || null;
+        let participantName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User';
+        
+        // If this person is a seller, use their shop avatar and shop name
+        const [sellerProfile] = await db
+          .select()
+          .from(sellers)
+          .where(eq(sellers.userId, otherUserId))
+          .limit(1);
+        
+        if (sellerProfile) {
+          participantAvatar = sellerProfile.avatar || participantAvatar;
+          participantName = sellerProfile.shopName || participantName;
+        }
+        
         // Get the latest message
         const [latestMessage] = await db
           .select()
@@ -1414,6 +1430,8 @@ export class DatabaseStorage implements IStorage {
             lastName: otherUser.lastName,
             profileImageUrl: otherUser.profileImageUrl
           } : null,
+          participantAvatar,
+          participantName,
           latestMessage,
           unreadCount: Number(unreadResult.count),
           listing
