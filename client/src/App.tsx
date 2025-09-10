@@ -43,6 +43,7 @@ import InventoryManagement from "@/pages/inventory-management";
 import Reviews from "@/pages/reviews";
 import Verification from "@/pages/verification";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminPage from "@/pages/admin";
 import Events from "@/pages/events";
 import SignIn from "@/pages/signin";
 import SignInOnly from "@/pages/signin-only";
@@ -205,6 +206,7 @@ function Router() {
           <Route path="/account" component={AccountManager} />
           <Route path="/verification" component={Verification} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/cleanup" component={AdminPage} />
           <Route path="/wishlists" component={Wishlists} />
           <Route path="/events" component={Events} />
           <Route path="/incognito-auth" component={IncognitoAuth} />
