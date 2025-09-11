@@ -166,31 +166,134 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log(`[WEBHOOK] Processing order completion for payment intent: ${paymentIntent.id}`);
     
-    // Call the existing order creation endpoint which handles order creation and emails
-    const createOrderUrl = `http://localhost:${process.env.PORT || 5000}/api/create-order`;
-    const orderPayload = {
-      paymentIntentId: paymentIntent.id,
-      shippingAddress: paymentIntent.shipping || {},
-      cartItems: [] // This will be retrieved from metadata or reconstructed
-    };
-
-    console.log(`[WEBHOOK] Calling create-order endpoint for payment intent: ${paymentIntent.id}`);
-    
-    // Make internal API call to create order and send emails
-    const response = await fetch(createOrderUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderPayload)
-    });
-
-    if (response.ok) {
-      console.log(`[WEBHOOK] ✅ Order creation and email sending completed successfully`);
-    } else {
-      const errorText = await response.text();
-      console.error(`[WEBHOOK] ❌ Order creation failed: ${response.status} - ${errorText}`);
+    // Create order directly using the same logic as /api/create-order endpoint
+    if (!paymentIntent.metadata?.userId) {
+      console.error(`[WEBHOOK] No user ID in payment intent metadata: ${paymentIntent.id}`);
+      return;
     }
+
+    const userId = paymentIntent.metadata.userId;
+    const subtotal = parseFloat(paymentIntent.metadata.subtotal || '0');
+    const shippingCost = parseFloat(paymentIntent.metadata.shippingCost || '0');
+    const platformFee = parseFloat(paymentIntent.metadata.platformFee || '0');
+    const total = (paymentIntent.amount / 100).toFixed(2); // Convert from cents
+
+    console.log(`[WEBHOOK] Creating order for user: ${userId}, total: $${total}`);
+
+    // Get cart items for this user
+    const cart = await storage.getOrCreateCart(userId);
+    const cartItems = await storage.getCartItems(cart.id);
+
+    if (!cartItems || cartItems.length === 0) {
+      console.error(`[WEBHOOK] No cart items found for user: ${userId}`);
+      return;
+    }
+
+    console.log(`[WEBHOOK] Found ${cartItems.length} cart items for user ${userId}`);
+
+    // Get user info for emails
+    const user = await storage.getUser(userId);
+    if (!user) {
+      console.error(`[WEBHOOK] User not found: ${userId}`);
+      return;
+    }
+
+    // Group cart items by seller to create separate orders
+    const ordersBySeller = new Map();
+    
+    for (const cartItem of cartItems) {
+      const listing = await storage.getListing(cartItem.listingId);
+      if (!listing) {
+        console.warn(`[WEBHOOK] Listing not found: ${cartItem.listingId}`);
+        continue;
+      }
+
+      const sellerId = listing.sellerId;
+      if (!ordersBySeller.has(sellerId)) {
+        ordersBySeller.set(sellerId, {
+          sellerId,
+          items: [],
+          subtotal: 0
+        });
+      }
+
+      const orderGroup = ordersBySeller.get(sellerId);
+      const itemTotal = parseFloat(listing.price) * (cartItem.quantity || 1);
+      
+      orderGroup.items.push({
+        listingId: cartItem.listingId,
+        quantity: cartItem.quantity || 1,
+        price: listing.price,
+        title: listing.title
+      });
+      orderGroup.subtotal += itemTotal;
+    }
+
+    // Create orders and send emails for each seller
+    for (const [sellerId, orderGroup] of ordersBySeller.entries()) {
+      try {
+        console.log(`[WEBHOOK] Creating order for seller: ${sellerId}`);
+        
+        // Create order in database
+        const orderData = {
+          id: crypto.randomUUID(),
+          buyerId: userId,
+          sellerId,
+          status: 'paid',
+          total: orderGroup.subtotal.toFixed(2),
+          paymentIntentId: paymentIntent.id,
+          shippingAddress: paymentIntent.shipping || {}
+        };
+
+        const order = await storage.createOrder(orderData);
+        console.log(`[WEBHOOK] Created order: ${order.id}`);
+
+        // Create order items
+        for (const item of orderGroup.items) {
+          await storage.createOrderItem({
+            orderId: order.id,
+            listingId: item.listingId,
+            quantity: item.quantity,
+            price: item.price
+          });
+        }
+
+        // Get seller info for emails
+        const seller = await storage.getSellerByUserId(sellerId);
+        
+        // Prepare email data
+        const emailData = {
+          customerEmail: user.email,
+          customerName: user.firstName || user.email?.split('@')[0] || 'Customer',
+          orderId: order.id,
+          orderNumber: `#${order.id.slice(-8).toUpperCase()}`,
+          orderTotal: order.total,
+          orderItems: orderGroup.items,
+          shippingAddress: paymentIntent.shipping,
+          shopName: seller?.shopName || 'Curio Market Seller',
+          sellerEmail: seller?.email || 'seller@curiosities.market'
+        };
+
+        console.log(`[WEBHOOK] Sending confirmation emails for order ${emailData.orderNumber}`);
+        
+        // Send buyer confirmation email
+        const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
+        console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
+
+        // Send seller notification email
+        if (seller?.email && seller.email !== 'seller@curiosities.market') {
+          const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
+          console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
+        }
+
+      } catch (orderError: any) {
+        console.error(`[WEBHOOK] Error creating order for seller ${sellerId}:`, orderError.message);
+      }
+    }
+
+    // Clear cart after successful order creation
+    await storage.clearCartByUserId(userId);
+    console.log(`[WEBHOOK] ✅ Order processing completed for payment intent: ${paymentIntent.id}`);
 
   } catch (error: any) {
     console.error(`[WEBHOOK] Error handling order completion:`, error.message);
@@ -263,12 +366,12 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v4.0: 2025-09-11 19:35 WEBHOOK TRIGGERS EMAILS
+// CACHE BUST v4.1: 2025-09-11 20:35 WEBHOOK DIRECT EMAIL FIX
 export async function registerRoutes(app: Express): Promise<Server> {
   // Version endpoint to verify which backend version is running
   app.get('/api/version', (req, res) => {
     res.json({ 
-      version: 'v4.0-2025-09-11-19:35-WEBHOOK-TRIGGERS-EMAILS',
+      version: 'v4.1-2025-09-11-20:35-WEBHOOK-DIRECT-EMAIL-FIX',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
