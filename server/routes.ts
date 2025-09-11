@@ -162,6 +162,41 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 // CRITICAL: Handle setup intent success - this automatically activates subscriptions!
+async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
+  try {
+    console.log(`[WEBHOOK] Processing order completion for payment intent: ${paymentIntent.id}`);
+    
+    // Call the existing order creation endpoint which handles order creation and emails
+    const createOrderUrl = `http://localhost:${process.env.PORT || 5000}/api/create-order`;
+    const orderPayload = {
+      paymentIntentId: paymentIntent.id,
+      shippingAddress: paymentIntent.shipping || {},
+      cartItems: [] // This will be retrieved from metadata or reconstructed
+    };
+
+    console.log(`[WEBHOOK] Calling create-order endpoint for payment intent: ${paymentIntent.id}`);
+    
+    // Make internal API call to create order and send emails
+    const response = await fetch(createOrderUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderPayload)
+    });
+
+    if (response.ok) {
+      console.log(`[WEBHOOK] ✅ Order creation and email sending completed successfully`);
+    } else {
+      const errorText = await response.text();
+      console.error(`[WEBHOOK] ❌ Order creation failed: ${response.status} - ${errorText}`);
+    }
+
+  } catch (error: any) {
+    console.error(`[WEBHOOK] Error handling order completion:`, error.message);
+  }
+}
+
 async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   if (!stripe) return;
   
@@ -228,12 +263,12 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v3.8: 2025-09-11 19:24 MINIMAL EMAIL FIX
+// CACHE BUST v4.0: 2025-09-11 19:35 WEBHOOK TRIGGERS EMAILS
 export async function registerRoutes(app: Express): Promise<Server> {
   // Version endpoint to verify which backend version is running
   app.get('/api/version', (req, res) => {
     res.json({ 
-      version: 'v3.8-2025-09-11-19:24-MINIMAL-EMAIL-FIX',
+      version: 'v4.0-2025-09-11-19:35-WEBHOOK-TRIGGERS-EMAILS',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
@@ -356,6 +391,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.error(`[WEBHOOK] Error retrieving subscription for invoice ${invoice.id}:`, error.message);
             }
           }
+          break;
+
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          console.log(`[WEBHOOK] Payment intent succeeded: ${paymentIntent.id}`);
+          await handleOrderCompletion(paymentIntent);
           break;
         
         default:
