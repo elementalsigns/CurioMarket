@@ -590,13 +590,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test complete order emails endpoint (sends both buyer and seller)
   app.post('/api/test-order-emails', async (req, res) => {
     try {
-      const { email } = req.body;
-      if (!email) return res.status(400).json({ error: 'Email address required' });
+      const { buyerEmail, sellerEmail } = req.body;
+      if (!buyerEmail || !sellerEmail) {
+        return res.status(400).json({ error: 'Both buyerEmail and sellerEmail are required' });
+      }
       
-      console.log(`[TEST ORDER] Simulating complete order flow for: ${email}`);
+      console.log(`[TEST ORDER] Simulating complete order flow - Buyer: ${buyerEmail}, Seller: ${sellerEmail}`);
       
       const emailData = {
-        customerEmail: email,
+        customerEmail: buyerEmail,
         customerName: 'Alex Morgan',
         orderId: crypto.randomUUID(),
         orderNumber: `#${crypto.randomUUID().slice(-8).toUpperCase()}`,
@@ -614,21 +616,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           country: 'US' 
         },
         shopName: 'Midnight Curiosities',
-        sellerEmail: email
+        sellerEmail: sellerEmail
       };
       
-      console.log(`[TEST ORDER] Sending buyer confirmation to: ${email}`);
+      console.log(`[TEST ORDER] Sending buyer confirmation to: ${buyerEmail}`);
       const buyer = await emailService.sendOrderConfirmation(emailData);
       console.log(`[TEST ORDER] Buyer email result: ${buyer ? 'SUCCESS' : 'FAILED'}`);
       
-      console.log(`[TEST ORDER] Sending seller notification to: ${email}`);
+      console.log(`[TEST ORDER] Sending seller notification to: ${sellerEmail}`);
       const seller = await emailService.sendSellerOrderNotification(emailData);
       console.log(`[TEST ORDER] Seller email result: ${seller ? 'SUCCESS' : 'FAILED'}`);
       
       return res.json({ 
         success: buyer && seller, 
         orderNumber: emailData.orderNumber,
-        results: { buyer, seller }
+        results: { 
+          buyer: { sent: buyer, to: buyerEmail },
+          seller: { sent: seller, to: sellerEmail }
+        }
       });
     } catch (e) {
       console.error('[TEST ORDER EMAILS] Error:', e);
