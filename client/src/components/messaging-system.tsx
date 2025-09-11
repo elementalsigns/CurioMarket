@@ -126,6 +126,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversation", selectedConversation] });
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent-conversations"] });
       setMessageText("");
       setIsComposing(false);
       scrollToBottom();
@@ -146,6 +147,7 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages/sent-conversations"] });
       setSelectedConversation(data.id);
       setMessageText("");
       setIsComposing(false);
