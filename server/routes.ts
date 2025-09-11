@@ -228,12 +228,12 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v3.5: 2025-09-11 18:15 EMAIL TEMPLATE FIX
+// CACHE BUST v3.6: 2025-09-11 19:06 EMAIL DEBUG FIX
 export async function registerRoutes(app: Express): Promise<Server> {
   // Version endpoint to verify which backend version is running
   app.get('/api/version', (req, res) => {
     res.json({ 
-      version: 'v3.5-2025-09-11-18:15-EMAIL-TEMPLATE-FIX',
+      version: 'v3.6-2025-09-11-19:06-EMAIL-DEBUG-FIX',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
@@ -2656,7 +2656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== PAYMENT PROCESSING ====================
 
-  // Create order after successful payment
+  // Create order after successful payment - Enhanced for production authentication issues
   app.post('/api/orders/create', async (req: any, res) => {
     try {
       const { paymentIntentId, cartItems, shippingAddress, testMode } = req.body;
@@ -2775,15 +2775,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Cart items are required" });
       }
       
-      // Extract user information from payment intent or session
+      // Enhanced authentication and user extraction for production reliability
       let userId = null;
       let userEmail = null;
+      
+      // DEBUG: Log authentication status
+      console.log('[ORDER CREATE] 🔍 Authentication Debug:');
+      console.log('[ORDER CREATE] - req.isAuthenticated():', req.isAuthenticated());
+      console.log('[ORDER CREATE] - req.user exists:', !!req.user);
+      console.log('[ORDER CREATE] - req.user?.claims:', req.user?.claims);
+      console.log('[ORDER CREATE] - req.sessionID:', req.sessionID);
+      console.log('[ORDER CREATE] - shippingAddress.email:', shippingAddress?.email);
+      console.log('[ORDER CREATE] - paymentIntent will be checked for receipt_email');
       
       // Try to get authenticated user first
       if (req.isAuthenticated() && req.user?.claims?.sub) {
         userId = req.user.claims.sub;
         userEmail = req.user.claims.email;
-        console.log('[ORDER CREATE] Authenticated user found:', userId);
+        console.log('[ORDER CREATE] ✅ Authenticated user found:', userId, userEmail);
+      } else {
+        console.log('[ORDER CREATE] ❌ No authenticated user found, will use guest flow');
       }
       
       if (!stripe) {
@@ -2791,28 +2802,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify payment intent is successful
-      console.log('[ORDER CREATE] Retrieving payment intent:', paymentIntentId);
+      console.log('[ORDER CREATE] 📋 Retrieving payment intent:', paymentIntentId);
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       console.log('[ORDER CREATE] Payment intent status:', paymentIntent.status);
+      console.log('[ORDER CREATE] Payment intent receipt_email:', paymentIntent.receipt_email);
       
       if (paymentIntent.status !== 'succeeded') {
+        console.log('[ORDER CREATE] ❌ Payment not completed, status:', paymentIntent.status);
         return res.status(400).json({ error: "Payment not completed" });
       }
       
-      // If no user from session, try to extract from payment intent metadata or shipping
-      if (!userId && shippingAddress?.name) {
-        console.log('[ORDER CREATE] No authenticated user, using guest order flow');
-        // For guest orders, we'll use email from shipping
-        userEmail = shippingAddress.email || paymentIntent.receipt_email || 'guest@curiosities.market';
-        // For now, we'll use a special guest user ID or create a temporary one
+      // If no user from session, create guest user with comprehensive fallback
+      if (!userId) {
+        console.log('[ORDER CREATE] 🎭 Creating guest user - using comprehensive fallback');
+        // Enhanced email extraction with multiple fallbacks
+        userEmail = 
+          shippingAddress?.email || 
+          paymentIntent.receipt_email || 
+          (shippingAddress?.name?.toLowerCase().includes('@') ? shippingAddress.name : null) ||
+          'guest@curiosities.market';
+        
+        // Create a unique guest user ID
         userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        console.log('[ORDER CREATE] Guest user email:', userEmail);
+        console.log('[ORDER CREATE] 🎭 Guest user created:', { userId, userEmail });
       }
       
       if (!userId) {
-        console.log('[ORDER CREATE] No user information available');
+        console.log('[ORDER CREATE] ❌ CRITICAL: Still no user information after all fallbacks');
         return res.status(400).json({ error: "User information required for order creation" });
       }
+      
+      console.log('[ORDER CREATE] ✅ Final user info:', { userId, userEmail });
       
       // Group items by seller to create separate orders
       const ordersBySeller: { [sellerId: string]: any[] } = {};
