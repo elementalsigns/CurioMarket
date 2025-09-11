@@ -370,16 +370,20 @@ Thank you for being part of the Curio Market community!`;
       <html>
       <head>
         <style>
-          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 95%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
           .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
           .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
           .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-          .order-details { background: hsl(0, 0%, 16%); padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid hsl(0, 0%, 20%); }
+          .order-details { background: hsl(0, 0%, 85%); color: hsl(0, 0%, 15%); padding: 20px; border-radius: 6px; margin: 20px 0; border: 1px solid hsl(0, 0%, 70%); }
+          .order-details h3 { color: hsl(0, 77%, 26%); margin-top: 0; }
+          .order-details p { color: hsl(0, 0%, 20%); }
+          .order-details strong { color: hsl(0, 0%, 10%); }
           .items { margin: 20px 0; }
-          .item { border-bottom: 1px solid hsl(0, 0%, 20%); padding: 10px 0; display: flex; justify-content: space-between; color: hsl(0, 0%, 100%); }
+          .item { border-bottom: 1px solid hsl(0, 0%, 40%); padding: 10px 0; display: flex; justify-content: space-between; color: hsl(0, 0%, 95%); }
           .total { font-weight: bold; font-size: 18px; color: hsl(0, 77%, 26%); text-align: right; margin-top: 15px; border-top: 2px solid hsl(0, 77%, 26%); padding-top: 15px; }
           .action-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
           .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
+          .footer a { color: hsl(0, 77%, 26%); text-decoration: none; }
         </style>
       </head>
       <body>
