@@ -230,7 +230,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
     }
 
     // Create orders and send emails for each seller
-    for (const [sellerId, orderGroup] of ordersBySeller.entries()) {
+    for (const [sellerId, orderGroup] of Array.from(ordersBySeller.entries())) {
       try {
         console.log(`[WEBHOOK] Creating order for seller: ${sellerId}`);
         
@@ -239,7 +239,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
           id: crypto.randomUUID(),
           buyerId: userId,
           sellerId,
-          status: 'paid',
+          status: 'paid' as const,
           total: orderGroup.subtotal.toFixed(2),
           paymentIntentId: paymentIntent.id,
           shippingAddress: paymentIntent.shipping || {}
@@ -260,8 +260,14 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
 
         // Get seller info for emails
         const seller = await storage.getSellerByUserId(sellerId);
+        const sellerUser = seller ? await storage.getUser(seller.userId) : null;
         
         // Prepare email data
+        if (!user.email) {
+          console.error(`[WEBHOOK] User ${userId} has no email address`);
+          continue;
+        }
+
         const emailData = {
           customerEmail: user.email,
           customerName: user.firstName || user.email?.split('@')[0] || 'Customer',
@@ -271,7 +277,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
           orderItems: orderGroup.items,
           shippingAddress: paymentIntent.shipping,
           shopName: seller?.shopName || 'Curio Market Seller',
-          sellerEmail: seller?.email || 'seller@curiosities.market'
+          sellerEmail: sellerUser?.email || 'seller@curiosities.market'
         };
 
         console.log(`[WEBHOOK] Sending confirmation emails for order ${emailData.orderNumber}`);
@@ -281,7 +287,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
         console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
 
         // Send seller notification email
-        if (seller?.email && seller.email !== 'seller@curiosities.market') {
+        if (sellerUser?.email && sellerUser.email !== 'seller@curiosities.market') {
           const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
           console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
         }
@@ -375,6 +381,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
+  });
+
+  // Test email endpoint
+  app.post('/api/test-email', async (req, res) => {
+    try {
+      const { email, type = 'buyer' } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email address required' });
+      }
+
+      const testEmailData = {
+        customerEmail: email,
+        customerName: 'Test Customer',
+        orderId: 'test-order-123',
+        orderNumber: '#TEST123',
+        orderTotal: '29.99',
+        orderItems: [
+          { title: 'Test Product', quantity: 1, price: '29.99' }
+        ],
+        shippingAddress: {
+          name: 'Test Customer',
+          line1: '123 Test St',
+          city: 'Test City',
+          state: 'TS',
+          postal_code: '12345',
+          country: 'US'
+        },
+        shopName: 'Test Shop',
+        sellerEmail: email
+      };
+
+      let result = false;
+      
+      if (type === 'buyer') {
+        console.log(`[TEST EMAIL] Sending buyer confirmation test to: ${email}`);
+        result = await emailService.sendOrderConfirmation(testEmailData);
+      } else if (type === 'seller') {
+        console.log(`[TEST EMAIL] Sending seller notification test to: ${email}`);
+        result = await emailService.sendSellerOrderNotification(testEmailData);
+      } else {
+        return res.status(400).json({ error: 'Type must be "buyer" or "seller"' });
+      }
+
+      console.log(`[TEST EMAIL] Result: ${result ? 'SUCCESS' : 'FAILED'}`);
+      
+      res.json({ 
+        success: result,
+        message: result ? 'Test email sent successfully' : 'Failed to send test email',
+        email,
+        type
+      });
+
+    } catch (error: any) {
+      console.error('[TEST EMAIL] Error:', error.message);
+      res.status(500).json({ 
+        success: false,
+        error: error.message,
+        message: 'Failed to send test email'
+      });
+    }
   });
 
 
