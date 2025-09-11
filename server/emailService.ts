@@ -38,19 +38,43 @@ export class EmailService {
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      await mailService.send({
+      console.log('[EMAIL SERVICE] 📧 Attempting to send email:', {
+        to: params.to,
+        from: params.from,
+        subject: params.subject,
+        hasText: !!params.text,
+        hasHtml: !!params.html
+      });
+      
+      const result = await mailService.send({
         to: params.to,
         from: params.from,
         subject: params.subject,
         text: params.text || '',
         html: params.html || params.text || '',
       });
+      
+      console.log('[EMAIL SERVICE] ✅ Email sent successfully:', {
+        to: params.to,
+        subject: params.subject,
+        result: 'success'
+      });
       return true;
     } catch (error: any) {
-      console.error('SendGrid email error:', error);
+      console.error('[EMAIL SERVICE] ❌ SendGrid email error:', {
+        to: params.to,
+        subject: params.subject,
+        error: error.message,
+        code: error.code,
+        statusCode: error.response?.status
+      });
+      
       if (error.response && error.response.body && error.response.body.errors) {
-        console.error('SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
+        console.error('[EMAIL SERVICE] SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
       }
+      
+      // Log the full error for debugging
+      console.error('[EMAIL SERVICE] Full error object:', error);
       return false;
     }
   }
