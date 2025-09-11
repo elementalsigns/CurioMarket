@@ -472,7 +472,8 @@ export default function SellerDashboard() {
     );
   }
 
-  const { seller, listings, orders, stats } = dashboardData;
+  const { seller, listings, stats } = dashboardData;
+  const orders = Array.isArray(dashboardData.orders) ? dashboardData.orders : [];
 
   return (
     <div className="min-h-screen bg-background">
