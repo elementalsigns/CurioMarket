@@ -604,6 +604,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile picture upload URL
+  app.post('/api/user/profile-picture/upload-url', requireAuth, async (req: any, res) => {
+    try {
+      console.log('[PROFILE-UPLOAD] Profile picture upload URL requested by user:', req.user?.claims?.sub || req.user?.id);
+      
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getProfilePictureUploadURL();
+      console.log('[PROFILE-UPLOAD] Generated profile picture upload URL');
+      
+      res.json({ url: uploadURL });
+    } catch (error) {
+      console.error("[PROFILE-UPLOAD] Error getting profile picture upload URL:", error);
+      res.status(500).json({ error: "Failed to get profile picture upload URL" });
+    }
+  });
+
+  // Update user profile including profile picture
+  app.put('/api/user/profile', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { firstName, lastName, email, profileImageUrl } = req.body;
+      
+      console.log('[USER-PROFILE] Updating profile for user:', userId, { firstName, lastName, email, hasProfileImage: !!profileImageUrl });
+      
+      // Get current user data
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Normalize profile image URL if provided
+      let normalizedProfileImageUrl = profileImageUrl;
+      if (profileImageUrl) {
+        const objectStorageService = new ObjectStorageService();
+        normalizedProfileImageUrl = objectStorageService.normalizeObjectEntityPath(profileImageUrl);
+      }
+
+      // Update user profile
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        email: email || currentUser.email,
+        firstName: firstName || currentUser.firstName,
+        lastName: lastName || currentUser.lastName,
+        profileImageUrl: normalizedProfileImageUrl || currentUser.profileImageUrl,
+        role: currentUser.role
+      });
+      
+      console.log('[USER-PROFILE] Profile updated successfully for user:', userId);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("[USER-PROFILE] Error updating user profile:", error);
+      res.status(500).json({ error: "Failed to update user profile" });
+    }
+  });
+
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
   // Auth user route - properly handle all users

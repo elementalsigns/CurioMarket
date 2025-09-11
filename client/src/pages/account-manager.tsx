@@ -41,6 +41,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import MessagingSystem from "@/components/messaging-system";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 export default function AccountManager() {
   const { user, isLoading } = useAuth();
@@ -57,22 +58,27 @@ export default function AccountManager() {
   };
   
   const [activeTab, setActiveTab] = useState(getInitialTab);
+  const [currentProfileImage, setCurrentProfileImage] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
+      profileImageUrl: "",
     },
   });
 
   // Update form when user data loads
   useEffect(() => {
     if (user) {
+      const profileImageUrl = (user as any)?.profileImageUrl || "";
+      setCurrentProfileImage(profileImageUrl);
       form.reset({
         firstName: (user as any)?.firstName || "",
         lastName: (user as any)?.lastName || "",
         email: (user as any)?.email || "",
+        profileImageUrl: profileImageUrl,
       });
     }
   }, [user, form]);
@@ -139,12 +145,33 @@ export default function AccountManager() {
     },
   });
 
+  // Profile picture upload handlers
+  const handleGetProfilePictureUploadUrl = async () => {
+    const response = await apiRequest("POST", "/api/user/profile-picture/upload-url");
+    return response;
+  };
+
+  const handleProfilePictureUploadComplete = (result: { successful: Array<{ uploadURL: string }> }) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedImageUrl = result.successful[0].uploadURL;
+      setCurrentProfileImage(uploadedImageUrl);
+      form.setValue("profileImageUrl", uploadedImageUrl);
+      toast({
+        title: "Profile picture uploaded",
+        description: "Your profile picture has been uploaded successfully.",
+      });
+    }
+  };
+
   const handleLogout = () => {
     window.location.href = "/api/logout";
   };
 
   const onSubmit = (data: any) => {
-    updateProfileMutation.mutate(data);
+    updateProfileMutation.mutate({
+      ...data,
+      profileImageUrl: currentProfileImage || data.profileImageUrl
+    });
   };
 
   useEffect(() => {
@@ -513,6 +540,36 @@ export default function AccountManager() {
               {activeTab === "profile" && (
                 <div data-testid="profile-settings">
                   <h2 className="text-xl font-bold mb-4">Profile Information</h2>
+                  
+                  {/* Profile Picture Section */}
+                  <div className="mb-6 p-4 border rounded-lg">
+                    <h3 className="text-lg font-medium mb-4">Profile Picture</h3>
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="w-20 h-20" data-testid="current-profile-picture">
+                        <AvatarImage src={currentProfileImage || (user as any)?.profileImageUrl || ""} />
+                        <AvatarFallback className="text-lg">
+                          {(user as any)?.firstName?.[0] || 'U'}{(user as any)?.lastName?.[0] || ''}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Upload a new profile picture. Recommended size: 400x400px
+                        </p>
+                        <ObjectUploader
+                          maxNumberOfFiles={1}
+                          maxFileSize={5242880} // 5MB
+                          allowedFileTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/webp']}
+                          onGetUploadParameters={handleGetProfilePictureUploadUrl}
+                          onComplete={handleProfilePictureUploadComplete}
+                          buttonClassName="bg-primary hover:bg-primary/90"
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          {currentProfileImage ? 'Change Picture' : 'Upload Picture'}
+                        </ObjectUploader>
+                      </div>
+                    </div>
+                  </div>
+
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
