@@ -3813,6 +3813,411 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== EMAIL TESTING ===================
+
+  // DIAGNOSTIC: Unauthenticated email testing for troubleshooting when auth is broken
+  app.post('/api/test/email/diagnostic', async (req: any, res) => {
+    try {
+      const { testEmail, testType = 'simple', diagnosticKey } = req.body;
+      
+      // Basic security: require a diagnostic key to prevent abuse
+      if (diagnosticKey !== 'curio-email-diagnostic-2025') {
+        return res.status(403).json({ 
+          error: "Diagnostic key required",
+          hint: "This endpoint is for troubleshooting email issues when authentication is broken"
+        });
+      }
+
+      // Require email address for diagnostic testing
+      if (!testEmail) {
+        return res.status(400).json({ 
+          error: "Email address required for diagnostic testing",
+          example: "POST /api/test/email/diagnostic with body: { testEmail: 'your@email.com', diagnosticKey: 'curio-email-diagnostic-2025' }"
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(testEmail)) {
+        return res.status(400).json({ 
+          error: "Invalid email address format",
+          email: testEmail 
+        });
+      }
+
+      const results = {
+        mode: 'DIAGNOSTIC',
+        timestamp: new Date().toISOString(),
+        testEmail: testEmail,
+        testType,
+        sendGridConfigured: !!process.env.SENDGRID_API_KEY,
+        tests: [] as any[],
+        summary: {
+          totalTests: 0,
+          successfulTests: 0,
+          failedTests: 0,
+          allPassed: false,
+          overallStatus: 'PENDING' as 'PENDING' | 'SUCCESS' | 'PARTIAL_FAILURE'
+        }
+      };
+
+      console.log(`[EMAIL-DIAGNOSTIC] Starting unauthenticated email tests with email: ${testEmail}`);
+      console.log(`[EMAIL-DIAGNOSTIC] Test type: ${testType}`);
+      console.log(`[EMAIL-DIAGNOSTIC] SendGrid configured: ${results.sendGridConfigured}`);
+
+      // Test 1: Basic email service functionality
+      try {
+        const basicEmailResult = await emailService.sendEmail({
+          to: testEmail,
+          from: 'Info@curiosities.market',
+          subject: `🚨 Curio Market DIAGNOSTIC Email Test - ${new Date().toLocaleDateString()}`,
+          text: `DIAGNOSTIC TEST: This email was sent at ${new Date().toISOString()} to verify email functionality during troubleshooting.`,
+          html: `
+            <div style="font-family: 'EB Garamond', 'Georgia', serif; color: #333; padding: 20px; border: 2px solid #ff6b6b;">
+              <h2 style="color: #ff6b6b;">🚨 Curio Market DIAGNOSTIC Email Test</h2>
+              <p><strong>This is a diagnostic test email sent at ${new Date().toISOString()}</strong></p>
+              <p>✅ Basic email service is working correctly</p>
+              <p>🔧 Mode: Diagnostic (unauthenticated testing)</p>
+              <p>📧 Test Email: ${testEmail}</p>
+              <p style="background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;">
+                <strong>Purpose:</strong> This test was run to diagnose missing confirmation emails from recent transactions.
+              </p>
+            </div>
+          `
+        });
+
+        results.tests.push({
+          testName: 'basic_email',
+          success: basicEmailResult,
+          message: basicEmailResult ? 'Basic email sent successfully' : 'Basic email failed',
+          timestamp: new Date().toISOString()
+        });
+
+        console.log(`[EMAIL-DIAGNOSTIC] Basic email test result: ${basicEmailResult}`);
+      } catch (basicError: any) {
+        results.tests.push({
+          testName: 'basic_email',
+          success: false,
+          message: 'Basic email threw exception',
+          error: basicError.message,
+          stack: basicError.stack,
+          timestamp: new Date().toISOString()
+        });
+        console.error(`[EMAIL-DIAGNOSTIC] Basic email test error:`, basicError);
+      }
+
+      // Test 2: Order confirmation email format (if requested) - USING $0.65 TRANSACTION DATA
+      if (testType === 'order' || testType === 'all') {
+        try {
+          const testOrderData = {
+            customerEmail: testEmail,
+            customerName: 'Diagnostic Test Customer',
+            orderId: `diagnostic-order-${Date.now()}`,
+            orderNumber: `#DIAG${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            orderTotal: '0.65', // Using the actual transaction amount that failed
+            orderItems: [
+              {
+                title: 'Diagnostic Test Curiosity Item ($0.65 Transaction)',
+                price: '0.65',
+                quantity: 1
+              }
+            ],
+            shippingAddress: {
+              name: 'Diagnostic Test Customer',
+              line1: '123 Diagnostic Street',
+              city: 'Test City',
+              state: 'TS',
+              postal_code: '12345',
+              country: 'US'
+            },
+            shopName: 'Diagnostic Curio Shop',
+            sellerEmail: 'diagnostic-seller@curiosities.market'
+          };
+
+          const orderEmailResult = await emailService.sendOrderConfirmation(testOrderData);
+
+          results.tests.push({
+            testName: 'order_confirmation',
+            success: orderEmailResult,
+            message: orderEmailResult ? 'Order confirmation email sent successfully' : 'Order confirmation email failed',
+            orderData: testOrderData,
+            timestamp: new Date().toISOString()
+          });
+
+          console.log(`[EMAIL-DIAGNOSTIC] Order confirmation test result: ${orderEmailResult}`);
+        } catch (orderError: any) {
+          results.tests.push({
+            testName: 'order_confirmation',
+            success: false,
+            message: 'Order confirmation email threw exception',
+            error: orderError.message,
+            stack: orderError.stack,
+            timestamp: new Date().toISOString()
+          });
+          console.error(`[EMAIL-DIAGNOSTIC] Order confirmation test error:`, orderError);
+        }
+      }
+
+      // Test 3: Seller notification email (if requested)
+      if (testType === 'seller' || testType === 'all') {
+        try {
+          const testSellerData = {
+            customerEmail: 'diagnostic-customer@example.com',
+            customerName: 'Diagnostic Customer',
+            orderId: `diagnostic-seller-order-${Date.now()}`,
+            orderNumber: `#SELL${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            orderTotal: '0.65',
+            orderItems: [
+              {
+                title: 'Diagnostic Seller Test Item',
+                price: '0.65',
+                quantity: 1
+              }
+            ],
+            shopName: 'Diagnostic Shop',
+            sellerEmail: testEmail // Send seller notification to the test email
+          };
+
+          const sellerEmailResult = await emailService.sendSellerOrderNotification(testSellerData);
+
+          results.tests.push({
+            testName: 'seller_notification',
+            success: sellerEmailResult,
+            message: sellerEmailResult ? 'Seller notification email sent successfully' : 'Seller notification email failed',
+            orderData: testSellerData,
+            timestamp: new Date().toISOString()
+          });
+
+          console.log(`[EMAIL-DIAGNOSTIC] Seller notification test result: ${sellerEmailResult}`);
+        } catch (sellerError: any) {
+          results.tests.push({
+            testName: 'seller_notification',
+            success: false,
+            message: 'Seller notification email threw exception',
+            error: sellerError.message,
+            stack: sellerError.stack,
+            timestamp: new Date().toISOString()
+          });
+          console.error(`[EMAIL-DIAGNOSTIC] Seller notification test error:`, sellerError);
+        }
+      }
+
+      // Summary
+      const successfulTests = results.tests.filter(test => test.success).length;
+      const totalTests = results.tests.length;
+      
+      results.summary = {
+        totalTests,
+        successfulTests,
+        failedTests: totalTests - successfulTests,
+        allPassed: successfulTests === totalTests,
+        overallStatus: successfulTests === totalTests ? 'SUCCESS' : 'PARTIAL_FAILURE'
+      };
+
+      console.log(`[EMAIL-DIAGNOSTIC] Test summary: ${successfulTests}/${totalTests} tests passed`);
+      console.log(`[EMAIL-DIAGNOSTIC] Overall status: ${results.summary.overallStatus}`);
+
+      // Return comprehensive results
+      const statusCode = results.summary.allPassed ? 200 : 
+                        results.summary.successfulTests > 0 ? 207 : 500;
+
+      res.status(statusCode).json({
+        message: `DIAGNOSTIC: Email testing completed: ${successfulTests}/${totalTests} tests passed`,
+        instructions: "If all tests pass, the email system is working. If they fail, check SendGrid API key and configuration.",
+        troubleshooting: {
+          sendGridConfigured: results.sendGridConfigured,
+          suggestion: results.sendGridConfigured ? 
+            "SendGrid is configured. Check logs above for specific errors." :
+            "SENDGRID_API_KEY environment variable is missing or empty"
+        },
+        ...results
+      });
+
+    } catch (error: any) {
+      console.error('[EMAIL-DIAGNOSTIC] Critical error during diagnostic email testing:', error);
+      res.status(500).json({ 
+        error: "Diagnostic email testing failed with critical error",
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Test email functionality - requires authentication to prevent abuse
+  app.post('/api/test/email', requireAuth, async (req: any, res) => {
+    try {
+      const { testEmail, testType = 'simple' } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Use user's own email if not provided, for security
+      const emailAddress = testEmail || user?.email;
+      
+      if (!emailAddress) {
+        return res.status(400).json({ 
+          error: "No email address provided and user has no email on file",
+          debug: { 
+            hasUser: !!user, 
+            userEmail: user?.email,
+            providedTestEmail: testEmail 
+          }
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailAddress)) {
+        return res.status(400).json({ 
+          error: "Invalid email address format",
+          email: emailAddress 
+        });
+      }
+
+      const results = {
+        timestamp: new Date().toISOString(),
+        testEmail: emailAddress,
+        testType,
+        sendGridConfigured: !!process.env.SENDGRID_API_KEY,
+        tests: [] as any[],
+        summary: {
+          totalTests: 0,
+          successfulTests: 0,
+          failedTests: 0,
+          allPassed: false,
+          overallStatus: 'PENDING' as 'PENDING' | 'SUCCESS' | 'PARTIAL_FAILURE'
+        }
+      };
+
+      console.log(`[EMAIL-TEST] Starting email tests for user ${userId} with email: ${emailAddress}`);
+      console.log(`[EMAIL-TEST] Test type: ${testType}`);
+      console.log(`[EMAIL-TEST] SendGrid configured: ${results.sendGridConfigured}`);
+
+      // Test 1: Basic email service functionality
+      try {
+        const basicEmailResult = await emailService.sendEmail({
+          to: emailAddress,
+          from: 'Info@curiosities.market',
+          subject: `Curio Market Email Test - ${new Date().toLocaleDateString()}`,
+          text: `This is a test email sent at ${new Date().toISOString()} to verify email functionality.`,
+          html: `
+            <div style="font-family: 'EB Garamond', 'Georgia', serif; color: #333; padding: 20px;">
+              <h2 style="color: hsl(0, 77%, 26%);">🧪 Curio Market Email Test</h2>
+              <p>This is a test email sent at <strong>${new Date().toISOString()}</strong></p>
+              <p>✅ Basic email service is working correctly</p>
+              <p>User ID: ${userId}</p>
+              <p>Test requested by: ${user?.email || 'unknown'}</p>
+            </div>
+          `
+        });
+
+        results.tests.push({
+          testName: 'basic_email',
+          success: basicEmailResult,
+          message: basicEmailResult ? 'Basic email sent successfully' : 'Basic email failed',
+          timestamp: new Date().toISOString()
+        });
+
+        console.log(`[EMAIL-TEST] Basic email test result: ${basicEmailResult}`);
+      } catch (basicError: any) {
+        results.tests.push({
+          testName: 'basic_email',
+          success: false,
+          message: 'Basic email threw exception',
+          error: basicError.message,
+          stack: basicError.stack,
+          timestamp: new Date().toISOString()
+        });
+        console.error(`[EMAIL-TEST] Basic email test error:`, basicError);
+      }
+
+      // Test 2: Order confirmation email format (if requested)
+      if (testType === 'order' || testType === 'all') {
+        try {
+          const testOrderData = {
+            customerEmail: emailAddress,
+            customerName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Test Customer',
+            orderId: `test-order-${Date.now()}`,
+            orderNumber: `#TEST${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            orderTotal: '0.65',
+            orderItems: [
+              {
+                title: 'Test Curiosity Item',
+                price: '0.65',
+                quantity: 1
+              }
+            ],
+            shippingAddress: {
+              name: 'Test Customer',
+              line1: '123 Test Street',
+              city: 'Test City',
+              state: 'TS',
+              postal_code: '12345',
+              country: 'US'
+            },
+            shopName: 'Test Curio Shop',
+            sellerEmail: 'test-seller@curiosities.market'
+          };
+
+          const orderEmailResult = await emailService.sendOrderConfirmation(testOrderData);
+
+          results.tests.push({
+            testName: 'order_confirmation',
+            success: orderEmailResult,
+            message: orderEmailResult ? 'Order confirmation email sent successfully' : 'Order confirmation email failed',
+            orderData: testOrderData,
+            timestamp: new Date().toISOString()
+          });
+
+          console.log(`[EMAIL-TEST] Order confirmation test result: ${orderEmailResult}`);
+        } catch (orderError: any) {
+          results.tests.push({
+            testName: 'order_confirmation',
+            success: false,
+            message: 'Order confirmation email threw exception',
+            error: orderError.message,
+            stack: orderError.stack,
+            timestamp: new Date().toISOString()
+          });
+          console.error(`[EMAIL-TEST] Order confirmation test error:`, orderError);
+        }
+      }
+
+      // Summary
+      const successfulTests = results.tests.filter(test => test.success).length;
+      const totalTests = results.tests.length;
+      
+      results.summary = {
+        totalTests,
+        successfulTests,
+        failedTests: totalTests - successfulTests,
+        allPassed: successfulTests === totalTests,
+        overallStatus: successfulTests === totalTests ? 'SUCCESS' : 'PARTIAL_FAILURE'
+      };
+
+      console.log(`[EMAIL-TEST] Test summary: ${successfulTests}/${totalTests} tests passed`);
+      console.log(`[EMAIL-TEST] Overall status: ${results.summary.overallStatus}`);
+
+      // Return comprehensive results
+      const statusCode = results.summary.allPassed ? 200 : 
+                        results.summary.successfulTests > 0 ? 207 : 500;
+
+      res.status(statusCode).json({
+        message: `Email testing completed: ${successfulTests}/${totalTests} tests passed`,
+        ...results
+      });
+
+    } catch (error: any) {
+      console.error('[EMAIL-TEST] Critical error during email testing:', error);
+      res.status(500).json({ 
+        error: "Email testing failed with critical error",
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // =================== REVIEWS ===================
 
   // Get reviews for seller
