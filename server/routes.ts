@@ -3659,8 +3659,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[DELETE-CONVERSATION] Successfully deleted conversation ${conversationId} for user ${userId}`);
       res.json({ message: "Conversation deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[DELETE-CONVERSATION] Error deleting conversation ${req.params.id} for user ${req.user.claims.sub}:`, error);
+      
+      // Handle specific error codes
+      if (error.code === 'NOT_FOUND') {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      if (error.code === 'UNAUTHORIZED') {
+        return res.status(403).json({ error: "Not authorized to delete this conversation" });
+      }
+      
+      // Generic server error
       res.status(500).json({ error: "Failed to delete conversation" });
     }
   });

@@ -1271,22 +1271,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteConversation(conversationId: string, userId: string): Promise<void> {
+    // Helper function to normalize IDs (remove trailing dashes)
+    const normalizeId = (id: string) => id?.replace(/-+$/, '') || '';
+    
     // Verify the user is a participant in this conversation
     const conversation = await db
       .select()
       .from(messageThreads)
-      .where(
-        and(
-          eq(messageThreads.id, conversationId),
-          or(
-            eq(messageThreads.buyerId, userId),
-            eq(messageThreads.sellerId, userId)
-          )
-        )
-      );
+      .where(eq(messageThreads.id, conversationId));
     
     if (conversation.length === 0) {
-      throw new Error("Conversation not found or user not authorized");
+      const error = new Error("Conversation not found");
+      (error as any).code = 'NOT_FOUND';
+      throw error;
+    }
+    
+    const thread = conversation[0];
+    const normalizedUserId = normalizeId(userId);
+    const normalizedBuyerId = normalizeId(thread.buyerId || '');
+    const normalizedSellerId = normalizeId(thread.sellerId || '');
+    
+    // Check if user is a participant (with normalized IDs)
+    if (normalizedUserId !== normalizedBuyerId && normalizedUserId !== normalizedSellerId) {
+      const error = new Error("User not authorized to delete this conversation");
+      (error as any).code = 'UNAUTHORIZED';
+      throw error;
     }
     
     // For now, keep current behavior to preserve functionality
