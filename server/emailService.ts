@@ -334,6 +334,37 @@ Thank you for supporting independent sellers on Curio Market
   async sendSellerOrderNotification(data: OrderEmailData): Promise<boolean> {
     const subject = `New Order Received - ${data.orderNumber}`;
     
+    // Create text version
+    const text = `New Order Received - ${data.orderNumber}
+
+Dear ${data.shopName},
+
+Congratulations! You've received a new order from ${data.customerName}. Please prepare the items for shipping as soon as possible.
+
+Order Details:
+Order Number: ${data.orderNumber}
+Order Date: ${new Date().toLocaleDateString()}
+Customer: ${data.customerName}
+
+Items Sold:
+${data.orderItems.map(item => `- ${item.title} (Qty: ${item.quantity}) - $${item.price}`).join('\n')}
+
+Your Earnings: $${(parseFloat(data.orderTotal) * 0.97).toFixed(2)} (after 3% platform fee)
+
+${data.shippingAddress ? `
+Shipping Address:
+${data.shippingAddress.name}
+${data.shippingAddress.line1}
+${data.shippingAddress.line2 ? data.shippingAddress.line2 + '\n' : ''}${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.postal_code}
+${data.shippingAddress.country}
+` : ''}
+
+Please log into your seller dashboard to add tracking information once the order ships: https://curiosities.market/seller/orders
+
+Questions? Visit our Seller Help Center: https://curiosities.market/help
+
+Thank you for being part of the Curio Market community!`;
+    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -413,6 +444,7 @@ Thank you for supporting independent sellers on Curio Market
       to: data.sellerEmail,
       from: this.fromEmail,
       subject,
+      text,
       html
     });
   }
