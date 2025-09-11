@@ -3477,6 +3477,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sellerId: seller.id
       };
 
+      // If quantity is being updated, also update stockQuantity to keep inventory in sync
+      if (req.body.quantity !== undefined) {
+        listingData.stockQuantity = req.body.quantity;
+      }
+
       const listing = await storage.updateListing(req.params.id, listingData);
       res.json(listing);
     } catch (error) {

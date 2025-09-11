@@ -121,7 +121,7 @@ export default function EditListing() {
         title: listing.title || "",
         description: listing.description || "",
         price: listing.price?.toString() || "",
-        quantity: listing.quantity?.toString() || "1",
+        quantity: listing.stockQuantity?.toString() || "1",
         shippingCost: listing.shippingCost?.toString() || "0",
         categoryIds: listing.categoryIds || [],
         speciesOrMaterial: listing.speciesOrMaterial || "",
