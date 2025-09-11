@@ -228,12 +228,12 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v3.7: 2025-09-11 19:08 ENHANCED EMAIL LOGGING
+// CACHE BUST v3.8: 2025-09-11 19:24 MINIMAL EMAIL FIX
 export async function registerRoutes(app: Express): Promise<Server> {
   // Version endpoint to verify which backend version is running
   app.get('/api/version', (req, res) => {
     res.json({ 
-      version: 'v3.7-2025-09-11-19:08-ENHANCED-EMAIL-LOGGING',
+      version: 'v3.8-2025-09-11-19:24-MINIMAL-EMAIL-FIX',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
