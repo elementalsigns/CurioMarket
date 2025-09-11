@@ -228,12 +228,12 @@ async function handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent) {
   }
 }
 
-// CACHE BUST v3.4: 2025-09-10 15:06 INVENTORY FIX WITH UNIFIED AUTH
+// CACHE BUST v3.5: 2025-09-11 18:15 EMAIL TEMPLATE FIX
 export async function registerRoutes(app: Express): Promise<Server> {
   // Version endpoint to verify which backend version is running
   app.get('/api/version', (req, res) => {
     res.json({ 
-      version: 'v3.4-2025-09-10-15:06-INVENTORY-FIX-WITH-UNIFIED-AUTH',
+      version: 'v3.5-2025-09-11-18:15-EMAIL-TEMPLATE-FIX',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development'
     });
