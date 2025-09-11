@@ -558,7 +558,7 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
