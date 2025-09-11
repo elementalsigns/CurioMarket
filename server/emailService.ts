@@ -58,6 +58,40 @@ export class EmailService {
   async sendOrderConfirmation(data: OrderEmailData): Promise<boolean> {
     const subject = `Order Confirmation - ${data.orderNumber}`;
     
+    // Create text version for better email deliverability
+    const text = `
+CURIO MARKET - ORDER CONFIRMATION
+
+Dear ${data.customerName},
+
+Thank you for your order! We've received your purchase and ${data.shopName} will begin processing it shortly.
+
+ORDER DETAILS
+Order Number: ${data.orderNumber}
+Order Date: ${new Date().toLocaleDateString()}
+Seller: ${data.shopName}
+
+ITEMS ORDERED
+${data.orderItems.map(item => `${item.title} (Qty: ${item.quantity}) - $${item.price}`).join('\n')}
+
+Order Total: $${data.orderTotal}
+
+${data.shippingAddress ? `
+SHIPPING ADDRESS
+${data.shippingAddress.name}
+${data.shippingAddress.line1}
+${data.shippingAddress.line2 ? data.shippingAddress.line2 : ''}
+${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.postal_code}
+${data.shippingAddress.country}
+` : ''}
+
+You'll receive another email with tracking information once your order ships.
+
+Questions? Contact ${data.shopName} directly or visit our Help Center at https://curiomarket.co/help
+
+Thank you for supporting independent sellers on Curio Market
+    `.trim();
+    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -129,6 +163,7 @@ export class EmailService {
       to: data.customerEmail,
       from: this.fromEmail,
       subject,
+      text,
       html
     });
   }
