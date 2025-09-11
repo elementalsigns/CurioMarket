@@ -37,6 +37,9 @@ export default function SellerOrders() {
     queryKey: ["/api/seller/orders"],
   });
 
+  // Ensure orders is always an array
+  const ordersList = Array.isArray(orders) ? orders : [];
+
   // Ship order mutation
   const shipOrderMutation = useMutation({
     mutationFn: async ({ orderId, trackingNumber, carrier }: any) => {
@@ -146,7 +149,7 @@ export default function SellerOrders() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-50">
-        <Navbar />
+        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-zinc-800 rounded w-1/3"></div>
@@ -180,9 +183,9 @@ export default function SellerOrders() {
           </p>
         </div>
 
-        {orders.length > 0 ? (
+        {ordersList.length > 0 ? (
           <div className="space-y-6" data-testid="orders-list">
-            {orders.map((order: any) => (
+            {ordersList.map((order: any) => (
               <Card key={order.id} className="glass-effect border-zinc-800" data-testid={`order-${order.id}`}>
                 <CardHeader className="border-b border-zinc-800">
                   <div className="flex items-center justify-between">
