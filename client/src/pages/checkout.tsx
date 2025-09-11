@@ -235,7 +235,6 @@ export default function Checkout() {
         cartItems: items,
         shippingAddress: {} // Will be collected in the form
       })
-        .then((res) => res.json())
         .then((data) => {
           console.log('[CHECKOUT] Payment intent created successfully');
           setClientSecret(data.clientSecret);
