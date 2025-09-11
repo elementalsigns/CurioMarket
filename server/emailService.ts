@@ -46,8 +46,11 @@ export class EmailService {
         html: params.html || params.text || '',
       });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('SendGrid email error:', error);
+      if (error.response && error.response.body && error.response.body.errors) {
+        console.error('SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
+      }
       return false;
     }
   }

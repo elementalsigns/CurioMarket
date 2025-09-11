@@ -239,6 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+
   // Image proxy endpoint for private images using ObjectStorageService
   app.get("/api/image-proxy/:imageId", async (req, res) => {
     try {
