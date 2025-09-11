@@ -63,6 +63,7 @@ export default function InventoryManagementPage() {
       console.log('[INVENTORY] Mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['/api/seller/listings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/seller/low-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/listings'] });
       toast({
         title: "Stock Updated",
         description: "Stock quantity updated successfully.",
