@@ -383,66 +383,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Test email endpoint
-  app.post('/api/test-email', async (req, res) => {
-    try {
-      const { email, type = 'buyer' } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ error: 'Email address required' });
-      }
-
-      const testEmailData = {
-        customerEmail: email,
-        customerName: 'Test Customer',
-        orderId: 'test-order-123',
-        orderNumber: '#TEST123',
-        orderTotal: '29.99',
-        orderItems: [
-          { title: 'Test Product', quantity: 1, price: '29.99' }
-        ],
-        shippingAddress: {
-          name: 'Test Customer',
-          line1: '123 Test St',
-          city: 'Test City',
-          state: 'TS',
-          postal_code: '12345',
-          country: 'US'
-        },
-        shopName: 'Test Shop',
-        sellerEmail: email
-      };
-
-      let result = false;
-      
-      if (type === 'buyer') {
-        console.log(`[TEST EMAIL] Sending buyer confirmation test to: ${email}`);
-        result = await emailService.sendOrderConfirmation(testEmailData);
-      } else if (type === 'seller') {
-        console.log(`[TEST EMAIL] Sending seller notification test to: ${email}`);
-        result = await emailService.sendSellerOrderNotification(testEmailData);
-      } else {
-        return res.status(400).json({ error: 'Type must be "buyer" or "seller"' });
-      }
-
-      console.log(`[TEST EMAIL] Result: ${result ? 'SUCCESS' : 'FAILED'}`);
-      
-      res.json({ 
-        success: result,
-        message: result ? 'Test email sent successfully' : 'Failed to send test email',
-        email,
-        type
-      });
-
-    } catch (error: any) {
-      console.error('[TEST EMAIL] Error:', error.message);
-      res.status(500).json({ 
-        success: false,
-        error: error.message,
-        message: 'Failed to send test email'
-      });
-    }
-  });
 
 
   // Image proxy endpoint for private images using ObjectStorageService
@@ -585,6 +525,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // NOW set up JSON parsing middleware for all other routes
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
+
+  // Test email endpoint (after JSON middleware)
+  app.post('/api/test-email', async (req, res) => {
+    try {
+      const { email, type = 'buyer' } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email address required' });
+      }
+
+      const testEmailData = {
+        customerEmail: email,
+        customerName: 'Test Customer',
+        orderId: 'test-order-123',
+        orderNumber: '#TEST123',
+        orderTotal: '29.99',
+        orderItems: [
+          { title: 'Test Product', quantity: 1, price: '29.99' }
+        ],
+        shippingAddress: {
+          name: 'Test Customer',
+          line1: '123 Test St',
+          city: 'Test City',
+          state: 'TS',
+          postal_code: '12345',
+          country: 'US'
+        },
+        shopName: 'Test Shop',
+        sellerEmail: email
+      };
+
+      let result = false;
+      
+      if (type === 'buyer') {
+        console.log(`[TEST EMAIL] Sending buyer confirmation test to: ${email}`);
+        result = await emailService.sendOrderConfirmation(testEmailData);
+      } else if (type === 'seller') {
+        console.log(`[TEST EMAIL] Sending seller notification test to: ${email}`);
+        result = await emailService.sendSellerOrderNotification(testEmailData);
+      } else {
+        return res.status(400).json({ error: 'Type must be "buyer" or "seller"' });
+      }
+
+      console.log(`[TEST EMAIL] Result: ${result ? 'SUCCESS' : 'FAILED'}`);
+      
+      res.json({ 
+        success: result,
+        message: result ? 'Test email sent successfully' : 'Failed to send test email',
+        email,
+        type
+      });
+
+    } catch (error: any) {
+      console.error('[TEST EMAIL] Error:', error.message);
+      res.status(500).json({ 
+        success: false,
+        error: error.message,
+        message: 'Failed to send test email'
+      });
+    }
+  });
 
   // Health check endpoints for deployment monitoring
   app.get('/health', async (req, res) => {
