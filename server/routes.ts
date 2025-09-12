@@ -1017,7 +1017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('[AUTH-USER] Session-based user assignment, sessionID:', sessionId);
         
         // Determine user type based on session ID hash for consistency
-        const sessionHash = sessionId.split('').reduce((a, b) => (a + b.charCodeAt(0)) % 1000, 0);
+        const sessionHash = sessionId.split('').reduce((a: number, b: string) => (a + b.charCodeAt(0)) % 1000, 0);
         const isSellerSession = sessionHash < 200; // 20% chance of being a seller
         
         console.log('[AUTH-USER] Session hash:', sessionHash, 'isSellerSession:', isSellerSession);
