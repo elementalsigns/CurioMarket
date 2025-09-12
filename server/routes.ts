@@ -969,28 +969,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
-  // Auth user route - properly handle all users
-  app.get('/api/auth/user', async (req: any, res) => {
+  // Auth user route - use proper authentication middleware
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      // PRODUCTION BYPASS: For users with corrupted sessions, try to identify them
-      // This handles the authentication issues without breaking existing functionality
-      let userId = null;
-      let userEmail = null;
-      
-      // Method 1: Standard authentication
-      if (req.user && req.user.claims) {
-        userId = req.user.claims.sub;
-        userEmail = req.user.claims.email;
-        console.log(`[AUTH-USER] Standard auth - User ID: ${userId}`);
-      }
-      
-      // No user authenticated - return error
-      if (!userId) {
-        console.log('[AUTH-USER] No authenticated user, authentication required');
-        return res.status(401).json({ 
-          message: 'Authentication required - please log in to continue' 
-        });
-      }
+      // User is guaranteed to be authenticated by isAuthenticated middleware
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
       
       console.log(`[AUTH-USER] Fetching user data for ID: ${userId}, email: ${userEmail}`);
       
