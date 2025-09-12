@@ -57,13 +57,28 @@ export class EmailService {
         hasHtml: !!params.html
       });
       
-      const result = await mailService.send({
+      // Build message conditionally to avoid empty content fields
+      const msg: any = {
         to: params.to,
         from: params.from,
         subject: params.subject,
-        text: params.text || '',
-        html: params.html || params.text || '',
-      });
+      };
+      
+      // Only add text if we have non-empty content
+      if (params.text && params.text.trim()) {
+        msg.text = params.text;
+      }
+      
+      // Only add html if we have non-empty content
+      if (params.html && params.html.trim()) {
+        msg.html = params.html;
+        // Add fallback text if html exists but no text provided
+        if (!msg.text) {
+          msg.text = params.html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 500);
+        }
+      }
+
+      const result = await mailService.send(msg);
       
       console.log('[EMAIL SERVICE] ✅ Email sent successfully:', {
         to: params.to,
@@ -216,55 +231,15 @@ Thank you for supporting independent sellers on Curio Market
     
     const trackingUrl = this.getTrackingUrl(data.carrier, data.trackingNumber);
     
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 100%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
-          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
-          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-          .shipping-info { background: hsl(0, 0%, 16%); border: 1px solid hsl(0, 77%, 26%); padding: 20px; border-radius: 6px; margin: 20px 0; }
-          .tracking-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="logo">Curio Market</div>
-            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">📦 Your Order Has Shipped!</h1>
-          </div>
-          
-          <p>Dear ${data.customerName},</p>
-          
-          <p>Great news! Your order from ${data.shopName} is on its way.</p>
-          
-          <div class="shipping-info">
-            <h3 style="margin-top: 0; color: hsl(0, 77%, 26%);">Shipping Information</h3>
-            <p><strong>Order Number:</strong> ${data.orderNumber}</p>
-            <p><strong>Carrier:</strong> ${data.carrier}</p>
-            <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
-            <p><strong>Estimated Delivery:</strong> 3-7 business days</p>
-          </div>
-          
-          ${trackingUrl ? `
-          <div style="text-align: center;">
-            <a href="${trackingUrl}" class="tracking-button">Track Your Package</a>
-          </div>
-          ` : ''}
-          
-          <p>You can also track your package directly on the ${data.carrier} website using tracking number: <strong>${data.trackingNumber}</strong></p>
-          
-          <div class="footer">
-            <p>Questions about your shipment? Contact ${data.shopName} directly</p>
-            <p>Thank you for shopping with Curio Market</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+    const html = `<html><body style="font-family: Arial, sans-serif; padding: 20px;">
+      <h1>Your Order Has Shipped!</h1>
+      <p>Dear ${data.customerName},</p>
+      <p>Your order ${data.orderNumber} from ${data.shopName} has been shipped via ${data.carrier}.</p>
+      <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
+      ${trackingUrl ? `<p><a href="${trackingUrl}">Track Your Package</a></p>` : ''}
+      <p>Thank you for shopping with us!</p>
+    </body></html>`;
+
 
     return this.sendEmail({
       to: data.customerEmail,

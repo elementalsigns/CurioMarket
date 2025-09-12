@@ -5109,6 +5109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Get admin activity log
   app.get('/api/admin/activity', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
