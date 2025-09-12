@@ -163,6 +163,7 @@ export const listings = pgTable("listings", {
   promotedUntil: timestamp("promoted_until"), // When promotion expires
   views: integer("views").default(0), // View counter
   displayOrder: integer("display_order").default(0), // Custom order for seller's shop display
+  deletedAt: timestamp("deleted_at"), // Soft delete - when listing was deleted
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
