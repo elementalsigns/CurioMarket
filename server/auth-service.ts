@@ -175,39 +175,6 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
       let authUser: AuthUser | null = null;
       const hostname = req.get('host') || '';
 
-      // UNIVERSAL BYPASS v3.3 - Apply to auth-service middleware too
-      console.log('[REQUIRE-AUTH] Checking hostname for bypass:', hostname);
-      console.log('[REQUIRE-AUTH] UNIVERSAL BYPASS v3.3 - Checking hostname:', hostname);
-      
-      // Check for logout-related paths - DISABLE BYPASS during logout
-      const requestUrl = req.originalUrl || req.url || '';
-      const isLogoutRequest = requestUrl.includes('/logout') || requestUrl.includes('/logout-complete') || requestUrl.includes('clear_tokens=true');
-      
-      if (isLogoutRequest) {
-        console.log('[REQUIRE-AUTH] 🚫 BYPASS DISABLED for logout request:', requestUrl);
-      }
-      
-      // PRODUCTION AUTHENTICATION SUPPORT - Enable for all domains
-      const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
-      const isProductionDomain = hostname.includes('curiosities.market');
-      
-      // PRODUCTION BYPASS v4.0 - Enable seller authentication for production AND development
-      if ((isDevelopmentDomain || isProductionDomain) && !isLogoutRequest) {
-        console.log('[REQUIRE-AUTH] ✅ PRODUCTION BYPASS v4.0 ACTIVATED - Seller authentication enabled for:', hostname);
-        
-        // Set authenticated seller user for production
-        req.user = {
-          claims: { 
-            sub: 'seller-curio-market-production', 
-            email: 'seller@curiosities.market' 
-          },
-          access_token: 'production-seller-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600
-        };
-        
-        console.log('[REQUIRE-AUTH] ✅ Production seller authenticated successfully');
-        return next();
-      }
 
       // Method 1: Check Authorization header (Bearer token)
       const authHeader = req.headers.authorization;
