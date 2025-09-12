@@ -461,7 +461,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteListing(id: string): Promise<void> {
-    await db.delete(listings).where(eq(listings.id, id));
+    // Surgical fix: Delete cart items that reference this listing first, then delete the listing
+    // This prevents foreign key constraint violations
+    await db.transaction(async (tx) => {
+      // Step 1: Remove all cart items that reference this listing
+      await tx.delete(cartItems).where(eq(cartItems.listingId, id));
+      
+      // Step 2: Now safely delete the listing
+      await tx.delete(listings).where(eq(listings.id, id));
+    });
   }
 
   // Listing images
