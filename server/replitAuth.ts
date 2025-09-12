@@ -305,24 +305,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log('Auth check - session ID:', req.sessionID);
   console.log('===================================');
 
-  // SECURE DEVELOPMENT BYPASS - Only for development domains with explicit flag
-  const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
-  const bypassEnabled = process.env.AUTH_BYPASS === '1' || process.env.NODE_ENV === 'development';
-  
-  // Only bypass on development domains with explicit environment flag
-  if (isDevelopmentDomain && bypassEnabled && !req.isAuthenticated()) {
-    console.log('[AUTH] 🔧 Development bypass activated for:', hostname);
-    
-    // Set test user for development only
-    req.user = {
-      claims: { 
-        sub: 'dev-test-user', 
-        email: 'dev@test.local' 
-      },
-      access_token: 'dev-test-token',
-      expires_at: Math.floor(Date.now() / 1000) + 3600
-    };
-    
+
+  // Development-only test login endpoint for authentication testing
+  if (process.env.NODE_ENV === 'development' && req.path === '/api/auth/dev-login') {
+    console.log('[AUTH] 🔧 Development login endpoint');
     return next();
   }
 

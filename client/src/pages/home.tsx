@@ -49,6 +49,9 @@ export default function Home() {
     retry: false, // Don't retry if user is not a seller
   });
 
+  // Determine if user should see seller dashboard
+  const showSellerDashboard = !!sellerProfile || (user as any)?.role === 'seller' || !!(user as any)?.stripeCustomerId;
+
   useEffect(() => {
     if (featuredError && isUnauthorizedError(featuredError as Error)) {
       toast({
@@ -145,7 +148,7 @@ export default function Home() {
             <Card className="glass-effect hover-lift cursor-pointer border border-border hover:border-red-700 transition-colors">
               <CardContent className="p-6 text-center">
                 <Star className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
-                {user && (user as any)?.role === 'seller' ? (
+                {user && showSellerDashboard ? (
                   <>
                     <h3 className="text-xl font-serif font-bold mb-2">Seller Dashboard</h3>
                     <p className="text-foreground/70 mb-4">

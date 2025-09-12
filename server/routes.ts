@@ -773,6 +773,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware  
   await setupAuth(app);
 
+  // Development-only login endpoint for testing authentication
+  app.get('/api/auth/dev-login', async (req: any, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    try {
+      // Create a unique test seller user for development with timestamp to avoid conflicts
+      const timestamp = Date.now();
+      const testUser = {
+        id: 'dev-seller-' + timestamp,
+        email: `dev-seller-${timestamp}@test.local`,
+        firstName: 'Dev',
+        lastName: 'Seller',
+        role: 'seller' as const
+      };
+
+      // Create the unique test user
+      await storage.upsertUser(testUser);
+
+      // Create proper passport user session
+      const authUser = {
+        claims: { 
+          sub: testUser.id,
+          email: testUser.email,
+          first_name: testUser.firstName,
+          last_name: testUser.lastName
+        },
+        access_token: 'dev-test-token-' + Date.now(),
+        expires_at: Math.floor(Date.now() / 1000) + 3600
+      };
+
+      // Use passport login
+      req.logIn(authUser, (err: any) => {
+        if (err) {
+          console.error('[AUTH] Dev login error:', err);
+          return res.status(500).json({ error: 'Login failed' });
+        }
+        
+        console.log('[AUTH] ✅ Development seller login successful');
+        res.redirect('/?dev_login=success');
+      });
+    } catch (error) {
+      console.error('[AUTH] Dev login error:', error);
+      res.status(500).json({ error: 'Failed to create test login' });
+    }
+  });
+
   // Debug endpoint to check token generation
   app.get('/api/auth/debug', (req: any, res) => {
     const authInfo = {
@@ -812,26 +860,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Auth check - session ID:', req.sessionID);
       console.log('===================================');
       
-      // SECURE DEVELOPMENT BYPASS - Only for development domains with explicit flag  
-      const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
-      const bypassEnabled = process.env.AUTH_BYPASS === '1' || process.env.NODE_ENV === 'development';
-      
-      // Only bypass on development domains with explicit environment flag
-      if (isDevelopmentDomain && bypassEnabled && !req.isAuthenticated()) {
-        console.log('[AUTH] 🔧 Development bypass activated for:', hostname);
-        
-        // Set test user for development only
-        req.user = {
-          claims: { 
-            sub: 'dev-test-user', 
-            email: 'dev@test.local' 
-          },
-          access_token: 'dev-test-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600
-        };
-        
-        return next();
-      }
       
       // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
