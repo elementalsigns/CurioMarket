@@ -108,6 +108,9 @@ export async function setupAuth(app: Express) {
     ) => {
       try {
         const claims = tokens.claims();
+        if (!claims) {
+          throw new Error('No claims found in tokens');
+        }
         const user = {
           id: claims.sub,
           access_token: tokens.access_token,
@@ -325,7 +328,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const config = await getOidcConfig();
         
         // Validate token against the proper OIDC userinfo endpoint
-        const response = await fetch(config.userinfo_endpoint!, {
+        const response = await fetch(config.userinfo_endpoint as string, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

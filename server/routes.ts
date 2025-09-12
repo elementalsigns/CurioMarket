@@ -820,8 +820,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (token && token.length > 10) {
           try {
-            // Simple token validation - make a request to Replit userinfo endpoint
-            const response = await fetch('https://replit.com/api/userinfo', {
+            // PRODUCTION FIX: Use proper OIDC userinfo endpoint for token validation
+            const { getOidcConfig } = await import('./replitAuth');
+            const config = await getOidcConfig();
+            const response = await fetch(config.userinfo_endpoint as string, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             
