@@ -21,7 +21,7 @@ export async function setupAuthRoutes(app: Express) {
         
         // Store state in session for validation
         if (req.session) {
-          req.session.authState = state;
+          (req.session as any).authState = state;
         }
         
         res.redirect(authUrl);
@@ -41,7 +41,7 @@ export async function setupAuthRoutes(app: Express) {
         }
 
         // Validate state parameter
-        if (req.session && req.session.authState && state !== req.session.authState) {
+        if (req.session && (req.session as any).authState && state !== (req.session as any).authState) {
           return res.status(400).json({ error: 'Invalid state parameter' });
         }
 
@@ -49,10 +49,10 @@ export async function setupAuthRoutes(app: Express) {
         
         // Store user in session
         if (req.session) {
-          req.session.userId = authUser.id;
-          req.session.accessToken = authUser.accessToken;
-          req.session.refreshToken = authUser.refreshToken;
-          req.session.expiresAt = authUser.expiresAt;
+          (req.session as any).userId = authUser.id;
+          (req.session as any).accessToken = authUser.accessToken;
+          (req.session as any).refreshToken = authUser.refreshToken;
+          (req.session as any).expiresAt = authUser.expiresAt;
         }
 
         // For incognito mode support, also redirect with token in URL
@@ -81,24 +81,24 @@ export async function setupAuthRoutes(app: Express) {
       res.redirect('/?logged_out=true');
     });
 
-    // Get current user route
-    app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-      try {
-        const userId = req.user.claims.sub;
-        const user = await storage.getUser(userId);
-        
-        if (!user) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-        
-        // User role returned from database
-        
-        res.json(user);
-      } catch (error) {
-        console.error('[AUTH] Get user error:', error);
-        res.status(500).json({ message: 'Failed to fetch user' });
-      }
-    });
+    // Get current user route - DISABLED: Using the one in routes.ts instead
+    // app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    //   try {
+    //     const userId = req.user.claims.sub;
+    //     const user = await storage.getUser(userId);
+    //     
+    //     if (!user) {
+    //       return res.status(404).json({ message: 'User not found' });
+    //     }
+    //     
+    //     // User role returned from database
+    //     
+    //     res.json(user);
+    //   } catch (error) {
+    //     console.error('[AUTH] Get user error:', error);
+    //     res.status(500).json({ message: 'Failed to fetch user' });
+    //   }
+    // });
 
     // Token validation route (for frontend to check token validity)
     app.post('/api/auth/validate', async (req, res) => {
@@ -141,9 +141,10 @@ export async function setupAuthRoutes(app: Express) {
       res.status(500).json({ error: 'Authentication not available' });
     });
     
-    app.get('/api/auth/user', (req, res) => {
-      res.status(500).json({ error: 'Authentication not available' });
-    });
+    // Fallback disabled - using main auth route instead
+    // app.get('/api/auth/user', (req, res) => {
+    //   res.status(500).json({ error: 'Authentication not available' });
+    // });
     
     // Return a middleware that always fails
     return (req: any, res: any, next: any) => {

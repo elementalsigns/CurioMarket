@@ -328,7 +328,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const config = await getOidcConfig();
         
         // Validate token against the proper OIDC userinfo endpoint
-        const response = await fetch(config.userinfo_endpoint as string, {
+        const response = await fetch((config as any).userinfo_endpoint, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -343,7 +343,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
             claims: userinfo,
             access_token: token,
             expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
-          };
+          } as any;
           
           return next();
         } else {
@@ -404,7 +404,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (!user?.expires_at) {
     console.log('Auth success - user authenticated but missing expires_at, setting default');
     // Set a default expires_at for existing authenticated sessions
-    user.expires_at = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+    (user as any).expires_at = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
   }
 
   const now = Math.floor(Date.now() / 1000);
