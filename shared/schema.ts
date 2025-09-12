@@ -163,7 +163,6 @@ export const listings = pgTable("listings", {
   promotedUntil: timestamp("promoted_until"), // When promotion expires
   views: integer("views").default(0), // View counter
   displayOrder: integer("display_order").default(0), // Custom order for seller's shop display
-  deletedAt: timestamp("deleted_at"), // Soft delete - when listing was deleted
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -240,7 +239,6 @@ export const messageThreadParticipants = pgTable("message_thread_participants", 
   threadId: varchar("thread_id").references(() => messageThreads.id).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   role: varchar("role").notNull(), // 'buyer' or 'seller'
-  deletedAt: timestamp("deleted_at"), // Soft delete timestamp
   archivedAt: timestamp("archived_at"), // Archive timestamp
   mutedUntil: timestamp("muted_until"), // Mute until timestamp
   pinned: boolean("pinned").default(false), // Pinned conversation

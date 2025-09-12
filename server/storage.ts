@@ -460,27 +460,49 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteListing(id: string): Promise<void> {
-    console.log(`[SOFT-DELETE] Performing safe soft delete for listing ID: ${id}`);
+    console.log(`[SAFE-DELETE] Starting safe delete for listing ID: ${id}`);
     
     try {
-      // SAFE APPROACH: Soft delete by changing state to 'draft'
-      // This hides the listing from dashboard without breaking anything
-      // No foreign key constraints violated - completely safe!
+      await db.transaction(async (tx) => {
+        // Check if listing has order history (must be preserved)
+        const orderHistory = await tx
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.listingId, id))
+          .limit(1);
+        
+        if (orderHistory.length > 0) {
+          // Has order history - SOFT DELETE (archive)
+          console.log(`[SAFE-DELETE] Listing ${id} has order history - archiving`);
+          await tx
+            .update(listings)
+            .set({ 
+              state: 'draft',  // Archive by changing to draft
+              updatedAt: new Date()
+            })
+            .where(eq(listings.id, id));
+          console.log(`[SAFE-DELETE] Archived listing ${id} (state=draft)`);
+        } else {
+          // No order history - HARD DELETE with proper cascade
+          console.log(`[SAFE-DELETE] Listing ${id} has no order history - hard deleting`);
+          
+          // Delete in correct order to satisfy foreign key constraints
+          await tx.delete(cartItems).where(eq(cartItems.listingId, id));
+          await tx.delete(listingImages).where(eq(listingImages.listingId, id));
+          await tx.delete(listingVariations).where(eq(listingVariations.listingId, id));
+          await tx.delete(favorites).where(eq(favorites.listingId, id));
+          await tx.delete(wishlistItems).where(eq(wishlistItems.listingId, id));
+          
+          // Finally delete the listing itself
+          await tx.delete(listings).where(eq(listings.id, id));
+          console.log(`[SAFE-DELETE] Hard deleted listing ${id} and all references`);
+        }
+      });
       
-      const [updatedListing] = await db
-        .update(listings)
-        .set({ 
-          state: 'draft',  // Change to draft to hide it
-          updatedAt: new Date()
-        })
-        .where(eq(listings.id, id))
-        .returning();
-      
-      console.log(`[SOFT-DELETE] Successfully soft-deleted listing ${id} - changed state to 'draft'`);
-      console.log(`[SOFT-DELETE] Updated listing:`, updatedListing);
+      console.log(`[SAFE-DELETE] Successfully processed delete for listing ${id}`);
       
     } catch (error) {
-      console.log(`[SOFT-DELETE] Error in soft delete for ${id}:`, error);
+      console.log(`[SAFE-DELETE] Error deleting listing ${id}:`, error);
       throw error;
     }
   }
