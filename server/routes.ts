@@ -969,10 +969,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
-  // Auth user route - use proper authentication middleware
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth user route - using same authentication as seller dashboard
+  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
-      // User is guaranteed to be authenticated by isAuthenticated middleware
+      // Use same authentication pattern as seller dashboard
       const userId = req.user.claims.sub;
       const userEmail = req.user.claims.email;
       
