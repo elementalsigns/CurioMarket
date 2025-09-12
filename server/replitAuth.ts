@@ -305,25 +305,24 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log('Auth check - session ID:', req.sessionID);
   console.log('===================================');
 
-  // PRODUCTION AUTHENTICATION BYPASS v4.0 - Enable for all domains
+  // SECURE DEVELOPMENT BYPASS - Only for development domains with explicit flag
   const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
-  const isProductionDomain = hostname.includes('curiosities.market');
+  const bypassEnabled = process.env.AUTH_BYPASS === '1' || process.env.NODE_ENV === 'development';
   
-  // Enable seller authentication for production AND development
-  if (isDevelopmentDomain || isProductionDomain) {
-    console.log('[AUTH] ✅ PRODUCTION BYPASS v4.0 ACTIVATED - Seller authentication enabled for:', hostname);
+  // Only bypass on development domains with explicit environment flag
+  if (isDevelopmentDomain && bypassEnabled && !req.isAuthenticated()) {
+    console.log('[AUTH] 🔧 Development bypass activated for:', hostname);
     
-    // Set authenticated seller user for production
+    // Set test user for development only
     req.user = {
       claims: { 
-        sub: 'seller-curio-market-production', 
-        email: 'seller@curiosities.market' 
+        sub: 'dev-test-user', 
+        email: 'dev@test.local' 
       },
-      access_token: 'production-seller-token',
+      access_token: 'dev-test-token',
       expires_at: Math.floor(Date.now() / 1000) + 3600
     };
     
-    console.log('[AUTH] ✅ Production seller authenticated successfully');
     return next();
   }
 
