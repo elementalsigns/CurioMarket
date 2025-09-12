@@ -31,7 +31,7 @@ export default function OrderDetails() {
     queryFn: async () => {
       if (!orderId) throw new Error("Order ID is required");
       const response = await apiRequest("GET", `/api/orders/${orderId}`);
-      return await response.json();
+      return response;
     },
     enabled: !!orderId,
   });

@@ -225,7 +225,7 @@ function Router() {
           <Route path="/seller/listings/edit/:id" component={() => <ProtectedRoute><EditListing /></ProtectedRoute>} />
           <Route path="/checkout" component={() => <ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/order-confirmation" component={() => <ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-          <Route path="/orders/:orderId" component={() => <ProtectedRoute><OrderDetails /></ProtectedRoute>} />
+          <Route path="/orders/:orderId" component={OrderDetails} />
           <Route path="/messages/new" component={() => <ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" component={() => <ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/account" component={() => <ProtectedRoute><AccountManager /></ProtectedRoute>} />
