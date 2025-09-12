@@ -970,7 +970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
   // Auth user route - properly handle all users
-  app.get('/api/auth/user', async (req: any, res) => {
+  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
       // PRODUCTION BYPASS: For users with corrupted sessions, try to identify them
       // This handles the authentication issues without breaking existing functionality
