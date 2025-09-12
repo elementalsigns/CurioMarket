@@ -860,25 +860,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Auth check - session ID:', req.sessionID);
       console.log('===================================');
       
-      // PRODUCTION BYPASS - Enable seller authentication for production AND development
-      const isDevelopmentDomain = hostname.includes('.replit.dev') || hostname.includes('.replit.app');
-      const isProductionDomain = hostname.includes('curiosities.market');
-      
-      if (isDevelopmentDomain || isProductionDomain) {
-        console.log('[AUTH] ✅ PRODUCTION BYPASS ACTIVATED - Seller authentication enabled for:', hostname);
-        
-        req.user = {
-          claims: { 
-            sub: 'seller-curio-market-production', 
-            email: 'seller@curiosities.market' 
-          },
-          access_token: 'production-seller-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600
-        };
-        
-        console.log('[AUTH] ✅ Production seller authenticated successfully');
-        return next();
-      }
       
       // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
