@@ -842,6 +842,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues  
   const requireAuth = async (req: any, res: any, next: any) => {
+    console.log('[AUTH-ENTRY] requireAuth function called - method:', req.method, 'path:', req.path);
     try {
       const hostname = req.get('host') || '';
       const origin = req.headers.origin || '';
