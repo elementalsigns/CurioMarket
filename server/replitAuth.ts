@@ -27,16 +27,20 @@ export function getSession() {
   
   // Configure session cookie settings for custom domain support
   const isProduction = process.env.NODE_ENV === 'production';
+  // Always use production settings for HTTPS and custom domain compatibility
+  const useProductionSettings = true; // Enable for all custom domain access
+  
   const cookieConfig = {
     httpOnly: true,
-    secure: isProduction, // HTTPS required in production
+    secure: useProductionSettings, // HTTPS required for production domain compatibility
     maxAge: sessionTtl,
-    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-site in production
-    domain: isProduction ? '.curiosities.market' : undefined, // Set domain for production
+    sameSite: useProductionSettings ? 'none' as const : 'lax' as const, // 'none' for cross-site compatibility
+    domain: undefined, // Let browser handle domain automatically
   };
   
   console.log('[SESSION] Cookie config:', {
     isProduction,
+    useProductionSettings,
     secure: cookieConfig.secure,
     sameSite: cookieConfig.sameSite,
     domain: cookieConfig.domain

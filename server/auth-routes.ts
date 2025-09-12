@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { authService, createAuthMiddleware } from "./auth-service";
+import { isAuthenticated } from "./replitAuth";
 import { storage } from "./storage";
 
 export async function setupAuthRoutes(app: Express) {
@@ -81,7 +82,7 @@ export async function setupAuthRoutes(app: Express) {
     });
 
     // Get current user route
-    app.get('/api/auth/user', requireAuth, async (req: any, res) => {
+    app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
       try {
         const userId = req.user.claims.sub;
         const user = await storage.getUser(userId);

@@ -3724,12 +3724,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Tracking number and carrier are required" });
       }
 
+      console.log('[SHIP ORDER] Starting ship process for order:', req.params.id);
       const trackingInfo = { trackingNumber, carrier };
+      
+      console.log('[SHIP ORDER] Step 1: Updating order tracking...');
       const order = await storage.updateOrderTracking(req.params.id, trackingInfo);
+      console.log('[SHIP ORDER] ✅ Order tracking updated successfully');
       
       // Send shipping notification email to buyer when tracking is added
       try {
+        console.log('[SHIP ORDER] Step 2: Getting order details for email...');
         const orderDetails = await storage.getOrderWithDetails(req.params.id);
+        console.log('[SHIP ORDER] ✅ Order details retrieved successfully');
         
         if (orderDetails && orderDetails.buyerEmail) {
           const emailData = {
@@ -3748,15 +3754,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
           };
           
-          console.log('[SHIP ORDER] Sending shipping notification to buyer:', orderDetails.buyerEmail);
+          console.log('[SHIP ORDER] Step 3: Sending shipping notification to buyer:', orderDetails.buyerEmail);
           const emailResult = await emailService.sendShippingNotification(emailData);
           if (emailResult) {
             console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
-            // Update order status to completed after successful email delivery
+            
+            console.log('[SHIP ORDER] Step 4: Updating order status to completed...');
             await storage.updateOrderStatusToCompleted(req.params.id);
             console.log('[SHIP ORDER] ✅ Order status updated to completed');
           } else {
             console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
+            throw new Error('Email notification failed to send');
           }
         } else {
           console.log('[SHIP ORDER] ⚠️ No buyer email found for shipping notification');
@@ -3768,8 +3776,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(order);
     } catch (error) {
-      console.error("Error shipping order:", error);
-      res.status(500).json({ error: "Failed to ship order" });
+      console.error('[SHIP ORDER] ❌ SHIPPING ERROR - Full details:', error);
+      
+      // Provide specific error messages based on the error
+      let errorMessage = "Failed to ship order";
+      if (error instanceof Error) {
+        if (error.message.includes('Email notification failed')) {
+          errorMessage = "Order tracking updated but email notification failed";
+        } else if (error.message.includes('updateOrderTracking')) {
+          errorMessage = "Failed to update order tracking information";
+        } else if (error.message.includes('getOrderWithDetails')) {
+          errorMessage = "Failed to retrieve order details";
+        } else if (error.message.includes('updateOrderStatusToCompleted')) {
+          errorMessage = "Tracking updated and email sent, but failed to mark order as completed";
+        }
+      }
+      
+      res.status(500).json({ 
+        error: errorMessage,
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
