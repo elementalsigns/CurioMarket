@@ -795,13 +795,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      console.log('[UNIFIED-AUTH] Processing request:', req.method, req.path);
+      const hostname = req.get('host') || '';
+      const origin = req.headers.origin || '';
+
+      console.log('====== AUTHENTICATION DEBUG ======');
+      console.log('Auth check - hostname:', hostname);
+      console.log('Auth check - origin:', origin);
+      console.log('Auth check - method:', req.method);
+      console.log('Auth check - path:', req.path);
+      console.log('Auth check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no session function');
+      console.log('Auth check - user:', req.user ? 'exists' : 'null');
+      console.log('Auth check - user.expires_at:', req.user?.expires_at);
+      console.log('Auth check - Authorization header:', req.headers.authorization ? 'present' : 'none');
+      console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
+      console.log('Auth check - cookies:', Object.keys(req.cookies || {}));
+      console.log('Auth check - session ID:', req.sessionID);
+      console.log('===================================');
       
       // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
-        console.log('[UNIFIED-AUTH] Found Bearer token, validating...');
+        console.log('[AUTH] Found Bearer token, attempting validation...');
         
         if (token && token.length > 10) {
           try {
@@ -817,33 +832,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 access_token: token,
                 expires_at: Math.floor(Date.now() / 1000) + 3600
               };
-              console.log('[UNIFIED-AUTH] Success via Bearer token for user:', userinfo.sub || userinfo.id);
+              console.log('[AUTH] Success via Bearer token for user:', userinfo.sub || userinfo.id);
               return next();
             }
           } catch (error) {
-            console.log('[UNIFIED-AUTH] Bearer token validation failed:', error);
+            console.log('[AUTH] Bearer token validation failed:', error);
           }
         }
       }
 
-      // Method 2: Check session authentication
-      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        console.log('[UNIFIED-AUTH] Session authentication valid for user:', req.user?.claims?.sub || req.user?.id);
+      // Method 2: Check session authentication with detailed fallback
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        console.log('[AUTH] Session authentication function passed');
         
-        // Handle cases where user is authenticated but missing expires_at
-        if (!req.user.expires_at) {
-          req.user.expires_at = Math.floor(Date.now() / 1000) + 3600;
+        if (req.user) {
+          console.log('[AUTH] Session user exists:', req.user?.claims?.sub || req.user?.id);
+          
+          // Handle cases where user is authenticated but missing expires_at
+          if (!req.user.expires_at) {
+            req.user.expires_at = Math.floor(Date.now() / 1000) + 3600;
+            console.log('[AUTH] Added expires_at to session user');
+          }
+          
+          console.log('[AUTH] ✅ Session authentication successful');
+          return next();
+        } else {
+          console.log('[AUTH] ❌ Session function passed but no user object');
         }
+      } else {
+        console.log('[AUTH] ❌ Session authentication failed or no session function');
         
-        return next();
+        // Additional session debugging
+        if (req.session) {
+          console.log('[AUTH] Session exists but not authenticated - sessionID:', req.sessionID);
+          console.log('[AUTH] Session keys:', Object.keys(req.session));
+        } else {
+          console.log('[AUTH] ❌ No session object found');
+        }
       }
 
-      // NO MORE BYPASSES - Require proper authentication
-      console.log('[UNIFIED-AUTH] Authentication failed - no valid token or session');
+      // Production domain specific handling
+      if (hostname.includes('curiosities.market')) {
+        console.log('[AUTH] ⚠️ PRODUCTION AUTH ISSUE: Cross-domain authentication failing on:', hostname);
+        console.log('[AUTH] 💡 Suggestion: Users may need to log in directly on the backend domain first');
+      }
+
+      console.log('[AUTH] ❌ Authentication required - no valid token or session');
       return res.status(401).json({ message: "Authentication required" });
 
     } catch (error) {
-      console.error('[UNIFIED-AUTH] Auth middleware error:', error);
+      console.error('[AUTH] ❌ Auth middleware error:', error);
       return res.status(500).json({ message: "Authentication error" });
     }
   };
