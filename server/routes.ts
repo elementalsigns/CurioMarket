@@ -3711,6 +3711,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ship order endpoint - called by "Mark as Shipped" button
+  app.post('/api/orders/:id/ship', isAuthenticated, async (req: any, res) => {
+    try {
+      const { trackingNumber, carrier } = req.body;
+      
+      if (!trackingNumber || !carrier) {
+        return res.status(400).json({ error: "Tracking number and carrier are required" });
+      }
+
+      const trackingInfo = { trackingNumber, carrier };
+      const order = await storage.updateOrderTracking(req.params.id, trackingInfo);
+      
+      // Send shipping notification email to buyer when tracking is added
+      try {
+        const orderDetails = await storage.getOrderWithDetails(req.params.id);
+        
+        if (orderDetails && orderDetails.buyerEmail) {
+          const emailData = {
+            customerEmail: orderDetails.buyerEmail,
+            customerName: orderDetails.buyerFirstName && orderDetails.buyerLastName 
+              ? `${orderDetails.buyerFirstName} ${orderDetails.buyerLastName}` 
+              : 'Customer',
+            orderId: orderDetails.id,
+            orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
+            orderTotal: orderDetails.total,
+            orderItems: orderDetails.items || [],
+            shippingAddress: orderDetails.shippingAddress,
+            trackingNumber: trackingInfo.trackingNumber,
+            carrier: trackingInfo.carrier,
+            shopName: orderDetails.sellerShopName || 'Curio Market Seller',
+            sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
+          };
+          
+          console.log('[SHIP ORDER] Sending shipping notification to buyer:', orderDetails.buyerEmail);
+          const emailResult = await emailService.sendShippingNotification(emailData);
+          if (emailResult) {
+            console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
+          } else {
+            console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
+          }
+        } else {
+          console.log('[SHIP ORDER] ⚠️ No buyer email found for shipping notification');
+        }
+      } catch (emailError) {
+        console.error('[SHIP ORDER] ❌ Failed to send shipping notification email:', emailError);
+        // Continue processing even if email fails
+      }
+      
+      res.json(order);
+    } catch (error) {
+      console.error("Error shipping order:", error);
+      res.status(500).json({ error: "Failed to ship order" });
+    }
+  });
+
   // Messages
   app.get('/api/orders/:id/messages', isAuthenticated, async (req: any, res) => {
     try {
