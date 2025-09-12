@@ -846,21 +846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hostname = req.get('host') || '';
       const origin = req.headers.origin || '';
 
-      console.log('====== AUTHENTICATION DEBUG ======');
-      console.log('Auth check - hostname:', hostname);
-      console.log('Auth check - origin:', origin);
-      console.log('Auth check - method:', req.method);
-      console.log('Auth check - path:', req.path);
-      console.log('Auth check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no session function');
-      console.log('Auth check - user:', req.user ? 'exists' : 'null');
-      console.log('Auth check - user.expires_at:', req.user?.expires_at);
-      console.log('Auth check - Authorization header:', req.headers.authorization ? 'present' : 'none');
-      console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
-      console.log('Auth check - cookies:', Object.keys(req.cookies || {}));
-      console.log('Auth check - session ID:', req.sessionID);
-      console.log('===================================');
-      
-      // TARGETED DEVELOPMENT BYPASS - Specific fix for seller dashboard authentication
+      // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
       // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE operations
       const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
       const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages');
@@ -883,6 +869,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         return next();
       }
+
+      console.log('====== AUTHENTICATION DEBUG ======');
+      console.log('Auth check - hostname:', hostname);
+      console.log('Auth check - origin:', origin);
+      console.log('Auth check - method:', req.method);
+      console.log('Auth check - path:', req.path);
+      console.log('Auth check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no session function');
+      console.log('Auth check - user:', req.user ? 'exists' : 'null');
+      console.log('Auth check - user.expires_at:', req.user?.expires_at);
+      console.log('Auth check - Authorization header:', req.headers.authorization ? 'present' : 'none');
+      console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
+      console.log('Auth check - cookies:', Object.keys(req.cookies || {}));
+      console.log('Auth check - session ID:', req.sessionID);
+      console.log('===================================');
       
       // Method 1: Check Authorization header (Bearer token) 
       const authHeader = req.headers.authorization;
