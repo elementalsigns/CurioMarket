@@ -2759,6 +2759,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete listing
   app.delete('/api/listings/:id', requireAuth, async (req: any, res) => {
     try {
+      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
       
