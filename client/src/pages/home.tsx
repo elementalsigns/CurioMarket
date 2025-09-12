@@ -45,12 +45,12 @@ export default function Home() {
 
   const { data: sellerProfile } = useQuery({
     queryKey: ["/api/seller/profile"],
-    enabled: !!user,
+    enabled: !!user && (user as any)?.role === 'seller',
     retry: false, // Don't retry if user is not a seller
   });
 
   // Determine if user should see seller dashboard
-  const showSellerDashboard = !!sellerProfile || (user as any)?.role === 'seller' || !!(user as any)?.stripeCustomerId;
+  const showSellerDashboard = (user as any)?.role === 'seller' || !!sellerProfile;
 
   useEffect(() => {
     if (featuredError && isUnauthorizedError(featuredError as Error)) {
