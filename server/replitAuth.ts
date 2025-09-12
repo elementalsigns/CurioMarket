@@ -360,14 +360,27 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     console.log('[AUTH] ❌ Session authentication failed or no session function');
     console.log(`[AUTH] Session exists but not authenticated - sessionID: ${req.sessionID}`);
     console.log(`[AUTH] Session keys: [`, Object.keys(req.session || {}), `]`);
-    console.log(`[AUTH] Full session data:`, JSON.stringify(req.session, null, 2));
     
-    // PRODUCTION FIX: Check if user has a valid session even if req.isAuthenticated() fails
-    // This handles cross-domain authentication issues in production
+    // CRITICAL FIX: Improved session debugging and fallback handling
     const session = req.session as any;
-    if (session?.passport?.user || session?.user) {
-      const sessionUser = session.passport?.user || session.user;
+    console.log(`[AUTH] FULL SESSION DEBUG:`, JSON.stringify(session, null, 2));
+    
+    // Look for user data in multiple possible locations in the session
+    let sessionUser = null;
+    if (session?.passport?.user) {
+      sessionUser = session.passport.user;
+      console.log(`[AUTH] Found user in session.passport.user`);
+    } else if (session?.user) {
+      sessionUser = session.user;  
+      console.log(`[AUTH] Found user in session.user`);
+    } else if (session?.cookie && session?.cookie?.user) {
+      sessionUser = session.cookie.user;
+      console.log(`[AUTH] Found user in session.cookie.user`);
+    }
+    
+    if (sessionUser) {
       console.log(`[AUTH] ✅ Found valid session user data despite isAuthenticated() failure`);
+      console.log(`[AUTH] Session user data:`, JSON.stringify(sessionUser, null, 2));
       
       // Create a minimal user object for the request
       req.user = {
