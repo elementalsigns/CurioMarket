@@ -72,14 +72,10 @@ export default function Landing() {
               <div className="flex flex-wrap items-center gap-2 mb-8">
                 <span className="text-sm text-foreground/60">Popular:</span>
                 {[
-                  { name: 'Taxidermy', slug: 'taxidermy-bones' },
+                  { name: 'Taxidermy', slug: 'taxidermy' },
                   { name: 'Vintage Medical', slug: 'vintage-medical' },
-                  { name: 'Oddities', slug: 'oddities-curiosities' },
-                  { name: 'Specimens', slug: 'antique-specimens' },
-                  { name: 'Gothic Decor', slug: 'gothic-home-decor' },
-                  { name: 'Jewelry', slug: 'jewelry' },
-                  { name: 'Occult', slug: 'occult' },
-                  { name: 'Murderabilia', slug: 'murderabilia' }
+                  { name: 'Wet Specimens', slug: 'wet-specimens' },
+                  { name: 'Bones & Skulls', slug: 'bones-skulls' }
                 ].map((tag) => (
                   <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
                     <Button 
