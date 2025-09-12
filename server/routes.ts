@@ -984,31 +984,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[AUTH-USER] Standard auth - User ID: ${userId}`);
       }
       
-      // Method 2: Production bypass for corrupted sessions
+      // Method 2: Production bypass DISABLED - causing buyers to see seller data
       // Check if there's a valid seller in the database that matches typical patterns
       if (!userId) {
-        // For production users experiencing auth issues, provide a bypass
-        // based on session activity and seller records
-        console.log('[AUTH-USER] No authenticated user, checking for production bypass...');
-        
-        // Look for active sellers with recent subscriptions as a fallback
-        // Simple production bypass: Find any user with seller role
-        try {
-          // Try to find sellers using the database directly
-          const sellersFromDB = await db.select().from(users).where(eq(users.role, 'seller'));
-          const activeSellers = sellersFromDB.filter((user: any) => 
-            user.stripeSubscriptionId
-          );
-        
-          if (activeSellers.length === 1) {
-            // If there's only one active seller, likely the production user
-            const user = activeSellers[0];
-            console.log(`[AUTH-USER] PRODUCTION BYPASS: Using single active seller ${user.email}`);
-            return res.json(user);
-          }
-        } catch (error) {
-          console.log('[AUTH-USER] Production bypass failed:', error);
-        }
+        // Production bypass completely disabled to fix buyer/seller authentication confusion
+        console.log('[AUTH-USER] No authenticated user, production bypass DISABLED');
         
         return res.status(401).json({ message: "Authentication required - please logout and login again" });
       }
