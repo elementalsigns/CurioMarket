@@ -155,7 +155,10 @@ export default function EditListing() {
       console.log('[EDIT-SUCCESS] Mutation response:', data);
       console.log('[EDIT-SUCCESS] Redirecting to dashboard');
       setLocation('/seller/dashboard');
+      // Invalidate all relevant cache keys to sync with inventory management
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/listings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/low-stock"] });
     },
     onError: (error) => {
       toast({

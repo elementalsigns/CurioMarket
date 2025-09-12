@@ -321,8 +321,8 @@ export default function InventoryManagementPage() {
           </CardContent>
         </Card>
 
-        {/* Inventory Table */}
-        <Card className="bg-zinc-900 border-zinc-800">
+        {/* Inventory Table - Desktop */}
+        <Card className="bg-zinc-900 border-zinc-800 hidden md:block">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -439,6 +439,101 @@ export default function InventoryManagementPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Mobile Card Layout */}
+        <div className="md:hidden space-y-4">
+          {filteredListings.length === 0 ? (
+            <Card className="bg-zinc-900 border-zinc-800">
+              <CardContent className="p-8 text-center">
+                <Package className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400">No inventory items found</p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredListings.map((listing: Listing) => {
+              const stockStatus = getStockStatus(listing);
+              return (
+                <Card key={listing.id} className="bg-zinc-900 border-zinc-800" data-testid={`card-listing-${listing.id}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start space-x-3 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedListings.includes(listing.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedListings(prev => [...prev, listing.id]);
+                            } else {
+                              setSelectedListings(prev => prev.filter(id => id !== listing.id));
+                            }
+                          }}
+                          className="w-4 h-4 text-red-600 rounded mt-1"
+                          data-testid={`checkbox-mobile-select-${listing.id}`}
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-medium text-white mb-1">{listing.title}</h3>
+                          {listing.sku && (
+                            <p className="text-zinc-400 text-sm font-mono">{listing.sku}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-zinc-700 text-zinc-300 hover:bg-zinc-700"
+                        data-testid={`button-mobile-edit-${listing.id}`}
+                      >
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <p className="text-zinc-400 text-xs mb-1">Status</p>
+                        <Badge 
+                          variant={listing.state === 'published' ? 'default' : 'secondary'}
+                          className={
+                            listing.state === 'published' ? 'bg-green-600' :
+                            listing.state === 'draft' ? 'bg-yellow-600' : 'bg-red-600'
+                          }
+                        >
+                          {listing.state.charAt(0).toUpperCase() + listing.state.slice(1)}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-zinc-400 text-xs mb-1">Stock Status</p>
+                        <Badge className={stockStatus.color}>
+                          {stockStatus.label}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-zinc-400 text-xs mb-1">Current Stock</p>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            value={listing.stockQuantity}
+                            onChange={(e) => handleStockUpdate(listing.id, parseInt(e.target.value) || 0)}
+                            className="w-16 h-8 bg-zinc-800 border-zinc-700 text-white text-center"
+                            data-testid={`input-mobile-stock-${listing.id}`}
+                          />
+                          <span className="text-zinc-400 text-xs">units</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-zinc-400 text-xs mb-1">Low Stock Alert</p>
+                        <span className="text-zinc-300 text-sm">{listing.lowStockThreshold}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
