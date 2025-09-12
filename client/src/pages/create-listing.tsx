@@ -16,7 +16,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Upload, X, Eye, Info } from "lucide-react";
+import { Upload as UploadIcon, X as XIcon, Eye as EyeIcon, Info as InfoIcon } from "lucide-react";
 import { ImageUploadGrid } from "@/components/ImageUploadGrid";
 import {
   Dialog,
@@ -244,7 +244,7 @@ export default function CreateListing() {
                 onClick={() => setPreviewMode(!previewMode)}
                 data-testid="button-toggle-preview"
               >
-                <Eye className="mr-2" size={16} />
+                <EyeIcon className="mr-2" size={16} />
                 {previewMode ? "Edit" : "Preview"}
               </Button>
             </div>
@@ -438,7 +438,7 @@ export default function CreateListing() {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button variant="ghost" size="sm" className="p-1 h-auto text-foreground/60 hover:text-foreground">
-                            <Info size={16} />
+                            <InfoIcon size={16} />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-md">
@@ -485,7 +485,7 @@ export default function CreateListing() {
                                 className="p-1 h-auto text-muted-foreground hover:text-foreground"
                                 data-testid="button-sku-info"
                               >
-                                <Info className="w-4 h-4" />
+                                <InfoIcon className="w-4 h-4" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="bg-zinc-900 border-zinc-700">
@@ -536,7 +536,7 @@ export default function CreateListing() {
                                 className="p-1 h-auto text-muted-foreground hover:text-foreground"
                                 data-testid="button-mpn-info"
                               >
-                                <Info className="w-4 h-4" />
+                                <InfoIcon className="w-4 h-4" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="bg-zinc-900 border-zinc-700">
