@@ -2757,31 +2757,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete listing
-  app.delete('/api/listings/:id', requireAuth, async (req: any, res) => {
+  app.delete('/api/listings/:id', (req: any, res, next) => {
+    console.log(`[DELETE-PRE-AUTH] Raw DELETE request received for listing ${req.params.id}`);
+    console.log(`[DELETE-PRE-AUTH] Method: ${req.method}, URL: ${req.url}`);
+    next();
+  }, requireAuth, async (req: any, res) => {
+    console.log(`[DELETE-REQUEST] Starting delete for listing ${req.params.id}`);
     try {
+      console.log(`[DELETE-AUTH] Checking authentication...`);
       if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        console.log(`[DELETE-AUTH] Authentication failed - no user data`);
         return res.status(401).json({ error: "Authentication required" });
       }
       
       const userId = req.user.claims.sub;
+      console.log(`[DELETE-AUTH] User ID: ${userId}`);
+      
+      console.log(`[DELETE-SELLER] Getting seller by user ID...`);
       const seller = await storage.getSellerByUserId(userId);
       
       if (!seller) {
+        console.log(`[DELETE-SELLER] No seller found for user ${userId}`);
         return res.status(403).json({ error: "Seller profile required" });
       }
+      
+      console.log(`[DELETE-SELLER] Seller found: ${seller.id}`);
 
+      console.log(`[DELETE-LISTING] Getting listing ${req.params.id}...`);
       const listing = await storage.getListing(req.params.id);
       if (!listing || listing.sellerId !== seller.id) {
+        console.log(`[DELETE-LISTING] Listing not found or not owned by seller`);
         return res.status(404).json({ error: "Listing not found" });
       }
+      
+      console.log(`[DELETE-LISTING] Listing found, owned by seller`);
 
+      console.log(`[DELETE-OPERATION] Deleting listing...`);
       await storage.deleteListing(req.params.id);
       
       console.log(`[DELETE-SUCCESS] Deleted listing ${req.params.id} for seller ${seller.id}`);
       
       res.json({ success: true, message: "Listing deleted successfully" });
     } catch (error) {
-      console.error("Error deleting listing:", error);
+      console.error(`[DELETE-ERROR] Error deleting listing ${req.params.id}:`, error);
       res.status(500).json({ error: "Failed to delete listing" });
     }
   });

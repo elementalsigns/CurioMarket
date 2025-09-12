@@ -142,6 +142,7 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
               </Button>
             </Link>
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => deleteListingMutation.mutate(listing.id)}
@@ -229,6 +230,7 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
               </Button>
             </Link>
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={() => deleteListingMutation.mutate(listing.id)}
