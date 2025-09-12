@@ -498,8 +498,13 @@ export class DatabaseStorage implements IStorage {
         // Step 6: Skip share events (table doesn't exist in this database)
         console.log(`[DELETE-TRANSACTION] Step 6: Skipping share events (table not in database)`);
         
-        // Step 7: Now safely delete the listing itself
-        console.log(`[DELETE-TRANSACTION] Step 7: Deleting listing ${id}`);
+        // Step 7: Remove order items that reference this listing
+        console.log(`[DELETE-TRANSACTION] Step 7: Deleting order items for listing ${id}`);
+        const orderItemsDeleted = await tx.delete(orderItems).where(eq(orderItems.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted order items:`, orderItemsDeleted);
+        
+        // Step 8: Now safely delete the listing itself
+        console.log(`[DELETE-TRANSACTION] Step 8: Deleting listing ${id}`);
         const listingDeleted = await tx.delete(listings).where(eq(listings.id, id));
         console.log(`[DELETE-TRANSACTION] Deleted listing:`, listingDeleted);
         
