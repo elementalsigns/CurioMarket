@@ -461,42 +461,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteListing(id: string): Promise<void> {
-    // Comprehensive fix: Delete all dependent records that reference this listing
-    // This prevents foreign key constraint violations
-    await db.transaction(async (tx) => {
-      console.log(`[DELETE-TRANSACTION] Starting deletion transaction for listing ${id}`);
+    console.log(`[DELETE-METHOD] deleteListing called for ID: ${id}`);
+    
+    try {
+      // Comprehensive fix: Delete all dependent records that reference this listing
+      // This prevents foreign key constraint violations
+      console.log(`[DELETE-METHOD] Starting transaction approach`);
       
-      // Step 1: Remove cart items that reference this listing
-      const cartItemsDeleted = await tx.delete(cartItems).where(eq(cartItems.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted cart items:`, cartItemsDeleted);
+      await db.transaction(async (tx) => {
+        console.log(`[DELETE-TRANSACTION] Starting deletion transaction for listing ${id}`);
+        
+        // Step 1: Remove cart items that reference this listing
+        console.log(`[DELETE-TRANSACTION] Step 1: Deleting cart items for listing ${id}`);
+        const cartItemsDeleted = await tx.delete(cartItems).where(eq(cartItems.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted cart items:`, cartItemsDeleted);
+        
+        // Step 2: Remove favorites that reference this listing
+        console.log(`[DELETE-TRANSACTION] Step 2: Deleting favorites for listing ${id}`);
+        const favoritesDeleted = await tx.delete(favorites).where(eq(favorites.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted favorites:`, favoritesDeleted);
+        
+        // Step 3: Remove wishlist items that reference this listing
+        console.log(`[DELETE-TRANSACTION] Step 3: Deleting wishlist items for listing ${id}`);
+        const wishlistItemsDeleted = await tx.delete(wishlistItems).where(eq(wishlistItems.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted wishlist items:`, wishlistItemsDeleted);
+        
+        // Step 4: Remove listing images
+        console.log(`[DELETE-TRANSACTION] Step 4: Deleting listing images for listing ${id}`);
+        const listingImagesDeleted = await tx.delete(listingImages).where(eq(listingImages.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted listing images:`, listingImagesDeleted);
+        
+        // Step 5: Remove listing variations
+        console.log(`[DELETE-TRANSACTION] Step 5: Deleting listing variations for listing ${id}`);
+        const listingVariationsDeleted = await tx.delete(listingVariations).where(eq(listingVariations.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted listing variations:`, listingVariationsDeleted);
+        
+        // Step 6: Remove share events for this listing
+        console.log(`[DELETE-TRANSACTION] Step 6: Deleting share events for listing ${id}`);
+        const shareEventsDeleted = await tx.delete(shareEvents).where(eq(shareEvents.listingId, id));
+        console.log(`[DELETE-TRANSACTION] Deleted share events:`, shareEventsDeleted);
+        
+        // Step 7: Now safely delete the listing itself
+        console.log(`[DELETE-TRANSACTION] Step 7: Deleting listing ${id}`);
+        const listingDeleted = await tx.delete(listings).where(eq(listings.id, id));
+        console.log(`[DELETE-TRANSACTION] Deleted listing:`, listingDeleted);
+        
+        console.log(`[DELETE-TRANSACTION] Transaction completed successfully for listing ${id}`);
+      });
       
-      // Step 2: Remove favorites that reference this listing
-      const favoritesDeleted = await tx.delete(favorites).where(eq(favorites.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted favorites:`, favoritesDeleted);
+      console.log(`[DELETE-METHOD] Transaction completed successfully for listing ${id}`);
       
-      // Step 3: Remove wishlist items that reference this listing
-      const wishlistItemsDeleted = await tx.delete(wishlistItems).where(eq(wishlistItems.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted wishlist items:`, wishlistItemsDeleted);
-      
-      // Step 4: Remove listing images
-      const listingImagesDeleted = await tx.delete(listingImages).where(eq(listingImages.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted listing images:`, listingImagesDeleted);
-      
-      // Step 5: Remove listing variations
-      const listingVariationsDeleted = await tx.delete(listingVariations).where(eq(listingVariations.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted listing variations:`, listingVariationsDeleted);
-      
-      // Step 6: Remove share events for this listing
-      const shareEventsDeleted = await tx.delete(shareEvents).where(eq(shareEvents.listingId, id));
-      console.log(`[DELETE-TRANSACTION] Deleted share events:`, shareEventsDeleted);
-      
-      // Step 7: Now safely delete the listing itself
-      console.log(`[DELETE-TRANSACTION] Deleting listing ${id}`);
-      const listingDeleted = await tx.delete(listings).where(eq(listings.id, id));
-      console.log(`[DELETE-TRANSACTION] Deleted listing:`, listingDeleted);
-      
-      console.log(`[DELETE-TRANSACTION] Transaction completed successfully for listing ${id}`);
-    });
+    } catch (error) {
+      console.log(`[DELETE-METHOD] Error in deleteListing for ${id}:`, error);
+      throw error; // Re-throw to maintain error handling
+    }
   }
 
   // Listing images
