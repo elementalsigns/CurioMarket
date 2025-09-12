@@ -241,7 +241,10 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
           sellerId,
           status: 'paid' as const,
           total: orderGroup.subtotal.toFixed(2),
-          paymentIntentId: paymentIntent.id,
+          subtotal: orderGroup.subtotal.toFixed(2),
+          shippingCost: (shippingCost || 0).toFixed(2),
+          platformFee: (platformFee || 0).toFixed(2),
+          stripePaymentIntentId: paymentIntent.id,
           shippingAddress: paymentIntent.shipping || {}
         };
 
