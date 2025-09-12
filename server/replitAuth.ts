@@ -27,20 +27,17 @@ export function getSession() {
   
   // Configure session cookie settings for custom domain support
   const isProduction = process.env.NODE_ENV === 'production';
-  // Always use production settings for HTTPS and custom domain compatibility
-  const useProductionSettings = true; // Enable for all custom domain access
   
   const cookieConfig = {
     httpOnly: true,
-    secure: useProductionSettings, // HTTPS required for production domain compatibility
+    secure: isProduction, // Only HTTPS in production
     maxAge: sessionTtl,
-    sameSite: useProductionSettings ? 'none' as const : 'lax' as const, // 'none' for cross-site compatibility
-    domain: undefined, // Let browser handle domain automatically
+    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-site compatibility in production
+    domain: isProduction ? '.curiosities.market' : undefined, // Production domain scope
   };
   
   console.log('[SESSION] Cookie config:', {
     isProduction,
-    useProductionSettings,
     secure: cookieConfig.secure,
     sameSite: cookieConfig.sameSite,
     domain: cookieConfig.domain
@@ -110,9 +107,16 @@ export async function setupAuth(app: Express) {
       verified: passport.AuthenticateCallback
     ) => {
       try {
-        const user = {};
+        const claims = tokens.claims();
+        const user = {
+          id: claims.sub,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          expires_at: claims.exp
+        };
         updateUserSession(user, tokens);
-        await upsertUser(tokens.claims());
+        await upsertUser(claims);
+        console.log('[AUTH] ✅ User verified with access token, token length:', tokens.access_token?.length || 0);
         verified(null, user);
       } catch (error) {
         console.error("Auth verification error:", error);
@@ -317,8 +321,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // In production, you'd want proper token validation
     if (token && token.length > 10) {
       try {
-        // Simple token validation - make a request to Replit userinfo endpoint
-        const response = await fetch('https://replit.com/api/userinfo', {
+        // PRODUCTION FIX: Use proper OIDC userinfo endpoint for token validation
+        const config = await getOidcConfig();
+        
+        // Validate token against the proper OIDC userinfo endpoint
+        const response = await fetch(config.userinfo_endpoint!, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -326,6 +333,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         
         if (response.ok) {
           const userinfo = await response.json();
+          console.log(`[AUTH] ✅ Bearer token validation successful for user: ${userinfo.sub}`);
           
           // Create a user object with the required data
           req.user = {
@@ -334,11 +342,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
             expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
           };
           
-          console.log('Auth success via Bearer token for user:', userinfo.sub || userinfo.id);
           return next();
+        } else {
+          console.log(`[AUTH] ❌ Bearer token validation failed - HTTP ${response.status}`);
         }
       } catch (error) {
-        console.log('Bearer token validation failed:', error);
+        console.log('[AUTH] ❌ Bearer token validation error:', error);
       }
     }
   }
