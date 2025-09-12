@@ -866,7 +866,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       
+      console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
+      console.log('[BYPASS-DEBUG] isSellerDashboardEndpoint:', isSellerDashboardEndpoint);
+      console.log('[BYPASS-DEBUG] isDeleteOperation:', isDeleteOperation);
+      console.log('[BYPASS-DEBUG] Should bypass:', isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation));
+      
       if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation)) {
+        console.log('[BYPASS] ✅ APPLYING DEVELOPMENT BYPASS FOR DELETE OPERATION');
         req.user = {
           claims: {
             sub: '46848882',  // ONLY for specific user
