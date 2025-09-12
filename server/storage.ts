@@ -24,7 +24,6 @@ import {
   listingVariations,
   searchAnalytics,
   payouts,
-  shareEvents,
   type User,
   type UpsertUser,
   type Seller,
@@ -654,22 +653,16 @@ export class DatabaseStorage implements IStorage {
     await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
   }
 
-  // Social sharing analytics
+  // Social sharing analytics (disabled - shareEvents table doesn't exist)
   async trackShareEvent(shareData: any): Promise<void> {
-    await db.insert(shareEvents).values(shareData);
+    // await db.insert(shareEvents).values(shareData);
+    console.log(`[SHARE-TRACKING] Share event tracking disabled (table not available):`, shareData);
   }
 
   async getListingShares(listingId: string): Promise<any[]> {
-    return await db
-      .select({
-        platform: shareEvents.platform,
-        count: sql<number>`count(*)`.as('count'),
-        lastShared: sql<string>`max(${shareEvents.timestamp})`.as('last_shared')
-      })
-      .from(shareEvents)
-      .where(eq(shareEvents.listingId, listingId))
-      .groupBy(shareEvents.platform)
-      .orderBy(sql`count(*) desc`);
+    // Return empty array since shareEvents table doesn't exist
+    console.log(`[SHARE-TRACKING] Share analytics disabled for listing ${listingId}`);
+    return [];
   }
 
   async getOrder(id: string): Promise<Order | undefined> {
