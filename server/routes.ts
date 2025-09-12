@@ -3286,9 +3286,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
       
-      // Verify the order belongs to the authenticated user
-      if (order.buyerId !== userId) {
-        console.log(`[ORDER DETAILS] Access denied: order belongs to ${order.buyerId}, user is ${userId}`);
+      // Verify the order belongs to the authenticated user (buyer) or seller
+      const seller = await storage.getSellerByUserId(userId);
+      const isOrderBuyer = order.buyerId === userId;
+      const isOrderSeller = seller && order.sellerId === seller.id;
+      
+      if (!isOrderBuyer && !isOrderSeller) {
+        console.log(`[ORDER DETAILS] Access denied: order belongs to buyer ${order.buyerId} and seller ${order.sellerId}, user is ${userId}`);
         return res.status(403).json({ error: "Access denied" });
       }
       
@@ -3748,6 +3752,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const emailResult = await emailService.sendShippingNotification(emailData);
           if (emailResult) {
             console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
+            // Update order status to completed after successful email delivery
+            await storage.updateOrderStatusToCompleted(req.params.id);
+            console.log('[SHIP ORDER] ✅ Order status updated to completed');
           } else {
             console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
           }

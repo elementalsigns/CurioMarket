@@ -158,6 +158,7 @@ export interface IStorage {
 
   // Order Management & Communication  
   updateOrderTracking(orderId: string, trackingInfo: any): Promise<Order>;
+  updateOrderStatusToCompleted(orderId: string): Promise<Order>;
   getOrderMessages(orderId: string): Promise<Message[]>;
   sendMessage(threadId: string, senderId: string, content: string, attachments?: string[]): Promise<Message>;
   markMessageAsRead(messageId: string): Promise<Message>;
@@ -1069,6 +1070,18 @@ export class DatabaseStorage implements IStorage {
       .set({
         shippingAddress: sql`COALESCE(${orders.shippingAddress}, '{}') || ${JSON.stringify({ tracking: trackingInfo })}`,
         status: 'shipped',
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+    return order;
+  }
+
+  async updateOrderStatusToCompleted(orderId: string): Promise<Order> {
+    const [order] = await db
+      .update(orders)
+      .set({
+        status: 'fulfilled',
         updatedAt: new Date()
       })
       .where(eq(orders.id, orderId))

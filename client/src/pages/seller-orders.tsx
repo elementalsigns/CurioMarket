@@ -211,7 +211,7 @@ export default function SellerOrders() {
                         data-testid={`order-status-${order.id}`}
                       >
                         {getStatusIcon(order.status)}
-                        {order.status}
+                        {order.status === 'fulfilled' ? 'completed' : order.status}
                       </Badge>
                     </div>
                   </div>
