@@ -322,7 +322,7 @@ export default function SellerDashboard() {
 
   const deleteListingMutation = useMutation({
     mutationFn: async (listingId: string) => {
-      return apiRequest("DELETE", `/api/listings/${listingId}`);
+      return apiRequest("POST", `/api/listings/${listingId}/delete`);
     },
     onSuccess: () => {
       toast({

@@ -2756,7 +2756,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete listing
+  // Delete listing (POST workaround for proxy compatibility)
+  app.post('/api/listings/:id/delete', requireAuth, async (req: any, res) => {
+    console.log(`[DELETE-POST] Starting delete for listing ${req.params.id}`);
+    try {
+      console.log(`[DELETE-AUTH] Checking authentication...`);
+      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        console.log(`[DELETE-AUTH] Authentication failed - no user data`);
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userId = req.user.claims.sub;
+      const listingId = req.params.id;
+
+      console.log(`[DELETE-DELETE] Attempting to delete listing ${listingId} for user ${userId}`);
+      await storage.deleteListing(listingId);
+      
+      console.log(`[DELETE-SUCCESS] Successfully deleted listing ${listingId}`);
+      res.json({ success: true, message: "Listing deleted successfully" });
+    } catch (error) {
+      console.error(`[DELETE-ERROR] Error deleting listing:`, error);
+      res.status(500).json({ error: "Failed to delete listing" });
+    }
+  });
+
+  // Delete listing (original DELETE endpoint)
   app.delete('/api/listings/:id', (req: any, res, next) => {
     console.log(`[DELETE-PRE-AUTH] Raw DELETE request received for listing ${req.params.id}`);
     console.log(`[DELETE-PRE-AUTH] Method: ${req.method}, URL: ${req.url}`);
