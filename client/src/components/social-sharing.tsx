@@ -26,9 +26,9 @@ export function SocialSharing({ listing, className, variant = "outline", size = 
   
   const shareUrl = `${window.location.origin}/listings/${listing.id}`;
   const shareTitle = `${listing.title} - ${listing.sellerShopName || 'Curio Market'}`;
-  const shareDescription = listing.description.length > 100 
+  const shareDescription = listing.description && listing.description.length > 100 
     ? `${listing.description.substring(0, 100)}...` 
-    : listing.description;
+    : listing.description || '';
   const sharePrice = `$${listing.price}`;
   const shareImage = listing.images[0] || '';
   
