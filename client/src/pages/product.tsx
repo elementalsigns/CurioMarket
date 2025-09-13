@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SocialSharing } from "@/components/social-sharing";
 import { MetaTags } from "@/components/meta-tags";
 import { apiRequest } from "@/lib/queryClient";
+import ReviewForm from "@/components/review-form";
 
 export default function Product() {
   const { slug } = useParams();
@@ -23,6 +24,11 @@ export default function Product() {
   const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+
+  // Parse URL parameters for review mode
+  const urlParams = new URLSearchParams(window.location.search);
+  const isReviewMode = urlParams.get('review') === 'true';
+  const orderId = urlParams.get('orderId');
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ["/api/listings/by-slug", slug],
@@ -480,6 +486,29 @@ export default function Product() {
             </Card>
           </div>
         </div>
+
+        {/* Review Form Section */}
+        {isReviewMode && orderId && user && (
+          <div className="mt-16" data-testid="review-form-section">
+            <h2 className="text-2xl font-serif font-bold mb-6">Write a Review</h2>
+            <Card className="glass-effect">
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-2">Reviewing: {listing.title}</h3>
+                  <p className="text-sm text-foreground/70">Share your experience with this item</p>
+                </div>
+                <ReviewForm 
+                  productId={listing.id} 
+                  orderId={orderId}
+                  onSuccess={() => {
+                    // Navigate back to order details after successful review
+                    setLocation(`/orders/${orderId}`);
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Reviews Section */}
         {reviews.length > 0 && (
