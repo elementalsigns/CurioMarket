@@ -301,11 +301,16 @@ export default function Header() {
                     data-testid="button-favorites"
                   >
                     <Heart size={20} />
-                    {wishlists && Array.isArray(wishlists) && wishlists.reduce((total: number, wishlist: any) => total + (wishlist.items?.length || 0), 0) > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="favorites-count">
-                        {wishlists.reduce((total: number, wishlist: any) => total + (wishlist.items?.length || 0), 0)}
-                      </span>
-                    )}
+                    {(() => {
+                      const totalItems = wishlists && Array.isArray(wishlists) 
+                        ? wishlists.reduce((total: number, wishlist: any) => total + (wishlist.items?.length || 0), 0) 
+                        : 0;
+                      return totalItems > 0 ? (
+                        <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="favorites-count">
+                          {totalItems}
+                        </span>
+                      ) : null;
+                    })()}
                   </Button>
                 </Link>
                 
