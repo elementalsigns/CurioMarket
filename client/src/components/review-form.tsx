@@ -10,6 +10,24 @@ import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import type { UploadResult } from "@uppy/core";
 
+// Helper function to convert Google Storage URLs to local /objects/ format
+function convertImageUrl(url: string): string {
+  if (!url || !url.startsWith('https://storage.googleapis.com/')) {
+    return url;
+  }
+  
+  const urlParts = url.split('/');
+  const bucketIndex = urlParts.findIndex(part => part.includes('replit-objstore'));
+  if (bucketIndex === -1) return url;
+  
+  const pathAfterBucket = urlParts.slice(bucketIndex + 1).join('/');
+  const objectPath = pathAfterBucket.startsWith('.private/') 
+    ? pathAfterBucket.replace('.private/', '') 
+    : pathAfterBucket;
+  
+  return `/objects/${objectPath}`;
+}
+
 interface ReviewFormProps {
   productId: string;
   orderId: string;
@@ -187,7 +205,7 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
                 {photos.map((photo, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={photo}
+                      src={convertImageUrl(photo)}
                       alt={`Review photo ${index + 1}`}
                       className="w-full h-24 object-cover rounded-lg bg-zinc-800"
                     />
