@@ -148,7 +148,7 @@ export default function EditListing() {
         images: images, // Include the uploaded images
       };
       const response = await apiRequest("PUT", `/api/listings/${id}`, payload);
-      return response.json();
+      return response;
     },
     onSuccess: (data) => {
       toast({
