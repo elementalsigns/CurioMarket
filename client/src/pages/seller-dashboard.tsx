@@ -543,7 +543,7 @@ export default function SellerDashboard() {
                     {stats.totalReviews}
                   </p>
                 </div>
-                <Users className="text-yellow-500/60 pointer-events-none" size={24} />
+                <Users className="text-yellow-500/60 pointer-events-none cursor-default" size={24} />
               </div>
             </CardContent>
           </Card>
