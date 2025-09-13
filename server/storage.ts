@@ -893,8 +893,8 @@ export class DatabaseStorage implements IStorage {
         count: 0, // Updated to match actual database count
       },
       {
-        slug: "medical-art",
-        name: "Medical Art",
+        slug: "vintage-medical",
+        name: "Vintage Medical",
         count: 0, // Updated to match actual database count
       }
     ];
