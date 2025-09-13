@@ -4640,10 +4640,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Product not found" });
       }
 
+      // Get the seller to find their user ID
+      const seller = await storage.getSeller(listing.sellerId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
       const review = await storage.createReview({
         orderId,
         buyerId,
-        sellerId: listing.sellerId,
+        sellerId: seller.userId, // Use seller's userId, not seller's id
         listingId: productId,
         rating,
         title,
