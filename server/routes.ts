@@ -4601,6 +4601,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if a review already exists for an order/product combination
+  app.get("/api/reviews/check", requireAuth, async (req: any, res) => {
+    try {
+      const { orderId, productId } = req.query;
+      const buyerId = req.user?.id || req.user?.claims?.sub;
+
+      if (!orderId || !productId) {
+        return res.status(400).json({ message: "Order ID and Product ID are required" });
+      }
+
+      const existingReview = await storage.checkExistingReview(orderId, productId, buyerId);
+      
+      if (existingReview) {
+        res.json({ exists: true, review: existingReview });
+      } else {
+        res.status(404).json({ exists: false });
+      }
+    } catch (error) {
+      console.error("Error checking existing review:", error);
+      res.status(500).json({ message: "Failed to check review status" });
+    }
+  });
+
   // Create a review
   app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {

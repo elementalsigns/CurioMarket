@@ -694,6 +694,28 @@ export class DatabaseStorage implements IStorage {
     return newReview;
   }
 
+  async checkExistingReview(orderId: string, productId: string, buyerId: string): Promise<any> {
+    const [existingReview] = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        title: reviews.title,
+        content: reviews.content,
+        createdAt: reviews.createdAt
+      })
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.orderId, orderId),
+          eq(reviews.listingId, productId),
+          eq(reviews.buyerId, buyerId)
+        )
+      )
+      .limit(1);
+    
+    return existingReview || null;
+  }
+
   async getListingReviews(listingId: string): Promise<Review[]> {
     return await db
       .select()

@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, Camera, X } from "lucide-react";
+import { Star, Camera, X, CheckCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import type { UploadResult } from "@uppy/core";
+import { useLocation } from "wouter";
 
 // Helper function to convert Google Storage URLs to local /objects/ format
 function convertImageUrl(url: string): string {
@@ -36,11 +37,27 @@ interface ReviewFormProps {
 
 export default function ReviewForm({ productId, orderId, onSuccess }: ReviewFormProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+
+  // Check if a review already exists for this order/product combination
+  const { data: existingReview, isLoading: checkingReview } = useQuery({
+    queryKey: ["/api/reviews/check", orderId, productId],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("GET", `/api/reviews/check?orderId=${orderId}&productId=${productId}`);
+        return response;
+      } catch (error: any) {
+        // If endpoint doesn't exist or review not found, return null
+        if (error?.response?.status === 404) return null;
+        throw error;
+      }
+    }
+  });
 
   const submitMutation = useMutation({
     mutationFn: async () => 
@@ -63,6 +80,11 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
       setPhotos([]);
       queryClient.invalidateQueries({ queryKey: ["/api/products", productId] });
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      // Redirect to order details page after successful submission
+      setTimeout(() => {
+        setLocation(`/orders/${orderId}`);
+      }, 1000);
       onSuccess?.();
     },
   });
@@ -111,6 +133,60 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
     }
     submitMutation.mutate();
   };
+
+  // Show loading state while checking for existing review
+  if (checkingReview) {
+    return (
+      <Card className="glass-effect" data-testid="review-checking">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+            <p className="mt-2 text-zinc-400">Checking review status...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show "Already reviewed" if review exists
+  if (existingReview) {
+    return (
+      <Card className="glass-effect" data-testid="review-already-exists">
+        <CardHeader>
+          <CardTitle className="text-center text-green-600 flex items-center justify-center gap-2">
+            <CheckCircle className="w-6 h-6" />
+            Review Already Submitted
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 text-center">
+          <p className="text-zinc-400 mb-4">
+            You have already submitted a review for this item.
+          </p>
+          <Button 
+            onClick={() => setLocation(`/orders/${orderId}`)}
+            variant="outline"
+            className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+            data-testid="button-back-to-order"
+          >
+            Back to Order Details
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (submitMutation.isPending) {
+    return (
+      <Card className="glass-effect" data-testid="review-submitting">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+            <p className="mt-2 text-zinc-400">Submitting your review...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="glass-effect" data-testid="review-form">
