@@ -543,7 +543,9 @@ export default function SellerDashboard() {
                     {stats.totalReviews}
                   </p>
                 </div>
-                <Users className="text-yellow-500/60 pointer-events-none cursor-default" size={24} />
+                <span style={{ cursor: 'default' }} className="pointer-events-none">
+                  <Users className="text-yellow-500/60" size={24} />
+                </span>
               </div>
             </CardContent>
           </Card>
