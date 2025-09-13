@@ -51,7 +51,7 @@ export default function CategoryGrid({ variant = 'grid' }: CategoryGridProps) {
   });
 
   // Filter to only show the four specified categories in order (data-only filter)
-  const allowedCategories = ["taxidermy", "wet-specimens", "bones-skulls", "occult"];
+  const allowedCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
   const counts = Array.isArray(categoryCounts) ? categoryCounts : [];
   const categories = allowedCategories.map(slug => {
     const categoryCount = counts.find(c => c.slug === slug);
