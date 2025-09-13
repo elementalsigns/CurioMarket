@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Package, Plus, Edit3, Trash2, Search, Filter, Download, Upload } from "lucide-react";
+import { AlertTriangle, Package, Plus, Edit3, Trash2, Search, Filter, Download, Upload, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 interface Listing {
   id: string;
@@ -156,6 +157,19 @@ export default function InventoryManagementPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto p-8">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link href="/" data-testid="link-back-to-home">
+            <Button 
+              variant="outline" 
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-700"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
