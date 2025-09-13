@@ -564,9 +564,8 @@ export default function SellerDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="listings" className="space-y-6 relative isolate" data-testid="dashboard-tabs">
-          <div className="sticky top-0 z-30 bg-background">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 pointer-events-auto">
+        <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 relative z-50">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
@@ -574,8 +573,7 @@ export default function SellerDashboard() {
             <TabsTrigger value="messages" data-testid="tab-messages">Messages</TabsTrigger>
             <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">Shop Profile</TabsTrigger>
-            </TabsList>
-          </div>
+          </TabsList>
 
           {/* Listings Tab */}
           <TabsContent value="listings" className="space-y-4" data-testid="content-listings">
