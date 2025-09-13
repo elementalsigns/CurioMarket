@@ -184,7 +184,7 @@ export default function Home() {
             </p>
           </div>
 
-          <CategoryGrid />
+          <CategoryGrid variant="grid" />
         </div>
       </section>
 
@@ -212,7 +212,7 @@ export default function Home() {
           </div>
 
           <div className="mb-6" data-testid="recently-bubbles">
-            <CategoryGrid />
+            <CategoryGrid variant="inline" />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="recently-viewed-grid">
