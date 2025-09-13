@@ -878,24 +878,24 @@ export class DatabaseStorage implements IStorage {
     // that would be dynamically calculated from the listings table in production
     return [
       {
+        slug: "taxidermy",
+        name: "Taxidermy",
+        count: 0, // Updated to match actual database count
+      },
+      {
         slug: "wet-specimens",
         name: "Wet Specimens",
         count: 0, // Updated to match actual database count
       },
       {
-        slug: "bones-skulls", 
-        name: "Bones & Skulls",
+        slug: "occult", 
+        name: "Occult",
+        count: 0, // Updated to match actual database count
+      },
+      {
+        slug: "bones-skulls",
+        name: "Bones & Skulls", 
         count: 1, // Updated to match actual database count
-      },
-      {
-        slug: "taxidermy",
-        name: "Taxidermy", 
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "vintage-medical",
-        name: "Vintage Medical",
-        count: 0, // Updated to match actual database count
       }
     ];
   }
