@@ -14,6 +14,7 @@ export default function Messages() {
   const sellerName = urlParams.get('sellerName');
   const listingId = urlParams.get('listingId');
   const listingTitle = urlParams.get('listingTitle');
+  const conversationId = urlParams.get('conversation');
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,6 +46,7 @@ export default function Messages() {
               <MessagingSystem 
                 listingId={listingId || undefined}
                 sellerId={sellerId || undefined}
+                conversationId={conversationId || undefined}
               />
             </CardContent>
           </Card>

@@ -74,9 +74,10 @@ interface Conversation {
 interface MessagingSystemProps {
   listingId?: string;
   sellerId?: string;
+  conversationId?: string;
 }
 
-export default function MessagingSystem({ listingId, sellerId }: MessagingSystemProps) {
+export default function MessagingSystem({ listingId, sellerId, conversationId }: MessagingSystemProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
@@ -247,6 +248,13 @@ export default function MessagingSystem({ listingId, sellerId }: MessagingSystem
       markAsReadMutation.mutate(selectedConversation);
     }
   }, [selectedConversation]);
+
+  // Auto-select conversation when conversationId is provided
+  useEffect(() => {
+    if (conversationId) {
+      setSelectedConversation(conversationId);
+    }
+  }, [conversationId]);
 
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
