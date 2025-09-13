@@ -22,6 +22,24 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/layout/footer";
 
+// Convert Google Cloud Storage URL to local object URL
+function convertImageUrl(url: string): string {
+  if (!url || !url.startsWith('https://storage.googleapis.com/')) {
+    return url;
+  }
+  
+  const urlParts = url.split('/');
+  const bucketIndex = urlParts.findIndex(part => part.includes('replit-objstore'));
+  if (bucketIndex === -1) return url;
+  
+  const pathAfterBucket = urlParts.slice(bucketIndex + 1).join('/');
+  const objectPath = pathAfterBucket.startsWith('.private/') 
+    ? pathAfterBucket.replace('.private/', '') 
+    : pathAfterBucket;
+  
+  return `/objects/${objectPath}`;
+}
+
 export default function OrderDetails() {
   const [, params] = useRoute("/orders/:orderId");
   const { toast } = useToast();
@@ -200,7 +218,7 @@ export default function OrderDetails() {
                         <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden border">
                           {item.image && typeof item.image === 'string' && item.image.length > 0 ? (
                             <img 
-                              src={item.image.includes('storage.googleapis.com') ? item.image : `/api/image-proxy/${item.image}`} 
+                              src={convertImageUrl(item.image)}
                               alt={item.title}
                               className="w-full h-full object-cover"
                               data-testid={`order-item-image-${index}`}
