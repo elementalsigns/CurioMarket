@@ -843,13 +843,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues  
   const requireAuth = async (req: any, res: any, next: any) => {
     console.log('[AUTH-ENTRY] requireAuth function called - method:', req.method, 'path:', req.path);
+    
+    // SPECIAL PUT REQUEST DEBUG
+    if (req.method === 'PUT' && req.path.includes('/api/listings/')) {
+      console.log('[PUT-DEBUG] ===== PUT REQUEST TO LISTINGS DETECTED =====');
+      console.log('[PUT-DEBUG] hostname:', req.get('host'));
+      console.log('[PUT-DEBUG] origin:', req.headers.origin);
+      console.log('[PUT-DEBUG] path:', req.path);
+      console.log('[PUT-DEBUG] method:', req.method);
+    }
+    
     try {
       const hostname = req.get('host') || '';
       const origin = req.headers.origin || '';
 
       // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
       // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE/PUT operations
-      const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1') || hostname.includes('kirk.replit.dev'));
+      const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
       const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
@@ -861,7 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[BYPASS-DEBUG] Should bypass:', isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate));
       
       if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate)) {
-        console.log('[BYPASS] ✅ APPLYING DEVELOPMENT BYPASS FOR DELETE OPERATION');
+        console.log('[BYPASS] ✅ APPLYING DEVELOPMENT BYPASS FOR PUT/DELETE OPERATION');
         req.user = {
           claims: {
             sub: '46848882',  // ONLY for specific user
