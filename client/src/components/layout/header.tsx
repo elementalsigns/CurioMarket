@@ -51,6 +51,11 @@ export default function Header() {
     refetchInterval: 30000, // Refresh every 30 seconds
   }) as { data: { count: number } | undefined };
 
+  const { data: favorites } = useQuery({
+    queryKey: ["/api/user/favorites"],
+    enabled: isAuthenticated,
+  });
+
   const cartItemCount = (cartData && Array.isArray((cartData as any).items)) ? (cartData as any).items.reduce((sum: number, item: any) => sum + item.quantity, 0) : 0;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -292,10 +297,15 @@ export default function Header() {
                 <Link to="/wishlists">
                   <Button 
                     variant="ghost" 
-                    className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
+                    className="text-foreground hover:text-red-600 hover:bg-transparent p-2 relative transition-colors"
                     data-testid="button-favorites"
                   >
                     <Heart size={20} />
+                    {(favorites as any)?.length > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="favorites-count">
+                        {(favorites as any)?.length}
+                      </span>
+                    )}
                   </Button>
                 </Link>
                 

@@ -139,7 +139,7 @@ export default function Home() {
                 <p className="text-foreground/70 mb-4">
                   {(favorites as any)?.length || 0} items saved for later
                 </p>
-                <Link to="/favorites">
+                <Link to="/wishlists">
                   <Button variant="outline" data-testid="button-view-favorites">
                     View Favorites
                   </Button>
