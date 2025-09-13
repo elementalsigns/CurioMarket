@@ -32,7 +32,8 @@ import {
   DollarSign,
   Users,
   MessageSquare,
-  FileText
+  FileText,
+  Trash2
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -111,6 +112,11 @@ export default function AccountManager() {
     enabled: !!user && !!sellerData,
   });
 
+  const { data: sellerOrders } = useQuery({
+    queryKey: ["/api/seller/orders"],
+    enabled: !!user && !!sellerData,
+  });
+
   const { data: sellerStats } = useQuery({
     queryKey: ["/api/seller/stats"],
     enabled: !!user && !!sellerData,
@@ -140,6 +146,36 @@ export default function AccountManager() {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete listing mutation
+  const deleteListingMutation = useMutation({
+    mutationFn: (listingId: string) => apiRequest("DELETE", `/api/listings/${listingId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/listings"] });
+      toast({
+        title: "Listing deleted",
+        description: "Your listing has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete listing. Please try again.",
         variant: "destructive",
       });
     },
@@ -714,40 +750,78 @@ export default function AccountManager() {
                   {sellerListings && (sellerListings as any).length > 0 ? (
                     <div className="space-y-4">
                       {(sellerListings as any).map((listing: any) => (
-                        <Card key={listing.id} data-testid={`listing-${listing.id}`}>
+                        <Card key={listing.id} data-testid={`listing-${listing.id}`} className="glass-effect">
                           <CardContent className="p-4">
                             <div className="flex justify-between items-start">
                               <div className="flex space-x-4">
-                                <img
-                                  src={listing.images?.[0] || "/placeholder-image.jpg"}
-                                  alt={listing.title}
-                                  className="w-16 h-16 object-cover rounded"
-                                />
+                                <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
+                                  {listing.images?.[0]?.url ? (
+                                    <img
+                                      src={`${listing.images[0].url}?cache=${Date.now()}`}
+                                      alt={listing.title}
+                                      className="w-full h-full object-cover rounded-lg"
+                                      style={{ 
+                                        aspectRatio: '1/1',
+                                        objectFit: 'cover',
+                                        objectPosition: 'center'
+                                      }}
+                                    />
+                                  ) : (
+                                    <Package className="text-foreground/40" size={24} />
+                                  )}
+                                </div>
                                 <div>
-                                  <h3 className="font-medium">{listing.title}</h3>
-                                  <p className="text-muted-foreground text-sm">{listing.category}</p>
-                                  <Badge className="mt-1">{listing.status}</Badge>
+                                  <h3 className="font-serif font-bold text-lg" data-testid={`listing-title-${listing.id}`}>
+                                    {listing.title}
+                                  </h3>
+                                  <p className="text-foreground/60 text-sm line-clamp-1">
+                                    {listing.description}
+                                  </p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <span className="text-gothic-red font-bold" data-testid={`listing-price-${listing.id}`}>
+                                      ${listing.price}
+                                    </span>
+                                    <Badge
+                                      variant={listing.state === 'published' ? 'default' : 'secondary'}
+                                      data-testid={`listing-status-${listing.id}`}
+                                    >
+                                      {listing.state}
+                                    </Badge>
+                                    {(listing.stockQuantity || 0) < 1 ? (
+                                      <Badge variant="destructive" className="text-xs" data-testid={`listing-sold-out-${listing.id}`}>
+                                        Sold Out
+                                      </Badge>
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground" data-testid={`listing-stock-${listing.id}`}>
+                                        {listing.stockQuantity} in stock
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <p className="font-medium">${listing.price}</p>
-                                {(listing.stockQuantity || 0) < 1 ? (
-                                  <Badge variant="destructive" className="text-xs mt-1" data-testid={`listing-sold-out-${listing.id}`}>
-                                    Sold Out
-                                  </Badge>
-                                ) : (
-                                  <p className="text-xs text-muted-foreground mt-1" data-testid={`listing-stock-${listing.id}`}>
-                                    {listing.stockQuantity} in stock
-                                  </p>
-                                )}
-                                <div className="flex space-x-2 mt-2">
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4" />
+                              <div className="flex items-center space-x-2">
+                                <Link to={`/product/${listing.slug}`}>
+                                  <Button variant="outline" size="sm" data-testid={`button-view-${listing.id}`}>
+                                    <Eye size={16} className="mr-1" />
+                                    View
                                   </Button>
-                                  <Button variant="outline" size="sm">
-                                    <Edit3 className="h-4 w-4" />
+                                </Link>
+                                <Link to={`/seller/listings/edit/${listing.id}`}>
+                                  <Button variant="outline" size="sm" data-testid={`button-edit-${listing.id}`}>
+                                    <Edit3 size={16} className="mr-1" />
+                                    Edit
                                   </Button>
-                                </div>
+                                </Link>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => deleteListingMutation.mutate(listing.id)}
+                                  className="text-destructive hover:text-destructive"
+                                  data-testid={`button-delete-${listing.id}`}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
                               </div>
                             </div>
                           </CardContent>
@@ -771,17 +845,57 @@ export default function AccountManager() {
                 </div>
               )}
 
-              {/* Placeholder tabs for future implementation */}
+              {/* Shop Orders Tab */}
               {activeTab === "orders-seller" && (
                 <div data-testid="seller-orders">
-                  <h2 className="text-xl font-bold mb-4">Shop Orders</h2>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                      <p className="text-muted-foreground">Orders for your listings will appear here.</p>
-                    </CardContent>
-                  </Card>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Shop Orders</h2>
+                    <Button variant="outline" data-testid="button-manage-orders">
+                      Manage All Orders
+                    </Button>
+                  </div>
+                  {sellerOrders && (sellerOrders as any).length > 0 ? (
+                    <div className="space-y-4">
+                      {(sellerOrders as any).map((order: any) => (
+                        <Card key={order.id} data-testid={`order-${order.id}`} className="glass-effect">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold">Order #{order.id.slice(0, 8)}</h3>
+                                <p className="text-sm text-foreground/70">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </p>
+                                <Badge 
+                                  variant={order.status === 'fulfilled' ? 'default' : 'secondary'}
+                                  className="mt-1"
+                                  data-testid={`order-status-${order.id}`}
+                                >
+                                  {order.status}
+                                </Badge>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-gothic-red font-bold text-lg">${order.total}</span>
+                                <div className="flex items-center space-x-2 mt-2">
+                                  <Button variant="outline" size="sm" data-testid={`button-view-order-${order.id}`}>
+                                    <Eye size={16} className="mr-1" />
+                                    View Details
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No orders yet</h3>
+                        <p className="text-muted-foreground">Orders for your listings will appear here.</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               )}
 
