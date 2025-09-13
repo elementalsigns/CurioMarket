@@ -176,7 +176,7 @@ export default function CreateListing() {
         state: 'published',
       };
       const response = await apiRequest("POST", "/api/listings", payload);
-      return response.json();
+      return response;
     },
     onSuccess: (data) => {
       toast({
