@@ -211,6 +211,10 @@ export default function Home() {
             </Link>
           </div>
 
+          <div className="mb-6" data-testid="recently-bubbles">
+            <CategoryGrid />
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="recently-viewed-grid">
             {Array.isArray(featuredListings) && (featuredListings as any)?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
