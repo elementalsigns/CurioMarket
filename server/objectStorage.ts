@@ -261,7 +261,7 @@ export class ObjectStorageService {
   
     // Extract the entity ID from the path
     const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
+    return `/api/image-proxy/${entityId}`;
   }
 
   // Gets the object entity file from the object path.
