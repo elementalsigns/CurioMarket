@@ -75,7 +75,7 @@ export function ImageUploadGrid({
             throw new Error('Failed to get upload URL');
           }
           
-          const { uploadURL } = await uploadResponse.json();
+          const { uploadURL, displayURL } = await uploadResponse.json();
           
           // Upload file to cloud storage
           const response = await fetch(uploadURL, {
@@ -90,14 +90,13 @@ export function ImageUploadGrid({
             throw new Error(`Upload failed: ${response.status}`);
           }
 
-          // Extract the clean URL without query parameters for persistent access
-          const cleanUrl = uploadURL ? uploadURL.split('?')[0] : null;
-          if (!cleanUrl) {
-            throw new Error('Upload URL is missing or invalid');
+          // Use the displayURL from server for proper image serving
+          if (!displayURL) {
+            throw new Error('Display URL is missing from server response');
           }
           
-          // Store the actual cloud storage URL for persistence
-          newImages.push(cleanUrl);
+          // Store the display URL for persistence and immediate display
+          newImages.push(displayURL);
         } catch (uploadError) {
           console.error('Failed to upload file:', file.name, uploadError);
           // Fallback to blob URL for immediate preview (but warn user)

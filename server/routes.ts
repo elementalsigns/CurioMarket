@@ -388,32 +388,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Image proxy endpoint for private images using ObjectStorageService
-  app.get("/api/image-proxy/:imageId", async (req, res) => {
-    try {
-      const { imageId } = req.params;
-      
-      // Construct the object path using the existing service pattern
-      const objectPath = `/objects/uploads/${imageId}`;
-      
-      console.log(`[IMAGE-PROXY] Fetching private image with path: ${objectPath}`);
-      
-      // Use the existing ObjectStorageService to get the file
-      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
-      
-      console.log(`[IMAGE-PROXY] Successfully retrieved file object for: ${imageId}`);
-      
-      // Stream the file using the existing downloadObject method
-      await objectStorageService.downloadObject(objectFile, res, 3600); // 1 hour cache
-      
-    } catch (error: any) {
-      console.error('[IMAGE-PROXY] Error proxying image:', error);
-      if (error.message?.includes('ObjectNotFoundError') || error.name === 'ObjectNotFoundError') {
-        res.status(404).json({ error: "Image not found" });
-      } else {
-        res.status(500).json({ error: "Failed to proxy image" });
-      }
-    }
+  // Compatibility redirect: /api/image-proxy/* -> /objects/*
+  app.get("/api/image-proxy/*", async (req: any, res) => {
+    const path = req.params[0];
+    const redirectURL = `/objects/uploads/${path}`;
+    console.log(`[IMAGE-PROXY] Redirecting ${req.path} to ${redirectURL}`);
+    res.redirect(301, redirectURL);
   });
 
   // CORS configuration - CRITICAL for production authentication
@@ -972,7 +952,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       console.log('[UPLOAD-DEBUG] Generated upload URL:', uploadURL);
       
-      res.json({ uploadURL });
+      // Extract the entity ID from the upload URL to create a display URL
+      const displayURL = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      console.log('[UPLOAD-DEBUG] Generated display URL:', displayURL);
+      
+      res.json({ uploadURL, displayURL });
     } catch (error) {
       console.error("[UPLOAD-DEBUG] Error getting upload URL:", error);
       res.status(500).json({ error: "Failed to get upload URL" });
