@@ -859,40 +859,40 @@ export default function AccountManager() {
 
               {/* Shop Orders Tab */}
               {activeTab === "orders-seller" && (
-                <div data-testid="seller-orders">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Shop Orders</h2>
-                    <Button variant="outline" data-testid="button-manage-orders">
-                      Manage All Orders
-                    </Button>
+                <div className="space-y-4" data-testid="seller-orders">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-serif font-bold">Recent Orders</h2>
+                    <Link to="/seller/orders">
+                      <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-manage-orders">
+                        Manage All Orders
+                      </Button>
+                    </Link>
                   </div>
-                  {sellerOrders && (sellerOrders as any).length > 0 ? (
-                    <div className="space-y-4">
-                      {(sellerOrders as any).map((order: any) => (
-                        <Card key={order.id} data-testid={`order-${order.id}`} className="glass-effect">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-start">
+                  
+                  {(sellerDashboardData?.orders?.length || 0) > 0 ? (
+                    <div className="space-y-4" data-testid="orders-list">
+                      {(sellerDashboardData?.orders || []).map((order: any) => (
+                        <Card key={order.id} className="glass-effect" data-testid={`order-${order.id}`}>
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
                               <div>
-                                <h3 className="font-semibold">Order #{order.id.slice(0, 8)}</h3>
-                                <p className="text-sm text-foreground/70">
+                                <h3 className="font-bold mb-1" data-testid={`order-id-${order.id}`}>
+                                  Order #{order.id.slice(-8).toUpperCase()}
+                                </h3>
+                                <p className="text-foreground/60 text-sm">
                                   {new Date(order.createdAt).toLocaleDateString()}
                                 </p>
-                                <Badge 
+                              </div>
+                              <div className="text-right">
+                                <p className="text-gothic-red font-bold text-lg" data-testid={`order-total-${order.id}`}>
+                                  ${order.total}
+                                </p>
+                                <Badge
                                   variant={order.status === 'fulfilled' ? 'default' : 'secondary'}
-                                  className="mt-1"
                                   data-testid={`order-status-${order.id}`}
                                 >
                                   {order.status}
                                 </Badge>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-gothic-red font-bold text-lg">${order.total}</span>
-                                <div className="flex items-center space-x-2 mt-2">
-                                  <Button variant="outline" size="sm" data-testid={`button-view-order-${order.id}`}>
-                                    <Eye size={16} className="mr-1" />
-                                    View Details
-                                  </Button>
-                                </div>
                               </div>
                             </div>
                           </CardContent>
@@ -900,11 +900,13 @@ export default function AccountManager() {
                       ))}
                     </div>
                   ) : (
-                    <Card>
-                      <CardContent className="p-8 text-center">
-                        <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                        <p className="text-muted-foreground">Orders for your listings will appear here.</p>
+                    <Card className="glass-effect" data-testid="no-orders">
+                      <CardContent className="p-12 text-center">
+                        <DollarSign className="mx-auto mb-4 text-foreground/40" size={48} />
+                        <h3 className="text-xl font-serif font-bold mb-2">No Orders Yet</h3>
+                        <p className="text-foreground/70">
+                          Orders will appear here once customers start purchasing your items.
+                        </p>
                       </CardContent>
                     </Card>
                   )}
