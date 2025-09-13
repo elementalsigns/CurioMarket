@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import Footer from "@/components/layout/footer";
 
 // Convert Google Cloud Storage URL to local object URL
@@ -55,13 +56,7 @@ export default function OrderDetails() {
     enabled: !!orderId,
   });
 
-  const { data: currentUser } = useQuery({
-    queryKey: ["/api/auth/user"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/auth/user");
-      return response;
-    },
-  });
+  const { user: currentUser, isSeller, effectiveRole } = useAuth();
 
   if (isLoading) {
     return (
@@ -167,18 +162,18 @@ export default function OrderDetails() {
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <div className="mb-6">
-            {currentUser && currentUser.id === order.buyerId ? (
-              <Link to="/account?tab=purchases">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Your Purchases
-                </Button>
-              </Link>
-            ) : (
+            {isSeller ? (
               <Link to="/seller/orders">
                 <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to My Orders
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/account?tab=purchases">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Your Purchases
                 </Button>
               </Link>
             )}
@@ -277,7 +272,7 @@ export default function OrderDetails() {
                             ${(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
                           </p>
                           {/* Review Button - Only show if user is buyer, order is delivered and not already reviewed */}
-                          {currentUser && currentUser.id === order.buyerId && (order.status === 'delivered' || order.status === 'fulfilled') && !item.hasReviewed && (
+                          {currentUser && (currentUser as any).id === order.buyerId && (order.status === 'delivered' || order.status === 'fulfilled') && !item.hasReviewed && (
                             <Link to={`/product/${item.slug}?review=true&orderId=${order.id}`}>
                               <Button
                                 size="sm"
