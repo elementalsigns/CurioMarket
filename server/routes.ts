@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Compatibility redirect: /api/image-proxy/* -> /objects/*
   app.get("/api/image-proxy/*", async (req: any, res) => {
     const path = req.params[0];
-    const redirectURL = `/objects/uploads/${path}`;
+    const redirectURL = `/objects/${path}`;
     console.log(`[IMAGE-PROXY] Redirecting ${req.path} to ${redirectURL}`);
     res.redirect(301, redirectURL);
   });
