@@ -177,7 +177,7 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
-              Explore Categories
+              Popular Categories
             </h2>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="categories-subtitle">
               Find exactly what speaks to your dark curiosity
