@@ -848,17 +848,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const origin = req.headers.origin || '';
 
       // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
-      // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE operations
+      // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE/PUT operations
       const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
       const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
+      const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
       
       console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
       console.log('[BYPASS-DEBUG] isSellerDashboardEndpoint:', isSellerDashboardEndpoint);
       console.log('[BYPASS-DEBUG] isDeleteOperation:', isDeleteOperation);
-      console.log('[BYPASS-DEBUG] Should bypass:', isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation));
+      console.log('[BYPASS-DEBUG] isListingUpdate:', isListingUpdate);
+      console.log('[BYPASS-DEBUG] Should bypass:', isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate));
       
-      if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation)) {
+      if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate)) {
         console.log('[BYPASS] ✅ APPLYING DEVELOPMENT BYPASS FOR DELETE OPERATION');
         req.user = {
           claims: {
