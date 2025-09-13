@@ -745,7 +745,7 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
                         className="bg-zinc-800 border-zinc-700 text-white mb-2"
                         data-testid="input-recipient-search"
                       />
-                      {recipientSearch.length > 2 && searchResults && 'shops' in searchResults && searchResults.shops && searchResults.shops.length > 0 && (
+                      {recipientSearch.length > 2 && searchResults && typeof searchResults === 'object' && 'shops' in searchResults && Array.isArray(searchResults.shops) && searchResults.shops.length > 0 && (
                         <div className="absolute z-10 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-lg max-h-40 overflow-y-auto">
                           {searchResults.shops.map((shop: any) => (
                             <button
