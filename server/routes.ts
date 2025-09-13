@@ -4634,9 +4634,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Rating must be between 1 and 5" });
       }
 
+      // Get the listing to find the seller ID
+      const listing = await storage.getListingById(productId);
+      if (!listing) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
       const review = await storage.createReview({
         orderId,
         buyerId,
+        sellerId: listing.sellerId,
         listingId: productId,
         rating,
         title,
