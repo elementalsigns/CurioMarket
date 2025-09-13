@@ -83,9 +83,9 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
             </div>
             
             <div className="w-16 h-16 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
-              {listing.images?.[0] ? (
+              {listing.images?.[0]?.url ? (
                 <img
-                  src={`${listing.images[0]}?cache=${Date.now()}`}
+                  src={`${listing.images[0].url}?cache=${Date.now()}`}
                   alt={listing.title}
                   className="w-full h-full object-cover rounded-lg"
                   style={{ 
@@ -168,9 +168,9 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
             </div>
             
             <div className="w-20 h-20 bg-card rounded-lg flex items-center justify-center overflow-hidden border border-border/50 flex-shrink-0">
-              {listing.images?.[0] ? (
+              {listing.images?.[0]?.url ? (
                 <img
-                  src={`${listing.images[0]}?cache=${Date.now()}`}
+                  src={`${listing.images[0].url}?cache=${Date.now()}`}
                   alt={listing.title}
                   className="w-full h-full object-cover rounded-lg"
                   style={{ 
