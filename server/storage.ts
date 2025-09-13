@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, or, sql, count, avg } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, or, sql, count, avg, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -874,30 +874,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategoryCounts(): Promise<any[]> {
-    // Since this is a development environment, return sample data with realistic counts
-    // that would be dynamically calculated from the listings table in production
-    return [
-      {
-        slug: "wet-specimens",
-        name: "Wet Specimens",
-        count: 3, // Sample count - in production this would count actual listings
-      },
-      {
-        slug: "bones-skulls", 
-        name: "Bones & Skulls",
-        count: 2,
-      },
-      {
-        slug: "taxidermy",
-        name: "Taxidermy", 
-        count: 1,
-      },
-      {
-        slug: "vintage-medical",
-        name: "Vintage Medical",
-        count: 4,
-      }
-    ];
+    // Get all categories from the database
+    const allCategories = await db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        slug: categories.slug,
+      })
+      .from(categories);
+
+    // Count listings for each category (only published listings)
+    const categoryCounts = await Promise.all(
+      allCategories.map(async (category) => {
+        const [countResult] = await db
+          .select({ count: count() })
+          .from(listings)
+          .where(
+            and(
+              sql`${category.id} = ANY(${listings.categoryIds})`,
+              ne(listings.state, 'draft')
+            )
+          );
+
+        return {
+          slug: category.slug,
+          name: category.name,
+          count: countResult?.count || 0,
+        };
+      })
+    );
+
+    return categoryCounts;
   }
 
   // Enhanced Product Management
