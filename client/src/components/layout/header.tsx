@@ -289,13 +289,15 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated && (
               <>
-                <Button 
-                  variant="ghost" 
-                  className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
-                  data-testid="button-favorites"
-                >
-                  <Heart size={20} />
-                </Button>
+                <Link to="/wishlists">
+                  <Button 
+                    variant="ghost" 
+                    className="text-foreground hover:text-red-600 hover:bg-transparent p-2 transition-colors"
+                    data-testid="button-favorites"
+                  >
+                    <Heart size={20} />
+                  </Button>
+                </Link>
                 
                 <Link to="/account?tab=messages">
                   <Button 
