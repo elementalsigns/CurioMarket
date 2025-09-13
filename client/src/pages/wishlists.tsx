@@ -30,6 +30,45 @@ interface WishlistItem {
   };
 }
 
+// Component to display wishlist card with item count
+function WishlistCard({ wishlist, isSelected, onSelect }: { 
+  wishlist: Wishlist, 
+  isSelected: boolean, 
+  onSelect: () => void 
+}) {
+  const { data: itemCount = 0 } = useQuery({
+    queryKey: ['/api/wishlists', wishlist.id, 'items', 'count'],
+    queryFn: () => fetch(`/api/wishlists/${wishlist.id}/items`).then(res => res.json()).then(items => items.length),
+  });
+
+  return (
+    <Card 
+      className={`bg-zinc-900 border-zinc-800 cursor-pointer transition-colors ${
+        isSelected ? 'border-red-600 bg-zinc-800' : 'hover:border-zinc-700'
+      }`}
+      onClick={onSelect}
+      data-testid={`card-wishlist-${wishlist.id}`}
+    >
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white text-lg">{wishlist.name} ({itemCount})</CardTitle>
+          {wishlist.isPublic && (
+            <Badge variant="secondary" className="bg-zinc-800 text-zinc-300">
+              <Eye className="w-3 h-3 mr-1" />
+              Public
+            </Badge>
+          )}
+        </div>
+        {wishlist.description && (
+          <CardDescription className="text-zinc-400">
+            {wishlist.description}
+          </CardDescription>
+        )}
+      </CardHeader>
+    </Card>
+  );
+}
+
 // Component to display individual favorite items
 function FavoriteItemCard({ listingId }: { listingId: string }) {
   const { toast } = useToast();
@@ -306,7 +345,7 @@ export default function WishlistsPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-4 flex items-center">
             <Heart className="w-6 h-6 mr-2 text-red-600" />
-            General Favorites
+            General Favorites ({favorites.length})
           </h2>
           
           {favorites.length === 0 ? (
@@ -357,31 +396,12 @@ export default function WishlistsPage() {
                 </Card>
               ) : (
                 wishlists.map((wishlist: Wishlist) => (
-                  <Card 
+                  <WishlistCard
                     key={wishlist.id}
-                    className={`bg-zinc-900 border-zinc-800 cursor-pointer transition-colors ${
-                      selectedWishlist === wishlist.id ? 'border-red-600 bg-zinc-800' : 'hover:border-zinc-700'
-                    }`}
-                    onClick={() => setSelectedWishlist(wishlist.id)}
-                    data-testid={`card-wishlist-${wishlist.id}`}
-                  >
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-white text-lg">{wishlist.name}</CardTitle>
-                        {wishlist.isPublic && (
-                          <Badge variant="secondary" className="bg-zinc-800 text-zinc-300">
-                            <Eye className="w-3 h-3 mr-1" />
-                            Public
-                          </Badge>
-                        )}
-                      </div>
-                      {wishlist.description && (
-                        <CardDescription className="text-zinc-400">
-                          {wishlist.description}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                  </Card>
+                    wishlist={wishlist}
+                    isSelected={selectedWishlist === wishlist.id}
+                    onSelect={() => setSelectedWishlist(wishlist.id)}
+                  />
                 ))
               )}
             </div>
