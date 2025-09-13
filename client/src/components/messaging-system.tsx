@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   MessageCircle, 
   Send, 
@@ -87,6 +88,8 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
   const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<string>("");
+  const [recipientSearch, setRecipientSearch] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Real mode - no more fake demo conversations
@@ -117,6 +120,13 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
     queryKey: ["/api/messages/conversation", selectedConversation],
     enabled: !!user && !!selectedConversation, // Only run when authenticated and conversation selected
     refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  // Search for shops when composing new message
+  const { data: searchResults } = useQuery({
+    queryKey: ["/api/search", recipientSearch],
+    enabled: !!user && !!recipientSearch && recipientSearch.length > 2,
+    staleTime: 5000, // Don't refetch for 5 seconds
   });
 
   // Send message mutation
@@ -266,16 +276,23 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
         content: messageText,
       });
     } else if (sellerId) {
-      // Start new conversation
+      // Start new conversation (from product page)
       startConversationMutation.mutate({
         recipientId: sellerId,
         content: messageText,
         listingId,
       });
+    } else if (selectedRecipient) {
+      // Start new conversation (from recipient selector)
+      startConversationMutation.mutate({
+        recipientId: selectedRecipient,
+        content: messageText,
+        listingId: undefined,
+      });
     } else {
       toast({
         title: "Cannot Send Message",
-        description: "Missing conversation or seller information.",
+        description: "Please select a recipient to send your message to.",
         variant: "destructive",
       });
     }
@@ -717,12 +734,45 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
                 <CardTitle className="text-white">New Message</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
+                {!sellerId && (
+                  <div className="mb-4">
+                    <label className="text-sm text-zinc-300 mb-2 block">To:</label>
+                    <div className="relative">
+                      <Input
+                        placeholder="Search for a shop to message..."
+                        value={recipientSearch}
+                        onChange={(e) => setRecipientSearch(e.target.value)}
+                        className="bg-zinc-800 border-zinc-700 text-white mb-2"
+                        data-testid="input-recipient-search"
+                      />
+                      {recipientSearch.length > 2 && searchResults && 'shops' in searchResults && searchResults.shops && searchResults.shops.length > 0 && (
+                        <div className="absolute z-10 w-full bg-zinc-800 border border-zinc-700 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                          {searchResults.shops.map((shop: any) => (
+                            <button
+                              key={shop.id}
+                              onClick={() => {
+                                setSelectedRecipient(shop.id);
+                                setRecipientSearch(shop.shopName || 'Unknown Shop');
+                              }}
+                              className="w-full px-3 py-2 text-left hover:bg-zinc-700 text-white border-b border-zinc-700 last:border-b-0"
+                              data-testid={`button-select-shop-${shop.id}`}
+                            >
+                              <div className="font-medium">{shop.shopName || 'Unknown Shop'}</div>
+                              {shop.location && <div className="text-sm text-zinc-400">{shop.location}</div>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="flex-1 mb-4">
                   <Textarea
                     placeholder="Type your message..."
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     className="bg-zinc-800 border-zinc-700 text-white h-32"
+                    data-testid="textarea-message-content"
                   />
                 </div>
                 
@@ -732,6 +782,8 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
                     onClick={() => {
                       setIsComposing(false);
                       setMessageText("");
+                      setSelectedRecipient("");
+                      setRecipientSearch("");
                     }}
                     className="text-zinc-300 border-zinc-600"
                   >
@@ -739,8 +791,9 @@ export default function MessagingSystem({ listingId, sellerId, conversationId }:
                   </Button>
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!messageText.trim() || startConversationMutation.isPending}
+                    disabled={!messageText.trim() || startConversationMutation.isPending || (!sellerId && !selectedRecipient)}
                     className="bg-red-600 hover:bg-red-700"
+                    data-testid="button-send-message"
                   >
                     {startConversationMutation.isPending ? "Sending..." : "Send Message"}
                   </Button>
