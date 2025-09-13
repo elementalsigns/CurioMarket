@@ -96,12 +96,8 @@ export function ImageUploadGrid({
             throw new Error('Upload URL is missing or invalid');
           }
           
-          // Use blob URL for immediate preview, store cloud URL for later
-          const previewUrl = URL.createObjectURL(file);
-          newImages.push(previewUrl);
-          
-          // Store the cloud URL in the images array for form submission
-          // We'll need to replace preview URLs with cloud URLs when submitting
+          // Store the actual cloud storage URL for persistence
+          newImages.push(cleanUrl);
         } catch (uploadError) {
           console.error('Failed to upload file:', file.name, uploadError);
           // Fallback to blob URL for immediate preview (but warn user)
