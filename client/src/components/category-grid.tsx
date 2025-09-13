@@ -40,113 +40,57 @@ const categoryImages = {
   }
 };
 
-interface CategoryGridProps {
-  variant?: 'grid' | 'inline';
-}
-
-export default function CategoryGrid({ variant = 'grid' }: CategoryGridProps) {
+export default function CategoryGrid() {
   // Fetch dynamic category counts
   const { data: categoryCounts, isLoading } = useQuery({
     queryKey: ['/api/categories/counts'],
   });
 
-  const counts = Array.isArray(categoryCounts) ? categoryCounts : [];
-  
-  // For grid variant: only show 4 main categories  
-  // For inline variant: show all categories
-  let categories;
-  if (variant === 'grid') {
-    const allowedCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
-    categories = allowedCategories.map(slug => {
-      const categoryCount = counts.find(c => c.slug === slug);
-      if (!categoryCount) return null;
-      
-      return {
-        id: categoryCount.slug,
-        name: categoryCount.name,
-        slug: categoryCount.slug,
-        icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
-        image: (categoryImages as any)[categoryCount.slug]?.image,
-        count: categoryCount.count || 0
-      };
-    }).filter(Boolean);
-  } else {
-    // For inline variant: show all available categories
-    categories = counts.map((categoryCount: any) => ({
-      id: categoryCount.slug,
-      name: categoryCount.name,
-      slug: categoryCount.slug,
-      icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
-      image: (categoryImages as any)[categoryCount.slug]?.image,
-      count: categoryCount.count || 0
-    }));
-  }
+  // Combine static category data with dynamic counts
+  const categories = (categoryCounts as any[])?.map((categoryCount: any) => ({
+    id: categoryCount.slug,
+    name: categoryCount.name,
+    slug: categoryCount.slug,
+    icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
+    image: (categoryImages as any)[categoryCount.slug]?.image,
+    count: categoryCount.count
+  })) || [];
 
   if (isLoading) {
-    if (variant === 'grid') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="glass-effect rounded-2xl overflow-hidden">
-              <div className="aspect-square bg-zinc-800/50 animate-pulse" />
-            </Card>
-          ))}
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex flex-wrap gap-4 justify-center" data-testid="category-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="px-6 py-3 rounded-full bg-zinc-800/50 animate-pulse h-10 w-24" />
-          ))}
-        </div>
-      );
-    }
-  }
-
-  if (variant === 'grid') {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-        {categories.map((category: any) => (
-          <Link key={category.id} to={`/browse?category=${category.slug}`}>
-            <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
-              <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
-                <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
-                      {category.icon}
-                    </div>
-                    <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-white/80 mt-1" data-testid={`category-count-${category.id}`}>
-                      {category.count} items
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex flex-wrap gap-4 justify-center" data-testid="category-grid">
-        {categories.map((category: any) => (
-          <Link key={category.slug} to={`/browse?category=${category.slug}`}>
-            <div className="inline-flex items-center px-6 py-3 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer" data-testid={`category-${category.slug}`}>
-              <span className="font-medium text-foreground" data-testid={`category-name-${category.slug}`}>
-                {category.name}
-              </span>
-              <span className="ml-2 text-sm text-foreground/70" data-testid={`category-count-${category.slug}`}>
-                ({category.count})
-              </span>
-            </div>
-          </Link>
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="glass-effect rounded-2xl overflow-hidden">
+            <div className="aspect-square bg-zinc-800/50 animate-pulse" />
+          </Card>
         ))}
       </div>
     );
   }
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
+      {categories.map((category: any) => (
+        <Link key={category.id} to={`/browse?category=${category.slug}`}>
+          <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
+            <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
+              <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
+                    {category.icon}
+                  </div>
+                  <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-white/80 mt-1" data-testid={`category-count-${category.id}`}>
+                    {category.count} items
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Link>
+      ))}
+    </div>
+  );
 }

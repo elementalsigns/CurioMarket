@@ -177,14 +177,14 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif font-bold mb-4" data-testid="categories-title">
-              Popular Categories
+              Explore Categories
             </h2>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="categories-subtitle">
               Find exactly what speaks to your dark curiosity
             </p>
           </div>
 
-          <CategoryGrid variant="grid" />
+          <CategoryGrid />
         </div>
       </section>
 
@@ -209,10 +209,6 @@ export default function Home() {
                 See more <ArrowRight className="ml-1" size={16} />
               </Button>
             </Link>
-          </div>
-
-          <div className="mb-6" data-testid="recently-bubbles">
-            <CategoryGrid variant="inline" />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="recently-viewed-grid">
