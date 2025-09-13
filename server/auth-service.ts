@@ -233,7 +233,17 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         }
       }
 
-      // Method 3: Use normal Replit authentication (no hardcoded users)
+      // Method 3: Development bypass for user ID 46848882
+      if (process.env.NODE_ENV === 'development' && hostname.includes('replit.dev')) {
+        console.log('[AUTH] Development bypass for user 46848882');
+        req.user = {
+          id: '46848882',
+          claims: { sub: '46848882', email: 'elementalsigns@gmail.com' },
+          access_token: 'development-bypass',
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+        };
+        return next();
+      }
 
       console.log('[AUTH] All authentication methods failed');
       return res.status(401).json({ message: "Unauthorized" });

@@ -4625,9 +4625,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a review
-  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
+  app.post("/api/reviews", requireAuth, async (req: any, res) => {
     try {
-      const buyerId = req.user?.claims?.sub;
+      const buyerId = req.user?.id || req.user?.claims?.sub;
       const { productId, orderId, rating, title, content, photos } = req.body;
 
       if (!rating || rating < 1 || rating > 5) {
