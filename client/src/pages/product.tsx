@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Heart, Share2, ShoppingCart, Star, MapPin, Shield, MessageCircle } from "lucide-react";
+import { Heart, Share2, ShoppingCart, Star, MapPin, Shield, MessageCircle, Plus, List } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,11 @@ export default function Product() {
 
   const { data: favorites = [] } = useQuery({
     queryKey: ["/api/favorites"],
+    enabled: !!user,
+  });
+
+  const { data: wishlists = [] } = useQuery({
+    queryKey: ["/api/wishlists"],
     enabled: !!user,
   });
 
@@ -77,6 +83,29 @@ export default function Product() {
       toast({
         title: "Error",
         description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addToWishlistMutation = useMutation({
+    mutationFn: async ({ wishlistId, notes }: { wishlistId: string; notes?: string }) => {
+      return apiRequest("POST", `/api/wishlists/${wishlistId}/items`, { 
+        listingId: listing.id, 
+        notes 
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wishlists"] });
+      toast({
+        title: "Added to Wishlist",
+        description: "Item added to your wishlist",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add to wishlist",
         variant: "destructive",
       });
     },
@@ -214,6 +243,34 @@ export default function Product() {
                   >
                     <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
                   </Button>
+                  
+                  {user && wishlists.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-foreground/60 hover:text-foreground"
+                          data-testid="button-add-to-wishlist"
+                        >
+                          <List size={20} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+                        {wishlists.map((wishlist: any) => (
+                          <DropdownMenuItem
+                            key={wishlist.id}
+                            onClick={() => addToWishlistMutation.mutate({ wishlistId: wishlist.id })}
+                            className="text-white hover:bg-zinc-800 cursor-pointer"
+                            data-testid={`item-wishlist-${wishlist.id}`}
+                          >
+                            <Plus size={16} className="mr-2" />
+                            {wishlist.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   <SocialSharing 
                     listing={{
                       id: listing.id,
