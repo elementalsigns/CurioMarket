@@ -220,7 +220,7 @@ export default function Product() {
                       title: listing.title,
                       description: listing.description,
                       price: listing.price,
-                      images: listing.images?.map(img => img.url) || [],
+                      images: listing.images?.map((img: any) => img.url) || [],
                       sellerShopName: listing.seller?.shopName
                     }}
                     variant="ghost"
