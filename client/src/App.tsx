@@ -227,6 +227,7 @@ function Router() {
           <Route path="/order-confirmation" component={() => <ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
           <Route path="/orders/:orderId" component={OrderDetails} />
           <Route path="/messages/new" component={() => <ProtectedRoute><Messages /></ProtectedRoute>} />
+          <Route path="/messages" component={() => <ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/profile" component={() => <ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/account" component={() => <ProtectedRoute><AccountManager /></ProtectedRoute>} />
           <Route path="/verification" component={() => <ProtectedRoute><Verification /></ProtectedRoute>} />
