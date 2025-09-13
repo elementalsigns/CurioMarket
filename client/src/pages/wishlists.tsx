@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,11 +30,112 @@ interface WishlistItem {
   };
 }
 
+// Component to display individual favorite items
+function FavoriteItemCard({ listingId }: { listingId: string }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch listing details
+  const { data: listing, isLoading } = useQuery({
+    queryKey: ['/api/listings', listingId],
+    queryFn: () => fetch(`/api/listings/${listingId}`).then(res => res.json()),
+  });
+
+  // Remove from favorites mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/favorites/${listingId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Removed from Favorites",
+        description: "Item removed from your favorites",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove from favorites",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardContent className="p-4">
+          <div className="animate-pulse">
+            <div className="bg-zinc-800 h-48 rounded mb-4"></div>
+            <div className="bg-zinc-800 h-4 rounded mb-2"></div>
+            <div className="bg-zinc-800 h-4 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!listing) {
+    return null;
+  }
+
+  return (
+    <Card className="bg-zinc-900 border-zinc-800 group hover:border-zinc-700 transition-colors">
+      <CardContent className="p-0">
+        <div className="relative">
+          <img 
+            src={listing.images?.[0]?.url || '/api/placeholder/300/300'} 
+            alt={listing.title}
+            className="w-full h-48 object-cover rounded-t-lg"
+          />
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => removeFavoriteMutation.mutate()}
+              disabled={removeFavoriteMutation.isPending}
+              data-testid={`button-remove-favorite-${listingId}`}
+            >
+              <Heart className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        
+        <div className="p-4">
+          <h3 className="text-white font-semibold mb-2 truncate">
+            {listing.title}
+          </h3>
+          <p className="text-red-400 font-bold mb-3">
+            ${listing.price}
+          </p>
+          <div className="flex gap-2">
+            <Link href={`/product/${listing.slug}`} className="flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                data-testid={`button-view-${listingId}`}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                View
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function WishlistsPage() {
   const [selectedWishlist, setSelectedWishlist] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newWishlist, setNewWishlist] = useState({ name: '', description: '', isPublic: false });
   const { toast } = useToast();
+
+  // Fetch user's favorites
+  const { data: favorites = [], isLoading: favoritesLoading } = useQuery({
+    queryKey: ['/api/favorites'],
+  });
 
   // Fetch user's wishlists
   const { data: wishlists = [], isLoading: wishlistsLoading } = useQuery({
@@ -96,7 +197,7 @@ export default function WishlistsPage() {
     createWishlistMutation.mutate(newWishlist);
   };
 
-  if (wishlistsLoading) {
+  if (wishlistsLoading || favoritesLoading) {
     return (
       <div className="min-h-screen bg-black text-white p-8">
         <div className="max-w-6xl mx-auto">
@@ -184,6 +285,40 @@ export default function WishlistsPage() {
               </form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* Favorites Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-4 flex items-center">
+            <Heart className="w-6 h-6 mr-2 text-red-600" />
+            Your Favorites
+          </h2>
+          
+          {favorites.length === 0 ? (
+            <Card className="bg-zinc-900 border-zinc-800 text-center py-8">
+              <CardContent>
+                <Heart className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400 mb-4">No favorites yet</p>
+                <p className="text-zinc-500 text-sm mb-4">
+                  Click the heart icon on items you love to save them here
+                </p>
+                <Link href="/browse">
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    data-testid="button-browse-to-favorite"
+                  >
+                    Start Browsing
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {favorites.map((listingId: string) => (
+                <FavoriteItemCard key={listingId} listingId={listingId} />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
