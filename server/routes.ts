@@ -3078,6 +3078,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Parameterized search route for messaging system
+  app.get('/api/search/:searchTerm', async (req, res) => {
+    try {
+      const searchTerm = req.params.searchTerm;
+      const limit = 10; // Limit for messaging dropdown
+      
+      // Search shops by name for messaging recipient selection
+      const shopResult = await storage.searchShops(searchTerm, {
+        limit,
+        offset: 0
+      });
+      
+      res.json({
+        shops: shopResult.shops || [],
+        total: shopResult.total || 0
+      });
+    } catch (error) {
+      console.error("Error searching shops for messaging:", error);
+      res.status(500).json({ error: "Failed to search shops" });
+    }
+  });
+
   // ==================== PAYMENT PROCESSING ====================
 
   // Create order after successful payment - Enhanced for production authentication issues
