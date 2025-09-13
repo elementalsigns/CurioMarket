@@ -873,6 +873,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }> {
+    // Get the user ID from the seller profile ID
+    const seller = await db.query.sellers.findFirst({
+      where: eq(sellers.id, sellerId)
+    });
+    
+    if (!seller) {
+      return { totalSales: 0, averageRating: 0, totalReviews: 0 };
+    }
+
     const [salesResult] = await db
       .select({ 
         totalSales: count(orders.id),
@@ -886,7 +895,7 @@ export class DatabaseStorage implements IStorage {
         averageRating: avg(reviews.rating),
       })
       .from(reviews)
-      .where(eq(reviews.sellerId, sellerId));
+      .where(eq(reviews.sellerId, seller.userId));
 
     return {
       totalSales: salesResult?.totalSales || 0,

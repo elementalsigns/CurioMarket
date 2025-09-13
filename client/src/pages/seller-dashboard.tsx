@@ -530,7 +530,11 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="glass-effect">
+          <Card className="glass-effect cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+            // Switch to reviews tab
+            const reviewsTab = document.querySelector('[data-testid="tab-reviews"]') as HTMLElement;
+            if (reviewsTab) reviewsTab.click();
+          }}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
