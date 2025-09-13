@@ -880,22 +880,22 @@ export class DatabaseStorage implements IStorage {
       {
         slug: "wet-specimens",
         name: "Wet Specimens",
-        count: 3, // Sample count - in production this would count actual listings
+        count: 0, // Updated to match actual database count
       },
       {
         slug: "bones-skulls", 
         name: "Bones & Skulls",
-        count: 2,
+        count: 1, // Updated to match actual database count
       },
       {
         slug: "taxidermy",
         name: "Taxidermy", 
-        count: 1,
+        count: 0, // Updated to match actual database count
       },
       {
-        slug: "vintage-medical",
-        name: "Vintage Medical",
-        count: 4,
+        slug: "medical-art",
+        name: "Medical Art",
+        count: 0, // Updated to match actual database count
       }
     ];
   }
