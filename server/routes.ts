@@ -3739,7 +3739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Wishlists
-  app.get('/api/wishlists', isAuthenticated, async (req: any, res) => {
+  app.get('/api/wishlists', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const wishlists = await storage.getUserWishlists(userId);
@@ -3750,7 +3750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/wishlists', isAuthenticated, async (req: any, res) => {
+  app.post('/api/wishlists', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const wishlist = await storage.createWishlist({
@@ -3764,7 +3764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/wishlists/:id/items', isAuthenticated, async (req: any, res) => {
+  app.get('/api/wishlists/:id/items', requireAuth, async (req: any, res) => {
     try {
       const items = await storage.getWishlistItems(req.params.id);
       res.json(items);
@@ -3774,7 +3774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/wishlists/:id/items', isAuthenticated, async (req: any, res) => {
+  app.post('/api/wishlists/:id/items', requireAuth, async (req: any, res) => {
     try {
       const { listingId, notes } = req.body;
       const item = await storage.addToWishlist(req.params.id, listingId, notes);
@@ -3785,7 +3785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/wishlists/:id/items/:listingId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/wishlists/:id/items/:listingId', requireAuth, async (req: any, res) => {
     try {
       await storage.removeFromWishlist(req.params.id, req.params.listingId);
       res.json({ success: true });
