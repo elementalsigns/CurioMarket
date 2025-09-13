@@ -3474,7 +3474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller orders
-  app.get('/api/seller/orders', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/orders', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
