@@ -21,22 +21,59 @@ export default function ContactUs() {
   const [sellerSearch, setSellerSearch] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simulate form submission
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll respond within 24 hours.",
-    });
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      category: "",
-      message: ""
-    });
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Message Sent",
+          description: result.message || "Thank you for contacting us. We'll respond within 24 hours.",
+        });
+        
+        // Reset form on success
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          category: "",
+          message: ""
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send message. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please check your connection and try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

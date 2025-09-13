@@ -5800,6 +5800,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== CONTACT FORM ====================
+  
+  // Contact form submission
+  app.post('/api/contact', async (req, res) => {
+    try {
+      const { name, email, subject, category, message } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: name, email, subject, and message are required' 
+        });
+      }
+      
+      // Send email to support
+      const emailSuccess = await emailService.sendEmail({
+        to: 'info@curiosities.market',
+        from: 'Info@curiosities.market',
+        subject: `Contact Form: ${subject}`,
+        text: `
+Contact Form Submission
+
+Name: ${name}
+Email: ${email}
+Category: ${category || 'General'}
+Subject: ${subject}
+
+Message:
+${message}
+
+---
+This message was sent via the Curio Market contact form.
+        `.trim(),
+        html: `
+<h2>Contact Form Submission</h2>
+<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Category:</strong> ${category || 'General'}</p>
+<p><strong>Subject:</strong> ${subject}</p>
+
+<h3>Message:</h3>
+<p>${message.replace(/\n/g, '<br>')}</p>
+
+<hr>
+<p><em>This message was sent via the Curio Market contact form.</em></p>
+        `
+      });
+      
+      if (emailSuccess) {
+        res.json({ 
+          success: true, 
+          message: 'Your message has been sent successfully. We\'ll respond within 24 hours.' 
+        });
+      } else {
+        res.status(500).json({ 
+          error: 'Failed to send message. Please try again later.' 
+        });
+      }
+      
+    } catch (error) {
+      console.error('Contact form error:', error);
+      res.status(500).json({ 
+        error: 'An error occurred while sending your message. Please try again later.' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
