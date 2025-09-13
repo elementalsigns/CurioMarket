@@ -4635,7 +4635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the listing to find the seller ID
-      const listing = await storage.getListingById(productId);
+      const listing = await storage.getListing(productId);
       if (!listing) {
         return res.status(404).json({ message: "Product not found" });
       }
