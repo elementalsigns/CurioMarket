@@ -725,11 +725,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSellerReviews(sellerId: string): Promise<Review[]> {
-    return await db
-      .select()
+    // Get seller by ID to get userId 
+    const seller = await db.query.sellers.findFirst({
+      where: eq(sellers.id, sellerId)
+    });
+    
+    if (!seller) {
+      return [];
+    }
+
+    // Query reviews with joined data for seller's products
+    const reviewsWithDetails = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        title: reviews.title,
+        content: reviews.content,
+        photos: reviews.photos,
+        createdAt: reviews.createdAt,
+        buyerId: reviews.buyerId,
+        listingId: reviews.listingId,
+        orderId: reviews.orderId,
+        sellerId: reviews.sellerId,
+        verified: reviews.verified,
+        helpful: reviews.helpful,
+        sellerResponse: reviews.sellerResponse,
+        sellerResponseDate: reviews.sellerResponseDate,
+        buyerName: users.email, // Use email as buyer name
+        listingTitle: listings.title
+      })
       .from(reviews)
-      .where(eq(reviews.sellerId, sellerId))
+      .leftJoin(users, eq(reviews.buyerId, users.id))
+      .leftJoin(listings, eq(reviews.listingId, listings.id))
+      .where(eq(reviews.sellerId, seller.userId))
       .orderBy(desc(reviews.createdAt));
+
+    return reviewsWithDetails as any[];
   }
 
   // Favorites operations

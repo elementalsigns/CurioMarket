@@ -1402,6 +1402,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get seller reviews
+  app.get('/api/seller/reviews', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+
+      const reviews = await storage.getSellerReviews(seller.id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching seller reviews:", error);
+      res.status(500).json({ message: "Failed to fetch seller reviews" });
+    }
+  });
+
   // Get public seller profile (for shop pages)
   app.get('/api/seller/public/:sellerId', async (req, res) => {
     try {

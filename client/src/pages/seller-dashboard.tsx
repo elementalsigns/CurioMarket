@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare, Star } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -565,10 +565,11 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7">
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
+            <TabsTrigger value="reviews" data-testid="tab-reviews">Reviews</TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-messages">Messages</TabsTrigger>
             <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">Shop Profile</TabsTrigger>
@@ -733,6 +734,21 @@ export default function SellerDashboard() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-4" data-testid="content-reviews">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Customer Reviews</h2>
+              <div className="flex items-center gap-2">
+                <Star className="text-yellow-500" size={20} />
+                <span className="text-lg font-medium">
+                  {stats.averageRating.toFixed(1)} ({stats.totalReviews} reviews)
+                </span>
+              </div>
+            </div>
+            
+            <SellerReviews />
           </TabsContent>
 
           {/* Messages Tab */}
@@ -1701,6 +1717,96 @@ function PromotionsList() {
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// Seller Reviews Component
+function SellerReviews() {
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ["/api/seller/reviews"],
+    enabled: true,
+  }) as { data: any[] | undefined; isLoading: boolean };
+
+  if (isLoading) {
+    return (
+      <Card className="glass-effect">
+        <CardContent className="p-12 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-foreground/70">Loading reviews...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!reviews || reviews.length === 0) {
+    return (
+      <Card className="glass-effect" data-testid="no-reviews">
+        <CardContent className="p-12 text-center">
+          <Star className="mx-auto mb-4 text-foreground/40" size={48} />
+          <h3 className="text-xl font-serif font-bold mb-2">No Reviews Yet</h3>
+          <p className="text-foreground/70">
+            Customer reviews will appear here once buyers start reviewing your products.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {reviews.map((review: any) => (
+        <Card key={review.id} className="glass-effect" data-testid={`review-${review.id}`}>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={16}
+                        className={star <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-foreground/60">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <h4 className="font-medium text-lg" data-testid={`review-title-${review.id}`}>
+                  {review.title}
+                </h4>
+              </div>
+              <Badge variant="outline">{review.listingTitle}</Badge>
+            </div>
+            
+            {review.content && (
+              <p className="text-foreground/80 mb-4" data-testid={`review-content-${review.id}`}>
+                {review.content}
+              </p>
+            )}
+            
+            {review.photos && review.photos.length > 0 && (
+              <div className="flex gap-2 mb-4">
+                {review.photos.map((photo: string, index: number) => (
+                  <div key={index} className="w-20 h-20 bg-zinc-800 rounded-lg overflow-hidden">
+                    <img 
+                      src={photo} 
+                      alt={`Review photo ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="text-sm text-foreground/60">
+              By {review.buyerName || "Anonymous"}
             </div>
           </CardContent>
         </Card>
