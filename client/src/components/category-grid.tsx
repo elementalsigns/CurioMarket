@@ -47,7 +47,7 @@ export default function CategoryGrid() {
   });
 
   // Only show the original four categories with images
-  const originalFourCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
+  const originalFourCategories = ["wet-specimens", "bones-skulls", "taxidermy", "jewelry"];
   
   // Combine static category data with dynamic counts, filtered to original four
   const categories = (categoryCounts as any[])
