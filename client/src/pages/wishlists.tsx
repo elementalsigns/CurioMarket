@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Plus, Trash2, Eye, ExternalLink, ShoppingBag, MessageCircle } from "lucide-react";
+import { Heart, Plus, Trash2, Eye, ExternalLink, ShoppingBag, MessageCircle, Home } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -213,6 +213,20 @@ export default function WishlistsPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-6xl mx-auto p-8">
+        {/* Return to Home Button */}
+        <div className="mb-6">
+          <Link to="/">
+            <Button 
+              variant="ghost" 
+              className="text-white hover:text-red-600 hover:bg-transparent transition-colors"
+              data-testid="button-return-home"
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Return to Home
+            </Button>
+          </Link>
+        </div>
+        
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

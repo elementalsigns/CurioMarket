@@ -25,8 +25,7 @@ import {
   Plus,
   ChevronDown,
   CreditCard,
-  MessageSquare,
-  Home
+  MessageSquare
 } from "lucide-react";
 
 export default function Header() {
@@ -158,14 +157,6 @@ export default function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Home Button */}
-            <Link to="/">
-              <Button variant="ghost" className="text-foreground hover:text-red-600 hover:bg-transparent font-medium flex items-center transition-colors border-none focus:border-none focus:ring-0 focus:outline-none" data-testid="button-home">
-                <Home size={16} className="mr-2" />
-                Home
-              </Button>
-            </Link>
 
             <Link to="/" className="flex items-center" data-testid="logo">
               <h1 
@@ -464,13 +455,6 @@ export default function Header() {
 
               {/* Mobile Navigation Links */}
               <div className="flex flex-col space-y-1">
-                <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base" data-testid="button-home-mobile">
-                    <Home className="mr-3" size={18} />
-                    Home
-                  </Button>
-                </Link>
-                
                 <Link to="/browse" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
                     Browse All Categories
