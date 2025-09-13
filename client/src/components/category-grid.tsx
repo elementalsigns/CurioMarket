@@ -50,22 +50,37 @@ export default function CategoryGrid({ variant = 'grid' }: CategoryGridProps) {
     queryKey: ['/api/categories/counts'],
   });
 
-  // Filter to only show the four specified categories in order (data-only filter)
-  const allowedCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
   const counts = Array.isArray(categoryCounts) ? categoryCounts : [];
-  const categories = allowedCategories.map(slug => {
-    const categoryCount = counts.find(c => c.slug === slug);
-    if (!categoryCount) return null;
-    
-    return {
+  
+  // For grid variant: only show 4 main categories  
+  // For inline variant: show all categories
+  let categories;
+  if (variant === 'grid') {
+    const allowedCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
+    categories = allowedCategories.map(slug => {
+      const categoryCount = counts.find(c => c.slug === slug);
+      if (!categoryCount) return null;
+      
+      return {
+        id: categoryCount.slug,
+        name: categoryCount.name,
+        slug: categoryCount.slug,
+        icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
+        image: (categoryImages as any)[categoryCount.slug]?.image,
+        count: categoryCount.count || 0
+      };
+    }).filter(Boolean);
+  } else {
+    // For inline variant: show all available categories
+    categories = counts.map((categoryCount: any) => ({
       id: categoryCount.slug,
       name: categoryCount.name,
       slug: categoryCount.slug,
       icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
       image: (categoryImages as any)[categoryCount.slug]?.image,
       count: categoryCount.count || 0
-    };
-  }).filter(Boolean);
+    }));
+  }
 
   if (isLoading) {
     if (variant === 'grid') {
