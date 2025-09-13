@@ -51,8 +51,8 @@ export default function Header() {
     refetchInterval: 30000, // Refresh every 30 seconds
   }) as { data: { count: number } | undefined };
 
-  const { data: favorites } = useQuery({
-    queryKey: ["/api/favorites"],
+  const { data: wishlists } = useQuery({
+    queryKey: ["/api/wishlists"],
     enabled: isAuthenticated,
   });
 
@@ -301,9 +301,9 @@ export default function Header() {
                     data-testid="button-favorites"
                   >
                     <Heart size={20} />
-                    {(favorites as any)?.length > 0 && (
+                    {wishlists && (wishlists as any)?.reduce((total: number, wishlist: any) => total + (wishlist.items?.length || 0), 0) > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="favorites-count">
-                        {(favorites as any)?.length}
+                        {(wishlists as any)?.reduce((total: number, wishlist: any) => total + (wishlist.items?.length || 0), 0)}
                       </span>
                     )}
                   </Button>
