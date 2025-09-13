@@ -167,12 +167,21 @@ export default function OrderDetails() {
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <div className="mb-6">
-            <Link to="/account?tab=purchases">
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Your Purchases
-              </Button>
-            </Link>
+            {currentUser && currentUser.id === order.buyerId ? (
+              <Link to="/account?tab=purchases">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Your Purchases
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/seller/orders">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to My Orders
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Order Header */}
