@@ -107,10 +107,22 @@ export default function AccountManager() {
     enabled: !!user,
   });
 
-  const { data: sellerListings } = useQuery({
-    queryKey: ["/api/seller/listings"],
+  const { data: sellerDashboardData } = useQuery({
+    queryKey: ["/api/seller/dashboard", "v2"],
+    queryFn: async () => {
+      const response = await fetch("/api/seller/dashboard", { 
+        credentials: 'include',
+        cache: 'no-cache' // Force fresh request
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+      return response.json();
+    },
     enabled: !!user && !!sellerData,
   });
+
+  const sellerListings = sellerDashboardData?.listings;
 
   const { data: sellerOrders } = useQuery({
     queryKey: ["/api/seller/orders"],
