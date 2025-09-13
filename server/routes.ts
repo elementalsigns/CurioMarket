@@ -3913,7 +3913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ship order endpoint - called by "Mark as Shipped" button
-  app.post('/api/orders/:id/ship', isAuthenticated, async (req: any, res) => {
+  app.post('/api/orders/:id/ship', requireAuth, async (req: any, res) => {
     try {
       const { trackingNumber, carrier } = req.body;
       
