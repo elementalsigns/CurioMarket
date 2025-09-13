@@ -846,7 +846,8 @@ export class DatabaseStorage implements IStorage {
       })
     );
     
-    return listingsWithImagesAndSeller;
+    // Filter out listings without images to avoid "No image" placeholders
+    return listingsWithImagesAndSeller.filter(listing => listing.images && listing.images.length > 0);
   }
 
   async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }> {
