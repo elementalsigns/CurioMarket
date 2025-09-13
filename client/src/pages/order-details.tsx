@@ -15,7 +15,8 @@ import {
   Truck,
   CheckCircle,
   Clock,
-  ShoppingBag
+  ShoppingBag,
+  Star
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -241,11 +242,28 @@ export default function OrderDetails() {
                           </div>
                         </div>
                         
-                        {/* Total Price */}
-                        <div className="text-right">
+                        {/* Total Price & Review Button */}
+                        <div className="text-right space-y-2">
                           <p className="font-semibold text-lg" data-testid={`order-item-total-${index}`}>
                             ${(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
                           </p>
+                          {/* Review Button - Only show if order is delivered and not already reviewed */}
+                          {(order.status === 'delivered' || order.status === 'fulfilled') && !item.hasReviewed && (
+                            <Link to={`/product/${item.slug}?review=true&orderId=${order.id}`}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                                data-testid={`button-review-${index}`}
+                              >
+                                <Star className="w-4 h-4 mr-1" />
+                                Write Review
+                              </Button>
+                            </Link>
+                          )}
+                          {item.hasReviewed && (
+                            <p className="text-sm text-green-600">✓ Reviewed</p>
+                          )}
                         </div>
                       </div>
                       );

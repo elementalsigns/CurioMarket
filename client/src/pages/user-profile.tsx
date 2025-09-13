@@ -320,9 +320,24 @@ export default function UserProfile() {
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="font-semibold">${order.total}</span>
-                              <Button variant="outline" size="sm">
-                                View Details
-                              </Button>
+                              <div className="flex gap-2">
+                                <Link href={`/orders/${order.id}`}>
+                                  <Button variant="outline" size="sm">
+                                    View Details
+                                  </Button>
+                                </Link>
+                                {/* Quick review button for delivered orders */}
+                                {(order.status === 'delivered' || order.status === 'fulfilled') && !order.hasReviewed && (
+                                  <Button 
+                                    size="sm"
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                    onClick={() => window.location.href = `/orders/${order.id}#reviews`}
+                                  >
+                                    <Star className="w-4 h-4 mr-1" />
+                                    Review
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
