@@ -8,7 +8,7 @@ import Footer from "@/components/layout/footer";
 import CategoryGrid from "@/components/category-grid";
 import ProductCard from "@/components/product-card";
 import { ArrowRight, Heart, ShoppingCart, Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Link } from "wouter";
 
@@ -43,10 +43,19 @@ export default function Home() {
     enabled: !!user,
   });
 
+  // Fetch item counts for each wishlist
+  const wishlistQueries = useQueries({
+    queries: (wishlists || []).map((wishlist: any) => ({
+      queryKey: ['/api/wishlists', wishlist.id, 'items', 'count'],
+      queryFn: () => fetch(`/api/wishlists/${wishlist.id}/items`).then(res => res.json()).then(items => items.length),
+      enabled: !!user && !!wishlists,
+    }))
+  });
+
   // Calculate total items across all wishlists
-  const favoriteItemsCount = wishlists?.reduce((total: number, wishlist: any) => {
-    return total + (wishlist.items?.length || 0);
-  }, 0) || 0;
+  const favoriteItemsCount = wishlistQueries.reduce((total: number, query: any) => {
+    return total + (query.data || 0);
+  }, 0);
 
   const { data: sellerProfile } = useQuery({
     queryKey: ["/api/seller/profile"],
