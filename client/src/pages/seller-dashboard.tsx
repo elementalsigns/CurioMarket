@@ -1725,6 +1725,24 @@ function PromotionsList() {
   );
 }
 
+// Helper function to convert Google Cloud Storage URLs to local /objects/ paths
+function convertImageUrl(url: string): string {
+  if (!url || !url.startsWith('https://storage.googleapis.com/')) {
+    return url;
+  }
+  
+  const urlParts = url.split('/');
+  const bucketIndex = urlParts.findIndex(part => part.includes('repl-objstore') || part.includes('replit-objstore'));
+  if (bucketIndex === -1) return url;
+  
+  const pathAfterBucket = urlParts.slice(bucketIndex + 1).join('/');
+  const objectPath = pathAfterBucket.startsWith('.private/') 
+    ? pathAfterBucket.replace('.private/', '') 
+    : pathAfterBucket;
+  
+  return `/objects/${objectPath}`;
+}
+
 // Seller Reviews Component
 function SellerReviews() {
   const { data: reviews, isLoading } = useQuery({
@@ -1796,7 +1814,7 @@ function SellerReviews() {
                 {review.photos.map((photo: string, index: number) => (
                   <div key={index} className="w-20 h-20 bg-zinc-800 rounded-lg overflow-hidden">
                     <img 
-                      src={photo} 
+                      src={convertImageUrl(photo)} 
                       alt={`Review photo ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
