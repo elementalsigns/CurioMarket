@@ -52,7 +52,7 @@ export default function Header() {
   }) as { data: { count: number } | undefined };
 
   const { data: favorites } = useQuery({
-    queryKey: ["/api/user/favorites"],
+    queryKey: ["/api/favorites"],
     enabled: isAuthenticated,
   });
 
@@ -265,7 +265,7 @@ export default function Header() {
                     data-testid="button-messages-mobile"
                   >
                     <MessageSquare size={18} />
-                    {unreadData?.count > 0 && (
+                    {unreadData?.count && unreadData.count > 0 && (
                       <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-medium shadow-lg" data-testid="messages-count-mobile">
                         {unreadData.count > 9 ? '9+' : unreadData.count}
                       </span>
@@ -316,7 +316,7 @@ export default function Header() {
                     data-testid="button-messages"
                   >
                     <MessageSquare size={20} />
-                    {unreadData?.count > 0 && (
+                    {unreadData?.count && unreadData.count > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" data-testid="messages-count">
                         {unreadData.count}
                       </span>

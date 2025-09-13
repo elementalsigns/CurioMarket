@@ -3555,6 +3555,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== FAVORITES ALIASES FOR BACKWARD COMPATIBILITY ====================
+  
+  // Alias for GET /api/user/favorites -> /api/favorites
+  app.get('/api/user/favorites', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const favoriteIds = await storage.getUserFavorites(userId);
+      res.json(favoriteIds);
+    } catch (error) {
+      console.error("Error fetching user favorites:", error);
+      res.status(500).json({ error: "Failed to fetch favorites" });
+    }
+  });
+
+  // Alias for DELETE /api/user/favorites/:listingId -> /api/favorites/:listingId
+  app.delete('/api/user/favorites/:listingId', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { listingId } = req.params;
+      
+      await storage.removeFavorite(userId, listingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing user favorite:", error);
+      res.status(500).json({ error: "Failed to remove favorite" });
+    }
+  });
+
   // =================== ENHANCED PRODUCT MANAGEMENT ===================
 
   // Listing variations
