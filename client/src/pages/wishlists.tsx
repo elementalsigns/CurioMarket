@@ -174,12 +174,12 @@ export default function WishlistsPage() {
   // Fetch user's favorites
   const { data: favorites = [], isLoading: favoritesLoading } = useQuery({
     queryKey: ['/api/favorites'],
-  });
+  }) as { data: string[], isLoading: boolean };
 
   // Fetch user's wishlists
   const { data: wishlists = [], isLoading: wishlistsLoading } = useQuery({
     queryKey: ['/api/wishlists'],
-  });
+  }) as { data: Wishlist[], isLoading: boolean };
 
   // Fetch selected wishlist items
   const { data: wishlistItems = [], isLoading: itemsLoading } = useQuery({
