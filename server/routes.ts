@@ -849,19 +849,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
       // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE/PUT operations
-      const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
+      const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1') || hostname.includes('kirk.replit.dev'));
       const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
-      
-      // DEBUG: Check why isListingUpdate is false
-      if (req.method === 'PUT' && req.path.includes('/api/listings/')) {
-        console.log('[LISTING-UPDATE-DEBUG] PUT request to listings detected:');
-        console.log('[LISTING-UPDATE-DEBUG] req.method:', req.method);
-        console.log('[LISTING-UPDATE-DEBUG] req.path:', req.path);
-        console.log('[LISTING-UPDATE-DEBUG] regex test result:', /^\/api\/listings\/[^/]+$/.test(req.path));
-        console.log('[LISTING-UPDATE-DEBUG] regex pattern:', '/^\/api\/listings\/[^/]+$/');
-      }
       
       console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
       console.log('[BYPASS-DEBUG] isSellerDashboardEndpoint:', isSellerDashboardEndpoint);
