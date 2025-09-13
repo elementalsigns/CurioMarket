@@ -191,28 +191,15 @@ export default function OrderDetails() {
                         {/* Product Image */}
                         <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
                           {item.image && typeof item.image === 'string' && item.image.length > 0 ? (
-                            (() => {
-                              // Extract image ID from the full Google Cloud Storage URL
-                              const imageId = item.image.includes('/.private/uploads/') 
-                                ? item.image.split('/.private/uploads/').pop() 
-                                : item.image;
-                              
-                              const proxyUrl = imageId !== item.image 
-                                ? `/api/image-proxy/${imageId}` 
-                                : item.image;
-                              
-                              return (
-                                <img 
-                                  src={proxyUrl} 
-                                  alt={item.title}
-                                  className="w-full h-full object-cover"
-                                  data-testid={`order-item-image-${index}`}
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              );
-                            })()
+                            <img 
+                              src={item.image.includes('storage.googleapis.com') ? item.image : `/api/image-proxy/${item.image}`} 
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              data-testid={`order-item-image-${index}`}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                           ) : item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
                             <img 
                               src={item.image[0].url} 
