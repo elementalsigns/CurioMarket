@@ -31,10 +31,22 @@ export function useAuth() {
     }
   }, [user, error]);
 
+  // Detect if user is effectively a seller (has subscription or seller profile)
+  const isSeller = user && (
+    (user as any).role === 'seller' || 
+    !!(user as any).stripeSubscriptionId || 
+    !!(user as any).sellerId
+  );
+  
+  // Determine effective role for UI routing
+  const effectiveRole = isSeller ? 'seller' : (user as any)?.role;
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     authError: error,
+    isSeller,
+    effectiveRole,
   };
 }

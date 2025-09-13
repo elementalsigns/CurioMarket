@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 export default function Header() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isSeller, effectiveRole } = useAuth();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -349,12 +349,12 @@ export default function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  {sellerData ? (
+                  {isSeller ? (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to="/account" className="flex items-center">
+                        <Link to="/seller/orders" className="flex items-center">
                           <Store className="mr-2" size={16} />
-                          Shop Manager
+                          Seller Dashboard
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -491,12 +491,12 @@ export default function Header() {
                       </Button>
                     </Link>
                     
-                    {sellerData ? (
+                    {isSeller ? (
                       <>
-                        <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
+                        <Link to="/seller/orders" onClick={() => setMobileMenuOpen(false)}>
                           <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
                             <Store className="mr-3" size={18} />
-                            Shop Manager
+                            Seller Dashboard
                           </Button>
                         </Link>
                         <Link to="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
