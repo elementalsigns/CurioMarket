@@ -139,9 +139,11 @@ export default function Home() {
                 <p className="text-foreground/70 mb-4">
                   {(favorites as any)?.length || 0} items saved for later
                 </p>
-                <Button variant="outline" data-testid="button-view-favorites">
-                  View Favorites
-                </Button>
+                <Link to="/favorites">
+                  <Button variant="outline" data-testid="button-view-favorites">
+                    View Favorites
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
