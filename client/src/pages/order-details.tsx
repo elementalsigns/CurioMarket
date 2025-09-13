@@ -37,6 +37,14 @@ export default function OrderDetails() {
     enabled: !!orderId,
   });
 
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/auth/user"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response;
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -189,7 +197,7 @@ export default function OrderDetails() {
                       return (
                         <div key={index} className="flex items-center gap-4 p-4 border rounded-lg" data-testid={`order-item-${index}`}>
                         {/* Product Image */}
-                        <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
+                        <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden border">
                           {item.image && typeof item.image === 'string' && item.image.length > 0 ? (
                             <img 
                               src={item.image.includes('storage.googleapis.com') ? item.image : `/api/image-proxy/${item.image}`} 
@@ -197,7 +205,12 @@ export default function OrderDetails() {
                               className="w-full h-full object-cover"
                               data-testid={`order-item-image-${index}`}
                               onError={(e) => {
-                                e.currentTarget.style.display = 'none';
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="w-8 h-8 bg-zinc-300 dark:bg-zinc-600 rounded flex items-center justify-center text-xs font-medium">IMG</div></div>';
+                                }
                               }}
                             />
                           ) : item.image && Array.isArray(item.image) && item.image.length > 0 && item.image[0]?.url ? (
@@ -208,8 +221,10 @@ export default function OrderDetails() {
                               data-testid={`order-item-image-${index}`}
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              <Package className="h-8 w-8 text-muted-foreground" />
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-8 h-8 bg-zinc-300 dark:bg-zinc-600 rounded flex items-center justify-center text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                                IMG
+                              </div>
                             </div>
                           )}
                         </div>
@@ -234,8 +249,8 @@ export default function OrderDetails() {
                           <p className="font-semibold text-lg" data-testid={`order-item-total-${index}`}>
                             ${(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}
                           </p>
-                          {/* Review Button - Only show if order is delivered and not already reviewed */}
-                          {(order.status === 'delivered' || order.status === 'fulfilled') && !item.hasReviewed && (
+                          {/* Review Button - Only show if user is buyer, order is delivered and not already reviewed */}
+                          {currentUser && currentUser.id === order.buyerId && (order.status === 'delivered' || order.status === 'fulfilled') && !item.hasReviewed && (
                             <Link to={`/product/${item.slug}?review=true&orderId=${order.id}`}>
                               <Button
                                 size="sm"
@@ -280,10 +295,16 @@ export default function OrderDetails() {
                     <div className="space-y-1 text-sm">
                       <p className="font-medium">{order.shippingAddress.name}</p>
                       <p>{order.shippingAddress.address}</p>
+                      {order.shippingAddress.address2 && (
+                        <p>{order.shippingAddress.address2}</p>
+                      )}
                       <p>
                         {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
                       </p>
                       <p>{order.shippingAddress.country}</p>
+                      {order.shippingAddress.phone && (
+                        <p className="text-muted-foreground">Phone: {order.shippingAddress.phone}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
