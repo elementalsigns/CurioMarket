@@ -4629,7 +4629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get upload URL for review photos
-  app.post("/api/reviews/photos/upload", isAuthenticated, async (req: any, res) => {
+  app.post("/api/reviews/photos/upload", requireAuth, async (req: any, res) => {
     try {
       const ObjectStorageService = (await import('./objectStorage')).ObjectStorageService;
       const objectStorageService = new ObjectStorageService();
