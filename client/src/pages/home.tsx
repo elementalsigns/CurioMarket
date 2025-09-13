@@ -38,10 +38,15 @@ export default function Home() {
     queryKey: ["/api/listings/featured"],
   });
 
-  const { data: favorites, error: favoritesError } = useQuery({
-    queryKey: ["/api/user/favorites"],
+  const { data: wishlists } = useQuery({
+    queryKey: ["/api/wishlists"],
     enabled: !!user,
   });
+
+  // Calculate total items across all wishlists
+  const favoriteItemsCount = wishlists?.reduce((total: number, wishlist: any) => {
+    return total + (wishlist.items?.length || 0);
+  }, 0) || 0;
 
   const { data: sellerProfile } = useQuery({
     queryKey: ["/api/seller/profile"],
@@ -65,18 +70,6 @@ export default function Home() {
     }
   }, [featuredError, toast]);
 
-  useEffect(() => {
-    if (favoritesError && isUnauthorizedError(favoritesError as Error)) {
-      toast({
-        title: "Unauthorized", 
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [favoritesError, toast]);
 
   if (isLoading) {
     return (
@@ -137,7 +130,7 @@ export default function Home() {
                 <Heart className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
                 <p className="text-foreground/70 mb-4">
-                  {(favorites as any)?.length || 0} items saved for later
+                  {favoriteItemsCount} items saved for later
                 </p>
                 <Link to="/wishlists">
                   <Button variant="outline" data-testid="button-view-favorites">
