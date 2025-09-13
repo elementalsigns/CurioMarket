@@ -854,6 +854,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
       
+      // DEBUG: Check why isListingUpdate is false
+      if (req.method === 'PUT' && req.path.includes('/api/listings/')) {
+        console.log('[LISTING-UPDATE-DEBUG] PUT request to listings detected:');
+        console.log('[LISTING-UPDATE-DEBUG] req.method:', req.method);
+        console.log('[LISTING-UPDATE-DEBUG] req.path:', req.path);
+        console.log('[LISTING-UPDATE-DEBUG] regex test result:', /^\/api\/listings\/[^/]+$/.test(req.path));
+        console.log('[LISTING-UPDATE-DEBUG] regex pattern:', '/^\/api\/listings\/[^/]+$/');
+      }
+      
       console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
       console.log('[BYPASS-DEBUG] isSellerDashboardEndpoint:', isSellerDashboardEndpoint);
       console.log('[BYPASS-DEBUG] isDeleteOperation:', isDeleteOperation);
