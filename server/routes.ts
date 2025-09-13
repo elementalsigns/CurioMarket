@@ -5800,6 +5800,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== SELLER LOOKUP ====================
+  
+  // Find seller by shop name for Purchase Support
+  app.get('/api/seller/lookup', async (req, res) => {
+    try {
+      const { name } = req.query;
+      
+      if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'Seller name is required' });
+      }
+      
+      // Search for sellers by shop name
+      const shopResult = await storage.searchShops(name, { limit: 5, offset: 0 });
+      
+      if (shopResult.shops && shopResult.shops.length > 0) {
+        // Return the first matching seller
+        const seller = shopResult.shops[0];
+        res.json({ 
+          found: true, 
+          seller: {
+            id: seller.id,
+            shopName: seller.shopName,
+            bio: seller.bio,
+            location: seller.location
+          }
+        });
+      } else {
+        res.json({ found: false });
+      }
+      
+    } catch (error) {
+      console.error('Seller lookup error:', error);
+      res.status(500).json({ error: 'Failed to lookup seller' });
+    }
+  });
+
   // ==================== CONTACT FORM ====================
   
   // Contact form submission

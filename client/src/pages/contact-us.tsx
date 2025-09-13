@@ -84,16 +84,32 @@ export default function ContactUs() {
     }));
   };
 
-  const handleSellerSearch = () => {
-    if (sellerSearch.trim()) {
-      // Navigate to browse page with seller search
-      window.location.href = `/browse?seller=${encodeURIComponent(sellerSearch.trim())}`;
-    } else {
+  const handleSellerSearch = async () => {
+    if (!sellerSearch.trim()) {
       toast({
         title: "Search Required",
         description: "Please enter a seller or store name to search.",
         variant: "destructive"
       });
+      return;
+    }
+    
+    try {
+      // First, try to find the exact seller for their shop page
+      const response = await fetch(`/api/seller/lookup?name=${encodeURIComponent(sellerSearch.trim())}`);
+      const result = await response.json();
+      
+      if (response.ok && result.found && result.seller) {
+        // Found a seller! Redirect to their shop page
+        window.location.href = `/shop/${result.seller.id}`;
+      } else {
+        // No exact seller found, fall back to browse page with seller filter
+        window.location.href = `/browse?seller=${encodeURIComponent(sellerSearch.trim())}`;
+      }
+    } catch (error) {
+      console.error('Seller lookup error:', error);
+      // Fall back to browse page on error
+      window.location.href = `/browse?seller=${encodeURIComponent(sellerSearch.trim())}`;
     }
   };
 
