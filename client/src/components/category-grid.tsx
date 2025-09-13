@@ -46,15 +46,20 @@ export default function CategoryGrid() {
     queryKey: ['/api/categories/counts'],
   });
 
-  // Combine static category data with dynamic counts
-  const categories = (categoryCounts as any[])?.map((categoryCount: any) => ({
-    id: categoryCount.slug,
-    name: categoryCount.name,
-    slug: categoryCount.slug,
-    icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
-    image: (categoryImages as any)[categoryCount.slug]?.image,
-    count: categoryCount.count
-  })) || [];
+  // Only show the original four categories with images
+  const originalFourCategories = ["wet-specimens", "bones-skulls", "taxidermy", "vintage-medical"];
+  
+  // Combine static category data with dynamic counts, filtered to original four
+  const categories = (categoryCounts as any[])
+    ?.filter((categoryCount: any) => originalFourCategories.includes(categoryCount.slug))
+    ?.map((categoryCount: any) => ({
+      id: categoryCount.slug,
+      name: categoryCount.name,
+      slug: categoryCount.slug,
+      icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
+      image: (categoryImages as any)[categoryCount.slug]?.image,
+      count: categoryCount.count
+    })) || [];
 
   if (isLoading) {
     return (
