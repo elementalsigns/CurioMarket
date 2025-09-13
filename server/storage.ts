@@ -1218,8 +1218,8 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(listings, eq(orderItems.listingId, listings.id))
         .where(eq(orderItems.orderId, orderId));
 
-      // Get images for each item separately
-      console.log(`[STORAGE] getOrderWithDetails: Fetching images for ${items.length} items`);
+      // Get images and review status for each item separately
+      console.log(`[STORAGE] getOrderWithDetails: Fetching images and review status for ${items.length} items`);
       const itemsWithImages = await Promise.all(
         items.map(async (item) => {
           console.log(`[STORAGE] Fetching images for listing: ${item.listingId}`);
@@ -1232,12 +1232,29 @@ export class DatabaseStorage implements IStorage {
           
           console.log(`[STORAGE] Found ${images.length} images for listing ${item.listingId}:`, images);
           
+          // Check if this order item has been reviewed
+          const existingReviews = await db
+            .select({ id: reviews.id })
+            .from(reviews)
+            .where(
+              and(
+                eq(reviews.orderId, orderId),
+                eq(reviews.listingId, item.listingId),
+                eq(reviews.buyerId, order[0].buyerId)
+              )
+            )
+            .limit(1);
+          
+          const hasReviewed = existingReviews.length > 0;
+          console.log(`[STORAGE] Item ${item.listingId} hasReviewed: ${hasReviewed}`);
+          
           const result = {
             ...item,
-            image: images[0]?.url || null
+            image: images[0]?.url || null,
+            hasReviewed
           };
           
-          console.log(`[STORAGE] Item with image:`, result);
+          console.log(`[STORAGE] Item with image and review status:`, result);
           return result;
         })
       );

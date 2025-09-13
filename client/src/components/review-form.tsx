@@ -85,12 +85,14 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
   };
 
   const handlePhotoComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    const newPhotos = result.successful.map((file) => file.uploadURL as string);
-    setPhotos(prev => [...prev, ...newPhotos]);
-    toast({
-      title: "Photo uploaded",
-      description: `${result.successful.length} photo(s) added to your review`,
-    });
+    if (result.successful) {
+      const newPhotos = result.successful.map((file) => file.uploadURL as string);
+      setPhotos(prev => [...prev, ...newPhotos]);
+      toast({
+        title: "Photo uploaded",
+        description: `${result.successful.length} photo(s) added to your review`,
+      });
+    }
   };
 
   const removePhoto = (index: number) => {
@@ -192,7 +194,7 @@ export default function ReviewForm({ productId, orderId, onSuccess }: ReviewForm
               maxFileSize={5242880} // 5MB
               allowedFileTypes={['image/*']}
               onGetUploadParameters={handlePhotoUpload}
-              onComplete={handlePhotoComplete}
+              onComplete={handlePhotoComplete as any}
               buttonClassName="bg-zinc-700 hover:bg-zinc-600 text-white border-zinc-600"
             >
               <Camera size={16} className="mr-2" />
