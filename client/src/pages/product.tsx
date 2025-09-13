@@ -38,7 +38,7 @@ export default function Product() {
   const { data: wishlists = [] } = useQuery({
     queryKey: ["/api/wishlists"],
     enabled: !!user,
-  });
+  }) as { data: any[] };
 
   const isFavorite = Array.isArray(favorites) && favorites.includes(listing?.id);
 
@@ -125,7 +125,16 @@ export default function Product() {
       });
       return;
     }
-    toggleFavoriteMutation.mutate();
+    
+    // If already favorited, remove it
+    if (isFavorite) {
+      toggleFavoriteMutation.mutate();
+    }
+    // If not favorited and no wishlists, add to general favorites
+    else if (wishlists.length === 0) {
+      toggleFavoriteMutation.mutate();
+    }
+    // If not favorited and has wishlists, don't do anything - let dropdown handle it
   };
 
   if (isLoading) {
@@ -234,29 +243,28 @@ export default function Product() {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleToggleFavorite}
-                    className={isFavorite ? 'text-gothic-red' : 'text-foreground/60'}
-                    data-testid="button-favorite"
-                  >
-                    <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
-                  </Button>
-                  
-                  {user && wishlists.length > 0 && (
+                  {user && !isFavorite && wishlists.length > 0 ? (
+                    // Show dropdown when user has wishlists and item is not favorited
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-foreground/60 hover:text-foreground"
-                          data-testid="button-add-to-wishlist"
+                          className="text-foreground/60 hover:text-gothic-red"
+                          data-testid="button-favorite"
                         >
-                          <List size={20} />
+                          <Heart size={20} />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+                        <DropdownMenuItem
+                          onClick={() => toggleFavoriteMutation.mutate()}
+                          className="text-white hover:bg-zinc-800 cursor-pointer"
+                          data-testid="item-general-favorites"
+                        >
+                          <Heart size={16} className="mr-2" />
+                          General Favorites
+                        </DropdownMenuItem>
                         {wishlists.map((wishlist: any) => (
                           <DropdownMenuItem
                             key={wishlist.id}
@@ -264,12 +272,23 @@ export default function Product() {
                             className="text-white hover:bg-zinc-800 cursor-pointer"
                             data-testid={`item-wishlist-${wishlist.id}`}
                           >
-                            <Plus size={16} className="mr-2" />
+                            <List size={16} className="mr-2" />
                             {wishlist.name}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                  ) : (
+                    // Show regular heart button when no wishlists or already favorited
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleToggleFavorite}
+                      className={isFavorite ? 'text-gothic-red' : 'text-foreground/60'}
+                      data-testid="button-favorite"
+                    >
+                      <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
+                    </Button>
                   )}
                   <SocialSharing 
                     listing={{
