@@ -3494,7 +3494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== FAVORITES ====================
   
   // Get user favorites
-  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
+  app.get('/api/favorites', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const favoriteIds = await storage.getUserFavorites(userId);
@@ -3506,7 +3506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add favorite
-  app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
+  app.post('/api/favorites', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { listingId } = req.body;
@@ -3520,7 +3520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Remove favorite
-  app.delete('/api/favorites/:listingId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/favorites/:listingId', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { listingId } = req.params;
