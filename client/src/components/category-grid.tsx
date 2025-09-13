@@ -46,20 +46,25 @@ export default function CategoryGrid() {
     queryKey: ['/api/categories/counts'],
   });
 
-  // Only show the original four categories with images
-  const originalFourCategories = ["wet-specimens", "bones-skulls", "taxidermy", "jewelry"];
+  // Only show the original four categories with images in the specified order
+  const originalFourCategories = ["taxidermy", "wet-specimens", "bones-skulls", "occult"];
   
-  // Combine static category data with dynamic counts, filtered to original four
-  const categories = (categoryCounts as any[])
-    ?.filter((categoryCount: any) => originalFourCategories.includes(categoryCount.slug))
-    ?.map((categoryCount: any) => ({
-      id: categoryCount.slug,
-      name: categoryCount.name,
-      slug: categoryCount.slug,
-      icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
-      image: (categoryImages as any)[categoryCount.slug]?.image,
-      count: categoryCount.count
-    })) || [];
+  // Combine static category data with dynamic counts, filtered to original four and maintain order
+  const categories = originalFourCategories
+    .map((slug) => {
+      const categoryCount = (categoryCounts as any[])?.find((cat: any) => cat.slug === slug);
+      if (!categoryCount) return null;
+      
+      return {
+        id: categoryCount.slug,
+        name: categoryCount.name,
+        slug: categoryCount.slug,
+        icon: (categoryImages as any)[categoryCount.slug]?.icon || "📦",
+        image: (categoryImages as any)[categoryCount.slug]?.image,
+        count: categoryCount.count
+      };
+    })
+    .filter(Boolean);
 
   if (isLoading) {
     return (
