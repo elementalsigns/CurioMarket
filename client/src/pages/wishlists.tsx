@@ -306,16 +306,16 @@ export default function WishlistsPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-4 flex items-center">
             <Heart className="w-6 h-6 mr-2 text-red-600" />
-            Your Favorites
+            General Favorites
           </h2>
           
           {favorites.length === 0 ? (
             <Card className="bg-zinc-900 border-zinc-800 text-center py-8">
               <CardContent>
                 <Heart className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-                <p className="text-zinc-400 mb-4">No favorites yet</p>
+                <p className="text-zinc-400 mb-4">No general favorites yet</p>
                 <p className="text-zinc-500 text-sm mb-4">
-                  Click the heart icon on items you love to save them here
+                  Items saved to "General Favorites" appear here. Use wishlists below to organize your collections.
                 </p>
                 <Link href="/browse">
                   <Button 
