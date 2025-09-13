@@ -850,7 +850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
       // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE operations
       const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
-      const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites');
+      const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/wishlists');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       
       console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
