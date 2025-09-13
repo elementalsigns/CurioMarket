@@ -145,6 +145,7 @@ export default function WishlistsPage() {
   // Fetch selected wishlist items
   const { data: wishlistItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ['/api/wishlists', selectedWishlist, 'items'],
+    queryFn: () => fetch(`/api/wishlists/${selectedWishlist}/items`).then(res => res.json()),
     enabled: !!selectedWishlist,
   });
 
