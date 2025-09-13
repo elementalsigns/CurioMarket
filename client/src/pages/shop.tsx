@@ -1,5 +1,5 @@
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,11 @@ import {
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ProductCard from "@/components/product-card";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface ShopPageProps {
   // For preview mode
@@ -43,6 +46,10 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
   const { sellerId } = useParams();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [, setLocation] = useLocation();
+  
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   // In preview mode, use previewData; otherwise fetch from API
   const { data: fetchedData, isLoading } = useQuery({
@@ -53,6 +60,97 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
 
   const seller = fetchedData?.seller;
   const listings = fetchedData?.listings || [];
+  
+  // Check if user is following this seller
+  const { data: followingData } = useQuery({
+    queryKey: ["/api/user/following"],
+    enabled: isAuthenticated && !isPreview,
+  });
+  
+  const isFollowing = followingData && Array.isArray(followingData) 
+    ? followingData.some((follow: any) => follow.sellerId === sellerId)
+    : false;
+  
+  // Follow/Unfollow mutation
+  const followMutation = useMutation({
+    mutationFn: async () => {
+      if (isFollowing) {
+        return apiRequest("DELETE", "/api/shop-follows", { sellerId });
+      } else {
+        return apiRequest("POST", "/api/shop-follows", { sellerId });
+      }
+    },
+    onSuccess: () => {
+      // Invalidate following data to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["/api/user/following"] });
+      toast({
+        title: isFollowing ? "Unfollowed" : "Now Following",
+        description: isFollowing 
+          ? `You're no longer following ${seller?.shopName}` 
+          : `You're now following ${seller?.shopName}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update follow status",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Message mutation
+  const messageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return apiRequest("POST", "/api/messages/conversations", {
+        recipientId: seller?.userId,
+        content: content
+      });
+    },
+    onSuccess: (data) => {
+      // Navigate to the conversation
+      setLocation(`/messages?conversation=${data.id}`);
+      toast({
+        title: "Message Sent",
+        description: `Started conversation with ${seller?.shopName}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Button click handlers
+  const handleFollowClick = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign In Required",
+        description: "You need to be signed in to follow sellers",
+        variant: "destructive"
+      });
+      return;
+    }
+    followMutation.mutate();
+  };
+  
+  const handleMessageClick = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign In Required", 
+        description: "You need to be signed in to message sellers",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Start conversation with a default greeting message
+    const defaultMessage = `Hi! I'm interested in your shop. Could you tell me more about your products?`;
+    messageMutation.mutate(defaultMessage);
+  };
 
   // Get categories used by this seller
   const { data: categoriesData } = useQuery({
@@ -204,13 +302,30 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
               </div>
               {!isPreview && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/10">
-                    <Heart className="w-4 h-4 mr-2" />
-                    Follow
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-white border-white hover:bg-white/10"
+                    onClick={handleFollowClick}
+                    disabled={followMutation.isPending}
+                    data-testid="button-follow"
+                  >
+                    <Heart className={`w-4 h-4 mr-2 ${isFollowing ? 'fill-red-500 text-red-500' : ''}`} />
+                    {followMutation.isPending 
+                      ? (isFollowing ? 'Unfollowing...' : 'Following...') 
+                      : (isFollowing ? 'Following' : 'Follow')
+                    }
                   </Button>
-                  <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-white border-white hover:bg-white/10"
+                    onClick={handleMessageClick}
+                    disabled={messageMutation.isPending}
+                    data-testid="button-message"
+                  >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Message
+                    {messageMutation.isPending ? 'Sending...' : 'Message'}
                   </Button>
                   <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/10">
                     <Share2 className="w-4 h-4" />
