@@ -842,17 +842,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues  
   const requireAuth = async (req: any, res: any, next: any) => {
-    console.log('[AUTH-ENTRY] requireAuth function called - method:', req.method, 'path:', req.path);
-    
-    // SPECIAL PUT REQUEST DEBUG
-    if (req.method === 'PUT' && req.path.includes('/api/listings/')) {
-      console.log('[PUT-DEBUG] ===== PUT REQUEST TO LISTINGS DETECTED =====');
-      console.log('[PUT-DEBUG] hostname:', req.get('host'));
-      console.log('[PUT-DEBUG] origin:', req.headers.origin);
-      console.log('[PUT-DEBUG] path:', req.path);
-      console.log('[PUT-DEBUG] method:', req.method);
-    }
-    
     try {
       const hostname = req.get('host') || '';
       const origin = req.headers.origin || '';
@@ -864,14 +853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
       
-      console.log('[BYPASS-DEBUG] isDevEnvironment:', isDevEnvironment);
-      console.log('[BYPASS-DEBUG] isSellerDashboardEndpoint:', isSellerDashboardEndpoint);
-      console.log('[BYPASS-DEBUG] isDeleteOperation:', isDeleteOperation);
-      console.log('[BYPASS-DEBUG] isListingUpdate:', isListingUpdate);
-      console.log('[BYPASS-DEBUG] Should bypass:', isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate));
-      
       if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate)) {
-        console.log('[BYPASS] ✅ APPLYING DEVELOPMENT BYPASS FOR PUT/DELETE OPERATION');
         req.user = {
           claims: {
             sub: '46848882',  // ONLY for specific user
@@ -2744,7 +2726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update listing
-  app.put('/api/listings/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/listings/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
