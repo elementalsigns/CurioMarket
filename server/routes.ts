@@ -5683,6 +5683,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date()
       };
       
+      console.log('=== EVENT DATA DEBUG ===');
+      console.log('eventData:', JSON.stringify(eventData, null, 2));
+      console.log('eventDate type:', typeof eventData.eventDate, 'value:', eventData.eventDate);
+      console.log('endDate type:', typeof eventData.endDate, 'value:', eventData.endDate);
+      console.log('createdAt type:', typeof eventData.createdAt, 'value:', eventData.createdAt);
+      console.log('updatedAt type:', typeof eventData.updatedAt, 'value:', eventData.updatedAt);
+      console.log('========================');
+      
       const event = await storage.createEvent(eventData);
       res.status(201).json(event);
     } catch (error) {
