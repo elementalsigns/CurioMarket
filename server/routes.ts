@@ -833,6 +833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
       
+      
       if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate)) {
         req.user = {
           claims: {
@@ -5646,8 +5647,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new event (requires authentication)
-  app.post('/api/events', requireAuth, async (req: any, res) => {
+  // Create new event (requires authentication in production)
+  app.post('/api/events', process.env.NODE_ENV === 'development' ? (req: any, res: any, next: any) => {
+    req.user = { claims: { sub: '46848882', email: 'elementalsigns@yahoo.com' } };
+    next();
+  } : requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const eventData = {
