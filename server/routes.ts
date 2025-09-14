@@ -1149,16 +1149,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Handle seller image uploads (normalize URLs and set ACL policies)
-  app.put('/api/seller/images', async (req: any, res) => {
+  app.put('/api/seller/images', requireAuth, async (req: any, res) => {
     console.log('====== SELLER IMAGES DEBUG ======');
     console.log('Request received for image processing');
     console.log('Request body:', req.body);
     try {
-      // Use authenticated user ID only
-      if (!req.user?.claims?.sub) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      
       const userId = req.user.claims.sub;
       console.log('[SELLER-IMAGES] Using authenticated user ID:', userId);
       
