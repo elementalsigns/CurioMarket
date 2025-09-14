@@ -63,10 +63,20 @@ export default function EventsPage() {
         endDate: data.endDate || null,
       };
       
-      return apiRequest("/api/events", {
+      const response = await fetch("/api/events", {
         method: "POST",
-        body: eventData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+        credentials: 'include',
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create event");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
