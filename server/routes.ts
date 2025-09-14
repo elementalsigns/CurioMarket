@@ -5655,9 +5655,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/events', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Convert date strings to Date objects
+      const { eventDate, endDate, ...restBody } = req.body;
+      
+      // Handle eventDate (required)
+      const parsedEventDate = eventDate && eventDate !== '' ? new Date(eventDate) : null;
+      if (!parsedEventDate || isNaN(parsedEventDate.getTime())) {
+        return res.status(400).json({ error: "Valid event date is required" });
+      }
+      
+      // Handle endDate (optional)
+      let parsedEndDate = null;
+      if (endDate && endDate !== '') {
+        parsedEndDate = new Date(endDate);
+        if (isNaN(parsedEndDate.getTime())) {
+          return res.status(400).json({ error: "Invalid end date" });
+        }
+      }
+      
       const eventData = {
         userId,
-        ...req.body,
+        ...restBody,
+        eventDate: parsedEventDate,
+        endDate: parsedEndDate,
         createdAt: new Date(),
         updatedAt: new Date()
       };
