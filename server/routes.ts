@@ -5652,7 +5652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new event (requires authentication)
-  app.post('/api/events', isAuthenticated, async (req: any, res) => {
+  app.post('/api/events', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const eventData = {
