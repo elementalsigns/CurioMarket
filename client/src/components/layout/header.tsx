@@ -369,6 +369,13 @@ export default function Header() {
                           Add Listing
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/account" className="flex items-center">
+                          <User className="mr-2" size={16} />
+                          Your Account
+                        </Link>
+                      </DropdownMenuItem>
                     </>
                   ) : (
                     <>
