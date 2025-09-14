@@ -1138,8 +1138,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         onGetUploadParameters={async () => {
                           console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
                           try {
-                            const res = await apiRequest("POST", "/api/objects/upload");
-                            const response = await res.json();
+                            const response = await apiRequest("POST", "/api/objects/upload");
                             console.log('[UPLOAD-DEBUG] Response from server:', response);
                             
                             if (!response) {
@@ -1166,10 +1165,9 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             
                             try {
                               // Process the uploaded image URL
-                              const res = await apiRequest("PUT", "/api/seller/images", {
+                              const response = await apiRequest("PUT", "/api/seller/images", {
                                 bannerImageURL: uploadURL
                               });
-                              const response = await res.json();
                               
                               if (response.success && response.bannerPath) {
                                 setBannerUrl(response.bannerPath);
@@ -1229,8 +1227,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                         onGetUploadParameters={async () => {
                           console.log('[UPLOAD-DEBUG] Making request to /api/objects/upload');
                           try {
-                            const res = await apiRequest("POST", "/api/objects/upload");
-                            const response = await res.json();
+                            const response = await apiRequest("POST", "/api/objects/upload");
                             console.log('[UPLOAD-DEBUG] Response from server:', response);
                             
                             if (!response) {
@@ -1257,10 +1254,9 @@ function ShopProfileManager({ seller }: { seller: any }) {
                             
                             try {
                               // Process the uploaded image URL
-                              const res = await apiRequest("PUT", "/api/seller/images", {
+                              const response = await apiRequest("PUT", "/api/seller/images", {
                                 avatarImageURL: uploadURL
                               });
-                              const response = await res.json();
                               
                               if (response.success && response.avatarPath) {
                                 setAvatarUrl(response.avatarPath);
