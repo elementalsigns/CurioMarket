@@ -5984,6 +5984,30 @@ This message was sent via the Curio Market contact form.
     }
   });
 
+  // Placeholder image generator endpoint
+  app.get("/api/placeholder/:width/:height", (req: any, res) => {
+    const { width, height } = req.params;
+    const { text = "Image", bg = "666666", color = "white" } = req.query;
+    
+    const w = parseInt(width) || 400;
+    const h = parseInt(height) || 300;
+    const bgColor = `#${bg.replace('#', '')}`;
+    const textColor = color;
+    
+    // Generate SVG placeholder image
+    const svg = `
+      <svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="${bgColor}"/>
+        <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="${textColor}" 
+              font-family="Arial, sans-serif" font-size="${Math.min(w, h) / 10}">${decodeURIComponent(text)}</text>
+      </svg>
+    `;
+    
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.send(svg);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
