@@ -5657,6 +5657,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventData = {
         userId,
         ...req.body,
+        startDate: req.body.startDate ? new Date(req.body.startDate) : null,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
+        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : null,
         createdAt: new Date(),
         updatedAt: new Date()
       };
