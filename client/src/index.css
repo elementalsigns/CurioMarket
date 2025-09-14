@@ -74,14 +74,6 @@ html, body {
   transform: scale(1.05) !important;
 }
 
-/* Force non-clickable cursor override */
-.force-default-cursor {
-  cursor: default !important;
-}
-
-.force-default-cursor * {
-  cursor: default !important;
-}
 
 /* Fix Uppy modal positioning - only when open */
 .uppy-Dashboard--modal.uppy-Dashboard--isOpen .uppy-Dashboard-inner {
