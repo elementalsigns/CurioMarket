@@ -5655,20 +5655,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Parse dates properly
+      // Helper to convert dates
+      const toDate = (v: any): Date => {
+        if (!v || String(v).trim() === "") {
+          throw new Error("Date is required");
+        }
+        const d = new Date(v);
+        if (isNaN(d.getTime())) {
+          throw new Error(`Invalid date: ${v}`);
+        }
+        return d;
+      };
+
+      const toDateOrNull = (v: any): Date | null => {
+        if (!v || String(v).trim() === "") {
+          return null;
+        }
+        const d = new Date(v);
+        if (isNaN(d.getTime())) {
+          throw new Error(`Invalid date: ${v}`);
+        }
+        return d;
+      };
+
+      const nullIfEmpty = (v: any) => (!v || String(v).trim() === "") ? null : v;
+      
+      // Build explicit insert payload - use eventDate not startDate to match schema
       const parsedEventData = {
         title: req.body.title,
         description: req.body.description,
         category: req.body.category,
         location: req.body.location,
-        website: req.body.website,
-        contactEmail: req.body.contactEmail,
+        price: req.body.price ? parseFloat(req.body.price) : null,
         maxAttendees: req.body.maxAttendees ? parseInt(req.body.maxAttendees) : null,
+        contactEmail: nullIfEmpty(req.body.contactEmail),
+        contactPhone: nullIfEmpty(req.body.contactPhone),
+        website: nullIfEmpty(req.body.website),
+        tags: req.body.tags ? req.body.tags.split(",").map((tag: string) => tag.trim()).filter(Boolean) : [],
         status: req.body.status || 'active',
         userId,
-        startDate: req.body.eventDate ? new Date(req.body.eventDate) : null,
-        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
-        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : null,
+        eventDate: toDate(req.body.eventDate), // required
+        endDate: toDateOrNull(req.body.endDate),
+        registrationDeadline: toDateOrNull(req.body.registrationDeadline),
         createdAt: new Date(),
         updatedAt: new Date()
       };
