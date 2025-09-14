@@ -5541,6 +5541,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =================== ADMIN EVENT MANAGEMENT ===================
+  
+  // Get all events for admin management with search, filter, and pagination
+  app.get('/api/admin/events', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { search, status, page = 1, limit = 100 } = req.query;
+      const events = await storage.getAllEventsForAdmin({
+        search: search as string,
+        status: status as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching admin events:", error);
+      res.status(500).json({ error: "Failed to fetch events" });
+    }
+  });
+
+  // Admin delete any event (override user permissions)
+  app.delete('/api/admin/events/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const eventId = req.params.id;
+      const adminId = req.user.claims.sub;
+
+      // Check if event exists
+      const event = await storage.getEventById(eventId);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      await storage.adminDeleteEvent(eventId, adminId);
+      res.json({ message: "Event deleted successfully", eventId });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ error: "Failed to delete event" });
+    }
+  });
+
+  // Admin change event status (suspend/hide/flag/etc)
+  app.put('/api/admin/events/:id/status', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const eventId = req.params.id;
+      const { status } = req.body;
+      const adminId = req.user.claims.sub;
+
+      // Validate status
+      const validStatuses = ['draft', 'published', 'cancelled', 'suspended', 'hidden', 'flagged', 'expired'];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: "Invalid status", 
+          validStatuses 
+        });
+      }
+
+      // Check if event exists
+      const existingEvent = await storage.getEventById(eventId);
+      if (!existingEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      const updatedEvent = await storage.adminUpdateEventStatus(eventId, status, adminId);
+      res.json({ 
+        message: `Event status updated to ${status}`, 
+        event: updatedEvent 
+      });
+    } catch (error) {
+      console.error("Error updating event status:", error);
+      res.status(500).json({ error: "Failed to update event status" });
+    }
+  });
+
+  // Auto-expire events older than specified days (default 30)
+  app.post('/api/admin/events/expire', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { daysOld = 30 } = req.body;
+      const adminId = req.user.claims.sub;
+
+      // Validate daysOld parameter
+      if (typeof daysOld !== 'number' || daysOld < 1 || daysOld > 365) {
+        return res.status(400).json({ 
+          error: "Invalid daysOld parameter", 
+          message: "daysOld must be a number between 1 and 365" 
+        });
+      }
+
+      const result = await storage.expireOldEvents(daysOld);
+      
+      console.log(`[ADMIN] Admin ${adminId} expired ${result.count} events older than ${daysOld} days`);
+      
+      res.json({
+        message: `Successfully expired ${result.count} events older than ${daysOld} days`,
+        count: result.count,
+        expiredEventIds: result.expiredIds,
+        daysOld
+      });
+    } catch (error) {
+      console.error("Error expiring events:", error);
+      res.status(500).json({ error: "Failed to expire events" });
+    }
+  });
+
   // Demo route for testing admin export functionality (development only)
   if (process.env.NODE_ENV === 'development') {
     app.get('/api/demo/admin/export/stats', async (req: any, res) => {

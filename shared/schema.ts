@@ -56,7 +56,7 @@ export const verificationTypeEnum = pgEnum('verification_type', ['email', 'phone
 export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected']);
 
 // Event status enum
-export const eventStatusEnum = pgEnum('event_status', ['draft', 'published', 'cancelled']);
+export const eventStatusEnum = pgEnum('event_status', ['draft', 'published', 'cancelled', 'suspended', 'hidden', 'flagged', 'expired']);
 
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {

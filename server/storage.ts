@@ -222,6 +222,12 @@ export interface IStorage {
   getUserEvents(userId: string): Promise<Event[]>;
   registerForEvent(eventId: string, userId: string, data: { attendeeEmail: string; attendeeName: string }): Promise<EventAttendee>;
   getEventAttendees(eventId: string): Promise<EventAttendee[]>;
+  
+  // Admin event operations
+  getAllEventsForAdmin(filters?: { search?: string; status?: string; page?: number; limit?: number }): Promise<{ events: Event[]; total: number }>;
+  adminDeleteEvent(eventId: string, adminId: string): Promise<void>;
+  adminUpdateEventStatus(eventId: string, status: string, adminId: string): Promise<Event>;
+  expireOldEvents(daysOld?: number): Promise<{ count: number; expiredIds: string[] }>;
 
   // Export operations
   getListingsForExport(): Promise<any[]>;
@@ -2238,6 +2244,120 @@ export class DatabaseStorage implements IStorage {
       .from(eventAttendees)
       .where(eq(eventAttendees.eventId, eventId))
       .orderBy(asc(eventAttendees.registeredAt));
+  }
+
+  // Admin event operations
+  async getAllEventsForAdmin(filters?: { search?: string; status?: string; page?: number; limit?: number }): Promise<{ events: Event[]; total: number }> {
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 100;
+    const offset = (page - 1) * limit;
+
+    let whereConditions = [];
+
+    // Search filter
+    if (filters?.search) {
+      whereConditions.push(
+        or(
+          ilike(events.title, `%${filters.search}%`),
+          ilike(events.description, `%${filters.search}%`),
+          ilike(events.location, `%${filters.search}%`)
+        )
+      );
+    }
+
+    // Status filter
+    if (filters?.status && filters.status !== 'all') {
+      whereConditions.push(eq(events.status, filters.status as any));
+    }
+
+    // Build query
+    const baseQuery = db.select().from(events);
+    let countQuery = db.select({ count: count() }).from(events);
+
+    if (whereConditions.length > 0) {
+      const whereClause = whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions);
+      baseQuery.where(whereClause);
+      countQuery.where(whereClause);
+    }
+
+    // Execute queries
+    const [eventsResult, totalResult] = await Promise.all([
+      baseQuery
+        .orderBy(desc(events.createdAt))
+        .limit(limit)
+        .offset(offset),
+      countQuery
+    ]);
+
+    return {
+      events: eventsResult,
+      total: totalResult[0]?.count || 0
+    };
+  }
+
+  async adminDeleteEvent(eventId: string, adminId: string): Promise<void> {
+    // Delete attendees first (foreign key constraint)
+    await db.delete(eventAttendees).where(eq(eventAttendees.eventId, eventId));
+    
+    // Delete the event
+    await db.delete(events).where(eq(events.id, eventId));
+    
+    console.log(`[ADMIN] Admin ${adminId} deleted event ${eventId}`);
+  }
+
+  async adminUpdateEventStatus(eventId: string, status: string, adminId: string): Promise<Event> {
+    const [event] = await db
+      .update(events)
+      .set({
+        status: status as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(events.id, eventId))
+      .returning();
+    
+    console.log(`[ADMIN] Admin ${adminId} updated event ${eventId} status to ${status}`);
+    return event;
+  }
+
+  async expireOldEvents(daysOld: number = 30): Promise<{ count: number; expiredIds: string[] }> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+
+    // Find events older than cutoff date that are not already expired
+    const oldEvents = await db
+      .select({ id: events.id })
+      .from(events)
+      .where(
+        and(
+          sql`${events.createdAt} < ${cutoffDate}`,
+          or(
+            eq(events.status, 'draft'),
+            eq(events.status, 'published'),
+            eq(events.status, 'cancelled'),
+            eq(events.status, 'suspended'),
+            eq(events.status, 'hidden'),
+            eq(events.status, 'flagged')
+          )
+        )
+      );
+
+    if (oldEvents.length === 0) {
+      return { count: 0, expiredIds: [] };
+    }
+
+    const eventIds = oldEvents.map(e => e.id);
+
+    // Update status to expired
+    await db
+      .update(events)
+      .set({
+        status: 'expired',
+        updatedAt: new Date(),
+      })
+      .where(sql`${events.id} IN (${eventIds.map(() => '?').join(',')})`, ...eventIds);
+
+    console.log(`[ADMIN] Expired ${eventIds.length} events older than ${daysOld} days`);
+    return { count: eventIds.length, expiredIds: eventIds };
   }
 
   async getAllListingsForAdmin(params: { page: number; limit: number; search: string; status: string }): Promise<any[]> {
