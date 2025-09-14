@@ -5655,6 +5655,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
+      // Debug: Log incoming request body
+      console.log("=== EVENT CREATION DEBUG ===");
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      console.log("Tags type:", typeof req.body.tags);
+      console.log("Tags value:", req.body.tags);
+      console.log("Is tags array?", Array.isArray(req.body.tags));
+      console.log("============================");
+      
       // Helper to convert dates
       const toDate = (v: any): Date => {
         if (!v || String(v).trim() === "") {

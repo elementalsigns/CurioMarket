@@ -141,6 +141,11 @@ export default function EventsPage() {
   const sortedDates = Object.keys(groupedEvents).sort();
 
   const onSubmit = (data: CreateEventFormData) => {
+    console.log("=== FRONTEND FORM SUBMISSION ===");
+    console.log("Form data:", data);
+    console.log("Form validation errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
+    console.log("=================================");
     createEventMutation.mutate(data);
   };
 
@@ -405,6 +410,55 @@ export default function EventsPage() {
                       >
                         Cancel
                       </Button>
+                      
+                      {/* Test button to bypass form validation */}
+                      <Button 
+                        type="button"
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={async () => {
+                          console.log("=== DIRECT TEST BUTTON CLICKED ===");
+                          try {
+                            const testData = {
+                              title: "Test Event",
+                              description: "This is a test event to verify the backend works",
+                              location: "Test Location", 
+                              eventDate: "2024-12-25T18:00",
+                              endDate: "",
+                              price: "",
+                              maxAttendees: "",
+                              contactEmail: "",
+                              contactPhone: "",
+                              website: "",
+                              tags: [],
+                              status: "published"
+                            };
+                            console.log("Sending test data:", testData);
+                            
+                            const response = await fetch("/api/events", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify(testData),
+                            });
+                            
+                            console.log("Response status:", response.status);
+                            const result = await response.json();
+                            console.log("Response data:", result);
+                            
+                            if (response.ok) {
+                              alert("SUCCESS! Event created successfully");
+                            } else {
+                              alert("ERROR: " + (result.error || "Unknown error"));
+                            }
+                          } catch (error) {
+                            console.error("Request failed:", error);
+                            alert("NETWORK ERROR: " + error.message);
+                          }
+                          console.log("===============================");
+                        }}
+                      >
+                        Test Create
+                      </Button>
+                      
                       <Button 
                         type="submit" 
                         disabled={createEventMutation.isPending}
