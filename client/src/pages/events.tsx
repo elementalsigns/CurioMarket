@@ -63,10 +63,7 @@ export default function EventsPage() {
         endDate: data.endDate || null,
       };
       
-      return apiRequest("/api/events", {
-        method: "POST",
-        body: eventData,
-      });
+      return apiRequest("POST", "/api/events", eventData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
