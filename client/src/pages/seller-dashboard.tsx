@@ -543,7 +543,13 @@ export default function SellerDashboard() {
                     {stats.totalReviews}
                   </p>
                 </div>
-                <div className="pointer-events-none" style={{ cursor: 'auto' }}>
+                <div
+                  className="cursor-default pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  aria-hidden="true"
+                >
                   <Users className="text-yellow-500/60" size={24} />
                 </div>
               </div>
