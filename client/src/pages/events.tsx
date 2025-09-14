@@ -29,20 +29,7 @@ const createEventSchema = z.object({
   maxAttendees: z.string().optional(),
   contactEmail: z.string().email("Invalid email address").optional().or(z.literal("")),
   contactPhone: z.string().optional(),
-  website: z.string()
-    .optional()
-    .refine((val) => {
-      if (!val || val === "") return true;
-      // Allow www.domain.com format
-      if (/^www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(val)) return true;
-      // Allow full URLs with http/https
-      try {
-        new URL(val);
-        return true;
-      } catch {
-        return false;
-      }
-    }, "Please enter a valid website URL (e.g., www.example.com or https://example.com)"),
+  website: z.string().url("Invalid website URL").optional().or(z.literal("")),
   tags: z.string().optional(),
   status: z.enum(["draft", "published"]),
 });
@@ -76,7 +63,10 @@ export default function EventsPage() {
         endDate: data.endDate || null,
       };
       
-      return apiRequest("POST", "/api/events", eventData);
+      return apiRequest("/api/events", {
+        method: "POST",
+        body: eventData,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });

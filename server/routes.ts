@@ -829,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
       // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE/PUT operations
       const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
-      const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload') || req.path.includes('/api/orders') || req.path.includes('/api/reviews') || req.path.includes('/api/events');
+      const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload') || req.path.includes('/api/orders') || req.path.includes('/api/reviews');
       const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
       const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
       
@@ -5652,33 +5652,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new event (requires authentication)
-  app.post('/api/events', requireAuth, async (req: any, res) => {
+  app.post('/api/events', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
-      // Convert date strings to Date objects
-      const { eventDate, endDate, ...restBody } = req.body;
-      
-      // Handle eventDate (required)
-      const parsedEventDate = eventDate && eventDate !== '' ? new Date(eventDate) : null;
-      if (!parsedEventDate || isNaN(parsedEventDate.getTime())) {
-        return res.status(400).json({ error: "Valid event date is required" });
-      }
-      
-      // Handle endDate (optional)
-      let parsedEndDate = null;
-      if (endDate && endDate !== '') {
-        parsedEndDate = new Date(endDate);
-        if (isNaN(parsedEndDate.getTime())) {
-          return res.status(400).json({ error: "Invalid end date" });
-        }
-      }
-      
       const eventData = {
         userId,
-        ...restBody,
-        eventDate: parsedEventDate,
-        endDate: parsedEndDate,
+        ...req.body,
         createdAt: new Date(),
         updatedAt: new Date()
       };
