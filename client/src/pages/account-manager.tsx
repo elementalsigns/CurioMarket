@@ -204,6 +204,13 @@ export default function AccountManager() {
       const uploadedImageUrl = result.successful[0].uploadURL;
       setCurrentProfileImage(uploadedImageUrl);
       form.setValue("profileImageUrl", uploadedImageUrl);
+      
+      // Automatically save the profile picture to database
+      updateProfileMutation.mutate({
+        ...form.getValues(),
+        profileImageUrl: uploadedImageUrl
+      });
+      
       toast({
         title: "Profile picture uploaded",
         description: "Your profile picture has been uploaded successfully.",
