@@ -544,7 +544,7 @@ export default function SellerDashboard() {
                   </p>
                 </div>
                 <div
-                  className="cursor-default pointer-events-auto"
+                  className="force-default-cursor pointer-events-auto"
                   onClick={(e) => e.stopPropagation()}
                   onMouseDown={(e) => e.stopPropagation()}
                   onMouseUp={(e) => e.stopPropagation()}
