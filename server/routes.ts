@@ -3432,7 +3432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== ORDER MANAGEMENT ====================
   
   // Get user orders
-  app.get('/api/orders', isAuthenticated, async (req: any, res) => {
+  app.get('/api/orders', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const orders = await storage.getUserOrders(userId);
