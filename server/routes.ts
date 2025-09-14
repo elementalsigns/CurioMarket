@@ -5654,7 +5654,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } : requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      console.log('Event creation request body:', JSON.stringify(req.body, null, 2));
       
       // Parse dates properly
       const parsedEventData = {
@@ -5667,7 +5666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxAttendees: req.body.maxAttendees ? parseInt(req.body.maxAttendees) : null,
         status: req.body.status || 'active',
         userId,
-        startDate: req.body.startDate ? new Date(req.body.startDate) : null,
+        startDate: req.body.eventDate ? new Date(req.body.eventDate) : null,
         endDate: req.body.endDate ? new Date(req.body.endDate) : null,
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : null,
         createdAt: new Date(),
