@@ -530,7 +530,7 @@ export default function SellerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="glass-effect hover:bg-muted/50 transition-colors relative">
+          <Card className="glass-effect">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -539,19 +539,8 @@ export default function SellerDashboard() {
                     {stats.totalReviews}
                   </p>
                 </div>
-                <div className="cursor-default z-10 relative">
-                  <Users className="text-yellow-500/60" size={24} />
-                </div>
+                <Users className="text-yellow-500/60" size={24} />
               </div>
-              <div 
-                className="absolute inset-0 cursor-pointer"
-                style={{ right: '60px' }}
-                onClick={() => {
-                  // Switch to reviews tab
-                  const reviewsTab = document.querySelector('[data-testid="tab-reviews"]') as HTMLElement;
-                  if (reviewsTab) reviewsTab.click();
-                }}
-              />
             </CardContent>
           </Card>
 
