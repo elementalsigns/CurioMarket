@@ -5654,9 +5654,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } : requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const eventData = {
+      console.log('Event creation request body:', JSON.stringify(req.body, null, 2));
+      
+      // Parse dates properly
+      const parsedEventData = {
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+        location: req.body.location,
+        website: req.body.website,
+        contactEmail: req.body.contactEmail,
+        maxAttendees: req.body.maxAttendees ? parseInt(req.body.maxAttendees) : null,
+        status: req.body.status || 'active',
         userId,
-        ...req.body,
         startDate: req.body.startDate ? new Date(req.body.startDate) : null,
         endDate: req.body.endDate ? new Date(req.body.endDate) : null,
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : null,
@@ -5664,7 +5674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date()
       };
       
-      const event = await storage.createEvent(eventData);
+      const event = await storage.createEvent(parsedEventData);
       res.status(201).json(event);
     } catch (error) {
       console.error("Error creating event:", error);
