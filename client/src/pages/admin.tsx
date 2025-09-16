@@ -6,7 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventsTable } from "@/components/admin/EventsTable";
 import { ExpirationManager } from "@/components/admin/ExpirationManager";
-import { Loader2, AlertTriangle, CheckCircle, Shield, Calendar, Database, Settings } from "lucide-react";
+import { UserManagement } from "@/components/admin/UserManagement";
+import { ShopManagement } from "@/components/admin/ShopManagement";
+import { ContentModeration } from "@/components/admin/ContentModeration";
+import { OrderDisputes } from "@/components/admin/OrderDisputes";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { SystemManagement } from "@/components/admin/SystemManagement";
+import { Loader2, AlertTriangle, CheckCircle, Shield, Calendar, Database, Settings, Users, Store, Flag, Scale, BarChart3, Settings2 } from "lucide-react";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -61,21 +67,85 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         </div>
         
-        <Tabs defaultValue="events" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="analytics" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <TabsTrigger value="analytics" className="flex items-center gap-2" data-testid="tab-analytics">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2" data-testid="tab-users">
+              <Users className="h-4 w-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="shops" className="flex items-center gap-2" data-testid="tab-shops">
+              <Store className="h-4 w-4" />
+              Shops
+            </TabsTrigger>
+            <TabsTrigger value="content" className="flex items-center gap-2" data-testid="tab-content">
+              <Flag className="h-4 w-4" />
+              Moderation
+            </TabsTrigger>
+            <TabsTrigger value="disputes" className="flex items-center gap-2" data-testid="tab-disputes">
+              <Scale className="h-4 w-4" />
+              Disputes
+            </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center gap-2" data-testid="tab-events">
               <Calendar className="h-4 w-4" />
-              Event Management
+              Events
             </TabsTrigger>
-            <TabsTrigger value="expiration" className="flex items-center gap-2" data-testid="tab-expiration">
-              <Settings className="h-4 w-4" />
-              Auto-Expiration
+            <TabsTrigger value="system" className="flex items-center gap-2" data-testid="tab-system">
+              <Settings2 className="h-4 w-4" />
+              System
             </TabsTrigger>
             <TabsTrigger value="database" className="flex items-center gap-2" data-testid="tab-database">
               <Database className="h-4 w-4" />
-              Database Tools
+              Database
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">User Management</h2>
+              <p className="text-muted-foreground">
+                Manage all users on the platform, track signups, and handle user moderation.
+              </p>
+            </div>
+            <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="shops" className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Shop Management</h2>
+              <p className="text-muted-foreground">
+                Manage seller shops, track performance, and handle shop verification and moderation.
+              </p>
+            </div>
+            <ShopManagement />
+          </TabsContent>
+
+          <TabsContent value="content" className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Content Moderation</h2>
+              <p className="text-muted-foreground">
+                Review flagged content, moderate user reports, and manage platform content standards.
+              </p>
+            </div>
+            <ContentModeration />
+          </TabsContent>
+
+          <TabsContent value="disputes" className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Order Disputes & Refunds</h2>
+              <p className="text-muted-foreground">
+                Handle buyer-seller disputes, process refunds, and manage order resolution.
+              </p>
+            </div>
+            <OrderDisputes />
+          </TabsContent>
 
           <TabsContent value="events" className="space-y-6">
             <div className="space-y-2">
@@ -85,16 +155,25 @@ export default function AdminPage() {
               </p>
             </div>
             <EventsTable />
+            <div className="mt-8">
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Auto-Expiration Management</h3>
+                <p className="text-muted-foreground">
+                  Configure and manage automatic expiration of old events to keep listings current.
+                </p>
+              </div>
+              <ExpirationManager />
+            </div>
           </TabsContent>
 
-          <TabsContent value="expiration" className="space-y-6">
+          <TabsContent value="system" className="space-y-6">
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold">Auto-Expiration Management</h2>
+              <h2 className="text-xl font-semibold">System Management</h2>
               <p className="text-muted-foreground">
-                Configure and manage automatic expiration of old events to keep listings current.
+                Manage platform settings, verification queue, and system administration.
               </p>
             </div>
-            <ExpirationManager />
+            <SystemManagement />
           </TabsContent>
 
           <TabsContent value="database" className="space-y-6">
