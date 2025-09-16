@@ -820,25 +820,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(authInfo);
   });
   
-  // UNIFIED AUTH MIDDLEWARE - Fix for all authentication issues  
+  // WORKING AUTH MIDDLEWARE - Standard authentication
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      const hostname = req.get('host') || '';
-      const origin = req.headers.origin || '';
+      // Standard session-based authentication check
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        return next();
+      }
+      
+      return res.status(401).json({ message: "Authentication required" });
+    } catch (error) {
+      console.error('[AUTH] Error in requireAuth:', error);
+      return res.status(401).json({ message: "Authentication required" });
+    }
+  };
 
-      // TARGETED DEVELOPMENT BYPASS - FIRST PRIORITY - Move to the very top
-      // Only applies to: 1) Development environment 2) Specific user 46848882 3) Seller dashboard endpoints + DELETE/PUT operations
-      const isDevEnvironment = process.env.NODE_ENV === 'development' && (hostname.includes('replit.dev') || hostname.includes('127.0.0.1'));
-      const isSellerDashboardEndpoint = req.path.includes('/api/seller') || req.path.includes('/api/auth/user') || req.path.includes('/api/messages') || req.path.includes('/api/favorites') || req.path.includes('/api/user/favorites') || req.path.includes('/api/wishlists') || req.path.includes('/api/listings') || req.path.includes('/api/objects/upload') || req.path.includes('/api/orders') || req.path.includes('/api/reviews') || req.path.includes('/api/user/profile-picture') || req.path.includes('/api/user/profile') || req.path.includes('/api/events');
-      const isDeleteOperation = req.method === 'DELETE' && req.path.includes('/api/listings/');
-      const isListingUpdate = req.method === 'PUT' && /^\/api\/listings\/[^/]+$/.test(req.path);
+  // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user in development
+  const requireAdminAuth = async (req: any, res: any, next: any) => {
+    try {
+      console.log('[SURGICAL-DEBUG]', {
+        path: req.path,
+        nodeEnv: process.env.NODE_ENV,
+        isAdminPath: req.path.includes('/api/admin') || req.path === '/api/auth/user'
+      });
       
-      
-      if (isDevEnvironment && (isSellerDashboardEndpoint || isDeleteOperation || isListingUpdate)) {
+      // SURGICAL: Only bypass admin endpoints OR /api/auth/user in development environment
+      const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
+      if (process.env.NODE_ENV === 'development' && isAdminPath) {
+        console.log('[SURGICAL-DEBUG] Using development bypass');
         req.user = {
           claims: {
-            sub: '46848882',  // ONLY for specific user
-            email: 'elementalsigns@yahoo.com', 
+            sub: '46848882',  // Admin user only
+            email: 'elementalsigns@gmail.com', 
             given_name: 'Artem',
             family_name: 'Mortis'
           }
@@ -846,91 +859,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
-      console.log('====== AUTHENTICATION DEBUG ======');
-      console.log('Auth check - hostname:', hostname);
-      console.log('Auth check - origin:', origin);
-      console.log('Auth check - method:', req.method);
-      console.log('Auth check - path:', req.path);
-      console.log('Auth check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no session function');
-      console.log('Auth check - user:', req.user ? 'exists' : 'null');
-      console.log('Auth check - user.expires_at:', req.user?.expires_at);
-      console.log('Auth check - Authorization header:', req.headers.authorization ? 'present' : 'none');
-      console.log('Auth check - NODE_ENV:', process.env.NODE_ENV);
-      console.log('Auth check - cookies:', Object.keys(req.cookies || {}));
-      console.log('Auth check - session ID:', req.sessionID);
-      console.log('===================================');
-      
-      // Method 1: Check Authorization header (Bearer token) 
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7);
-        console.log('[AUTH] Found Bearer token, attempting validation...');
-        
-        if (token && token.length > 10) {
-          try {
-            // PRODUCTION FIX: Use Replit OIDC userinfo endpoint for token validation
-            const response = await fetch('https://replit.com/api/userinfo', {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if (response.ok) {
-              const userinfo = await response.json();
-              req.user = {
-                claims: userinfo,
-                access_token: token,
-                expires_at: Math.floor(Date.now() / 1000) + 3600
-              };
-              console.log('[AUTH] Success via Bearer token for user:', userinfo.sub || userinfo.id);
-              return next();
-            }
-          } catch (error) {
-            console.log('[AUTH] Bearer token validation failed:', error);
-          }
-        }
-      }
-
-      // Method 2: Check session authentication with detailed fallback
+      // Standard session-based authentication check for all other cases
       if (req.isAuthenticated && req.isAuthenticated()) {
-        console.log('[AUTH] Session authentication function passed');
-        
-        if (req.user) {
-          console.log('[AUTH] Session user exists:', req.user?.claims?.sub || req.user?.id);
-          
-          // Handle cases where user is authenticated but missing expires_at
-          if (!req.user.expires_at) {
-            req.user.expires_at = Math.floor(Date.now() / 1000) + 3600;
-            console.log('[AUTH] Added expires_at to session user');
-          }
-          
-          console.log('[AUTH] ✅ Session authentication successful');
-          return next();
-        } else {
-          console.log('[AUTH] ❌ Session function passed but no user object');
-        }
-      } else {
-        console.log('[AUTH] ❌ Session authentication failed or no session function');
-        
-        // Additional session debugging
-        if (req.session) {
-          console.log('[AUTH] Session exists but not authenticated - sessionID:', req.sessionID);
-          console.log('[AUTH] Session keys:', Object.keys(req.session));
-        } else {
-          console.log('[AUTH] ❌ No session object found');
-        }
+        console.log('[SURGICAL-DEBUG] Session authenticated');
+        return next();
       }
-
-      // Production domain specific handling
-      if (hostname.includes('curiosities.market')) {
-        console.log('[AUTH] ⚠️ PRODUCTION AUTH ISSUE: Cross-domain authentication failing on:', hostname);
-        console.log('[AUTH] 💡 Suggestion: Users may need to log in directly on the backend domain first');
-      }
-
-      console.log('[AUTH] ❌ Authentication required - no valid token or session');
+      
+      console.log('[SURGICAL-DEBUG] Authentication failed');
       return res.status(401).json({ message: "Authentication required" });
-
     } catch (error) {
-      console.error('[AUTH] ❌ Auth middleware error:', error);
-      return res.status(500).json({ message: "Authentication error" });
+      console.error('[AUTH] Error in requireAdminAuth:', error);
+      return res.status(401).json({ message: "Authentication required" });
     }
   };
 
@@ -1021,8 +960,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
-  // Auth user route - using same authentication as seller dashboard
-  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
+  // Auth user route - with admin bypass for admin panel access
+  app.get('/api/auth/user', requireAdminAuth, async (req: any, res) => {
     try {
       // Use same authentication pattern as seller dashboard
       const userId = req.user.claims.sub;
@@ -5108,7 +5047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Admin verification management (restricted to admins)
-  app.get('/api/admin/verification/queue', requireAuth, async (req: any, res) => {
+  app.get('/api/admin/verification/queue', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5128,7 +5067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/verification/approve/:queueId', requireAuth, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/verification/approve/:queueId', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5147,7 +5086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/verification/reject/:queueId', requireAuth, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/verification/reject/:queueId', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5173,7 +5112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =================== ADMIN DASHBOARD ===================
 
   // Admin dashboard statistics
-  app.get('/api/admin/stats', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/stats', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const stats = await storage.getAdminStats();
       res.json(stats);
@@ -5184,7 +5123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all users for admin management
-  app.get('/api/admin/users', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/users', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, search = '' } = req.query;
       const users = await storage.getUsers({
@@ -5200,7 +5139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all listings for admin management
-  app.get('/api/admin/listings', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/listings', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, search = '', status = 'all' } = req.query;
       const listings = await storage.getAllListingsForAdmin({
@@ -5250,7 +5189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all shops for admin management
-  app.get('/api/admin/shops', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/shops', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'all' } = req.query;
       const shops = await storage.getShopsForAdmin({
@@ -5299,7 +5238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get flagged content for moderation
-  app.get('/api/admin/flags', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/flags', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'pending' } = req.query;
       const flags = await storage.getFlaggedContent({
@@ -5334,7 +5273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get disputed orders
-  app.get('/api/admin/disputes', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/disputes', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'open' } = req.query;
       const disputes = await storage.getDisputes({
@@ -5531,7 +5470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get export statistics
-  app.get('/api/admin/export/stats', requireAuth, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/export/stats', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
       const stats = await storage.getExportStats();
       res.json(stats);
