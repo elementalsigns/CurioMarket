@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,14 +8,24 @@ import CategoryGrid from "@/components/category-grid";
 import ProductCard from "@/components/product-card";
 import { ChevronDown, Star, Shield, Scale, CreditCard, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const { data: featuredListings = [] } = useQuery({
     queryKey: ["/api/listings/featured"],
   });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setLocation(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <div className="page-layout bg-gradient-to-br from-black via-black to-zinc-900">
@@ -50,23 +60,26 @@ export default function Landing() {
               <p className="text-foreground/80 mb-8 text-[17px]">Find rare specimens, curiosities, and artifacts from collectors who share your passion </p>
 
               {/* Search Bar */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="flex-1">
                   <Input 
                     type="text" 
                     placeholder="Search for oddities and curiosities..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-12 text-base bg-input border-border rounded-full px-6"
                     data-testid="hero-search"
                   />
                 </div>
                 <Button 
+                  type="submit"
                   size="lg" 
                   className="bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow"
                   data-testid="button-search"
                 >
                   Search
                 </Button>
-              </div>
+              </form>
 
               {/* Popular Tags */}
               <div className="flex flex-wrap items-center gap-2 mb-8">
