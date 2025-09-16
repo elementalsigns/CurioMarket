@@ -5093,8 +5093,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin middleware to check for admin role
+  const requireAdmin: RequestHandler = async (req: any, res, next) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ error: "Failed to verify admin status" });
+    }
+  };
+
   // Admin verification management (restricted to admins)
-  app.get('/api/admin/verification/queue', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/verification/queue', requireAuth, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5114,7 +5128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/verification/approve/:queueId', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/verification/approve/:queueId', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5133,7 +5147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/verification/reject/:queueId', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/verification/reject/:queueId', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (!user || user.role !== 'admin') {
@@ -5158,22 +5172,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // =================== ADMIN DASHBOARD ===================
 
-  // Admin middleware to check for admin role
-  const requireAdmin: RequestHandler = async (req: any, res, next) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ error: "Admin access required" });
-      }
-      next();
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      res.status(500).json({ error: "Failed to verify admin status" });
-    }
-  };
-
   // Admin dashboard statistics
-  app.get('/api/admin/stats', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/stats', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const stats = await storage.getAdminStats();
       res.json(stats);
@@ -5184,7 +5184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all users for admin management
-  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/users', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, search = '' } = req.query;
       const users = await storage.getUsers({
@@ -5200,7 +5200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all listings for admin management
-  app.get('/api/admin/listings', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/listings', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, search = '', status = 'all' } = req.query;
       const listings = await storage.getAllListingsForAdmin({
@@ -5217,7 +5217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ban a user
-  app.post('/api/admin/users/:userId/ban', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/ban', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -5236,7 +5236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Unban a user
-  app.post('/api/admin/users/:userId/unban', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/unban', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const adminId = req.user.claims.sub;
@@ -5250,7 +5250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all shops for admin management
-  app.get('/api/admin/shops', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/shops', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'all' } = req.query;
       const shops = await storage.getShopsForAdmin({
@@ -5266,7 +5266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Suspend a shop
-  app.post('/api/admin/shops/:shopId/suspend', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/shops/:shopId/suspend', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { shopId } = req.params;
       const { reason } = req.body;
@@ -5285,7 +5285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reactivate a shop
-  app.post('/api/admin/shops/:shopId/reactivate', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/shops/:shopId/reactivate', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { shopId } = req.params;
       const adminId = req.user.claims.sub;
@@ -5299,7 +5299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get flagged content for moderation
-  app.get('/api/admin/flags', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/flags', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'pending' } = req.query;
       const flags = await storage.getFlaggedContent({
@@ -5315,7 +5315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Moderate flagged content
-  app.post('/api/admin/flags/:flagId/moderate', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/flags/:flagId/moderate', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { flagId } = req.params;
       const { action, notes } = req.body;
@@ -5334,7 +5334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get disputed orders
-  app.get('/api/admin/disputes', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/disputes', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 50, status = 'open' } = req.query;
       const disputes = await storage.getDisputes({
@@ -5350,7 +5350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Resolve a dispute
-  app.post('/api/admin/disputes/:disputeId/resolve', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/disputes/:disputeId/resolve', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { disputeId } = req.params;
       const { resolution, notes } = req.body;
@@ -5369,7 +5369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Process refund
-  app.post('/api/admin/orders/:orderId/refund', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/orders/:orderId/refund', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { orderId } = req.params;
       const { amount, reason } = req.body;
@@ -5390,7 +5390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Get admin activity log
-  app.get('/api/admin/activity', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/activity', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { page = 1, limit = 100 } = req.query;
       const activities = await storage.getAdminActivityLog({
@@ -5405,7 +5405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Platform settings management
-  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/settings', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const settings = await storage.getPlatformSettings();
       res.json(settings);
@@ -5415,7 +5415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.put('/api/admin/settings', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const adminId = req.user.claims.sub;
       const updatedSettings = await storage.updatePlatformSettings(req.body, adminId);
@@ -5427,7 +5427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export product data for advertising platforms
-  app.get('/api/admin/export/products', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/export/products', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { format = 'csv' } = req.query;
       const listings = await storage.getListingsForExport();
@@ -5531,7 +5531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get export statistics
-  app.get('/api/admin/export/stats', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/export/stats', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const stats = await storage.getExportStats();
       res.json(stats);
@@ -5544,7 +5544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =================== ADMIN EVENT MANAGEMENT ===================
   
   // Get all events for admin management with search, filter, and pagination
-  app.get('/api/admin/events', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/events', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { search, status, page = 1, limit = 100 } = req.query;
       const events = await storage.getAllEventsForAdmin({
@@ -5561,7 +5561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin delete any event (override user permissions)
-  app.delete('/api/admin/events/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.delete('/api/admin/events/:id', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const eventId = req.params.id;
       const adminId = req.user.claims.sub;
@@ -5581,7 +5581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin change event status (suspend/hide/flag/etc)
-  app.put('/api/admin/events/:id/status', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.put('/api/admin/events/:id/status', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const eventId = req.params.id;
       const { status } = req.body;
@@ -5614,7 +5614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auto-expire events older than specified days (default 30)
-  app.post('/api/admin/events/expire', isAuthenticated, requireAdmin, async (req: any, res) => {
+  app.post('/api/admin/events/expire', requireAuth, requireAdmin, async (req: any, res) => {
     try {
       const { daysOld = 30 } = req.body;
       const adminId = req.user.claims.sub;
