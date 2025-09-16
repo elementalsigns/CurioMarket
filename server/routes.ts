@@ -840,8 +840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // SURGICAL: Only bypass admin endpoints OR /api/auth/user in development environment
       const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
-      // TEMPORARILY DISABLED FOR SEARCH TESTING
-      if (false && process.env.NODE_ENV === 'development' && isAdminPath) {
+      if (process.env.NODE_ENV === 'development' && isAdminPath) {
         req.user = {
           claims: {
             sub: '46848882',  // Admin user only
