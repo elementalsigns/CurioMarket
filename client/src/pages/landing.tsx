@@ -7,18 +7,63 @@ import Footer from "@/components/layout/footer";
 import CategoryGrid from "@/components/category-grid";
 import ProductCard from "@/components/product-card";
 import { ChevronDown, Star, Shield, Scale, CreditCard, ArrowRight } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 
 
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: featuredListings = [] } = useQuery({
     queryKey: ["/api/listings/featured"],
   });
+
+  // Fetch user favorites (silently fail if not authenticated)
+  const { data: userFavorites = [] } = useQuery({
+    queryKey: ["/api/favorites"],
+    retry: false, // Don't retry if auth fails
+    refetchOnWindowFocus: false, // Prevent constant refetching
+  });
+
+  // Toggle favorites mutation
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ listingId, isFavorited }: { listingId: string; isFavorited: boolean }) => {
+      if (isFavorited) {
+        return apiRequest("DELETE", `/api/favorites/${listingId}`);
+      } else {
+        return apiRequest("POST", "/api/favorites", { listingId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/favorites"] });
+    },
+    onError: (error: any) => {
+      if (error.message?.includes('Authentication required')) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to add items to favorites.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update favorites. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleToggleFavorite = (listingId: string, isFavorited: boolean) => {
+    toggleFavoriteMutation.mutate({ listingId, isFavorited });
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,9 +242,17 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="featured-grid">
-            {Array.isArray(featuredListings) && featuredListings.map((listing: any) => (
-              <ProductCard key={listing.id} listing={listing} />
-            ))}
+            {Array.isArray(featuredListings) && featuredListings.map((listing: any) => {
+              const isFavorited = Array.isArray(userFavorites) && userFavorites.includes(listing.id);
+              return (
+                <ProductCard 
+                  key={listing.id} 
+                  listing={listing}
+                  isFavorited={isFavorited}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
