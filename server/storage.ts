@@ -380,7 +380,8 @@ export class DatabaseStorage implements IStorage {
         or(
           ilike(listings.title, `%${filters.search}%`),
           ilike(listings.description, `%${filters.search}%`),
-          ilike(listings.speciesOrMaterial, `%${filters.search}%`)
+          ilike(listings.speciesOrMaterial, `%${filters.search}%`),
+          sql`${`%${filters.search}%`} ILIKE ANY(${listings.tags})`
         )
       );
     }
