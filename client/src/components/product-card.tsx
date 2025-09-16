@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import WishlistSelector from "./wishlist-selector";
 
 // Convert Google Cloud Storage URL to local object URL
 function convertImageUrl(url: string): string {
@@ -46,6 +47,23 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showWishlistSelector, setShowWishlistSelector] = useState(false);
+
+  // Fetch user's wishlists to determine behavior
+  const { data: wishlists = [] } = useQuery({
+    queryKey: ["/api/wishlists"],
+    retry: false, // Don't retry if auth fails
+    refetchOnWindowFocus: false,
+  }) as { data: any[] };
+
+  // Check if user is favorited in general favorites
+  const { data: userFavorites = [] } = useQuery({
+    queryKey: ["/api/favorites"],
+    retry: false, // Don't retry if auth fails  
+    refetchOnWindowFocus: false,
+  }) as { data: string[] };
+
+  const isInGeneralFavorites = userFavorites.includes(listing.id);
 
   const addToCartMutation = useMutation({
     mutationFn: ({ listingId, quantity }: { listingId: string; quantity: number }) => 
@@ -114,11 +132,31 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
     e.preventDefault();
     e.stopPropagation();
     
+    // If this is being used with custom toggle handler (like in account manager), use that
     if (onToggleFavorite) {
       onToggleFavorite(listing.id, isFavorited);
-    } else {
-      toggleFavoriteMutation.mutate({ listingId: listing.id, isFavorited });
+      return;
     }
+
+    // If the item is already favorited, remove it from favorites directly
+    if (isFavorited || isInGeneralFavorites) {
+      toggleFavoriteMutation.mutate({ listingId: listing.id, isFavorited: true });
+      return;
+    }
+
+    // If user has wishlists, show selector dialog
+    if (wishlists.length > 0) {
+      setShowWishlistSelector(true);
+    } else {
+      // No wishlists exist, add to general favorites directly
+      toggleFavoriteMutation.mutate({ listingId: listing.id, isFavorited: false });
+    }
+  };
+
+  const handleWishlistSuccess = () => {
+    // Refresh favorites and wishlists data
+    queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/wishlists"] });
   };
 
   const handleRemoveFavorite = (e: React.MouseEvent) => {
@@ -169,7 +207,7 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
                     data-testid={`button-toggle-favorite-${listing.id}`}
                   >
                     <Heart className={`w-4 h-4 ${
-                      isFavorited 
+                      isFavorited || isInGeneralFavorites
                         ? "fill-current text-red-600" 
                         : "text-muted-foreground hover:text-red-600"
                     }`} />
@@ -225,6 +263,14 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
           </div>
         </CardContent>
       </Card>
+      
+      {/* Wishlist Selector Dialog */}
+      <WishlistSelector
+        open={showWishlistSelector}
+        onOpenChange={setShowWishlistSelector}
+        listingId={listing.id}
+        onSuccess={handleWishlistSuccess}
+      />
     </Link>
   );
 }

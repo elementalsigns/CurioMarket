@@ -97,8 +97,15 @@ export default function AccountManager() {
     refetchInterval: 30000, // Refresh every 30 seconds
   }) as { data: { count: number } | undefined };
 
-  const { data: favorites } = useQuery({
-    queryKey: ["/api/user/favorites"],
+  // Get favorites with full listing data
+  const { data: favoriteListings } = useQuery({
+    queryKey: ["/api/favorites/listings"],
+    enabled: !!user,
+  });
+
+  // Keep original favorites query for the counter (backwards compatibility)
+  const { data: favoriteIds } = useQuery({
+    queryKey: ["/api/favorites"],
     enabled: !!user,
   });
 
@@ -192,6 +199,52 @@ export default function AccountManager() {
       });
     },
   });
+
+  // Toggle favorites mutation
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ listingId, isFavorited }: { listingId: string; isFavorited: boolean }) => {
+      if (isFavorited) {
+        return apiRequest("DELETE", `/api/favorites/${listingId}`);
+      } else {
+        return apiRequest("POST", "/api/favorites", { listingId });
+      }
+    },
+    onSuccess: () => {
+      // Invalidate all favorites-related queries
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/favorites"] });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      if (error.message?.includes('Authentication required')) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to add items to favorites.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update favorites. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleToggleFavorite = (listingId: string, isFavorited: boolean) => {
+    toggleFavoriteMutation.mutate({ listingId, isFavorited });
+  };
 
   // Profile picture upload handlers
   const handleGetProfilePictureUploadUrl = async () => {
@@ -546,7 +599,7 @@ export default function AccountManager() {
                               <Heart className="h-5 w-5 text-muted-foreground" />
                               <div>
                                 <p className="text-sm font-medium">Favorites</p>
-                                <p className="text-2xl font-bold">{(favorites as any)?.length || 0}</p>
+                                <p className="text-2xl font-bold">{(favoriteIds as any)?.length || 0}</p>
                               </div>
                             </div>
                           </CardContent>
@@ -731,10 +784,15 @@ export default function AccountManager() {
               {activeTab === "favorites" && (
                 <div data-testid="favorites-content">
                   <h2 className="text-xl font-bold mb-4">Your Favorites</h2>
-                  {favorites && (favorites as any).length > 0 ? (
+                  {favoriteListings && (favoriteListings as any).length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {(favorites as any).map((item: any) => (
-                        <ProductCard key={item.id} listing={item} />
+                      {(favoriteListings as any).map((listing: any) => (
+                        <ProductCard 
+                          key={listing.id} 
+                          listing={listing} 
+                          isFavorited={true}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
                       ))}
                     </div>
                   ) : (
