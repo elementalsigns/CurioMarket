@@ -1967,19 +1967,21 @@ export class DatabaseStorage implements IStorage {
     // Get real users from database
     const offset = (params.page - 1) * params.limit;
     
-    let queryBuilder = db.select().from(users);
-    
     if (params.search) {
-      queryBuilder = queryBuilder.where(
-        or(
-          like(users.email, `%${params.search}%`),
-          like(users.firstName, `%${params.search}%`),
-          like(users.lastName, `%${params.search}%`)
+      const realUsers = await db.select().from(users)
+        .where(
+          or(
+            like(users.email, `%${params.search}%`),
+            like(users.firstName, `%${params.search}%`),
+            like(users.lastName, `%${params.search}%`)
+          )
         )
-      );
+        .limit(params.limit)
+        .offset(offset);
+      return realUsers;
     }
     
-    const realUsers = await queryBuilder.limit(params.limit).offset(offset);
+    const realUsers = await db.select().from(users).limit(params.limit).offset(offset);
     return realUsers;
   }
 
@@ -2347,7 +2349,7 @@ export class DatabaseStorage implements IStorage {
         status: 'expired',
         updatedAt: new Date(),
       })
-      .where(sql`${events.id} IN (${eventIds.map(() => '?').join(',')})`, ...eventIds);
+      .where(sql`${events.id} = ANY(${eventIds})`);
 
     console.log(`[ADMIN] Expired ${eventIds.length} events older than ${daysOld} days`);
     return { count: eventIds.length, expiredIds: eventIds };
