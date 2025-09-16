@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, or, sql, count, avg } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, like, or, sql, count, avg } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -1945,49 +1945,42 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAdminStats(): Promise<any> {
-    // In a real implementation, this would aggregate actual data from the database
+    // Get real data from database
+    const [totalUsers] = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const [totalSellers] = await db.select({ count: sql<number>`count(*)` }).from(sellers);
+    const [totalListings] = await db.select({ count: sql<number>`count(*)` }).from(listings);
+    const [totalOrders] = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    
     return {
-      totalUsers: 1250,
-      totalSellers: 89,
-      totalListings: 542,
-      totalOrders: 2143,
-      pendingVerifications: 7,
-      disputedOrders: 3,
-      flaggedContent: 2,
-      totalRevenue: 45890.50
+      totalUsers: totalUsers.count,
+      totalSellers: totalSellers.count,
+      totalListings: totalListings.count,
+      totalOrders: totalOrders.count,
+      pendingVerifications: 0, // No verification queue in current schema
+      disputedOrders: 0, // No disputes in current schema
+      flaggedContent: 0, // No flags in current schema
+      totalRevenue: 0 // Would need order total calculation
     };
   }
 
   async getUsers(params: { page: number; limit: number; search: string }): Promise<User[]> {
-    // Mock data for demonstration
-    return [
-      {
-        id: "user1",
-        email: "john.doe@example.com",
-        firstName: "John",
-        lastName: "Doe",
-        role: "buyer",
-        accountStatus: "active",
-        emailVerified: true,
-        phoneVerified: false,
-        verificationLevel: 1,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      } as User,
-      {
-        id: "user2", 
-        email: "jane.seller@example.com",
-        firstName: "Jane",
-        lastName: "Seller",
-        role: "seller",
-        accountStatus: "active",
-        emailVerified: true,
-        phoneVerified: true,
-        verificationLevel: 2,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      } as User
-    ];
+    // Get real users from database
+    const offset = (params.page - 1) * params.limit;
+    
+    let queryBuilder = db.select().from(users);
+    
+    if (params.search) {
+      queryBuilder = queryBuilder.where(
+        or(
+          like(users.email, `%${params.search}%`),
+          like(users.firstName, `%${params.search}%`),
+          like(users.lastName, `%${params.search}%`)
+        )
+      );
+    }
+    
+    const realUsers = await queryBuilder.limit(params.limit).offset(offset);
+    return realUsers;
   }
 
   async banUser(userId: string, adminId: string, reason: string): Promise<void> {
@@ -2009,24 +2002,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShopsForAdmin(params: { page: number; limit: number; status: string }): Promise<any[]> {
-    return [
-      {
-        id: "shop1",
-        shopName: "Gothic Curiosities",
-        ownerName: "Dark Collector",
-        totalListings: 45,
-        verificationStatus: "approved",
-        isActive: true
-      },
-      {
-        id: "shop2",
-        shopName: "Vintage Oddities",
-        ownerName: "Antique Hunter",
-        totalListings: 23,
-        verificationStatus: "pending",
-        isActive: true
-      }
-    ];
+    // Get real shops from database with owner information
+    const offset = (params.page - 1) * params.limit;
+    
+    const shopsWithOwners = await db
+      .select({
+        id: sellers.id,
+        shopName: sellers.shopName,
+        ownerName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
+        totalListings: sql<number>`(SELECT COUNT(*) FROM ${listings} WHERE ${listings.sellerId} = ${sellers.id})`,
+        verificationStatus: sql<string>`'approved'`, // Default status
+        isActive: sellers.isActive
+      })
+      .from(sellers)
+      .leftJoin(users, eq(sellers.userId, users.id))
+      .limit(params.limit)
+      .offset(offset);
+    
+    return shopsWithOwners;
   }
 
   async suspendShop(shopId: string, adminId: string, reason: string): Promise<void> {

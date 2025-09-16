@@ -838,16 +838,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user in development
   const requireAdminAuth = async (req: any, res: any, next: any) => {
     try {
-      console.log('[SURGICAL-DEBUG]', {
-        path: req.path,
-        nodeEnv: process.env.NODE_ENV,
-        isAdminPath: req.path.includes('/api/admin') || req.path === '/api/auth/user'
-      });
-      
       // SURGICAL: Only bypass admin endpoints OR /api/auth/user in development environment
       const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
       if (process.env.NODE_ENV === 'development' && isAdminPath) {
-        console.log('[SURGICAL-DEBUG] Using development bypass');
         req.user = {
           claims: {
             sub: '46848882',  // Admin user only
@@ -861,11 +854,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Standard session-based authentication check for all other cases
       if (req.isAuthenticated && req.isAuthenticated()) {
-        console.log('[SURGICAL-DEBUG] Session authenticated');
         return next();
       }
       
-      console.log('[SURGICAL-DEBUG] Authentication failed');
       return res.status(401).json({ message: "Authentication required" });
     } catch (error) {
       console.error('[AUTH] Error in requireAdminAuth:', error);
