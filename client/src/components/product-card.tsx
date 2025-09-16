@@ -37,10 +37,12 @@ interface ProductCardProps {
     seller?: { shopName: string };
     category?: { name: string };
   };
+  isFavorited?: boolean;
+  onToggleFavorite?: (listingId: string, isFavorited: boolean) => void;
   onRemoveFavorite?: () => void;
 }
 
-export default function ProductCard({ listing, onRemoveFavorite }: ProductCardProps) {
+export default function ProductCard({ listing, isFavorited = false, onToggleFavorite, onRemoveFavorite }: ProductCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -66,11 +68,57 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
     },
   });
 
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ listingId, isFavorited }: { listingId: string; isFavorited: boolean }) => {
+      if (isFavorited) {
+        return apiRequest("DELETE", `/api/favorites/${listingId}`);
+      } else {
+        return apiRequest("POST", "/api/favorites", { listingId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/favorites"] });
+      toast({
+        title: isFavorited ? "Removed from favorites" : "Added to favorites",
+        description: isFavorited 
+          ? "Item has been removed from your favorites." 
+          : "Item has been added to your favorites.",
+      });
+    },
+    onError: (error: any) => {
+      if (error.message?.includes('Authentication required')) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to add items to favorites.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update favorites. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsAddingToCart(true);
     addToCartMutation.mutate({ listingId: listing.id, quantity: 1 });
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onToggleFavorite) {
+      onToggleFavorite(listing.id, isFavorited);
+    } else {
+      toggleFavoriteMutation.mutate({ listingId: listing.id, isFavorited });
+    }
   };
 
   const handleRemoveFavorite = (e: React.MouseEvent) => {
@@ -101,7 +149,7 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
             {/* Overlay with actions */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200">
               <div className="absolute top-2 right-2 space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                {onRemoveFavorite && (
+                {onRemoveFavorite ? (
                   <Button
                     size="icon"
                     variant="secondary"
@@ -110,6 +158,21 @@ export default function ProductCard({ listing, onRemoveFavorite }: ProductCardPr
                     data-testid={`button-remove-favorite-${listing.id}`}
                   >
                     <Heart className="w-4 h-4 fill-current text-red-600" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="w-8 h-8 rounded-full"
+                    onClick={handleToggleFavorite}
+                    disabled={toggleFavoriteMutation.isPending}
+                    data-testid={`button-toggle-favorite-${listing.id}`}
+                  >
+                    <Heart className={`w-4 h-4 ${
+                      isFavorited 
+                        ? "fill-current text-red-600" 
+                        : "text-muted-foreground hover:text-red-600"
+                    }`} />
                   </Button>
                 )}
                 <Button
