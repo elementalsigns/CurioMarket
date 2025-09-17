@@ -262,6 +262,12 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Always call this hook - it's used as fallback when analytics API fails
+  const { data: sellerStats } = useQuery({
+    queryKey: ['/api/seller/stats'],
+    enabled: Boolean(sellerId),
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -286,16 +292,102 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
   }
 
   if (!analytics || typeof analytics !== 'object') {
+    // Use seller stats data for real analytics examples instead of placeholder
+
+    if (!sellerStats) {
+      return (
+        <Card className="glass-effect">
+          <CardContent className="p-8 text-center">
+            <TrendingUp className="mx-auto mb-4 text-gothic-red" size={48} />
+            <h3 className="text-xl font-serif font-bold mb-2">Loading Analytics...</h3>
+            <p className="text-foreground/70">
+              Gathering your shop performance data.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Show real analytics based on seller stats data
     return (
-      <Card className="glass-effect">
-        <CardContent className="p-8 text-center">
-          <TrendingUp className="mx-auto mb-4 text-gothic-red" size={48} />
-          <h3 className="text-xl font-serif font-bold mb-2">Analytics Coming Soon</h3>
-          <p className="text-foreground/70">
-            Your detailed analytics will appear here once you have more activity.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6" data-testid="analytics-overview">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-serif font-bold">Analytics Overview</h2>
+          <p className="text-sm text-foreground/60">Real-time data</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Sales</p>
+                  <p className="text-2xl font-bold text-green-500" data-testid="analytics-sales">
+                    {sellerStats.totalSales || 0}
+                  </p>
+                  <p className="text-xs text-green-500/70">
+                    Completed orders
+                  </p>
+                </div>
+                <DollarSign className="text-green-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Avg Rating</p>
+                  <p className="text-2xl font-bold text-yellow-500" data-testid="analytics-rating">
+                    {sellerStats.averageRating ? sellerStats.averageRating.toFixed(1) : '0.0'}
+                  </p>
+                  <p className="text-xs text-yellow-500/70">
+                    {sellerStats.totalReviews || 0} reviews
+                  </p>
+                </div>
+                <Star className="text-yellow-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Customer Satisfaction</p>
+                  <p className="text-2xl font-bold text-purple-500" data-testid="analytics-satisfaction">
+                    {sellerStats.averageRating >= 4.5 ? 'Excellent' : 
+                     sellerStats.averageRating >= 4.0 ? 'Great' : 
+                     sellerStats.averageRating >= 3.0 ? 'Good' : 'Building'}
+                  </p>
+                  <p className="text-xs text-purple-500/70">
+                    Based on reviews
+                  </p>
+                </div>
+                <TrendingUp className="text-purple-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Performance</p>
+                  <p className="text-2xl font-bold text-orange-500" data-testid="analytics-performance">
+                    {sellerStats.totalSales > 0 ? 'Active' : 'Starting'}
+                  </p>
+                  <p className="text-xs text-orange-500/70">
+                    Shop status
+                  </p>
+                </div>
+                <Eye className="text-orange-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 

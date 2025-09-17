@@ -981,11 +981,81 @@ export default function AccountManager() {
               {activeTab === "shop-stats" && (
                 <div data-testid="shop-stats">
                   <h2 className="text-xl font-bold mb-4">Shop Statistics</h2>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Statistics Coming Soon</h3>
-                      <p className="text-muted-foreground">Detailed analytics and insights will be available here.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <Card className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-foreground/60 text-sm">Total Sales</p>
+                            <p className="text-2xl font-bold text-green-500" data-testid="stats-total-sales">
+                              {sellerStats?.totalSales || 0}
+                            </p>
+                            <p className="text-xs text-green-500/70">
+                              Completed orders
+                            </p>
+                          </div>
+                          <DollarSign className="text-green-500" size={24} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-foreground/60 text-sm">Average Rating</p>
+                            <p className="text-2xl font-bold text-yellow-500" data-testid="stats-avg-rating">
+                              {sellerStats?.averageRating ? sellerStats.averageRating.toFixed(1) : '0.0'}
+                            </p>
+                            <p className="text-xs text-yellow-500/70">
+                              {sellerStats?.totalReviews || 0} reviews
+                            </p>
+                          </div>
+                          <Star className="text-yellow-500" size={24} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-foreground/60 text-sm">Active Listings</p>
+                            <p className="text-2xl font-bold text-blue-500" data-testid="stats-active-listings">
+                              {sellerData?.listings?.length || 0}
+                            </p>
+                            <p className="text-xs text-blue-500/70">
+                              Items for sale
+                            </p>
+                          </div>
+                          <Package className="text-blue-500" size={24} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card className="glass-effect">
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <BarChart3 className="text-gothic-red" size={24} />
+                        <h3 className="text-lg font-serif font-bold">Shop Performance</h3>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-foreground/70">Customer Satisfaction</span>
+                          <span className="font-semibold">
+                            {sellerStats?.averageRating ? 'Excellent' : 'Building'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-foreground/70">Shop Status</span>
+                          <span className="font-semibold text-green-500">Active</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-foreground/70">Total Reviews</span>
+                          <span className="font-semibold">{sellerStats?.totalReviews || 0}</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
