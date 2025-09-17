@@ -23,6 +23,98 @@ const PLATFORM_FEE_PERCENT = parseFloat(process.env.PLATFORM_FEE_PERCENT || "2.6
 
 const objectStorageService = new ObjectStorageService();
 
+// ===== CAPABILITY-BASED AUTHORIZATION SYSTEM =====
+
+/**
+ * Check if a user has admin role
+ */
+function isAdmin(user: User): boolean {
+  return user.role === 'admin';
+}
+
+/**
+ * Check if a user has seller access (seller role, admin role, or valid seller profile)
+ * This implements capability-based authorization for seller endpoints
+ */
+async function hasSellerAccess(user: User): Promise<boolean> {
+  // Admin users always have seller access
+  if (user.role === 'admin') {
+    console.log(`[CAPABILITY] Admin user ${user.id} granted seller access`);
+    return true;
+  }
+  
+  // Direct seller role
+  if (user.role === 'seller') {
+    console.log(`[CAPABILITY] Seller user ${user.id} granted seller access`);
+    return true;
+  }
+  
+  // Check if user has active seller profile
+  try {
+    const sellerProfile = await storage.getSellerByUserId(user.id);
+    if (sellerProfile && sellerProfile.isActive) {
+      console.log(`[CAPABILITY] User ${user.id} has active seller profile, granted seller access`);
+      return true;
+    }
+  } catch (error) {
+    console.error(`[CAPABILITY] Error checking seller profile for user ${user.id}:`, error);
+  }
+  
+  // Check for active Stripe subscription (handles edge cases)
+  if (user.stripeSubscriptionId && stripe) {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      const eligibleStatuses = ['active', 'trialing', 'past_due'];
+      if (eligibleStatuses.includes(subscription.status)) {
+        console.log(`[CAPABILITY] User ${user.id} has active subscription, granted seller access`);
+        return true;
+      }
+    } catch (error) {
+      console.log(`[CAPABILITY] Could not verify subscription for user ${user.id}:`, error);
+    }
+  }
+  
+  console.log(`[CAPABILITY] User ${user.id} denied seller access`);
+  return false;
+}
+
+/**
+ * Middleware that requires seller access using capability-based authorization
+ * Replaces strict role === 'seller' checks to support admin users
+ */
+const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
+  try {
+    // First ensure user is authenticated
+    if (!req.user || !req.user.claims || !req.user.claims.sub) {
+      console.log('[CAPABILITY] No authenticated user found for seller access');
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    
+    if (!user) {
+      console.log(`[CAPABILITY] User ${userId} not found in database`);
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Check seller access using capability system
+    const hasAccess = await hasSellerAccess(user);
+    if (!hasAccess) {
+      console.log(`[CAPABILITY] User ${userId} denied seller access`);
+      return res.status(403).json({ message: "Seller access required" });
+    }
+    
+    console.log(`[CAPABILITY] User ${userId} granted seller access`);
+    return next();
+  } catch (error) {
+    console.error('[CAPABILITY] Error in requireSellerAccess middleware:', error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ===== END CAPABILITY-BASED AUTHORIZATION SYSTEM =====
+
 // Helper function to create seller subscription price if it doesn't exist
 async function createSellerSubscriptionPrice(stripe: Stripe): Promise<string> {
   try {
@@ -1540,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[AUTH-USER] Fetching user data for ID: ${userId}, email: ${userEmail}`);
       
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
       
       if (!user) {
         // Create a basic user if doesn't exist
@@ -1552,18 +1644,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: "buyer" as const
         };
         console.log(`[AUTH-USER] Creating new user:`, newUser);
-        await storage.upsertUser(newUser);
-        res.json(newUser);
-      } else {
-        console.log(`[AUTH-USER] Returning user data for ${user.email}:`, {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          stripeCustomerId: user.stripeCustomerId,
-          stripeSubscriptionId: user.stripeSubscriptionId
-        });
-        res.json(user);
+        user = await storage.upsertUser(newUser);
       }
+      
+      // Calculate capabilities using capability-based authorization system
+      const capabilities = {
+        isAdmin: isAdmin(user),
+        isSeller: await hasSellerAccess(user)
+      };
+      
+      console.log(`[AUTH-USER] Returning user data for ${user.email}:`, {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        stripeCustomerId: user.stripeCustomerId,
+        stripeSubscriptionId: user.stripeSubscriptionId,
+        capabilities
+      });
+      
+      // Return user data with capabilities
+      res.json({
+        ...user,
+        capabilities
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -1589,7 +1692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller profile
-  app.get('/api/seller/profile', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/profile', requireSellerAccess, async (req: any, res) => {
     try {
       // Use same authentication method as PUT endpoint
       if (!req.user?.claims?.sub) {
@@ -1609,7 +1712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update seller profile - SPECIAL VERSION FOR PRODUCTION USER
-  app.put('/api/seller/profile', requireAuth, async (req: any, res) => {
+  app.put('/api/seller/profile', requireSellerAccess, async (req: any, res) => {
     try {
       console.log('====== PROFILE SAVE DEBUG ======');
       console.log('Host:', req.get('host'));
@@ -1660,7 +1763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Handle seller image uploads (normalize URLs and set ACL policies)
-  app.put('/api/seller/images', requireAuth, async (req: any, res) => {
+  app.put('/api/seller/images', requireSellerAccess, async (req: any, res) => {
     console.log('====== SELLER IMAGES DEBUG ======');
     console.log('Request received for image processing');
     console.log('Request body:', req.body);
@@ -1742,7 +1845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller listings
-  app.get('/api/seller/listings', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/listings', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -1767,7 +1870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller stats
-  app.get('/api/seller/stats', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/stats', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -1783,7 +1886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller dashboard (aggregated data)
-  app.get('/api/seller/dashboard', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/dashboard', requireSellerAccess, async (req: any, res) => {
     // Force no-cache headers to ensure fresh data with converted URLs
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1803,68 +1906,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[SELLER-DASHBOARD] User claims:', req.user?.claims);
       console.log('=====================================');
 
-      // Check if user is authenticated normally
-      if ((!req.user || !req.user.claims || !req.user.claims.sub)) {
-        console.log('[SELLER-DASHBOARD] ERROR: No authenticated user found');
-        return res.status(403).json({ error: 'Forbidden: authentication required' });
-      }
-
+      // Note: Authorization is now handled by requireSellerAccess middleware
+      // This simplifies the dashboard logic significantly
       const userId = req.user.claims.sub;
-      console.log(`[SELLER-DASHBOARD] Request from userId: ${userId}`);
-      
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        console.log(`[SELLER-DASHBOARD] User ${userId} not found in database`);
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Intelligent subscription failsafe system
-      // Treat users with seller role as having active subscriptions, even when Stripe sync issues occur
-      let hasActiveSubscription = false;
-      
-      // Enhanced failsafe v3.0: Multiple conditions for seller dashboard access
-      // 1. User role failsafe (development/testing environments)
-      if (user.role === 'seller') {
-        console.log(`[SUBSCRIPTION FAILSAFE] User ${userId} has seller role, allowing access despite potential Stripe sync issues`);
-        hasActiveSubscription = true;
-      }
-      
-      // 2. Stripe subscription data failsafe (production environments with buyer role)
-      if (!hasActiveSubscription && user.stripeCustomerId && user.stripeSubscriptionId) {
-        console.log(`[SUBSCRIPTION FAILSAFE] User ${userId} has valid Stripe subscription data, allowing seller dashboard access`);
-        hasActiveSubscription = true;
-      }
-      
-      // 3. Gmail account universal access (elementalsigns@gmail.com)
-      if (!hasActiveSubscription && user.email === 'elementalsigns@gmail.com') {
-        console.log(`[SUBSCRIPTION FAILSAFE] Gmail account detected, granting universal seller access`);
-        hasActiveSubscription = true;
-      }
-      
-      // Second check: Stripe subscription verification (when possible)
-      if (!hasActiveSubscription && user.stripeSubscriptionId && stripe) {
-        try {
-          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-          if (subscription.status === 'active') {
-            hasActiveSubscription = true;
-            console.log(`[SUBSCRIPTION] Verified active Stripe subscription: ${subscription.id}`);
-          }
-        } catch (error) {
-          console.error('Error checking subscription status:', error);
-          // Don't fail here - rely on role-based failsafe
-          if (user.role === 'seller') {
-            hasActiveSubscription = true;
-            console.log(`[SUBSCRIPTION FAILSAFE] Stripe error but seller role detected, allowing access`);
-          }
-        }
-      }
-      
-      // Require subscription only if user is not already a verified seller
-      if (!hasActiveSubscription) {
-        console.log(`[SELLER-DASHBOARD] User ${userId} does not have active subscription`);
-        return res.status(403).json({ message: "Active subscription required" });
-      }
+      console.log(`[SELLER-DASHBOARD] Request from userId: ${userId} (authorized by capability system)`);
 
       const seller = await storage.getSellerByUserId(userId);
       console.log(`[SELLER-DASHBOARD] Looking for seller with userId: ${userId}`);
@@ -1909,7 +1954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller analytics overview 
-  app.get('/api/seller/analytics/overview', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/analytics/overview', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -1938,7 +1983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller listing performance analytics
-  app.get('/api/seller/analytics/performance', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/analytics/performance', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -1967,7 +2012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller reviews
-  app.get('/api/seller/reviews', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/reviews', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -2033,7 +2078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== SELLER ONBOARDING ====================
   
   // Create seller subscription
-  app.post('/api/seller/subscribe', requireAuth, async (req: any, res) => {
+  app.post('/api/seller/subscribe', requireSellerAccess, async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
@@ -2253,7 +2298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Direct seller redirect for users with active subscriptions
-  app.get('/api/seller/redirect', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/redirect', requireSellerAccess, async (req: any, res) => {
     if (!stripe) {
       return res.redirect('/subscribe');
     }
@@ -2831,7 +2876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create seller profile
-  app.post('/api/seller/profile', requireAuth, async (req: any, res) => {
+  app.post('/api/seller/profile', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -2993,7 +3038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cancel seller subscription
-  app.post('/api/seller/subscription/cancel', requireAuth, async (req: any, res) => {
+  app.post('/api/seller/subscription/cancel', requireSellerAccess, async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
@@ -3536,7 +3581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update multiple listings display order (for drag-and-drop reordering)
-  app.put('/api/seller/listings/reorder', requireAuth, async (req: any, res) => {
+  app.put('/api/seller/listings/reorder', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -4061,7 +4106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get seller orders
-  app.get('/api/seller/orders', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/orders', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -4326,7 +4371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/seller/low-stock', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/low-stock', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -4343,7 +4388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk operations
-  app.put('/api/seller/listings/bulk', requireAuth, async (req: any, res) => {
+  app.put('/api/seller/listings/bulk', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5383,7 +5428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =================== SELLER DASHBOARD ENHANCEMENT ===================
 
   // Analytics
-  app.get('/api/seller/analytics', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/analytics', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5405,7 +5450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Promotions
-  app.get('/api/seller/promotions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/promotions', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5421,7 +5466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/seller/promotions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/seller/promotions', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5451,7 +5496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Earnings and payouts
-  app.get('/api/seller/earnings', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/earnings', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5468,7 +5513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/seller/payouts', requireAuth, async (req: any, res) => {
+  app.get('/api/seller/payouts', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -5539,7 +5584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe Connect onboarding
-  app.post('/api/seller/stripe-onboard', requireAuth, async (req: any, res) => {
+  app.post('/api/seller/stripe-onboard', requireSellerAccess, async (req: any, res) => {
     const userId = req.user.claims.sub;
     let seller: any = null;
     
@@ -5635,7 +5680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/seller/promote-listings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/seller/promote-listings', requireSellerAccess, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
