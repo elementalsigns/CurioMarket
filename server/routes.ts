@@ -822,11 +822,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
   const requireAuth = async (req: any, res: any, next: any) => {
-    console.log('[REQUIRE-AUTH] Called for:', req.method, req.path, 'NODE_ENV:', process.env.NODE_ENV);
     try {
       // Development bypass for consistent authentication across all endpoints
       if (process.env.NODE_ENV === 'development') {
-        console.log('[REQUIRE-AUTH] Development bypass activated');
         req.user = {
           claims: {
             sub: '46848882',  // Development user
@@ -4923,7 +4921,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe Connect onboarding
   app.post('/api/seller/stripe-onboard', requireAuth, async (req: any, res) => {
     try {
-      console.log('[STRIPE-ONBOARD] Request received, user:', req.user?.claims);
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
       if (!seller) {

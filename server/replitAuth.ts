@@ -289,6 +289,19 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Development bypass for consistent authentication across all endpoints
+  if (process.env.NODE_ENV === 'development') {
+    req.user = {
+      claims: {
+        sub: '46848882',  // Development user
+        email: 'elementalsigns@gmail.com', 
+        given_name: 'Artem',
+        family_name: 'Mortis'
+      }
+    };
+    return next();
+  }
+
   const user = req.user as any;
   const hostname = req.get('host') || '';
   const origin = req.headers.origin || '';
