@@ -185,6 +185,31 @@ export interface IStorage {
   updatePromotion(id: string, updates: Partial<InsertPromotion>): Promise<Promotion>;
   getSellerEarnings(sellerId: string, period: 'week' | 'month' | 'year'): Promise<any>;
   
+  // Enhanced Analytics (using existing data)
+  getSellerAnalyticsOverview(sellerId: string, dateRange: { from: Date; to: Date }): Promise<{
+    totalViews: number;
+    totalOrders: number;
+    totalRevenue: number;
+    totalFees: number;
+    netRevenue: number;
+    averageOrderValue: number;
+    conversionRate: number;
+    totalFavorites: number;
+    totalFollowers: number;
+    totalReviews: number;
+    averageRating: number;
+    topListings: Array<{ listing: Listing; views: number; orders: number; revenue: number }>;
+    revenueByDay: Array<{ date: string; revenue: number; orders: number }>;
+  }>;
+  getListingPerformance(sellerId: string, dateRange: { from: Date; to: Date }): Promise<Array<{
+    listing: Listing;
+    views: number;
+    orders: number;
+    revenue: number;
+    favorites: number;
+    conversionRate: number;
+  }>>;
+  
   // Health check
   healthCheck(): Promise<void>;
 
@@ -197,6 +222,9 @@ export interface IStorage {
   incrementListingViews(listingId: string): Promise<void>;
   getListingAnalytics(listingId: string): Promise<any>;
   promoteListings(sellerId: string, listingIds: string[], duration: number): Promise<void>;
+  
+  // Real-time view tracking
+  trackListingView(listingId: string, sellerId: string, sessionId?: string): Promise<void>;
   
   // Admin operations
   getAdminStats(): Promise<any>;
@@ -2467,6 +2495,255 @@ export class DatabaseStorage implements IStorage {
       withMpn: Number(stats.withMpn || 0),
       complete: Number(stats.complete || 0)
     };
+  }
+
+  // Track listing view method
+  async trackListingView(listingId: string): Promise<void> {
+    await db
+      .update(listings)
+      .set({ 
+        views: sql`COALESCE(${listings.views}, 0) + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(listings.id, listingId));
+  }
+
+  // Get seller analytics overview using existing data
+  async getSellerAnalyticsOverview(sellerId: string, dateRange: { from: Date; to: Date }): Promise<{
+    totalViews: number;
+    totalOrders: number;
+    totalRevenue: number;
+    totalFees: number;
+    netRevenue: number;
+    averageOrderValue: number;
+    conversionRate: number;
+    totalFavorites: number;
+    totalFollowers: number;
+    totalReviews: number;
+    averageRating: number;
+    topListings: Array<{ listing: Listing; views: number; orders: number; revenue: number }>;
+    revenueByDay: Array<{ date: string; revenue: number; orders: number }>;
+  }> {
+    // Get seller's listings for the period
+    const sellerListings = await db
+      .select()
+      .from(listings)
+      .where(eq(listings.sellerId, sellerId));
+
+    const listingIds = sellerListings.map(l => l.id);
+
+    // Get orders data for the period
+    const ordersData = await db
+      .select({
+        id: orders.id,
+        total: orders.total,
+        platformFee: orders.platformFee,
+        createdAt: orders.createdAt,
+        items: sql<any[]>`
+          COALESCE(
+            (SELECT JSON_AGG(JSON_BUILD_OBJECT(
+              'listingId', ${orderItems.listingId},
+              'quantity', ${orderItems.quantity},
+              'price', ${orderItems.price}
+            ))
+            FROM ${orderItems}
+            WHERE ${orderItems.orderId} = ${orders.id}),
+            '[]'::json
+          )
+        `
+      })
+      .from(orders)
+      .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .where(
+        and(
+          sql`${orderItems.listingId} = ANY(${listingIds})`,
+          sql`${orders.createdAt} >= ${dateRange.from}`,
+          sql`${orders.createdAt} <= ${dateRange.to}`,
+          eq(orders.status, 'paid')
+        )
+      );
+
+    // Calculate totals
+    const totalRevenue = ordersData.reduce((sum, order) => sum + parseFloat(order.total), 0);
+    const totalFees = ordersData.reduce((sum, order) => sum + parseFloat(order.platformFee || '0'), 0);
+    const netRevenue = totalRevenue - totalFees;
+    const totalOrders = ordersData.length;
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Calculate total views
+    const totalViews = sellerListings.reduce((sum, listing) => sum + (listing.views || 0), 0);
+    const conversionRate = totalViews > 0 ? (totalOrders / totalViews) * 100 : 0;
+
+    // Get favorites count
+    const favoritesResult = await db
+      .select({ count: count() })
+      .from(favorites)
+      .where(sql`${favorites.listingId} = ANY(${listingIds})`);
+    
+    const totalFavorites = favoritesResult[0]?.count || 0;
+
+    // Get followers count
+    const followersResult = await db
+      .select({ count: count() })
+      .from(shopFollows)
+      .where(eq(shopFollows.sellerId, sellerId));
+    
+    const totalFollowers = followersResult[0]?.count || 0;
+
+    // Get reviews data
+    const reviewsData = await db
+      .select({
+        rating: reviews.rating,
+        count: count()
+      })
+      .from(reviews)
+      .where(sql`${reviews.listingId} = ANY(${listingIds})`)
+      .groupBy(reviews.rating);
+
+    const totalReviews = reviewsData.reduce((sum, r) => sum + Number(r.count), 0);
+    const weightedRatingSum = reviewsData.reduce((sum, r) => sum + (r.rating * Number(r.count)), 0);
+    const averageRating = totalReviews > 0 ? weightedRatingSum / totalReviews : 0;
+
+    // Calculate top listings
+    const topListingsData = await Promise.all(
+      sellerListings.slice(0, 5).map(async listing => {
+        const listingOrders = ordersData.filter(order => 
+          order.items.some((item: any) => item.listingId === listing.id)
+        );
+        const listingRevenue = listingOrders.reduce((sum, order) => {
+          const relevantItems = order.items.filter((item: any) => item.listingId === listing.id);
+          return sum + relevantItems.reduce((itemSum: number, item: any) => 
+            itemSum + (parseFloat(item.price) * item.quantity), 0);
+        }, 0);
+
+        return {
+          listing,
+          views: listing.views || 0,
+          orders: listingOrders.length,
+          revenue: listingRevenue
+        };
+      })
+    );
+
+    // Sort by revenue and take top 5
+    const topListings = topListingsData
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    // Calculate revenue by day
+    const revenueByDay = ordersData.reduce((acc: any[], order) => {
+      const date = new Date(order.createdAt || new Date()).toISOString().split('T')[0];
+      const existingDay = acc.find(day => day.date === date);
+      
+      if (existingDay) {
+        existingDay.revenue += parseFloat(order.total);
+        existingDay.orders += 1;
+      } else {
+        acc.push({
+          date,
+          revenue: parseFloat(order.total),
+          orders: 1
+        });
+      }
+      
+      return acc;
+    }, []).sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      totalViews,
+      totalOrders,
+      totalRevenue,
+      totalFees,
+      netRevenue,
+      averageOrderValue,
+      conversionRate,
+      totalFavorites: Number(totalFavorites),
+      totalFollowers: Number(totalFollowers),
+      totalReviews,
+      averageRating,
+      topListings,
+      revenueByDay
+    };
+  }
+
+  // Get listing performance data
+  async getListingPerformance(sellerId: string, dateRange: { from: Date; to: Date }): Promise<Array<{
+    listing: Listing;
+    views: number;
+    orders: number;
+    revenue: number;
+    favorites: number;
+    conversionRate: number;
+  }>> {
+    // Get seller's listings
+    const sellerListings = await db
+      .select()
+      .from(listings)
+      .where(eq(listings.sellerId, sellerId));
+
+    const listingIds = sellerListings.map(l => l.id);
+
+    // Get performance data for each listing
+    const performanceData = await Promise.all(
+      sellerListings.map(async listing => {
+        // Get orders for this listing in the date range
+        const listingOrdersQuery = await db
+          .select({
+            id: orders.id,
+            total: orders.total,
+            items: sql<any[]>`
+              (SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                'listingId', ${orderItems.listingId},
+                'quantity', ${orderItems.quantity},
+                'price', ${orderItems.price}
+              ))
+              FROM ${orderItems}
+              WHERE ${orderItems.orderId} = ${orders.id}
+              AND ${orderItems.listingId} = ${listing.id})
+            `
+          })
+          .from(orders)
+          .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+          .where(
+            and(
+              eq(orderItems.listingId, listing.id),
+              sql`${orders.createdAt} >= ${dateRange.from}`,
+              sql`${orders.createdAt} <= ${dateRange.to}`,
+              eq(orders.status, 'paid')
+            )
+          );
+
+        // Calculate revenue for this listing
+        const revenue = listingOrdersQuery.reduce((sum: number, order: any) => {
+          const items = order.items || [];
+          return sum + items.reduce((itemSum: number, item: any) => 
+            itemSum + (parseFloat(item.price) * item.quantity), 0);
+        }, 0);
+
+        // Get favorites count for this listing
+        const favoritesResult = await db
+          .select({ count: count() })
+          .from(favorites)
+          .where(eq(favorites.listingId, listing.id));
+        
+        const favoritesCount = Number(favoritesResult[0]?.count || 0);
+
+        const views = listing.views || 0;
+        const orderCount = listingOrdersQuery.length;
+        const conversionRate = views > 0 ? (orderCount / views) * 100 : 0;
+
+        return {
+          listing,
+          views,
+          orders: orderCount,
+          revenue,
+          favorites: favoritesCount,
+          conversionRate
+        };
+      })
+    );
+
+    return performanceData.sort((a, b) => b.revenue - a.revenue);
   }
 
   // Health check method

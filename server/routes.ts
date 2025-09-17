@@ -7,7 +7,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authService } from "./auth-service";
-import { insertSellerSchema, insertListingSchema, listings, sellers, orders, orderItems, users } from "@shared/schema";
+import { insertSellerSchema, insertListingSchema, listings, sellers, orders, orderItems, users, type User } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, sql } from "drizzle-orm";
 import { verificationService } from "./verificationService";
@@ -1905,6 +1905,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching seller dashboard:", error);
       res.status(500).json({ message: "Failed to fetch seller dashboard" });
+    }
+  });
+
+  // Get seller analytics overview 
+  app.get('/api/seller/analytics/overview', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+
+      // Get date range from query params (default to last 30 days)
+      const defaultFromDate = new Date();
+      defaultFromDate.setDate(defaultFromDate.getDate() - 30);
+      
+      const fromDate = req.query.from ? new Date(req.query.from as string) : defaultFromDate;
+      const toDate = req.query.to ? new Date(req.query.to as string) : new Date();
+
+      const analytics = await storage.getSellerAnalyticsOverview(seller.id, {
+        from: fromDate,
+        to: toDate
+      });
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching seller analytics overview:", error);
+      res.status(500).json({ message: "Failed to fetch analytics overview" });
+    }
+  });
+
+  // Get seller listing performance analytics
+  app.get('/api/seller/analytics/performance', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      
+      if (!seller) {
+        return res.status(404).json({ message: "Seller profile not found" });
+      }
+
+      // Get date range from query params (default to last 30 days)
+      const defaultFromDate = new Date();
+      defaultFromDate.setDate(defaultFromDate.getDate() - 30);
+      
+      const fromDate = req.query.from ? new Date(req.query.from as string) : defaultFromDate;
+      const toDate = req.query.to ? new Date(req.query.to as string) : new Date();
+
+      const performance = await storage.getListingPerformance(seller.id, {
+        from: fromDate,
+        to: toDate
+      });
+
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching seller listing performance:", error);
+      res.status(500).json({ message: "Failed to fetch listing performance" });
     }
   });
 

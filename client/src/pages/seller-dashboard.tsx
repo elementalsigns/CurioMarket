@@ -246,6 +246,234 @@ function SortableListingItem({ listing, deleteListingMutation }: { listing: any;
   );
 }
 
+// Analytics Overview Component
+function AnalyticsOverview({ sellerId }: { sellerId: string }) {
+  const { data: analytics, isLoading } = useQuery({
+    queryKey: ['/api/seller/analytics/overview'],
+    enabled: Boolean(sellerId),
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const { data: performance } = useQuery({
+    queryKey: ['/api/seller/analytics/performance'],
+    enabled: Boolean(sellerId),
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-serif font-bold">Analytics Overview</h2>
+          <div className="animate-pulse bg-muted h-6 w-32 rounded"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="glass-effect">
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-2">
+                  <div className="bg-muted h-4 w-20 rounded"></div>
+                  <div className="bg-muted h-6 w-16 rounded"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics || typeof analytics !== 'object') {
+    return (
+      <Card className="glass-effect">
+        <CardContent className="p-8 text-center">
+          <TrendingUp className="mx-auto mb-4 text-gothic-red" size={48} />
+          <h3 className="text-xl font-serif font-bold mb-2">Analytics Coming Soon</h3>
+          <p className="text-foreground/70">
+            Your detailed analytics will appear here once you have more activity.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6" data-testid="analytics-overview">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-serif font-bold">Analytics Overview</h2>
+        <p className="text-sm text-foreground/60">Last 30 days</p>
+      </div>
+
+      {/* Enhanced Analytics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="glass-effect">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-foreground/60 text-sm">Total Revenue</p>
+                <p className="text-2xl font-bold text-green-500" data-testid="analytics-revenue">
+                  ${analytics.totalRevenue ? analytics.totalRevenue.toFixed(2) : '0.00'}
+                </p>
+                <p className="text-xs text-green-500/70">
+                  Net: ${analytics.netRevenue ? analytics.netRevenue.toFixed(2) : '0.00'}
+                </p>
+              </div>
+              <DollarSign className="text-green-500" size={24} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-foreground/60 text-sm">Total Orders</p>
+                <p className="text-2xl font-bold text-blue-500" data-testid="analytics-orders">
+                  {analytics.totalOrders || 0}
+                </p>
+                <p className="text-xs text-blue-500/70">
+                  Avg: ${analytics.averageOrderValue ? analytics.averageOrderValue.toFixed(2) : '0.00'}
+                </p>
+              </div>
+              <Package className="text-blue-500" size={24} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-foreground/60 text-sm">Total Views</p>
+                <p className="text-2xl font-bold text-purple-500" data-testid="analytics-views">
+                  {analytics.totalViews ? analytics.totalViews.toLocaleString() : '0'}
+                </p>
+                <p className="text-xs text-purple-500/70">
+                  {analytics.conversionRate ? analytics.conversionRate.toFixed(2) : '0.0'}% conversion
+                </p>
+              </div>
+              <Eye className="text-purple-500" size={24} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-foreground/60 text-sm">Engagement</p>
+                <p className="text-2xl font-bold text-orange-500" data-testid="analytics-favorites">
+                  {analytics.totalFavorites || 0}
+                </p>
+                <p className="text-xs text-orange-500/70">
+                  {analytics.totalFollowers || 0} followers
+                </p>
+              </div>
+              <Star className="text-orange-500" size={24} />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue Trend Chart */}
+      {analytics.revenueByDay && Array.isArray(analytics.revenueByDay) && analytics.revenueByDay.length > 0 && (
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="text-gothic-red" size={20} />
+              Revenue Trend (Last 30 Days)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analytics.revenueByDay.map((day: any, index: number) => (
+                <div key={day.date} className="flex items-center justify-between p-2 hover:bg-muted/20 rounded">
+                  <div>
+                    <p className="font-medium">{new Date(day.date).toLocaleDateString()}</p>
+                    <p className="text-sm text-foreground/60">{day.orders} orders</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-green-500">${day.revenue.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Performing Listings */}
+      {analytics.topListings && Array.isArray(analytics.topListings) && analytics.topListings.length > 0 && (
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="text-gothic-red" size={20} />
+              Top Performing Listings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analytics.topListings.map((item: any, index: number) => (
+                <div key={item.listing.id} className="flex items-center justify-between p-4 border border-border/20 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                      <span className="font-bold text-gothic-red">#{index + 1}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{item.listing.title}</h4>
+                      <p className="text-sm text-foreground/60">
+                        {item.views} views • {item.orders} orders
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-green-500">${item.revenue.toFixed(2)}</p>
+                    <p className="text-sm text-foreground/60">Revenue</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Listing Performance Summary */}
+      {performance && Array.isArray(performance) && performance.length > 0 && (
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="text-gothic-red" size={20} />
+              All Listings Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {performance.slice(0, 10).map((item: any) => (
+                <div key={item.listing.id} className="flex items-center justify-between p-3 hover:bg-muted/20 rounded">
+                  <div className="flex-1">
+                    <h4 className="font-medium truncate">{item.listing.title}</h4>
+                    <div className="flex items-center gap-4 text-sm text-foreground/60">
+                      <span>{item.views} views</span>
+                      <span>{item.orders} orders</span>
+                      <span>{item.favorites} favorites</span>
+                      <span>{item.conversionRate.toFixed(1)}% conv.</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-green-500">${item.revenue.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 export default function SellerDashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -560,8 +788,9 @@ export default function SellerDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="listings" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 relative z-50">
+        <Tabs defaultValue="analytics" className="space-y-6" data-testid="dashboard-tabs">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 relative z-50">
+            <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
@@ -571,6 +800,11 @@ export default function SellerDashboard() {
             <TabsTrigger value="promotions" data-testid="tab-promotions">Promotions</TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">Shop Profile</TabsTrigger>
           </TabsList>
+
+          {/* Analytics Tab - NEW COMPREHENSIVE ANALYTICS SECTION */}
+          <TabsContent value="analytics" className="space-y-6" data-testid="content-analytics">
+            <AnalyticsOverview sellerId={seller.id} />
+          </TabsContent>
 
           {/* Listings Tab */}
           <TabsContent value="listings" className="space-y-4" data-testid="content-listings">
