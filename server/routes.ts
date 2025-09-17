@@ -56,84 +56,273 @@ async function createSellerSubscriptionPrice(stripe: Stripe): Promise<string> {
   }
 }
 
-// Webhook handler functions
+// Enhanced webhook handler functions
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata.userId;
-  if (!userId) {
-    console.log(`[WEBHOOK] No userId in subscription metadata: ${subscription.id}`);
-    return;
-  }
-
+  const userId = subscription.metadata?.userId;
+  
   try {
-    let user = await storage.getUser(userId);
+    let user: User | undefined = undefined;
     
-    // If user doesn't exist, try to find them by customer ID
+    // Primary lookup by user ID from metadata
+    if (userId) {
+      user = await storage.getUser(userId);
+      console.log(`[WEBHOOK] Looking up user by metadata userId ${userId}: ${user ? 'found' : 'not found'}`);
+    }
+    
+    // ENHANCED FEATURE 1: Customer ID Fallback
     if (!user && subscription.customer) {
-      console.log(`[WEBHOOK] User ${userId} not found, searching by customer ID ${subscription.customer}`);
-      // We can't easily search by customer ID in our current schema, but let's create the user
-      // This is a production safety measure
+      console.log(`[WEBHOOK] Attempting fallback lookup by customer ID: ${subscription.customer}`);
+      user = await storage.getUserByStripeCustomerId(subscription.customer as string);
+      if (user) {
+        console.log(`[WEBHOOK] ✅ Found user via customer ID fallback: ${user.id} (${user.email})`);
+      } else {
+        console.log(`[WEBHOOK] ❌ User not found by customer ID fallback: ${subscription.customer}`);
+      }
+    }
+    
+    if (!user) {
+      console.error(`[WEBHOOK] No user found for subscription ${subscription.id}. Metadata userId: ${userId}, Customer ID: ${subscription.customer}`);
+      return;
     }
 
-    if (user) {
-      console.log(`[WEBHOOK] Updating user ${userId} with subscription ${subscription.id}, status: ${subscription.status}`);
+    const actualUserId = user.id;
+    console.log(`[WEBHOOK] Processing subscription update for user ${actualUserId} (${user.email}), subscription: ${subscription.id}, status: ${subscription.status}`);
+    
+    // Update Stripe info regardless of subscription status
+    await storage.updateUserStripeInfo(actualUserId, {
+      customerId: subscription.customer as string,
+      subscriptionId: subscription.id
+    });
+    
+    // ENHANCED FEATURE 2: Expanded Status Coverage - handle trialing, past_due, and other active states
+    const eligibleStatuses = ['active', 'trialing', 'past_due'];
+    const hasPaymentMethodOrIncompletePaid = subscription.status === 'incomplete' && subscription.default_payment_method;
+    const shouldGrantSellerAccess = eligibleStatuses.includes(subscription.status) || hasPaymentMethodOrIncompletePaid;
+    
+    if (shouldGrantSellerAccess) {
+      console.log(`[WEBHOOK] User ${actualUserId} eligible for seller access - Status: ${subscription.status}, Payment method: ${subscription.default_payment_method || 'none'}`);
       
-      await storage.updateUserStripeInfo(userId, {
-        customerId: subscription.customer as string,
-        subscriptionId: subscription.id
+      // ENHANCED FEATURE 3: Admin Role Preservation - Never downgrade admin users
+      const currentRole = user.role;
+      let newRole: 'buyer' | 'seller' | 'admin' = 'seller';
+      
+      if (currentRole === 'admin') {
+        newRole = 'admin';
+        console.log(`[WEBHOOK] ✅ Preserving admin role for user ${actualUserId}`);
+      }
+      
+      // Update user role (or preserve admin)
+      await storage.upsertUser({
+        ...user,
+        role: newRole
       });
+      console.log(`[WEBHOOK] Updated user ${actualUserId} role to ${newRole}`);
       
-      // If subscription is active OR has a payment method attached, ensure user has seller role
-      if (subscription.status === 'active' || (subscription.status === 'incomplete' && subscription.default_payment_method)) {
-        console.log(`[WEBHOOK] Granting seller role to user ${userId} - subscription status: ${subscription.status}, payment method: ${subscription.default_payment_method || 'none'}`);
+      // Ensure seller profile exists (even for admin users)
+      const existingSeller = await storage.getSellerByUserId(actualUserId);
+      if (!existingSeller) {
+        console.log(`[WEBHOOK] Creating seller profile for user ${actualUserId}`);
+        await storage.createSeller({
+          userId: actualUserId,
+          shopName: user.email || `Seller ${actualUserId}`,
+          bio: 'Welcome to my shop!',
+          isActive: true,
+          verificationStatus: 'approved'
+        });
+        console.log(`[WEBHOOK] ✅ Seller profile created for user ${actualUserId}`);
+      } else {
+        // Ensure existing seller profile is active
+        if (!existingSeller.isActive) {
+          await storage.updateSeller(existingSeller.id, { isActive: true });
+          console.log(`[WEBHOOK] ✅ Reactivated seller profile for user ${actualUserId}`);
+        } else {
+          console.log(`[WEBHOOK] Seller profile already exists and active for user ${actualUserId}`);
+        }
+      }
+    } else {
+      console.log(`[WEBHOOK] Subscription status ${subscription.status} does not grant seller access for user ${actualUserId}`);
+      
+      // Handle subscription cancellation/inactivity (only downgrade non-admin users)
+      if (user.role !== 'admin' && (subscription.status === 'canceled' || subscription.status === 'unpaid')) {
+        console.log(`[WEBHOOK] Downgrading user ${actualUserId} to buyer due to subscription status: ${subscription.status}`);
         await storage.upsertUser({
           ...user,
-          role: 'seller' as const
+          role: 'buyer' as const
         });
         
-        // CRITICAL FIX: Create seller profile if it doesn't exist
-        const existingSeller = await storage.getSellerByUserId(userId);
+        // Deactivate seller profile but don't delete it
+        const existingSeller = await storage.getSellerByUserId(actualUserId);
+        if (existingSeller && existingSeller.isActive) {
+          await storage.updateSeller(existingSeller.id, { isActive: false });
+          console.log(`[WEBHOOK] Deactivated seller profile for user ${actualUserId}`);
+        }
+      }
+    }
+    
+  } catch (error: any) {
+    console.error(`[WEBHOOK] Error handling subscription update for ${subscription.id}:`, {
+      error: error.message,
+      stack: error.stack,
+      subscriptionId: subscription.id,
+      customerId: subscription.customer,
+      status: subscription.status,
+      userId: userId
+    });
+  }
+}
+
+// ENHANCED FEATURE 4: Self-healing function to detect and fix subscription inconsistencies
+async function performSelfHealing() {
+  try {
+    console.log('[WEBHOOK] Starting self-healing process...');
+    
+    if (!stripe) {
+      console.log('[WEBHOOK] Stripe not configured, skipping self-healing');
+      return;
+    }
+    
+    // Find users with active Stripe subscriptions but missing seller profiles or wrong roles
+    // This is a simplified version - in production you might want to add pagination
+    const subscriptions = await stripe.subscriptions.list({
+      status: 'active',
+      limit: 100,
+      expand: ['data.customer']
+    });
+    
+    let healedCount = 0;
+    
+    for (const subscription of subscriptions.data) {
+      if (!subscription.customer || typeof subscription.customer === 'string') continue;
+      
+      // Find user by customer ID
+      const user = await storage.getUserByStripeCustomerId(subscription.customer.id);
+      if (!user) continue;
+      
+      const existingSeller = await storage.getSellerByUserId(user.id);
+      const needsHealing = 
+        (user.role === 'buyer' && !existingSeller) || // Buyer with no seller profile but active subscription
+        (user.role === 'seller' && !existingSeller) || // Seller role but no profile
+        (existingSeller && !existingSeller.isActive);   // Inactive seller profile
+      
+      if (needsHealing) {
+        console.log(`[WEBHOOK] Self-healing user ${user.id}: role=${user.role}, has seller profile=${!!existingSeller}, profile active=${existingSeller?.isActive}`);
+        
+        // Fix the user's role (preserve admin)
+        if (user.role !== 'admin') {
+          await storage.upsertUser({ ...user, role: 'seller' });
+        }
+        
+        // Create or reactivate seller profile
         if (!existingSeller) {
-          console.log(`[WEBHOOK] Creating seller profile for user ${userId}`);
           await storage.createSeller({
-            userId: userId,
-            shopName: user.email || `Seller ${userId}`,
+            userId: user.id,
+            shopName: user.email || `Seller ${user.id}`,
             bio: 'Welcome to my shop!',
             isActive: true,
             verificationStatus: 'approved'
           });
-          console.log(`[WEBHOOK] ✅ Seller profile created for user ${userId}`);
-        } else {
-          console.log(`[WEBHOOK] Seller profile already exists for user ${userId}`);
+        } else if (!existingSeller.isActive) {
+          await storage.updateSeller(existingSeller.id, { isActive: true });
         }
+        
+        healedCount++;
       }
-    } else {
-      console.error(`[WEBHOOK] User ${userId} not found in database for subscription ${subscription.id}`);
     }
-  } catch (error) {
-    console.error('Error handling subscription update:', error);
+    
+    console.log(`[WEBHOOK] Self-healing completed. Fixed ${healedCount} user(s).`);
+    
+  } catch (error: any) {
+    console.error('[WEBHOOK] Error during self-healing:', error.message);
+  }
+}
+
+// ENHANCED FEATURE 5: Handle checkout.session.completed for immediate seller onboarding
+async function handleCheckoutSessionCompleted(checkoutSession: Stripe.Checkout.Session) {
+  try {
+    console.log(`[WEBHOOK] Processing checkout.session.completed: ${checkoutSession.id}`);
+    
+    // Only handle seller subscription checkouts
+    if (checkoutSession.mode !== 'subscription') {
+      console.log(`[WEBHOOK] Checkout session ${checkoutSession.id} is not a subscription, skipping`);
+      return;
+    }
+    
+    const customerId = checkoutSession.customer as string;
+    const subscriptionId = checkoutSession.subscription as string;
+    
+    if (!customerId || !subscriptionId) {
+      console.log(`[WEBHOOK] Missing customer or subscription ID in checkout session ${checkoutSession.id}`);
+      return;
+    }
+    
+    // Find user by customer ID
+    const user = await storage.getUserByStripeCustomerId(customerId);
+    if (!user) {
+      console.error(`[WEBHOOK] No user found for customer ${customerId} in checkout session ${checkoutSession.id}`);
+      return;
+    }
+    
+    console.log(`[WEBHOOK] Immediately onboarding seller for user ${user.id} via checkout session`);
+    
+    // Get the subscription and process it
+    if (stripe) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      await handleSubscriptionUpdate(subscription);
+    }
+    
+  } catch (error: any) {
+    console.error(`[WEBHOOK] Error handling checkout session completed:`, error.message);
   }
 }
 
 async function handleSubscriptionCancellation(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata.userId;
-  if (!userId) return;
-
   try {
-    const user = await storage.getUser(userId);
-    if (user) {
-      await storage.updateUserStripeInfo(userId, {
-        customerId: subscription.customer as string,
-        subscriptionId: ""
-      });
-      
-      // Downgrade user role back to buyer
+    const userId = subscription.metadata?.userId;
+    let user: User | undefined = undefined;
+    
+    // Try to find user by metadata first, then by customer ID
+    if (userId) {
+      user = await storage.getUser(userId);
+    }
+    
+    if (!user && subscription.customer) {
+      user = await storage.getUserByStripeCustomerId(subscription.customer as string);
+      console.log(`[WEBHOOK] Subscription cancellation - found user via customer ID fallback: ${user?.id}`);
+    }
+    
+    if (!user) {
+      console.error(`[WEBHOOK] No user found for cancelled subscription ${subscription.id}`);
+      return;
+    }
+
+    console.log(`[WEBHOOK] Processing subscription cancellation for user ${user.id}`);
+    
+    // Clear subscription info
+    await storage.updateUserStripeInfo(user.id, {
+      customerId: subscription.customer as string,
+      subscriptionId: ""
+    });
+    
+    // Only downgrade non-admin users
+    if (user.role !== 'admin') {
+      console.log(`[WEBHOOK] Downgrading user ${user.id} from ${user.role} to buyer due to subscription cancellation`);
       await storage.upsertUser({
         ...user,
         role: 'buyer' as const
       });
+    } else {
+      console.log(`[WEBHOOK] Preserving admin role for user ${user.id} despite subscription cancellation`);
     }
-  } catch (error) {
-    console.error('Error handling subscription cancellation:', error);
+    
+    // Deactivate seller profile but don't delete it
+    const existingSeller = await storage.getSellerByUserId(user.id);
+    if (existingSeller && existingSeller.isActive) {
+      await storage.updateSeller(existingSeller.id, { isActive: false });
+      console.log(`[WEBHOOK] Deactivated seller profile for user ${user.id}`);
+    }
+    
+  } catch (error: any) {
+    console.error(`[WEBHOOK] Error handling subscription cancellation for ${subscription.id}:`, error.message);
   }
 }
 
@@ -487,6 +676,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const subscription = event.data.object as Stripe.Subscription;
           console.log(`[WEBHOOK] Subscription ${event.type}: ${subscription.id}, status: ${subscription.status}`);
           await handleSubscriptionUpdate(subscription);
+          break;
+          
+        case 'customer.subscription.deleted':
+          const deletedSubscription = event.data.object as Stripe.Subscription;
+          console.log(`[WEBHOOK] Subscription deleted: ${deletedSubscription.id}, status: ${deletedSubscription.status}`);
+          await handleSubscriptionCancellation(deletedSubscription);
+          break;
+        
+        case 'checkout.session.completed':
+          const checkoutSession = event.data.object as Stripe.Checkout.Session;
+          console.log(`[WEBHOOK] Checkout session completed: ${checkoutSession.id}, mode: ${checkoutSession.mode}`);
+          await handleCheckoutSessionCompleted(checkoutSession);
           break;
         
         case 'invoice.payment_succeeded':
@@ -6128,6 +6329,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error expiring events:", error);
       res.status(500).json({ error: "Failed to expire events" });
+    }
+  });
+
+  // Self-healing endpoint for Stripe webhook inconsistencies
+  app.post('/api/admin/webhooks/self-heal', requireAuth, requireAdmin, async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      console.log(`[ADMIN] Admin ${adminId} triggered webhook self-healing process`);
+      
+      // Execute the self-healing function
+      await performSelfHealing();
+      
+      res.json({
+        message: "Self-healing process completed successfully",
+        timestamp: new Date().toISOString(),
+        triggeredBy: adminId
+      });
+    } catch (error: any) {
+      console.error("[ADMIN] Error during manual self-healing:", error);
+      res.status(500).json({ 
+        error: "Self-healing process failed", 
+        message: error.message 
+      });
     }
   });
 
