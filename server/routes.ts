@@ -6869,6 +6869,150 @@ This message was sent via the Curio Market contact form.
     res.send(svg);
   });
 
+  // ==================== ORPHANED SUBSCRIPTION REPAIR ====================
+  
+  // CRITICAL FIX: Repair orphaned subscriptions (active Stripe subscription but no database user)
+  app.post('/api/admin/fix-orphaned-subscription', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      
+      if (!stripe) {
+        return res.status(500).json({ error: 'Stripe not configured' });
+      }
+      
+      console.log(`[ORPHAN-FIX] Starting repair for email: ${email}`);
+      
+      // Step 1: Check if user already exists in database
+      const existingUser = await storage.getUser(email);
+      if (existingUser) {
+        console.log(`[ORPHAN-FIX] User already exists: ${existingUser.id}`);
+        return res.json({ 
+          success: false, 
+          message: 'User already exists in database',
+          existingUser: { id: existingUser.id, email: existingUser.email, role: existingUser.role }
+        });
+      }
+      
+      // Step 2: Find Stripe customer by email
+      console.log(`[ORPHAN-FIX] Searching for Stripe customer with email: ${email}`);
+      const customers = await stripe.customers.list({
+        email: email,
+        limit: 10
+      });
+      
+      if (customers.data.length === 0) {
+        console.log(`[ORPHAN-FIX] No Stripe customer found for email: ${email}`);
+        return res.json({ 
+          success: false, 
+          message: 'No Stripe customer found for this email' 
+        });
+      }
+      
+      const customer = customers.data[0];
+      console.log(`[ORPHAN-FIX] Found Stripe customer: ${customer.id}`);
+      
+      // Step 3: Find active subscriptions for this customer
+      console.log(`[ORPHAN-FIX] Searching for active subscriptions for customer: ${customer.id}`);
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customer.id,
+        status: 'active',
+        limit: 10
+      });
+      
+      if (subscriptions.data.length === 0) {
+        console.log(`[ORPHAN-FIX] No active subscriptions found for customer: ${customer.id}`);
+        return res.json({ 
+          success: false, 
+          message: 'No active subscriptions found for this customer' 
+        });
+      }
+      
+      const subscription = subscriptions.data[0];
+      console.log(`[ORPHAN-FIX] Found active subscription: ${subscription.id}, status: ${subscription.status}`);
+      
+      // Step 4: Create database user record with seller role
+      console.log(`[ORPHAN-FIX] Creating database user record for: ${email}`);
+      const newUser = await storage.upsertUser({
+        email: email,
+        firstName: customer.name?.split(' ')[0] || 'Seller',
+        lastName: customer.name?.split(' ').slice(1).join(' ') || 'User',
+        role: 'seller' as const,
+        stripeCustomerId: customer.id,
+        stripeSubscriptionId: subscription.id,
+        emailVerified: true, // Assume verified since they have active subscription
+        accountStatus: 'active',
+        verificationLevel: 2 // Higher level due to paid subscription
+      });
+      
+      console.log(`[ORPHAN-FIX] Created user record: ${newUser.id} for ${newUser.email}`);
+      
+      // Step 5: Create seller profile
+      console.log(`[ORPHAN-FIX] Creating seller profile for user: ${newUser.id}`);
+      const newSeller = await storage.createSeller({
+        userId: newUser.id,
+        shopName: email.split('@')[0] || `Seller ${newUser.id}`,
+        bio: 'Welcome to my shop! I offer unique and interesting items.',
+        isActive: true,
+        verificationStatus: 'approved' as const
+      });
+      
+      console.log(`[ORPHAN-FIX] Created seller profile: ${newSeller.id} for shop: ${newSeller.shopName}`);
+      
+      // Step 6: Update Stripe subscription metadata to point to correct user ID
+      console.log(`[ORPHAN-FIX] Updating Stripe subscription metadata for: ${subscription.id}`);
+      await stripe.subscriptions.update(subscription.id, {
+        metadata: {
+          userId: newUser.id,
+          email: email,
+          repairedAt: new Date().toISOString(),
+          repairReason: 'orphaned_subscription_fix'
+        }
+      });
+      
+      console.log(`[ORPHAN-FIX] ✅ Successfully repaired orphaned subscription for: ${email}`);
+      
+      // Step 7: Return success response with all details
+      res.json({
+        success: true,
+        message: 'Successfully repaired orphaned subscription',
+        details: {
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            role: newUser.role,
+            stripeCustomerId: newUser.stripeCustomerId,
+            stripeSubscriptionId: newUser.stripeSubscriptionId
+          },
+          seller: {
+            id: newSeller.id,
+            shopName: newSeller.shopName,
+            isActive: newSeller.isActive,
+            verificationStatus: newSeller.verificationStatus
+          },
+          stripe: {
+            customerId: customer.id,
+            subscriptionId: subscription.id,
+            subscriptionStatus: subscription.status,
+            metadataUpdated: true
+          }
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('[ORPHAN-FIX] ERROR:', error.message);
+      console.error('[ORPHAN-FIX] Stack:', error.stack);
+      res.status(500).json({ 
+        success: false,
+        error: error.message,
+        message: 'Failed to repair orphaned subscription'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
