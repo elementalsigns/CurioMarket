@@ -128,7 +128,7 @@ export default function Home() {
                 <Heart className="mx-auto mb-4" style={{color: '#6A1B1B'}} size={48} />
                 <h3 className="text-xl font-serif font-bold mb-2">Your Favorites</h3>
                 <p className="text-foreground/70 mb-4">
-                  {favoriteItemsCount} items saved for later
+                  Items saved for later
                 </p>
                 <Link to="/wishlists">
                   <Button variant="outline" data-testid="button-view-favorites">
