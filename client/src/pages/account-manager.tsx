@@ -1034,6 +1034,42 @@ export default function AccountManager() {
                     </Card>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <Card className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-foreground/60 text-sm">Total Favorites</p>
+                            <p className="text-2xl font-bold text-purple-500" data-testid="stats-total-favorites">
+                              {sellerStats?.totalFavorites || 0}
+                            </p>
+                            <p className="text-xs text-purple-500/70">
+                              People who favorited your items
+                            </p>
+                          </div>
+                          <Heart className="text-purple-500" size={24} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-foreground/60 text-sm">Total Views</p>
+                            <p className="text-2xl font-bold text-orange-500" data-testid="stats-total-views">
+                              {sellerStats?.totalViews || 0}
+                            </p>
+                            <p className="text-xs text-orange-500/70">
+                              Times your items were viewed
+                            </p>
+                          </div>
+                          <Eye className="text-orange-500" size={24} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
                   <Card className="glass-effect">
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-3 mb-4">

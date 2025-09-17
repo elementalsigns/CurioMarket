@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare, Star, AlertCircle } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare, Star, AlertCircle, Heart } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -374,12 +374,29 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-foreground/60 text-sm">Performance</p>
-                  <p className="text-2xl font-bold text-orange-500" data-testid="analytics-performance">
-                    {sellerStats.totalSales > 0 ? 'Active' : 'Starting'}
+                  <p className="text-foreground/60 text-sm">Total Favorites</p>
+                  <p className="text-2xl font-bold text-purple-500" data-testid="analytics-favorites">
+                    {sellerStats.totalFavorites || 0}
+                  </p>
+                  <p className="text-xs text-purple-500/70">
+                    People who favorited
+                  </p>
+                </div>
+                <Heart className="text-purple-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Views</p>
+                  <p className="text-2xl font-bold text-orange-500" data-testid="analytics-views">
+                    {sellerStats.totalViews || 0}
                   </p>
                   <p className="text-xs text-orange-500/70">
-                    Shop status
+                    Item page views
                   </p>
                 </div>
                 <Eye className="text-orange-500" size={24} />
