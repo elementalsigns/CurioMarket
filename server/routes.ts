@@ -91,13 +91,35 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       sessionId: req.sessionID,
     };
     
-    // First ensure user is authenticated
-    if (!req.user || !req.user.claims || !req.user.claims.sub) {
-      console.log('[CAPABILITY] Authentication failure for seller access:', debugInfo);
-      return res.status(401).json({ message: "Authentication required" });
+    // MOBILE AUTH FIX: Try multiple authentication methods
+    let userId = null;
+    
+    // Method 1: Standard authentication (req.user.claims.sub)
+    if (req.user && req.user.claims && req.user.claims.sub) {
+      userId = req.user.claims.sub;
+      console.log(`[CAPABILITY] Standard auth success for user: ${userId}`);
+    }
+    // Method 2: Mobile fallback - check session authentication
+    else if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      // Handle mobile browser session format
+      if (req.user.id) {
+        userId = req.user.id;
+        console.log(`[CAPABILITY] Mobile session auth success for user: ${userId}`);
+      } else if (req.user.claims && req.user.claims.sub) {
+        userId = req.user.claims.sub;
+        console.log(`[CAPABILITY] Mobile claims auth success for user: ${userId}`);
+      }
+    }
+    // Method 3: Last resort - check passport session
+    else if (req.session && req.session.passport && req.session.passport.user) {
+      userId = req.session.passport.user;
+      console.log(`[CAPABILITY] Passport session auth success for user: ${userId}`);
     }
     
-    const userId = req.user.claims.sub;
+    if (!userId) {
+      console.log('[CAPABILITY] All authentication methods failed for seller access:', debugInfo);
+      return res.status(401).json({ message: "Authentication required" });
+    }
     const user = await storage.getUser(userId);
     
     if (!user) {
