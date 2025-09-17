@@ -4947,51 +4947,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ onboardingUrl: accountLink.url });
       }
 
-      // DEVELOPMENT ONLY: Complete Stripe Connect bypass for platform profile issues
-      let account;
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔧 [DEV BYPASS] Creating mock Connect account for development testing');
-        
-        // Create a mock account ID for development
-        const mockAccountId = `acct_dev_${Date.now()}_${userId}`;
-        
-        // Store mock account ID in database
-        await db
-          .update(sellers)
-          .set({ stripeConnectAccountId: mockAccountId })
-          .where(eq(sellers.id, seller.id));
+      // Create a Standard Connect account for Stripe onboarding
+      const account = await stripe.accounts.create({
+        type: 'standard',
+        metadata: {
+          userId: userId,
+          sellerId: seller.id,
+        },
+      });
 
-        // Return mock onboarding URL for development
-        const mockOnboardingUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=dev-complete&mock=${mockAccountId}`;
-        
-        console.log('🔧 [DEV BYPASS] Mock Connect account created:', mockAccountId);
-        return res.json({ onboardingUrl: mockOnboardingUrl });
-      } else {
-        // Production: Use standard account only
-        account = await stripe.accounts.create({
-          type: 'standard',
-          metadata: {
-            userId: userId,
-            sellerId: seller.id,
-          },
-        });
-        
-        // Update seller with Connect account ID in database
-        await db
-          .update(sellers)
-          .set({ stripeConnectAccountId: account.id })
-          .where(eq(sellers.id, seller.id));
+      // Update seller with Connect account ID in database
+      await db
+        .update(sellers)
+        .set({ stripeConnectAccountId: account.id })
+        .where(eq(sellers.id, seller.id));
 
-        // Create account link for onboarding
-        const accountLink = await stripe.accountLinks.create({
-          account: account.id,
-          refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=failed`,
-          return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
-          type: 'account_onboarding',
-        });
+      // Create account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=failed`,
+        return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+        type: 'account_onboarding',
+      });
 
-        return res.json({ onboardingUrl: accountLink.url });
-      }
+      res.json({ onboardingUrl: accountLink.url });
     } catch (error: any) {
       console.error("Error creating Stripe Connect onboarding:", error);
       
