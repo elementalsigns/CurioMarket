@@ -32,10 +32,9 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
     try {
       // Create the subscription first to get the customer ID and client secret
-      const response = await apiRequest('POST', '/api/subscription/create');
-      const data = await response.json();
+      const data = await apiRequest('POST', '/api/subscription/create');
       
-      if (response.ok && data.clientSecret) {
+      if (data.clientSecret) {
         // Submit the payment elements now that we have the subscription and customer
         const { error: submitError } = await elements.submit();
         if (submitError) {
@@ -57,21 +56,21 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
           // After successful setup intent, activate the subscription
           if (setupIntent?.status === 'succeeded') {
             try {
-              const activateResponse = await apiRequest('POST', '/api/subscription/activate', {
-                setupIntentId: setupIntent.id
-              });
-              
-              if (!activateResponse.ok) {
-                const errorData = await activateResponse.json();
-                console.error('Activation failed:', errorData);
+              try {
+                const activateData = await apiRequest('POST', '/api/subscription/activate', {
+                  setupIntentId: setupIntent.id
+                });
+                console.log('Activation successful:', activateData);
+              } catch (activateError: any) {
+                console.error('Activation failed:', activateError);
                 
                 // If activation fails with user not found, still show success
                 // This can happen when production DB is out of sync
-                if (activateResponse.status === 404) {
+                if (activateError.message?.includes('404')) {
                   console.warn('User/subscription not found in database, but payment setup completed');
                   // Continue with success flow
                 } else {
-                  throw new Error(errorData.error || 'Failed to activate subscription');
+                  throw new Error(activateError.message || 'Failed to activate subscription');
                 }
               }
             } catch (activationError: any) {
@@ -103,7 +102,7 @@ const SubscribeForm = ({ onSuccess }: { onSuccess: () => void }) => {
           description: "Welcome to Curio Market! Your seller account is now active.",
         });
         onSuccess();
-      } else if (response.ok && data.status === 'active') {
+      } else if (data.status === 'active') {
         // Already has active subscription
         toast({
           title: "Subscription Active",
@@ -234,8 +233,7 @@ export default function Subscribe() {
     setIsCreatingSubscription(true);
     
     try {
-      const response = await apiRequest("POST", "/api/subscription/create");
-      const data = await response.json();
+      const data = await apiRequest("POST", "/api/subscription/create");
       console.log("Subscription response:", data);
       console.log("Checking conditions: clientSecret exists =", !!data.clientSecret, "status =", data.status);
       
