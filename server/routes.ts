@@ -4920,10 +4920,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Stripe Connect onboarding
   app.post('/api/seller/stripe-onboard', requireAuth, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    let seller: any = null;
+    
     try {
       console.log('💰💰💰 [STRIPE-ONBOARD] Request received, user:', req.user.claims);
-      const userId = req.user.claims.sub;
-      const seller = await storage.getSellerByUserId(userId);
+      seller = await storage.getSellerByUserId(userId);
       if (!seller) {
         return res.status(404).json({ error: "Seller profile not found" });
       }
@@ -4945,14 +4947,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ onboardingUrl: accountLink.url });
       }
 
-      // Create new Connect account
-      const account = await stripe.accounts.create({
-        type: 'standard',
-        metadata: {
-          userId: userId,
-          sellerId: seller.id,
-        },
-      });
+      // DEVELOPMENT ONLY: Temporary bypass for platform profile processing delays
+      let account;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 [DEV BYPASS] Attempting standard account creation, with express onboarding fallback');
+        try {
+          account = await stripe.accounts.create({
+            type: 'standard',
+            metadata: {
+              userId: userId,
+              sellerId: seller.id,
+            },
+          });
+        } catch (platformError: any) {
+          if (platformError?.message?.includes('platform profile')) {
+            console.log('🔧 [DEV BYPASS] Platform profile issue detected, using express account for development testing');
+            account = await stripe.accounts.create({
+              type: 'express',
+              metadata: {
+                userId: userId,
+                sellerId: seller.id,
+              },
+            });
+          } else {
+            throw platformError;
+          }
+        }
+      } else {
+        // Production: Use standard account only
+        account = await stripe.accounts.create({
+          type: 'standard',
+          metadata: {
+            userId: userId,
+            sellerId: seller.id,
+          },
+        });
+      }
 
       // Update seller with Connect account ID in database
       await db
@@ -4976,6 +5006,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error?.type === 'StripeInvalidRequestError' && 
           (error?.raw?.message?.includes('platform profile') || 
            error?.message?.includes('platform profile'))) {
+           
+        // DEVELOPMENT ONLY: Express account bypass for platform profile issues
+        if (process.env.NODE_ENV === 'development' && stripe && seller) {
+          console.log('🔧 [DEV BYPASS] Platform profile error in development, creating Express account as fallback');
+          try {
+            const account = await stripe.accounts.create({
+              type: 'express',
+              metadata: {
+                userId: userId,
+                sellerId: seller.id,
+              },
+            });
+
+            // Update seller with Connect account ID in database
+            await db
+              .update(sellers)
+              .set({ stripeConnectAccountId: account.id })
+              .where(eq(sellers.id, seller.id));
+
+            // Create account link for onboarding
+            const accountLink = await stripe.accountLinks.create({
+              account: account.id,
+              refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=failed`,
+              return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+              type: 'account_onboarding',
+            });
+
+            console.log('🔧 [DEV BYPASS] Express account created successfully:', account.id);
+            return res.json({ onboardingUrl: accountLink.url });
+          } catch (bypassError) {
+            console.error('🔧 [DEV BYPASS] Express account creation also failed:', bypassError);
+            // Fall through to original error handling
+          }
+        }
+        
         return res.status(400).json({ 
           error: "Platform profile incomplete",
           message: "Please complete your Stripe Connect platform profile first. Visit https://dashboard.stripe.com/connect/accounts/overview to complete the business questionnaire.",
