@@ -975,8 +975,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route handled by replitAuth.ts - no duplicate needed here
 
-  // Auth user route - with admin bypass for admin panel access
-  app.get('/api/auth/user', requireAdminAuth, async (req: any, res) => {
+  // Auth user route - check if user is authenticated 
+  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
       // Use same authentication pattern as seller dashboard
       const userId = req.user.claims.sub;
