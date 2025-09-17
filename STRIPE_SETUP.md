@@ -21,7 +21,7 @@ Your Curio Market now has a fully implemented Stripe subscription system. Here's
 
 ### Key Features
 - $10/month subscription fee for sellers
-- 3% platform fee on sales
+- 2.6% platform fee on sales
 - Automatic role management (buyer ↔ seller)
 - Professional subscription dashboard
 - Email notifications for payment events
@@ -93,7 +93,7 @@ Your webhook endpoint is already configured at: `/api/webhooks/stripe`
 ## 💡 Business Model
 
 - **Seller Subscription**: $10/month per seller
-- **Platform Fee**: 3% of each successful sale
+- **Platform Fee**: 2.6% of each successful sale
 - **Revenue Streams**: Monthly subscriptions + transaction fees
 - **Scalable**: Automatic billing and user management
 

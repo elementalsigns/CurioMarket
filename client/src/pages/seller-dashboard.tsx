@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare, Star } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Package, DollarSign, Users, TrendingUp, Percent, Tag, Save, Upload, Camera, GripVertical, MessageSquare, Star, AlertCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -731,6 +731,132 @@ export default function SellerDashboard() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Earnings & Payments Tab */}
+          <TabsContent value="earnings" className="space-y-4" data-testid="content-earnings">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif font-bold">Earnings & Payments</h2>
+              <div className="flex items-center gap-2">
+                <DollarSign className="text-gothic-red" size={20} />
+                <span className="text-lg font-medium text-foreground/80">2.6% platform fee</span>
+              </div>
+            </div>
+
+            {/* Payment Info Cards */}
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* How You Get Paid */}
+              <Card className="glass-effect">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="text-gothic-red" size={20} />
+                    How You Get Paid
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
+                    <p className="text-sm text-foreground/80 mb-2">
+                      <strong>Payment Processor:</strong> Stripe handles all payouts
+                    </p>
+                    <p className="text-sm text-foreground/80 mb-2">
+                      <strong>Payout Schedule:</strong> Every 2 business days (Stripe standard)
+                    </p>
+                    <p className="text-sm text-foreground/80">
+                      <strong>Payment Method:</strong> Direct deposit to your bank account
+                    </p>
+                  </div>
+                  <p className="text-xs text-foreground/60">
+                    Payments are processed automatically after each sale. No action required on your part.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Fee Breakdown */}
+              <Card className="glass-effect">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Percent className="text-gothic-red" size={20} />
+                    Fee Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Platform Fee:</span>
+                      <span className="font-medium">2.6%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Stripe Processing:</span>
+                      <span className="font-medium">2.9% + $0.30</span>
+                    </div>
+                    <div className="border-t border-border/30 pt-2">
+                      <div className="flex justify-between text-sm font-semibold">
+                        <span>Total Fees:</span>
+                        <span className="text-gothic-red">~5.5%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-green-500/10 p-3 rounded-lg border border-green-500/30">
+                    <p className="text-xs text-green-400 font-medium">
+                      Example: $100 sale = $94.20 in your pocket
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Earnings Summary */}
+            <Card className="glass-effect">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="text-gothic-red" size={20} />
+                  Earnings Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <DollarSign className="mx-auto mb-2 text-gothic-red" size={24} />
+                    <p className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-sm text-foreground/60">Total Sales</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <Package className="mx-auto mb-2 text-gothic-red" size={24} />
+                    <p className="text-2xl font-bold">{stats.totalOrders}</p>
+                    <p className="text-sm text-foreground/60">Orders Completed</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <TrendingUp className="mx-auto mb-2 text-gothic-red" size={24} />
+                    <p className="text-2xl font-bold">${(stats.totalRevenue * 0.945).toFixed(2)}</p>
+                    <p className="text-sm text-foreground/60">Est. Earnings</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Important Payment Info */}
+            <Card className="glass-effect border border-yellow-500/30 bg-yellow-500/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-yellow-400">
+                  <AlertCircle className="text-yellow-400" size={20} />
+                  Payment Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2 text-sm text-foreground/80">
+                  <p>• <strong>Bank Account Setup:</strong> Configure your payout method in your Stripe dashboard</p>
+                  <p>• <strong>Tax Information:</strong> You're responsible for reporting earnings on your tax returns</p>
+                  <p>• <strong>Payout Timeline:</strong> Sales appear in your bank account 2-7 business days after the customer's order</p>
+                  <p>• <strong>Minimum Payout:</strong> Stripe processes payouts once you reach $0.50 in earnings</p>
+                  <p>• <strong>Currency:</strong> All payouts are processed in USD</p>
+                </div>
+                <div className="mt-4 p-3 bg-muted/20 rounded-lg">
+                  <p className="text-xs text-foreground/60">
+                    Need help with payouts? Contact Stripe support directly through your seller dashboard or visit their help center.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Reviews Tab */}

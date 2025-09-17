@@ -1,5 +1,5 @@
 # Overview
-Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 3% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
+Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 2.6% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
 ## Recent Enhancement (September 16, 2025)
 - **Complete Favorites System with Category Selection**: Fully restored and enhanced the favorites functionality with intelligent category/wishlist selection. Fixed data format mismatch where favorites API returned listing IDs but UI expected full objects by creating new `/api/favorites/listings` endpoint. Implemented smart heart button behavior: when users have multiple wishlist categories (like "general" or "love list"), clicking the heart icon presents a selection dialog asking which category to add items to. Features real-time counter updates, proper authentication integration, and maintains complete backward compatibility. All ProductCard components now include consistent favorites functionality across landing page and dashboard.
@@ -69,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 ## Payment Processing
 - **Payment Provider**: Stripe for subscription billing and marketplace transactions.
 - **Subscription Model**: Monthly seller subscriptions ($10/month) with automatic renewal.
-- **Transaction Fees**: 3% platform fee on completed sales.
+- **Transaction Fees**: 2.6% platform fee on completed sales.
 - **Payout System**: Integrated with Stripe for seller payouts.
 
 # External Dependencies
@@ -80,7 +80,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Payment & Financial Services
 - **Stripe**: Complete payment processing (subscriptions, marketplace transactions, seller payouts).
-- **Pricing**: $10/month seller subscription + 3% platform transaction fee.
+- **Pricing**: $10/month seller subscription + 2.6% platform transaction fee.
 
 ## File & Asset Management
 - **Google Cloud Storage**: Primary file storage and review photo hosting.

@@ -324,7 +324,7 @@ Customer: ${data.customerName}
 Items Sold:
 ${data.orderItems.map(item => `- ${item.title} (Qty: ${item.quantity}) - $${item.price}`).join('\n')}
 
-Your Earnings: $${(parseFloat(data.orderTotal) * 0.97).toFixed(2)} (after 3% platform fee)
+Your Earnings: $${(parseFloat(data.orderTotal) * 0.974).toFixed(2)} (after 2.6% platform fee)
 
 ${data.shippingAddress ? `
 Shipping Address:
@@ -390,7 +390,7 @@ Thank you for being part of the Curio Market community!`;
           </div>
           
           <div class="total">
-            Your Earnings: $${(parseFloat(data.orderTotal) * 0.97).toFixed(2)} (after 3% platform fee)
+            Your Earnings: $${(parseFloat(data.orderTotal) * 0.974).toFixed(2)} (after 2.6% platform fee)
           </div>
           
           ${data.shippingAddress ? `
