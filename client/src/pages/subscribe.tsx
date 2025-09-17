@@ -475,10 +475,14 @@ export default function Subscribe() {
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">3.</span>
-                      Set up your seller dashboard and create listings
+                      Complete Stripe onboarding via your Earnings button to receive payments
                     </li>
                     <li className="flex items-start">
                       <span className="font-bold mr-2">4.</span>
+                      Set up your seller dashboard and create listings
+                    </li>
+                    <li className="flex items-start">
+                      <span className="font-bold mr-2">5.</span>
                       Connect with collectors and start selling
                     </li>
                   </ol>
