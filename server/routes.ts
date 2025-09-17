@@ -80,9 +80,20 @@ async function hasSellerAccess(user: User): Promise<boolean> {
  */
 const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
   try {
+    // Enhanced debugging for authentication failures
+    const debugInfo = {
+      hasUser: !!req.user,
+      hasClaims: !!(req.user?.claims),
+      hasSub: !!(req.user?.claims?.sub),
+      userAgent: req.get('User-Agent'),
+      origin: req.get('Origin'),
+      referer: req.get('Referer'),
+      sessionId: req.sessionID,
+    };
+    
     // First ensure user is authenticated
     if (!req.user || !req.user.claims || !req.user.claims.sub) {
-      console.log('[CAPABILITY] No authenticated user found for seller access');
+      console.log('[CAPABILITY] Authentication failure for seller access:', debugInfo);
       return res.status(401).json({ message: "Authentication required" });
     }
     
