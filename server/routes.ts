@@ -3189,7 +3189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { 
         search, 
         category, 
-        limit = 20, 
+        limit = 100, 
         offset = 0 
       } = req.query;
 
@@ -3572,7 +3572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search listings with category filtering
   app.get('/api/search', async (req, res) => {
     try {
-      const { q, category, limit = 20, offset = 0 } = req.query;
+      const { q, category, limit = 100, offset = 0 } = req.query;
       
       let categoryId = category as string;
       
