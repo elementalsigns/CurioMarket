@@ -867,6 +867,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Standard session-based authentication check for all other cases
       if (req.isAuthenticated && req.isAuthenticated()) {
+        // SURGICAL FIX: Ensure req.user.claims is properly formatted for production admin access
+        if (req.user && !req.user.claims && req.user.id) {
+          // Transform session user format to claims format for admin middleware compatibility
+          req.user = {
+            claims: {
+              sub: req.user.id,
+              email: req.user.email || req.user.claims?.email
+            },
+            ...req.user
+          };
+        }
         return next();
       }
       
