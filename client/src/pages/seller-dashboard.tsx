@@ -817,22 +817,25 @@ export default function SellerDashboard() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <DollarSign className="mx-auto mb-2 text-gothic-red" size={24} />
-                    <p className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold">${stats?.totalRevenue?.toFixed(2) || "0.00"}</p>
                     <p className="text-sm text-foreground/60">Total Sales</p>
                   </div>
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <Package className="mx-auto mb-2 text-gothic-red" size={24} />
-                    <p className="text-2xl font-bold">{stats.totalOrders}</p>
+                    <p className="text-2xl font-bold">{stats?.totalOrders || 0}</p>
                     <p className="text-sm text-foreground/60">Orders Completed</p>
                   </div>
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <TrendingUp className="mx-auto mb-2 text-gothic-red" size={24} />
-                    <p className="text-2xl font-bold">${(stats.totalRevenue * 0.945).toFixed(2)}</p>
+                    <p className="text-2xl font-bold">${((stats?.totalRevenue || 0) * 0.945).toFixed(2)}</p>
                     <p className="text-sm text-foreground/60">Est. Earnings</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Pending Payouts */}
+            <PayoutTracker sellerId={seller.id} />
 
             {/* Important Payment Info */}
             <Card className="glass-effect border border-yellow-500/30 bg-yellow-500/5">
@@ -1949,5 +1952,138 @@ function SellerReviews() {
         </Card>
       ))}
     </div>
+  );
+}
+
+// PayoutTracker component to show pending earnings and next payout date
+function PayoutTracker({ sellerId }: { sellerId: string }) {
+  const { data: payoutData, isLoading } = useQuery({
+    queryKey: ['/api/seller/payouts'],
+    refetchInterval: 60000, // Refresh every minute for real-time updates
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="glass-effect">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="text-gothic-red" size={20} />
+            Pending Payouts
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gothic-red mx-auto mb-2"></div>
+            <p className="text-foreground/60">Loading payout information...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const stripeData = payoutData?.stripeData;
+
+  if (!stripeData) {
+    return (
+      <Card className="glass-effect border border-orange-500/30 bg-orange-500/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="text-gothic-red" size={20} />
+            Payout Setup Required
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-foreground/80 mb-4">
+            To receive payouts, you need to complete your Stripe account setup. This includes verifying your identity and adding your bank account details.
+          </p>
+          <Button className="w-full bg-orange-600 hover:bg-orange-700">
+            Complete Stripe Setup
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="glass-effect border border-green-500/30 bg-green-500/5">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <DollarSign className="text-gothic-red" size={20} />
+          Your Payouts
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Pending and Available Balance */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/30">
+            <DollarSign className="mx-auto mb-2 text-green-400" size={24} />
+            <p className="text-2xl font-bold text-green-400">${stripeData.pendingAmount.toFixed(2)}</p>
+            <p className="text-sm text-foreground/60">Pending Earnings</p>
+            <p className="text-xs text-foreground/40 mt-1">Processing from recent sales</p>
+          </div>
+          
+          <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
+            <TrendingUp className="mx-auto mb-2 text-blue-400" size={24} />
+            <p className="text-2xl font-bold text-blue-400">${stripeData.availableAmount.toFixed(2)}</p>
+            <p className="text-sm text-foreground/60">Available Balance</p>
+            <p className="text-xs text-foreground/40 mt-1">Ready for next payout</p>
+          </div>
+        </div>
+
+        {/* Next Payout Date */}
+        <div className="bg-muted/20 p-4 rounded-lg border border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="bg-gothic-red/20 p-2 rounded-lg">
+              <AlertCircle className="text-gothic-red" size={16} />
+            </div>
+            <div>
+              <p className="font-medium">Next Payout</p>
+              <p className="text-sm text-foreground/60">
+                Expected on <strong>{new Date(stripeData.nextPayoutDate).toLocaleDateString()}</strong>
+              </p>
+              <p className="text-xs text-foreground/40 mt-1">
+                Stripe typically processes payouts every 2 business days
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Payouts */}
+        {stripeData.recentPayouts && stripeData.recentPayouts.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-3">Recent Payouts</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {stripeData.recentPayouts.slice(0, 5).map((payout: any) => (
+                <div key={payout.id} className="flex justify-between items-center p-3 bg-muted/10 rounded-lg">
+                  <div>
+                    <p className="font-medium">${payout.amount.toFixed(2)}</p>
+                    <p className="text-xs text-foreground/60">
+                      {new Date(payout.arrivalDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Badge 
+                    variant={payout.status === 'paid' ? 'default' : 'secondary'}
+                    className={payout.status === 'paid' ? 'bg-green-600' : ''}
+                  >
+                    {payout.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Payouts Yet */}
+        {(!stripeData.recentPayouts || stripeData.recentPayouts.length === 0) && (
+          <div className="text-center p-6 bg-muted/10 rounded-lg">
+            <DollarSign className="mx-auto mb-2 text-foreground/40" size={32} />
+            <p className="text-foreground/60">No payouts yet</p>
+            <p className="text-xs text-foreground/40 mt-1">
+              Payouts will appear here once you start making sales
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

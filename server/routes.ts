@@ -4856,8 +4856,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Seller profile not found" });
       }
 
-      const payouts = await storage.getSellerPayouts(seller.id);
-      res.json(payouts);
+      // Get both local payout data and real Stripe payout information
+      const localPayouts = await storage.getSellerPayouts(seller.id);
+      
+      let stripePayoutData = null;
+      if (stripe && seller.stripeConnectAccountId) {
+        try {
+          // Get Stripe account balance (pending earnings)
+          const balance = await stripe.balance.retrieve({
+            stripeAccount: seller.stripeConnectAccountId,
+          });
+
+          // Get recent payouts from Stripe
+          const payouts = await stripe.payouts.list({
+            limit: 10,
+            stripeAccount: seller.stripeConnectAccountId,
+          });
+
+          // Calculate next payout date (Stripe typically pays out every 2 business days)
+          const now = new Date();
+          const nextPayout = new Date(now);
+          
+          // Add 2 business days
+          let businessDaysAdded = 0;
+          while (businessDaysAdded < 2) {
+            nextPayout.setDate(nextPayout.getDate() + 1);
+            // Skip weekends
+            if (nextPayout.getDay() !== 0 && nextPayout.getDay() !== 6) {
+              businessDaysAdded++;
+            }
+          }
+
+          stripePayoutData = {
+            pendingAmount: balance.pending.reduce((total: number, pending: any) => total + pending.amount, 0) / 100,
+            availableAmount: balance.available.reduce((total: number, available: any) => total + available.amount, 0) / 100,
+            currency: balance.available[0]?.currency || 'usd',
+            nextPayoutDate: nextPayout.toISOString().split('T')[0],
+            recentPayouts: payouts.data.map(payout => ({
+              id: payout.id,
+              amount: payout.amount / 100,
+              currency: payout.currency,
+              status: payout.status,
+              arrivalDate: new Date(payout.arrival_date * 1000).toISOString().split('T')[0],
+              created: new Date(payout.created * 1000).toISOString(),
+            })),
+          };
+        } catch (stripeError) {
+          console.error("Error fetching Stripe payout data:", stripeError);
+          // Continue without Stripe data if there's an error
+        }
+      }
+
+      res.json({
+        localPayouts,
+        stripeData: stripePayoutData,
+      });
     } catch (error) {
       console.error("Error fetching payouts:", error);
       res.status(500).json({ error: "Failed to fetch payouts" });
