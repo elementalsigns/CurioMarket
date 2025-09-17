@@ -213,38 +213,50 @@ export default function Header() {
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.setProperty('color', '#dc2626', 'important');
-                  e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
-                  e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
+                  if (e.currentTarget && e.currentTarget.style) {
+                    e.currentTarget.style.setProperty('color', '#dc2626', 'important');
+                    e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
+                    e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.setProperty('color', '#ffffff', 'important');
-                  e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
-                  e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
-                }}
-                onTouchStart={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.style.setProperty('color', '#dc2626', 'important');
-                  e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
-                  e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
-                }}
-                onTouchEnd={(e) => {
-                  setTimeout(() => {
+                  if (e.currentTarget && e.currentTarget.style) {
                     e.currentTarget.style.setProperty('color', '#ffffff', 'important');
                     e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
                     e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
+                  }
+                }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  if (e.currentTarget && e.currentTarget.style) {
+                    e.currentTarget.style.setProperty('color', '#dc2626', 'important');
+                    e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
+                    e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  setTimeout(() => {
+                    if (e.currentTarget && e.currentTarget.style) {
+                      e.currentTarget.style.setProperty('color', '#ffffff', 'important');
+                      e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
+                      e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
+                    }
                   }, 200);
                 }}
                 onClick={(e) => {
                   // Trigger the effect on click for all devices
-                  e.currentTarget.style.setProperty('color', '#dc2626', 'important');
-                  e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
-                  e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
-                  setTimeout(() => {
-                    e.currentTarget.style.setProperty('color', '#ffffff', 'important');
-                    e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
-                    e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
-                  }, 300);
+                  if (e.currentTarget && e.currentTarget.style) {
+                    e.currentTarget.style.setProperty('color', '#dc2626', 'important');
+                    e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
+                    e.currentTarget.style.setProperty('transform', 'scale(1.05)', 'important');
+                    setTimeout(() => {
+                      if (e.currentTarget && e.currentTarget.style) {
+                        e.currentTarget.style.setProperty('color', '#ffffff', 'important');
+                        e.currentTarget.style.setProperty('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1)', 'important');
+                        e.currentTarget.style.setProperty('transform', 'scale(1)', 'important');
+                      }
+                    }, 300);
+                  }
                 }}
               >
                 <span>
