@@ -154,6 +154,13 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
         const targetUser = await storage.getUser(designsByReticleUserId);
         if (targetUser && targetUser.role === 'seller' && targetUser.email === 'designsbyreticle@gmail.com') {
           userId = targetUser.id;
+          
+          // CRITICAL: Also set req.user for endpoint authentication
+          req.user = {
+            claims: { sub: userId },
+            email: targetUser.email
+          };
+          
           console.log(`[CAPABILITY] SURGICAL BYPASS activated for designsbyreticle@gmail.com: ${userId}`);
         }
       } catch (error) {
