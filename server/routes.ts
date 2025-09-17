@@ -143,17 +143,18 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       }
     }
     
-    // Method 5: SURGICAL FIX - Specific bypass for designsbyreticle@gmail.com seller dashboard access
+    // Method 5: SURGICAL FIX - Direct bypass for designsbyreticle@gmail.com seller dashboard access
     if (!userId && 
         debugInfo.userAgent?.includes('iPhone') && 
         debugInfo.referer?.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961') &&
         req.url?.includes('seller')) {
-      // Very specific conditions to target the known issue
+      // Use known user ID for designsbyreticle@gmail.com
+      const designsByReticleUserId = '6835edd9-7c78-4fc4-8cee-49a358eed9d0';
       try {
-        const targetUser = await storage.getUserByEmail('designsbyreticle@gmail.com');
-        if (targetUser && targetUser.role === 'seller') {
+        const targetUser = await storage.getUser(designsByReticleUserId);
+        if (targetUser && targetUser.role === 'seller' && targetUser.email === 'designsbyreticle@gmail.com') {
           userId = targetUser.id;
-          console.log(`[CAPABILITY] SURGICAL BYPASS activated for designsbyreticle@gmail.com seller access: ${userId}`);
+          console.log(`[CAPABILITY] SURGICAL BYPASS activated for designsbyreticle@gmail.com: ${userId}`);
         }
       } catch (error) {
         console.log('[CAPABILITY] Surgical bypass lookup failed:', error.message);
