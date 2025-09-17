@@ -65,6 +65,9 @@ export default function Browse() {
   // Simple fetch function without React Query complications
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     // Don't fetch until URL parameters are initialized
@@ -72,17 +75,21 @@ export default function Browse() {
     
     const fetchResults = async () => {
       setIsLoading(true);
+      setCurrentOffset(0); // Reset offset for new search
       try {
         const params = new URLSearchParams();
         if (searchQuery) params.append("q", searchQuery);
         if (filters.category) params.append("category", filters.category);
         if (filters.minPrice) params.append("minPrice", filters.minPrice);
         if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+        params.append("limit", ITEMS_PER_PAGE.toString());
+        params.append("offset", "0");
         
         const apiUrl = `/api/search?${params.toString()}`;
         const response = await fetch(apiUrl);
         const result = await response.json();
         setSearchResults(result);
+        setCurrentOffset(ITEMS_PER_PAGE);
       } catch (error) {
         console.error('Search failed:', error);
       } finally {
@@ -92,6 +99,44 @@ export default function Browse() {
 
     fetchResults();
   }, [initialized, filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
+
+  const loadMoreResults = async () => {
+    if (!searchResults || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("q", searchQuery);
+      if (filters.category) params.append("category", filters.category);
+      if (filters.minPrice) params.append("minPrice", filters.minPrice);
+      if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+      params.append("limit", ITEMS_PER_PAGE.toString());
+      params.append("offset", currentOffset.toString());
+      
+      const apiUrl = `/api/search?${params.toString()}`;
+      const response = await fetch(apiUrl);
+      const result = await response.json();
+      
+      // Append new results to existing ones
+      setSearchResults((prev: any) => ({
+        ...result,
+        listings: [...(prev.listings || []), ...(result.listings || [])],
+        shops: [...(prev.shops || []), ...(result.shops || [])]
+      }));
+      
+      setCurrentOffset(prev => prev + ITEMS_PER_PAGE);
+    } catch (error) {
+      console.error('Load more failed:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const hasMoreResults = () => {
+    if (!searchResults) return false;
+    const currentTotal = (searchResults.listings?.length || 0) + (searchResults.shops?.length || 0);
+    return currentTotal < (searchResults.total || 0);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,6 +348,34 @@ export default function Browse() {
                         />
                       ))}
                     </div>
+                  </div>
+                )}
+                
+                {/* Load More Button */}
+                {hasMoreResults() && (
+                  <div className="flex justify-center pt-8">
+                    <Button 
+                      onClick={loadMoreResults}
+                      disabled={isLoadingMore}
+                      variant="outline"
+                      size="lg"
+                      className="bg-zinc-800/50 border-zinc-700 hover:bg-zinc-700 text-white"
+                      data-testid="button-load-more"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          Load More Results
+                          <span className="ml-2 text-zinc-400">
+                            ({(searchResults.listings?.length || 0) + (searchResults.shops?.length || 0)} of {searchResults.total})
+                          </span>
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
