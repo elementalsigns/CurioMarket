@@ -3390,7 +3390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/orders/create', async (req: any, res) => {
     try {
       const { paymentIntentIds, cartItems, shippingAddress, isMultiSeller } = req.body;
-      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
       const sessionId = req.sessionID;
       
       console.log('[ORDER CREATE] Processing multi-seller order creation request');
