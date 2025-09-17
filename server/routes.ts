@@ -4921,6 +4921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe Connect onboarding
   app.post('/api/seller/stripe-onboard', requireAuth, async (req: any, res) => {
     try {
+      console.log('💰💰💰 [STRIPE-ONBOARD] Request received, user:', req.user.claims);
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
       if (!seller) {
@@ -4968,8 +4969,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json({ onboardingUrl: accountLink.url });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating Stripe Connect onboarding:", error);
+      
+      // Handle specific Stripe platform profile error
+      if (error?.type === 'StripeInvalidRequestError' && 
+          (error?.raw?.message?.includes('platform profile') || 
+           error?.message?.includes('platform profile'))) {
+        return res.status(400).json({ 
+          error: "Platform profile incomplete",
+          message: "Please complete your Stripe Connect platform profile first. Visit https://dashboard.stripe.com/connect/accounts/overview to complete the business questionnaire.",
+          needsPlatformProfile: true
+        });
+      }
+      
       res.status(500).json({ error: "Failed to create onboarding link" });
     }
   });
