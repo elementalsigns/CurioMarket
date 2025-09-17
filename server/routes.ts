@@ -4994,10 +4994,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if seller already has a Connect account
       if (seller.stripeConnectAccountId) {
         // Get existing account link for reauth if needed
+        const baseUrl = process.env.BASE_URL || `https://${req.get('host')}`;
         const accountLink = await stripe.accountLinks.create({
           account: seller.stripeConnectAccountId,
-          refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&reauth=failed`,
-          return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+          refresh_url: `${baseUrl}/seller/dashboard?tab=earnings&reauth=failed`,
+          return_url: `${baseUrl}/seller/dashboard?tab=earnings&setup=complete`,
           type: 'account_onboarding',
         });
         
@@ -5020,10 +5021,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(sellers.id, seller.id));
 
       // Create account link for onboarding
+      const baseUrl = process.env.BASE_URL || `https://${req.get('host')}`;
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=failed`,
-        return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+        refresh_url: `${baseUrl}/seller/dashboard?tab=earnings&setup=failed`,
+        return_url: `${baseUrl}/seller/dashboard?tab=earnings&setup=complete`,
         type: 'account_onboarding',
       });
 
