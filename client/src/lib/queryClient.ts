@@ -69,7 +69,16 @@ export async function apiRequest(
     }
   }
 
-  await throwIfResNotOk(res);
+  // Check if response is ok and handle errors properly
+  if (!res.ok) {
+    let errorText;
+    try {
+      errorText = await res.text();
+    } catch {
+      errorText = res.statusText;
+    }
+    throw new Error(`${res.status}: ${errorText}`);
+  }
   
   // Parse JSON response automatically for mutations
   try {
