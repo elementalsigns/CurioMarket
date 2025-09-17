@@ -518,6 +518,12 @@ export default function Header() {
                             Add Listing
                           </Button>
                         </Link>
+                        <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="ghost" className="w-full justify-start text-foreground hover:text-red-600 hover:bg-transparent transition-colors min-h-[44px] text-base">
+                            <User className="mr-3" size={18} />
+                            Your Account
+                          </Button>
+                        </Link>
                       </>
                     ) : (
                       <>
