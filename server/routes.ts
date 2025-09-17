@@ -4848,7 +4848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/seller/payouts', isAuthenticated, async (req: any, res) => {
+  app.get('/api/seller/payouts', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
@@ -4870,6 +4870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Get recent payouts from Stripe
           const payouts = await stripe.payouts.list({
             limit: 10,
+          }, {
             stripeAccount: seller.stripeConnectAccountId,
           });
 
@@ -4914,6 +4915,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching payouts:", error);
       res.status(500).json({ error: "Failed to fetch payouts" });
+    }
+  });
+
+  // Stripe Connect onboarding
+  app.post('/api/seller/stripe-onboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seller = await storage.getSellerByUserId(userId);
+      if (!seller) {
+        return res.status(404).json({ error: "Seller profile not found" });
+      }
+
+      if (!stripe) {
+        return res.status(500).json({ error: "Stripe not configured" });
+      }
+
+      // Check if seller already has a Connect account
+      if (seller.stripeConnectAccountId) {
+        // Get existing account link for reauth if needed
+        const accountLink = await stripe.accountLinks.create({
+          account: seller.stripeConnectAccountId,
+          refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&reauth=failed`,
+          return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+          type: 'account_onboarding',
+        });
+        
+        return res.json({ onboardingUrl: accountLink.url });
+      }
+
+      // Create new Connect account
+      const account = await stripe.accounts.create({
+        type: 'standard',
+        metadata: {
+          userId: userId,
+          sellerId: seller.id,
+        },
+      });
+
+      // Update seller with Connect account ID in database
+      await db
+        .update(sellers)
+        .set({ stripeConnectAccountId: account.id })
+        .where(eq(sellers.id, seller.id));
+
+      // Create account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=failed`,
+        return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/seller/dashboard?tab=earnings&setup=complete`,
+        type: 'account_onboarding',
+      });
+
+      res.json({ onboardingUrl: accountLink.url });
+    } catch (error) {
+      console.error("Error creating Stripe Connect onboarding:", error);
+      res.status(500).json({ error: "Failed to create onboarding link" });
     }
   });
 

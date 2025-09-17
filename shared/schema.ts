@@ -118,6 +118,8 @@ export const sellers = pgTable("sellers", {
   // Risk assessment
   riskScore: integer("risk_score").default(0), // 0-100, higher = riskier
   flaggedReasons: text("flagged_reasons").array(),
+  // Stripe Connect integration
+  stripeConnectAccountId: varchar("stripe_connect_account_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

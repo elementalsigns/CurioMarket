@@ -1962,6 +1962,23 @@ function PayoutTracker({ sellerId }: { sellerId: string }) {
     refetchInterval: 60000, // Refresh every minute for real-time updates
   });
 
+  const stripeOnboardMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/seller/stripe-onboard");
+    },
+    onSuccess: (data: { onboardingUrl: string }) => {
+      // Redirect to Stripe onboarding
+      window.location.href = data.onboardingUrl;
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start Stripe setup",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <Card className="glass-effect">
@@ -1996,8 +2013,13 @@ function PayoutTracker({ sellerId }: { sellerId: string }) {
           <p className="text-foreground/80 mb-4">
             To receive payouts, you need to complete your Stripe account setup. This includes verifying your identity and adding your bank account details.
           </p>
-          <Button className="w-full bg-orange-600 hover:bg-orange-700">
-            Complete Stripe Setup
+          <Button 
+            className="w-full bg-orange-600 hover:bg-orange-700"
+            onClick={() => stripeOnboardMutation.mutate()}
+            disabled={stripeOnboardMutation.isPending}
+            data-testid="button-stripe-setup"
+          >
+            {stripeOnboardMutation.isPending ? "Setting up..." : "Complete Stripe Setup"}
           </Button>
         </CardContent>
       </Card>
