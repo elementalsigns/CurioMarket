@@ -58,6 +58,32 @@ export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 
 // Event status enum
 export const eventStatusEnum = pgEnum('event_status', ['draft', 'published', 'cancelled', 'suspended', 'hidden', 'flagged', 'expired']);
 
+// Analytics event type enum
+export const analyticsEventTypeEnum = pgEnum('analytics_event_type', [
+  'view_listing',
+  'view_shop', 
+  'add_to_cart',
+  'favorite_listing',
+  'follow_shop',
+  'message_sent',
+  'order_paid',
+  'review_posted',
+  'share_click',
+  'search_impression',
+  'search_click'
+]);
+
+// Traffic source enum
+export const trafficSourceEnum = pgEnum('traffic_source', [
+  'direct',
+  'search',
+  'social',
+  'referral',
+  'email',
+  'ads',
+  'internal'
+]);
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -356,7 +382,95 @@ export const notifications = pgTable("notifications", {
   readAt: timestamp("read_at"),
 });
 
-// Seller analytics data
+// Analytics events for real-time tracking
+export const analyticsEvents = pgTable("analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id),
+  listingId: varchar("listing_id").references(() => listings.id),
+  buyerId: varchar("buyer_id").references(() => users.id),
+  sessionId: varchar("session_id"),
+  eventType: analyticsEventTypeEnum("event_type").notNull(),
+  source: trafficSourceEnum("source").default('direct'),
+  utm: jsonb("utm"), // UTM parameters
+  valueCents: integer("value_cents"), // Monetary value in cents
+  occurredAt: timestamp("occurred_at").defaultNow(),
+  userAgent: text("user_agent"),
+  ipHash: varchar("ip_hash"), // Hashed IP for privacy
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_analytics_events_seller_date").on(table.sellerId, table.occurredAt),
+  index("idx_analytics_events_listing_date").on(table.listingId, table.occurredAt),
+  index("idx_analytics_events_type").on(table.eventType),
+]);
+
+// Enhanced seller daily metrics
+export const sellerMetricsDaily = pgTable("seller_metrics_daily", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  date: timestamp("date").notNull(),
+  // Traffic metrics
+  views: integer("views").default(0),
+  uniqueVisitors: integer("unique_visitors").default(0),
+  visits: integer("visits").default(0),
+  // Conversion funnel
+  addToCarts: integer("add_to_carts").default(0),
+  orders: integer("orders").default(0),
+  unitsSold: integer("units_sold").default(0),
+  // Financial metrics
+  grossCents: integer("gross_cents").default(0),
+  netCents: integer("net_cents").default(0),
+  feesCents: integer("fees_cents").default(0),
+  refundsCents: integer("refunds_cents").default(0),
+  // Calculated metrics
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 4 }).default('0'), // Views to orders
+  averageOrderValue: decimal("average_order_value", { precision: 10, scale: 2 }).default('0'),
+  // Engagement metrics
+  favorites: integer("favorites").default(0),
+  follows: integer("follows").default(0),
+  messages: integer("messages").default(0),
+  reviews: integer("reviews").default(0),
+  avgRating: decimal("avg_rating", { precision: 3, scale: 2 }).default('0'),
+  // Traffic sources
+  directTraffic: integer("direct_traffic").default(0),
+  searchTraffic: integer("search_traffic").default(0),
+  socialTraffic: integer("social_traffic").default(0),
+  referralTraffic: integer("referral_traffic").default(0),
+  adTraffic: integer("ad_traffic").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_seller_metrics_daily_seller_date").on(table.sellerId, table.date),
+]);
+
+// Listing-level daily metrics
+export const listingMetricsDaily = pgTable("listing_metrics_daily", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  listingId: varchar("listing_id").references(() => listings.id).notNull(),
+  sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
+  date: timestamp("date").notNull(),
+  // Performance metrics
+  views: integer("views").default(0),
+  uniqueViews: integer("unique_views").default(0),
+  addToCarts: integer("add_to_carts").default(0),
+  orders: integer("orders").default(0),
+  unitsSold: integer("units_sold").default(0),
+  grossCents: integer("gross_cents").default(0),
+  favorites: integer("favorites").default(0),
+  // Search metrics
+  searchImpressions: integer("search_impressions").default(0),
+  searchClicks: integer("search_clicks").default(0),
+  searchClickRate: decimal("search_click_rate", { precision: 5, scale: 4 }).default('0'),
+  // Conversion metrics
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 4 }).default('0'),
+  cartConversionRate: decimal("cart_conversion_rate", { precision: 5, scale: 4 }).default('0'),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_listing_metrics_daily_listing_date").on(table.listingId, table.date),
+  index("idx_listing_metrics_daily_seller_date").on(table.sellerId, table.date),
+]);
+
+// Legacy seller analytics (keep for compatibility)
 export const sellerAnalytics = pgTable("seller_analytics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sellerId: varchar("seller_id").references(() => sellers.id).notNull(),
@@ -574,6 +688,21 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
 
+export const analyticsEventsRelations = relations(analyticsEvents, ({ one }) => ({
+  seller: one(sellers, { fields: [analyticsEvents.sellerId], references: [sellers.id] }),
+  listing: one(listings, { fields: [analyticsEvents.listingId], references: [listings.id] }),
+  buyer: one(users, { fields: [analyticsEvents.buyerId], references: [users.id] }),
+}));
+
+export const sellerMetricsDailyRelations = relations(sellerMetricsDaily, ({ one }) => ({
+  seller: one(sellers, { fields: [sellerMetricsDaily.sellerId], references: [sellers.id] }),
+}));
+
+export const listingMetricsDailyRelations = relations(listingMetricsDaily, ({ one }) => ({
+  listing: one(listings, { fields: [listingMetricsDaily.listingId], references: [listings.id] }),
+  seller: one(sellers, { fields: [listingMetricsDaily.sellerId], references: [sellers.id] }),
+}));
+
 export const sellerAnalyticsRelations = relations(sellerAnalytics, ({ one }) => ({
   seller: one(sellers, { fields: [sellerAnalytics.sellerId], references: [sellers.id] }),
 }));
@@ -671,6 +800,24 @@ export const insertIdentityVerificationSessionSchema = createInsertSchema(identi
   createdAt: true,
 });
 
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents).omit({
+  id: true,
+  createdAt: true,
+  occurredAt: true,
+});
+
+export const insertSellerMetricsDailySchema = createInsertSchema(sellerMetricsDaily).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertListingMetricsDailySchema = createInsertSchema(listingMetricsDaily).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -708,6 +855,12 @@ export type VerificationTemplate = typeof verificationTemplates.$inferSelect;
 export type SellerReviewQueueItem = typeof sellerReviewQueue.$inferSelect;
 export type InsertSellerReviewQueueItem = z.infer<typeof insertSellerReviewQueueSchema>;
 export type VerificationAuditLog = typeof verificationAuditLog.$inferSelect;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+export type SellerMetricsDaily = typeof sellerMetricsDaily.$inferSelect;
+export type InsertSellerMetricsDaily = z.infer<typeof insertSellerMetricsDailySchema>;
+export type ListingMetricsDaily = typeof listingMetricsDaily.$inferSelect;
+export type InsertListingMetricsDaily = z.infer<typeof insertListingMetricsDailySchema>;
 export type IdentityVerificationSession = typeof identityVerificationSessions.$inferSelect;
 export type InsertIdentityVerificationSession = z.infer<typeof insertIdentityVerificationSessionSchema>;
 
