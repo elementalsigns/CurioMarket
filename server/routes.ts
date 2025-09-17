@@ -4919,7 +4919,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe Connect onboarding
-  app.post('/api/seller/stripe-onboard', isAuthenticated, async (req: any, res) => {
+  app.post('/api/seller/stripe-onboard', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const seller = await storage.getSellerByUserId(userId);
