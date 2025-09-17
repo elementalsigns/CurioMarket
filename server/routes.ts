@@ -89,6 +89,22 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
           ...user,
           role: 'seller' as const
         });
+        
+        // CRITICAL FIX: Create seller profile if it doesn't exist
+        const existingSeller = await storage.getSellerByUserId(userId);
+        if (!existingSeller) {
+          console.log(`[WEBHOOK] Creating seller profile for user ${userId}`);
+          await storage.createSeller({
+            userId: userId,
+            shopName: user.email || `Seller ${userId}`,
+            bio: 'Welcome to my shop!',
+            isActive: true,
+            verificationStatus: 'approved'
+          });
+          console.log(`[WEBHOOK] ✅ Seller profile created for user ${userId}`);
+        } else {
+          console.log(`[WEBHOOK] Seller profile already exists for user ${userId}`);
+        }
       }
     } else {
       console.error(`[WEBHOOK] User ${userId} not found in database for subscription ${subscription.id}`);
