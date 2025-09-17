@@ -43,8 +43,6 @@ export default function Home() {
     enabled: !!user,
   });
 
-  // Show that you have wishlists (simplified approach)
-  const favoriteItemsCount = wishlists?.length > 0 ? 1 : 0;
 
   const { data: sellerProfile } = useQuery({
     queryKey: ["/api/seller/profile"],
