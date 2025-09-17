@@ -35,6 +35,7 @@ function isAdmin(user: User): boolean {
 /**
  * Check if a user has seller access (seller role, admin role, or valid seller profile)
  * This implements capability-based authorization for seller endpoints
+ * NOTE: Relies on cached database data - no live Stripe calls for performance
  */
 async function hasSellerAccess(user: User): Promise<boolean> {
   // Admin users always have seller access
@@ -60,18 +61,12 @@ async function hasSellerAccess(user: User): Promise<boolean> {
     console.error(`[CAPABILITY] Error checking seller profile for user ${user.id}:`, error);
   }
   
-  // Check for active Stripe subscription (handles edge cases)
-  if (user.stripeSubscriptionId && stripe) {
-    try {
-      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      const eligibleStatuses = ['active', 'trialing', 'past_due'];
-      if (eligibleStatuses.includes(subscription.status)) {
-        console.log(`[CAPABILITY] User ${user.id} has active subscription, granted seller access`);
-        return true;
-      }
-    } catch (error) {
-      console.log(`[CAPABILITY] Could not verify subscription for user ${user.id}:`, error);
-    }
+  // Fallback: Check if user has cached subscription data (updated via webhooks)
+  // This avoids live Stripe calls for better performance
+  if (user.stripeSubscriptionId) {
+    console.log(`[CAPABILITY] User ${user.id} has subscription ID ${user.stripeSubscriptionId} but no seller role/profile - may need webhook sync`);
+    // Don't grant access here - rely on webhooks to properly sync user roles
+    // This prevents inconsistent states and forces proper role management
   }
   
   console.log(`[CAPABILITY] User ${user.id} denied seller access`);
@@ -81,6 +76,7 @@ async function hasSellerAccess(user: User): Promise<boolean> {
 /**
  * Middleware that requires seller access using capability-based authorization
  * Replaces strict role === 'seller' checks to support admin users
+ * Auto-provisions seller profiles for admin users who don't have one
  */
 const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
   try {
@@ -105,7 +101,49 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       return res.status(403).json({ message: "Seller access required" });
     }
     
-    console.log(`[CAPABILITY] User ${userId} granted seller access`);
+    // AUTO-PROVISIONING: If user is admin and doesn't have seller profile, create one
+    if (user.role === 'admin') {
+      try {
+        let sellerProfile = await storage.getSellerByUserId(userId);
+        
+        if (!sellerProfile) {
+          console.log(`[CAPABILITY] Auto-provisioning seller profile for admin user ${userId}`);
+          sellerProfile = await storage.createSeller({
+            userId: userId,
+            shopName: `${user.email || userId} Admin Shop`,
+            bio: 'Administrator seller profile - auto-provisioned',
+            isActive: true,
+            verificationStatus: 'approved' // Admins are pre-approved
+          });
+          console.log(`[CAPABILITY] ✅ Created seller profile ${sellerProfile.id} for admin user ${userId}`);
+        } else if (!sellerProfile.isActive) {
+          // Reactivate existing but inactive profile for admin
+          await storage.updateSeller(sellerProfile.id, { isActive: true });
+          console.log(`[CAPABILITY] ✅ Reactivated seller profile ${sellerProfile.id} for admin user ${userId}`);
+        }
+        
+        // Attach seller info to request for downstream handlers
+        req.sellerId = sellerProfile.id;
+        req.sellerProfile = sellerProfile;
+        
+      } catch (provisionError) {
+        console.error(`[CAPABILITY] Error auto-provisioning seller profile for admin ${userId}:`, provisionError);
+        // Don't fail the request - admin might still be able to access some seller functionality
+      }
+    } else {
+      // For non-admin users, just try to get existing seller profile
+      try {
+        const sellerProfile = await storage.getSellerByUserId(userId);
+        if (sellerProfile) {
+          req.sellerId = sellerProfile.id;
+          req.sellerProfile = sellerProfile;
+        }
+      } catch (error) {
+        console.error(`[CAPABILITY] Error getting seller profile for user ${userId}:`, error);
+      }
+    }
+    
+    console.log(`[CAPABILITY] User ${userId} granted seller access with seller ID: ${req.sellerId || 'none'}`);
     return next();
   } catch (error) {
     console.error('[CAPABILITY] Error in requireSellerAccess middleware:', error);
@@ -3195,17 +3233,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== LISTING MANAGEMENT ====================
   
   // Create listing
-  app.post('/api/listings', requireAuth, async (req: any, res) => {
+  app.post('/api/listings', requireSellerAccess, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const seller = await storage.getSellerByUserId(userId);
-      
-      if (!seller) {
+      // Seller profile and ID already validated and attached by requireSellerAccess middleware
+      if (!req.sellerId) {
         return res.status(403).json({ error: "Seller profile required" });
       }
 
       const listingData = insertListingSchema.parse({
-        sellerId: seller.id,
+        sellerId: req.sellerId,
         ...req.body
       });
 
@@ -3336,18 +3372,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update listing
-  app.put('/api/listings/:id', requireAuth, async (req: any, res) => {
+  app.put('/api/listings/:id', requireSellerAccess, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const seller = await storage.getSellerByUserId(userId);
-      
-      if (!seller) {
+      // Seller profile and ID already validated and attached by requireSellerAccess middleware
+      if (!req.sellerId) {
         return res.status(403).json({ error: "Seller profile required" });
       }
 
       const listing = await storage.getListing(req.params.id);
-      if (!listing || listing.sellerId !== seller.id) {
+      if (!listing) {
         return res.status(404).json({ error: "Listing not found" });
+      }
+
+      // OWNERSHIP VALIDATION: Ensure user can only modify their own listings (admin bypass)
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (user.role !== 'admin' && listing.sellerId !== req.sellerId) {
+        return res.status(403).json({ error: "You can only modify your own listings" });
       }
 
       // If title changed, regenerate the slug
@@ -3385,19 +3429,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete listing (POST workaround for proxy compatibility)
-  app.post('/api/listings/:id/delete', requireAuth, async (req: any, res) => {
+  app.post('/api/listings/:id/delete', requireSellerAccess, async (req: any, res) => {
     console.log(`[DELETE-POST] Starting delete for listing ${req.params.id}`);
     try {
-      console.log(`[DELETE-AUTH] Checking authentication...`);
-      if (!req.user || !req.user.claims || !req.user.claims.sub) {
-        console.log(`[DELETE-AUTH] Authentication failed - no user data`);
-        return res.status(401).json({ error: "Authentication required" });
+      // Seller profile and ID already validated and attached by requireSellerAccess middleware
+      if (!req.sellerId) {
+        console.log(`[DELETE-AUTH] No seller ID - seller profile required`);
+        return res.status(403).json({ error: "Seller profile required" });
       }
 
-      const userId = req.user.claims.sub;
       const listingId = req.params.id;
+      const listing = await storage.getListing(listingId);
+      
+      if (!listing) {
+        console.log(`[DELETE-ERROR] Listing ${listingId} not found`);
+        return res.status(404).json({ error: "Listing not found" });
+      }
 
-      console.log(`[DELETE-DELETE] Attempting to delete listing ${listingId} for user ${userId}`);
+      // OWNERSHIP VALIDATION: Ensure user can only delete their own listings (admin bypass)
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (user.role !== 'admin' && listing.sellerId !== req.sellerId) {
+        console.log(`[DELETE-ERROR] User ${req.user.claims.sub} attempting to delete listing owned by ${listing.sellerId}`);
+        return res.status(403).json({ error: "You can only delete your own listings" });
+      }
+
+      console.log(`[DELETE-DELETE] Attempting to delete listing ${listingId} for seller ${req.sellerId}`);
       await storage.deleteListing(listingId);
       
       console.log(`[DELETE-SUCCESS] Successfully deleted listing ${listingId}`);
@@ -3413,41 +3473,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`[DELETE-PRE-AUTH] Raw DELETE request received for listing ${req.params.id}`);
     console.log(`[DELETE-PRE-AUTH] Method: ${req.method}, URL: ${req.url}`);
     next();
-  }, requireAuth, async (req: any, res) => {
+  }, requireSellerAccess, async (req: any, res) => {
     console.log(`[DELETE-REQUEST] Starting delete for listing ${req.params.id}`);
     try {
-      console.log(`[DELETE-AUTH] Checking authentication...`);
-      if (!req.user || !req.user.claims || !req.user.claims.sub) {
-        console.log(`[DELETE-AUTH] Authentication failed - no user data`);
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      
-      const userId = req.user.claims.sub;
-      console.log(`[DELETE-AUTH] User ID: ${userId}`);
-      
-      console.log(`[DELETE-SELLER] Getting seller by user ID...`);
-      const seller = await storage.getSellerByUserId(userId);
-      
-      if (!seller) {
-        console.log(`[DELETE-SELLER] No seller found for user ${userId}`);
+      // Seller profile and ID already validated and attached by requireSellerAccess middleware
+      if (!req.sellerId) {
+        console.log(`[DELETE-AUTH] No seller ID - seller profile required`);
         return res.status(403).json({ error: "Seller profile required" });
       }
       
-      console.log(`[DELETE-SELLER] Seller found: ${seller.id}`);
+      console.log(`[DELETE-SELLER] Seller ID: ${req.sellerId}`);
 
       console.log(`[DELETE-LISTING] Getting listing ${req.params.id}...`);
       const listing = await storage.getListing(req.params.id);
-      if (!listing || listing.sellerId !== seller.id) {
-        console.log(`[DELETE-LISTING] Listing not found or not owned by seller`);
+      
+      if (!listing) {
+        console.log(`[DELETE-LISTING] Listing ${req.params.id} not found`);
         return res.status(404).json({ error: "Listing not found" });
       }
+
+      // OWNERSHIP VALIDATION: Ensure user can only delete their own listings (admin bypass)
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
       
-      console.log(`[DELETE-LISTING] Listing found, owned by seller`);
+      if (user.role !== 'admin' && listing.sellerId !== req.sellerId) {
+        console.log(`[DELETE-LISTING] User ${req.user.claims.sub} attempting to delete listing owned by ${listing.sellerId}`);
+        return res.status(403).json({ error: "You can only delete your own listings" });
+      }
+      
+      console.log(`[DELETE-LISTING] Listing found, ownership validated`);
 
       console.log(`[DELETE-OPERATION] Deleting listing...`);
       await storage.deleteListing(req.params.id);
       
-      console.log(`[DELETE-SUCCESS] Deleted listing ${req.params.id} for seller ${seller.id}`);
+      console.log(`[DELETE-SUCCESS] Deleted listing ${req.params.id} for seller ${req.sellerId}`);
       
       res.json({ success: true, message: "Listing deleted successfully" });
     } catch (error) {
