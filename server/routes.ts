@@ -727,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create one PaymentIntent per seller using Direct Charges
       for (const [sellerId, items] of Object.entries(sellerGroups)) {
         // Get seller's connected account
-        const seller = await storage.getSellerById(sellerId);
+        const seller = await storage.getSellerByUserId(sellerId);
         if (!seller?.stripeConnectAccountId) {
           return res.status(400).json({ 
             error: `Seller account not set up for payments. Please contact support.`,
