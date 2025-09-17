@@ -688,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== PAYMENT PROCESSING (BEFORE AUTH) ====================
   
-  // Create payment intent for purchase - works for both authenticated and guest users
+  // Create payment intents for purchase - Direct Charges per seller with application fees
   app.post("/api/create-payment-intent", async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
@@ -698,54 +698,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { cartItems, shippingAddress } = req.body;
       const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
       
-      console.log('[PAYMENT-INTENT] Creating payment intent for', cartItems?.length || 0, 'items');
+      console.log('[PAYMENT-INTENT] Creating payment intents for', cartItems?.length || 0, 'items');
       
-      // Calculate totals
-      let subtotal = 0;
-      let shippingCost = 0;
+      // Group cart items by seller
+      const sellerGroups: { [sellerId: string]: any[] } = {};
       
       for (const item of cartItems) {
         const listing = await storage.getListing(item.listingId);
         if (listing) {
-          subtotal += parseFloat(listing.price) * (item.quantity || 1);
-          shippingCost += parseFloat(listing.shippingCost || '0');
+          if (!sellerGroups[listing.sellerId]) {
+            sellerGroups[listing.sellerId] = [];
+          }
+          sellerGroups[listing.sellerId].push({
+            ...item,
+            listing,
+            itemTotal: parseFloat(listing.price) * (item.quantity || 1),
+            shipping: parseFloat(listing.shippingCost || '0')
+          });
         }
       }
       
-      const platformFee = subtotal * (PLATFORM_FEE_PERCENT / 100);
-      const total = subtotal + shippingCost;
-
-      // Stripe minimum amount validation
-      const STRIPE_MINIMUM_USD = 0.50;
-      if (total < STRIPE_MINIMUM_USD) {
-        console.log(`[PAYMENT-INTENT] Amount $${total} is below Stripe minimum $${STRIPE_MINIMUM_USD}`);
-        return res.status(400).json({ 
-          error: `Order total must be at least $${STRIPE_MINIMUM_USD} USD. Current total: $${total.toFixed(2)}` 
-        });
-      }
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(total * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          userId: userId || 'guest',
-          subtotal: subtotal.toString(),
-          shippingCost: shippingCost.toString(),
-          platformFee: platformFee.toString(),
-        },
-      });
+      console.log('[PAYMENT-INTENT] Grouped into', Object.keys(sellerGroups).length, 'seller groups');
       
-      console.log('[PAYMENT-INTENT] Successfully created payment intent:', paymentIntent.id);
+      const paymentIntents = [];
+      let totalAmount = 0;
+      let totalPlatformFee = 0;
+      
+      // Create one PaymentIntent per seller using Direct Charges
+      for (const [sellerId, items] of Object.entries(sellerGroups)) {
+        // Get seller's connected account
+        const seller = await storage.getSellerById(sellerId);
+        if (!seller?.stripeConnectAccountId) {
+          return res.status(400).json({ 
+            error: `Seller account not set up for payments. Please contact support.`,
+            sellerId 
+          });
+        }
+        
+        // Calculate seller totals
+        const sellerSubtotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
+        const sellerShipping = items.reduce((sum, item) => sum + item.shipping, 0);
+        const sellerTotal = sellerSubtotal + sellerShipping;
+        
+        // Platform fee based on item subtotal only (not shipping)
+        const applicationFeeAmount = Math.round(sellerSubtotal * (PLATFORM_FEE_PERCENT / 100) * 100);
+        
+        // Stripe minimum validation per seller
+        const STRIPE_MINIMUM_USD = 0.50;
+        if (sellerTotal < STRIPE_MINIMUM_USD) {
+          return res.status(400).json({ 
+            error: `Order total for seller must be at least $${STRIPE_MINIMUM_USD} USD. Current: $${sellerTotal.toFixed(2)}`,
+            sellerId: seller.shopName
+          });
+        }
+        
+        console.log(`[PAYMENT-INTENT] Seller ${seller.shopName}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
+        
+        // Create Direct Charge PaymentIntent on connected account
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(sellerTotal * 100), // Convert to cents
+          currency: "usd",
+          application_fee_amount: applicationFeeAmount,
+          automatic_payment_methods: { enabled: true },
+          metadata: {
+            userId: userId || 'guest',
+            sellerId: sellerId,
+            sellerSubtotal: sellerSubtotal.toString(),
+            sellerShipping: sellerShipping.toString(),
+            platformFeeAmount: (applicationFeeAmount / 100).toString(),
+            itemsCount: items.length.toString(),
+            cartGroupId: Date.now().toString() // For order reconciliation
+          },
+        }, {
+          stripeAccount: seller.stripeConnectAccountId // Direct Charge to connected account
+        });
+        
+        paymentIntents.push({
+          sellerId: sellerId,
+          sellerName: seller.shopName,
+          clientSecret: paymentIntent.client_secret,
+          amount: sellerTotal,
+          subtotal: sellerSubtotal,
+          shipping: sellerShipping,
+          platformFee: applicationFeeAmount / 100,
+          items: items.map(item => ({
+            listingId: item.listingId,
+            title: item.listing.title,
+            quantity: item.quantity || 1,
+            price: item.listing.price
+          }))
+        });
+        
+        totalAmount += sellerTotal;
+        totalPlatformFee += applicationFeeAmount / 100;
+      }
+      
+      console.log('[PAYMENT-INTENT] Created', paymentIntents.length, 'payment intents, total:', totalAmount);
 
       res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        total,
-        subtotal,
-        shippingCost,
-        platformFee
+        paymentIntents,
+        totalAmount,
+        totalPlatformFee,
+        sellersCount: paymentIntents.length
       });
     } catch (error: any) {
-      console.error("Error creating payment intent:", error);
+      console.error("Error creating payment intents:", error);
       res.status(500).json({ error: error.message });
     }
   });
