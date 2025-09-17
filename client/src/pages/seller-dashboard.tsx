@@ -286,16 +286,119 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
   }
 
   if (!analytics || typeof analytics !== 'object') {
+    // Calculate basic analytics from existing dashboard data
+    const orders = dashboardData?.orders || [];
+    const listings = dashboardData?.listings || [];
+    const stats = dashboardData?.stats || {};
+    
+    const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.total || 0), 0);
+    const totalOrders = orders.length;
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const totalViews = listings.reduce((sum: number, listing: any) => sum + (listing.views || 0), 0);
+    
     return (
-      <Card className="glass-effect">
-        <CardContent className="p-8 text-center">
-          <TrendingUp className="mx-auto mb-4 text-gothic-red" size={48} />
-          <h3 className="text-xl font-serif font-bold mb-2">Analytics Coming Soon</h3>
-          <p className="text-foreground/70">
-            Your detailed analytics will appear here once you have more activity.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6" data-testid="analytics-overview">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-serif font-bold">Analytics Overview</h2>
+          <p className="text-sm text-foreground/60">Based on current data</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Revenue</p>
+                  <p className="text-2xl font-bold text-green-500" data-testid="analytics-revenue">
+                    ${totalRevenue.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-green-500/70">
+                    From {totalOrders} orders
+                  </p>
+                </div>
+                <DollarSign className="text-green-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Orders</p>
+                  <p className="text-2xl font-bold text-blue-500" data-testid="analytics-orders">
+                    {totalOrders}
+                  </p>
+                  <p className="text-xs text-blue-500/70">
+                    Avg: ${averageOrderValue.toFixed(2)}
+                  </p>
+                </div>
+                <ShoppingCart className="text-blue-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Views</p>
+                  <p className="text-2xl font-bold text-purple-500" data-testid="analytics-views">
+                    {totalViews}
+                  </p>
+                  <p className="text-xs text-purple-500/70">
+                    Across {listings.length} listings
+                  </p>
+                </div>
+                <Eye className="text-purple-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Avg Rating</p>
+                  <p className="text-2xl font-bold text-yellow-500" data-testid="analytics-rating">
+                    {stats.averageRating?.toFixed(1) || '0.0'}
+                  </p>
+                  <p className="text-xs text-yellow-500/70">
+                    {stats.totalReviews || 0} reviews
+                  </p>
+                </div>
+                <Star className="text-yellow-500" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {totalOrders > 0 && (
+          <Card className="glass-effect">
+            <CardHeader>
+              <CardTitle className="text-foreground">Recent Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-500">{stats.pendingOrders || 0}</div>
+                  <div className="text-sm text-foreground/60">Pending Orders</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-500">{stats.published || 0}</div>
+                  <div className="text-sm text-foreground/60">Active Listings</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-500">
+                    {totalOrders > 0 ? ((totalViews / totalOrders) * 0.1).toFixed(1) : '0.0'}%
+                  </div>
+                  <div className="text-sm text-foreground/60">Est. Conversion</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     );
   }
 
