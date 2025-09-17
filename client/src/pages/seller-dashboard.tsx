@@ -911,12 +911,12 @@ export default function SellerDashboard() {
           </TabsList>
 
           {/* Analytics Tab - NEW COMPREHENSIVE ANALYTICS SECTION */}
-          <TabsContent value="analytics" className="space-y-6" data-testid="content-analytics">
+          <TabsContent value="analytics" className="space-y-6 pb-16 sm:pb-0" data-testid="content-analytics">
             <AnalyticsOverview sellerId={seller.id} />
           </TabsContent>
 
           {/* Listings Tab */}
-          <TabsContent value="listings" className="space-y-4" data-testid="content-listings">
+          <TabsContent value="listings" className="space-y-4 pb-16 sm:pb-0" data-testid="content-listings">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-serif font-bold">Your Listings</h2>
               <Link to="/seller/listings/create">
@@ -995,7 +995,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Inventory Tab */}
-          <TabsContent value="inventory" className="space-y-4" data-testid="content-inventory">
+          <TabsContent value="inventory" className="space-y-4 pb-16 sm:pb-0" data-testid="content-inventory">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Inventory Management</h2>
               <Link to="/seller/inventory-management">
@@ -1023,7 +1023,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Orders Tab */}
-          <TabsContent value="orders" className="space-y-4" data-testid="content-orders">
+          <TabsContent value="orders" className="space-y-4 pb-16 sm:pb-0" data-testid="content-orders">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Recent Orders</h2>
               <Link to="/seller/orders">
@@ -1077,7 +1077,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Earnings & Payments Tab */}
-          <TabsContent value="earnings" className="space-y-4" data-testid="content-earnings">
+          <TabsContent value="earnings" className="space-y-4 pb-16 sm:pb-0" data-testid="content-earnings">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Earnings & Payments</h2>
               <div className="flex items-center gap-2">
@@ -1206,7 +1206,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Reviews Tab */}
-          <TabsContent value="reviews" className="space-y-4" data-testid="content-reviews">
+          <TabsContent value="reviews" className="space-y-4 pb-16 sm:pb-0" data-testid="content-reviews">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Customer Reviews</h2>
               <div className="flex items-center gap-2">
@@ -1221,7 +1221,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Messages Tab */}
-          <TabsContent value="messages" className="space-y-4" data-testid="content-messages">
+          <TabsContent value="messages" className="space-y-4 pb-16 sm:pb-0" data-testid="content-messages">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Customer Messages</h2>
               <Badge variant="secondary" className="bg-red-600 text-white">
@@ -1238,7 +1238,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Promotions Tab */}
-          <TabsContent value="promotions" className="space-y-4" data-testid="content-promotions">
+          <TabsContent value="promotions" className="space-y-4 pb-16 sm:pb-0" data-testid="content-promotions">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif font-bold">Discount Codes & Promotions</h2>
               <PromotionDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: ["/api/seller/promotions"] })} />
@@ -1248,7 +1248,7 @@ export default function SellerDashboard() {
           </TabsContent>
 
           {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-4" data-testid="content-profile">
+          <TabsContent value="profile" className="space-y-4 pb-16 sm:pb-0" data-testid="content-profile">
             <ShopProfileManager seller={seller} />
           </TabsContent>
         </Tabs>
