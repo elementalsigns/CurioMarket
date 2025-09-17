@@ -105,6 +105,7 @@ export interface IStorage {
   // Order operations
   createOrder(order: Partial<Order>): Promise<Order>;
   getOrder(id: string): Promise<Order | undefined>;
+  getOrderByPaymentIntentId(paymentIntentId: string): Promise<Order | undefined>;
   getUserOrders(userId: string): Promise<Order[]>;
   getSellerOrders(sellerId: string): Promise<Order[]>;
   updateOrderStatus(id: string, status: string): Promise<Order>;
@@ -667,6 +668,11 @@ export class DatabaseStorage implements IStorage {
 
   async getOrder(id: string): Promise<Order | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order;
+  }
+
+  async getOrderByPaymentIntentId(paymentIntentId: string): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.stripePaymentIntentId, paymentIntentId));
     return order;
   }
 

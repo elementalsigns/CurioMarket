@@ -488,8 +488,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          console.log(`[WEBHOOK] Payment intent succeeded: ${paymentIntent.id}`);
-          await handleOrderCompletion(paymentIntent);
+          console.log(`[WEBHOOK] Payment intent succeeded: ${paymentIntent.id} - SKIPPING webhook order creation to prevent duplicates`);
+          // DISABLED: await handleOrderCompletion(paymentIntent);
+          // Orders are now created via /api/orders/create endpoint only to prevent race conditions
           break;
         
         default:
@@ -803,6 +804,287 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error creating payment intents:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
+  app.post("/api/cart/checkout", async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const { shippingAddress } = req.body;
+      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const sessionId = req.sessionID;
+      
+      // Get cart items
+      const cart = await storage.getOrCreateCart(userId, sessionId);
+      const cartItems = await storage.getCartItems(cart.id);
+      
+      if (!cartItems || cartItems.length === 0) {
+        return res.status(400).json({ error: "Cart is empty" });
+      }
+      
+      console.log('[CART-CHECKOUT] Creating checkout for', cartItems.length, 'items');
+      
+      // Group cart items by seller (reuse existing logic)
+      const sellerGroups: { [sellerId: string]: any[] } = {};
+      
+      for (const item of cartItems) {
+        const listing = await storage.getListing(item.listingId);
+        if (listing) {
+          if (!sellerGroups[listing.sellerId]) {
+            sellerGroups[listing.sellerId] = [];
+          }
+          sellerGroups[listing.sellerId].push({
+            ...item,
+            listing,
+            itemTotal: parseFloat(listing.price) * (item.quantity || 1),
+            shipping: parseFloat(listing.shippingCost || '0')
+          });
+        }
+      }
+      
+      console.log('[CART-CHECKOUT] Grouped into', Object.keys(sellerGroups).length, 'seller groups');
+      
+      // Create SetupIntent for capturing reusable payment method
+      const setupIntent = await stripe.setupIntents.create({
+        usage: 'off_session', // Allow saving for future use
+        metadata: {
+          userId: userId || 'guest',
+          cartId: cart.id,
+          checkoutType: 'multi_seller'
+        }
+      });
+      
+      console.log('[CART-CHECKOUT] Created SetupIntent:', setupIntent.id);
+      
+      const paymentIntents = [];
+      let totalAmount = 0;
+      let totalPlatformFee = 0;
+      
+      // Create one PaymentIntent per seller using Direct Charges (no automatic payment methods)
+      for (const [sellerId, items] of Object.entries(sellerGroups)) {
+        // Get seller's connected account
+        const seller = await storage.getSellerByUserId(sellerId);
+        if (!seller?.stripeConnectAccountId) {
+          return res.status(400).json({ 
+            error: `Seller account not set up for payments. Please contact support.`,
+            sellerId 
+          });
+        }
+        
+        // Calculate seller totals
+        const sellerSubtotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
+        const sellerShipping = items.reduce((sum, item) => sum + item.shipping, 0);
+        const sellerTotal = sellerSubtotal + sellerShipping;
+        
+        // Platform fee based on item subtotal only (not shipping)
+        const applicationFeeAmount = Math.round(sellerSubtotal * (PLATFORM_FEE_PERCENT / 100) * 100);
+        
+        // Stripe minimum validation per seller
+        const STRIPE_MINIMUM_USD = 0.50;
+        if (sellerTotal < STRIPE_MINIMUM_USD) {
+          return res.status(400).json({ 
+            error: `Order total for seller must be at least $${STRIPE_MINIMUM_USD} USD. Current: $${sellerTotal.toFixed(2)}`,
+            sellerId: seller.shopName
+          });
+        }
+        
+        // ✅ ENHANCED FEE LOGGING for verification
+        console.log(`[CART-CHECKOUT] 💰 Fee Calculation for ${seller.shopName}:`);
+        console.log(`[CART-CHECKOUT]   • Item Subtotal: $${sellerSubtotal.toFixed(2)}`);
+        console.log(`[CART-CHECKOUT]   • Shipping Cost: $${sellerShipping.toFixed(2)}`);
+        console.log(`[CART-CHECKOUT]   • Total Charge: $${sellerTotal.toFixed(2)}`);
+        console.log(`[CART-CHECKOUT]   • Platform Fee: $${(applicationFeeAmount/100).toFixed(2)} (${PLATFORM_FEE_PERCENT}% of subtotal)`);
+        console.log(`[CART-CHECKOUT]   • Seller Receives: $${(sellerTotal - (applicationFeeAmount/100)).toFixed(2)}`);
+        
+        // Create Direct Charge PaymentIntent on connected account (manual confirmation)
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(sellerTotal * 100), // Convert to cents
+          currency: "usd",
+          application_fee_amount: applicationFeeAmount,
+          confirmation_method: 'manual', // We'll confirm manually with saved payment method
+          metadata: {
+            userId: userId || 'guest',
+            sellerId: sellerId,
+            sellerSubtotal: sellerSubtotal.toString(),
+            sellerShipping: sellerShipping.toString(),
+            platformFeeAmount: (applicationFeeAmount / 100).toString(),
+            itemsCount: items.length.toString(),
+            cartGroupId: Date.now().toString(), // For order reconciliation
+            setupIntentId: setupIntent.id // Link to SetupIntent
+          },
+        }, {
+          stripeAccount: seller.stripeConnectAccountId // Direct Charge to connected account
+        });
+        
+        paymentIntents.push({
+          sellerId: sellerId,
+          sellerName: seller.shopName,
+          clientSecret: paymentIntent.client_secret,
+          paymentIntentId: paymentIntent.id,
+          amount: Math.round(sellerTotal * 100), // Convert to cents for frontend consistency
+          subtotal: Math.round(sellerSubtotal * 100), // Convert to cents
+          shipping: Math.round(sellerShipping * 100), // Convert to cents
+          platformFee: applicationFeeAmount, // Already in cents
+          stripeAccount: seller.stripeConnectAccountId,
+          items: items.map(item => ({
+            listingId: item.listingId,
+            title: item.listing.title,
+            quantity: item.quantity || 1,
+            price: item.listing.price
+          }))
+        });
+        
+        totalAmount += sellerTotal;
+        totalPlatformFee += applicationFeeAmount / 100;
+      }
+      
+      console.log('[CART-CHECKOUT] Created', paymentIntents.length, 'payment intents, total:', totalAmount);
+
+      res.json({ 
+        setupIntentClientSecret: setupIntent.client_secret,
+        setupIntentId: setupIntent.id,
+        paymentIntents,
+        totalAmount,
+        totalPlatformFee,
+        sellersCount: paymentIntents.length,
+        cartId: cart.id
+      });
+    } catch (error: any) {
+      console.error("Error creating cart checkout:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Payment confirmation endpoint - confirms PaymentIntent using saved payment method
+  app.post("/api/payments/confirm", async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const { paymentIntentId, paymentMethodId, sellerId, shippingAddress } = req.body;
+      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const sessionId = req.sessionID;
+      
+      if (!paymentIntentId || !paymentMethodId) {
+        return res.status(400).json({ 
+          error: "Missing required fields: paymentIntentId and paymentMethodId" 
+        });
+      }
+      
+      console.log(`[PAYMENT-CONFIRM] Confirming payment ${paymentIntentId} with method ${paymentMethodId} for seller ${sellerId}`);
+      
+      // Get seller's connected account
+      const seller = await storage.getSellerByUserId(sellerId);
+      if (!seller?.stripeConnectAccountId) {
+        return res.status(400).json({ 
+          error: `Seller account not set up for payments`,
+          sellerId 
+        });
+      }
+      
+      // SECURITY: First retrieve the PaymentIntent to validate metadata and authorization
+      const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
+        stripeAccount: seller.stripeConnectAccountId
+      });
+      
+      // SECURITY: Validate that this PaymentIntent belongs to the current user/session
+      const paymentUserId = existingPaymentIntent.metadata?.userId;
+      if (!paymentUserId || (paymentUserId !== (userId || 'guest'))) {
+        console.error(`[PAYMENT-CONFIRM] Authorization failed: Payment user ${paymentUserId} vs current user ${userId || 'guest'}`);
+        return res.status(403).json({ 
+          error: "Unauthorized: Payment does not belong to current user" 
+        });
+      }
+      
+      // SECURITY: Additional validation for seller match
+      if (existingPaymentIntent.metadata?.sellerId !== sellerId) {
+        console.error(`[PAYMENT-CONFIRM] Seller mismatch: Expected ${sellerId}, got ${existingPaymentIntent.metadata?.sellerId}`);
+        return res.status(400).json({ 
+          error: "Seller validation failed" 
+        });
+      }
+      
+      console.log(`[PAYMENT-CONFIRM] Security validation passed for user ${userId || 'guest'}, payment ${paymentIntentId}`);
+      
+      // Check if already confirmed to prevent double-processing
+      if (existingPaymentIntent.status === 'succeeded') {
+        console.log(`[PAYMENT-CONFIRM] Payment ${paymentIntentId} already succeeded`);
+        return res.json({
+          success: true,
+          paymentIntentId: paymentIntentId,
+          status: existingPaymentIntent.status,
+          amount: existingPaymentIntent.amount / 100
+        });
+      }
+      
+      // Confirm the PaymentIntent with the saved payment method
+      const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+        payment_method: paymentMethodId,
+        return_url: `${req.protocol}://${req.get('host')}/order-confirmation`,
+        ...(shippingAddress && {
+          shipping: {
+            name: shippingAddress.name,
+            address: {
+              line1: shippingAddress.address,
+              city: shippingAddress.city,
+              state: shippingAddress.state,
+              postal_code: shippingAddress.postalCode,
+              country: shippingAddress.country || 'US'
+            }
+          }
+        })
+      }, {
+        stripeAccount: seller.stripeConnectAccountId // Confirm on connected account
+      });
+      
+      console.log(`[PAYMENT-CONFIRM] Payment confirmed: ${paymentIntent.id}, status: ${paymentIntent.status}`);
+      
+      // Check if payment requires additional action (3D Secure, etc.)
+      if (paymentIntent.status === 'requires_action') {
+        return res.json({
+          success: false,
+          requiresAction: true,
+          clientSecret: paymentIntent.client_secret,
+          paymentIntentId: paymentIntent.id
+        });
+      }
+      
+      // Check if payment succeeded
+      if (paymentIntent.status === 'succeeded') {
+        return res.json({
+          success: true,
+          paymentIntentId: paymentIntent.id,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount / 100 // Convert back to dollars
+        });
+      }
+      
+      // Handle other statuses
+      return res.json({
+        success: false,
+        error: `Payment status: ${paymentIntent.status}`,
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status
+      });
+      
+    } catch (error: any) {
+      console.error("Error confirming payment:", error);
+      
+      // Handle specific Stripe errors
+      if (error.type === 'StripeCardError') {
+        return res.status(400).json({ 
+          error: error.message,
+          code: error.code,
+          decline_code: error.decline_code
+        });
+      }
+      
       res.status(500).json({ error: error.message });
     }
   });
@@ -3104,12 +3386,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== PAYMENT PROCESSING ====================
 
-  // Create order after successful payment - Enhanced for production authentication issues
+  // Create order after successful payment - FIXED for multi-seller synchronous order creation
   app.post('/api/orders/create', async (req: any, res) => {
     try {
-      const { paymentIntentId, cartItems, shippingAddress, testMode } = req.body;
-      console.log('[ORDER CREATE] Processing order creation request');
-      console.log('[ORDER CREATE] Request body:', { paymentIntentId, cartItems: cartItems?.length, shippingAddress, testMode });
+      const { paymentIntentIds, cartItems, shippingAddress, isMultiSeller } = req.body;
+      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const sessionId = req.sessionID;
+      
+      console.log('[ORDER CREATE] Processing multi-seller order creation request');
+      console.log('[ORDER CREATE] Request body:', { 
+        paymentIntentIds: paymentIntentIds?.length, 
+        cartItems: cartItems?.length, 
+        shippingAddress: !!shippingAddress, 
+        isMultiSeller,
+        userId: userId || 'guest'
+      });
       
       // Handle test mode for debugging
       if (testMode && process.env.NODE_ENV === 'development') {
@@ -3212,224 +3503,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ orders: createdOrders, success: true, testMode: true });
       }
       
-      // Validate required fields for real payments
-      if (!paymentIntentId) {
-        console.error('[ORDER CREATE] Missing paymentIntentId');
-        return res.status(400).json({ error: "Payment intent ID is required" });
+      // Validate required fields for multi-seller payments
+      if (!paymentIntentIds || !Array.isArray(paymentIntentIds) || paymentIntentIds.length === 0) {
+        console.error('[ORDER CREATE] Missing or invalid paymentIntentIds array');
+        return res.status(400).json({ error: "Payment intent IDs are required for multi-seller checkout" });
       }
       
-      if (!cartItems || cartItems.length === 0) {
-        console.error('[ORDER CREATE] Missing or empty cartItems');
-        return res.status(400).json({ error: "Cart items are required" });
-      }
-      
-      // Enhanced authentication and user extraction for production reliability
-      let userId = null;
-      let userEmail = null;
-      
-      // DEBUG: Log authentication status
-      console.log('[ORDER CREATE] 🔍 Authentication Debug:');
-      console.log('[ORDER CREATE] - req.isAuthenticated():', req.isAuthenticated());
-      console.log('[ORDER CREATE] - req.user exists:', !!req.user);
-      console.log('[ORDER CREATE] - req.user?.claims:', req.user?.claims);
-      console.log('[ORDER CREATE] - req.sessionID:', req.sessionID);
-      console.log('[ORDER CREATE] - shippingAddress.email:', shippingAddress?.email);
-      console.log('[ORDER CREATE] - paymentIntent will be checked for receipt_email');
-      
-      // Try to get authenticated user first
-      if (req.isAuthenticated() && req.user?.claims?.sub) {
-        userId = req.user.claims.sub;
-        userEmail = req.user.claims.email;
-        console.log('[ORDER CREATE] ✅ Authenticated user found:', userId, userEmail);
-      } else {
-        console.log('[ORDER CREATE] ❌ No authenticated user found, will use guest flow');
+      if (!shippingAddress || !shippingAddress.name || !shippingAddress.address) {
+        console.error('[ORDER CREATE] Missing required shipping address fields');
+        return res.status(400).json({ error: "Complete shipping address is required" });
       }
       
       if (!stripe) {
         return res.status(500).json({ error: "Stripe not configured" });
       }
       
-      // Verify payment intent is successful
-      console.log('[ORDER CREATE] 📋 Retrieving payment intent:', paymentIntentId);
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-      console.log('[ORDER CREATE] Payment intent status:', paymentIntent.status);
-      console.log('[ORDER CREATE] Payment intent receipt_email:', paymentIntent.receipt_email);
+      console.log(`[ORDER CREATE] Processing ${paymentIntentIds.length} payment intents for multi-seller order`);
       
-      if (paymentIntent.status !== 'succeeded') {
-        console.log('[ORDER CREATE] ❌ Payment not completed, status:', paymentIntent.status);
-        return res.status(400).json({ error: "Payment not completed" });
-      }
+      // Step 1: Retrieve and validate all PaymentIntents
+      const validatedPayments = [];
+      let userEmail = null;
       
-      // If no user from session, create guest user with comprehensive fallback
-      if (!userId) {
-        console.log('[ORDER CREATE] 🎭 Creating guest user - using comprehensive fallback');
-        // Enhanced email extraction with multiple fallbacks
-        userEmail = 
-          shippingAddress?.email || 
-          paymentIntent.receipt_email || 
-          (shippingAddress?.name?.toLowerCase().includes('@') ? shippingAddress.name : null) ||
-          'guest@curiosities.market';
+      for (const paymentIntentId of paymentIntentIds) {
+        console.log(`[ORDER CREATE] Validating payment intent: ${paymentIntentId}`);
         
-        // Create a unique guest user ID
-        userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        console.log('[ORDER CREATE] 🎭 Guest user created:', { userId, userEmail });
+        try {
+          // Get seller info to determine which Stripe account to query
+          const sellerId = cartItems.find(item => 
+            item.listing?.sellerId && paymentIntentId.includes(item.listing.sellerId.slice(-8))
+          )?.listing?.sellerId;
+          
+          if (!sellerId) {
+            console.error(`[ORDER CREATE] Could not determine seller for payment ${paymentIntentId}`);
+            return res.status(400).json({ error: `Invalid payment intent: ${paymentIntentId}` });
+          }
+          
+          const seller = await storage.getSellerByUserId(sellerId);
+          if (!seller?.stripeConnectAccountId) {
+            console.error(`[ORDER CREATE] Seller ${sellerId} missing Stripe account`);
+            return res.status(400).json({ error: `Seller payment account not configured` });
+          }
+          
+          // Retrieve PaymentIntent from seller's connected account
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
+            stripeAccount: seller.stripeConnectAccountId
+          });
+          
+          console.log(`[ORDER CREATE] Payment ${paymentIntentId} status: ${paymentIntent.status}`);
+          
+          // SECURITY: Validate PaymentIntent belongs to current user/session
+          const paymentUserId = paymentIntent.metadata?.userId;
+          if (!paymentUserId || (paymentUserId !== (userId || 'guest'))) {
+            console.error(`[ORDER CREATE] Authorization failed: Payment user ${paymentUserId} vs current user ${userId || 'guest'}`);
+            return res.status(403).json({ error: "Unauthorized: Payments do not belong to current user" });
+          }
+          
+          // Validate payment status
+          if (paymentIntent.status !== 'succeeded') {
+            console.error(`[ORDER CREATE] Payment ${paymentIntentId} not completed, status: ${paymentIntent.status}`);
+            return res.status(400).json({ error: `Payment ${paymentIntentId} not completed` });
+          }
+          
+          // Extract email for user creation if needed
+          if (!userEmail) {
+            userEmail = paymentIntent.receipt_email || shippingAddress?.email;
+          }
+          
+          validatedPayments.push({
+            paymentIntent,
+            sellerId,
+            seller,
+            metadata: paymentIntent.metadata
+          });
+          
+        } catch (error: any) {
+          console.error(`[ORDER CREATE] Error validating payment ${paymentIntentId}:`, error);
+          return res.status(400).json({ error: `Failed to validate payment: ${error.message}` });
+        }
       }
       
+      console.log(`[ORDER CREATE] All ${validatedPayments.length} payments validated successfully`);
+      
+      // Step 2: Create user if needed (for guest checkout)
       if (!userId) {
-        console.log('[ORDER CREATE] ❌ CRITICAL: Still no user information after all fallbacks');
-        return res.status(400).json({ error: "User information required for order creation" });
+        userEmail = userEmail || 'guest@curiosities.market';
+        userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`[ORDER CREATE] Creating guest user: ${userId} with email: ${userEmail}`);
       }
       
       console.log('[ORDER CREATE] ✅ Final user info:', { userId, userEmail });
       
-      // Group items by seller to create separate orders
-      const ordersBySeller: { [sellerId: string]: any[] } = {};
-      let totalAmount = 0;
-      
-      for (const item of cartItems) {
-        const listing = await storage.getListing(item.listingId);
-        if (!listing) continue;
-        
-        // Stock validation - check if enough stock is available
-        const requestedQuantity = item.quantity || 1;
-        const availableStock = listing.stockQuantity || 0;
-        
-        if (requestedQuantity > availableStock) {
-          console.log(`[ORDER CREATE] Insufficient stock for ${listing.title}: requested ${requestedQuantity}, available ${availableStock}`);
-          return res.status(400).json({ 
-            error: `Insufficient stock for "${listing.title}". Only ${availableStock} available.` 
-          });
-        }
-        
-        const sellerId = listing.sellerId;
-        if (!ordersBySeller[sellerId]) {
-          ordersBySeller[sellerId] = [];
-        }
-        
-        const itemTotal = parseFloat(listing.price) * requestedQuantity;
-        totalAmount += itemTotal;
-        
-        ordersBySeller[sellerId].push({
-          listing,
-          quantity: requestedQuantity,
-          price: listing.price,
-          itemTotal
-        });
-      }
-      
+      // Step 3: Create orders for each validated payment (using PaymentIntent metadata, NOT current cart)
       const createdOrders = [];
       
-      // Create orders for each seller
-      for (const [sellerId, items] of Object.entries(ordersBySeller)) {
-        const orderTotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
-        const orderShippingCost = items.reduce((sum, item) => sum + parseFloat(item.listing.shippingCost || '0'), 0);
+      for (const { paymentIntent, sellerId, seller, metadata } of validatedPayments) {
+        console.log(`[ORDER CREATE] Creating order for seller ${sellerId} from payment ${paymentIntent.id}`);
         
-        // Create order
-        const order = await storage.createOrder({
-          buyerId: userId,
-          sellerId,
-          total: (orderTotal + orderShippingCost).toString(),
-          subtotal: orderTotal.toString(),
-          shippingCost: orderShippingCost.toString(),
-          platformFee: (orderTotal * (PLATFORM_FEE_PERCENT / 100)).toString(),
-          status: 'paid',
-          stripePaymentIntentId: paymentIntentId,
-          shippingAddress
-        });
-        
-        // Create order items and deduct inventory
-        for (const item of items) {
-          await storage.createOrderItem({
-            orderId: order.id,
-            listingId: item.listing.id,
-            quantity: item.quantity,
-            price: item.price,
-            title: item.listing.title
+        try {
+          // ✅ IDEMPOTENCY PROTECTION: Check if order already exists for this PaymentIntent
+          const existingOrder = await storage.getOrderByPaymentIntentId(paymentIntent.id);
+          if (existingOrder) {
+            console.log(`[ORDER CREATE] ⚠️ Order already exists for PaymentIntent ${paymentIntent.id}: ${existingOrder.id}`);
+            createdOrders.push(existingOrder);
+            continue; // Skip creating duplicate order
+          }
+          
+          // Use PaymentIntent metadata to reconstruct order items (IMMUTABLE STATE)
+          const sellerSubtotal = parseFloat(metadata.sellerSubtotal || '0');
+          const sellerShipping = parseFloat(metadata.sellerShipping || '0');
+          const platformFeeAmount = parseFloat(metadata.platformFeeAmount || '0');
+          const itemsCount = parseInt(metadata.itemsCount || '0');
+          
+          const orderTotal = sellerSubtotal + sellerShipping;
+          
+          // ✅ ENHANCED LOGGING for fee verification
+          console.log(`[ORDER CREATE] 💰 Fee Verification for seller ${sellerId}:`);
+          console.log(`[ORDER CREATE]   • PaymentIntent Amount: $${(paymentIntent.amount / 100).toFixed(2)}`);
+          console.log(`[ORDER CREATE]   • Item Subtotal: $${sellerSubtotal.toFixed(2)}`);
+          console.log(`[ORDER CREATE]   • Shipping Cost: $${sellerShipping.toFixed(2)}`);
+          console.log(`[ORDER CREATE]   • Total Charge: $${orderTotal.toFixed(2)}`);
+          console.log(`[ORDER CREATE]   • Platform Fee: $${platformFeeAmount.toFixed(2)} (${((platformFeeAmount/sellerSubtotal)*100).toFixed(2)}% of subtotal)`);
+          console.log(`[ORDER CREATE]   • Seller Receives: $${(orderTotal - platformFeeAmount).toFixed(2)}`);
+          
+          // Create order with PaymentIntent data (secure, immutable)
+          const order = await storage.createOrder({
+            id: crypto.randomUUID(),
+            buyerId: userId,
+            sellerId: sellerId,
+            status: 'paid',
+            total: orderTotal.toFixed(2),
+            subtotal: sellerSubtotal.toFixed(2),
+            shippingCost: sellerShipping.toFixed(2),
+            platformFee: platformFeeAmount.toFixed(2),
+            stripePaymentIntentId: paymentIntent.id,
+            shippingAddress: shippingAddress
           });
           
-          // Deduct inventory after successful order item creation
-          const newStockQuantity = (item.listing.stockQuantity || 0) - item.quantity;
-          await storage.updateListingStock(item.listing.id, Math.max(0, newStockQuantity));
-          console.log(`[ORDER CREATE] Inventory updated for ${item.listing.title}: ${item.listing.stockQuantity} -> ${newStockQuantity}`);
-        }
-        
-        createdOrders.push(order);
-        
-        // Send order confirmation email to buyer and notification email to seller
-        try {
-          const orderDetails = await storage.getOrderWithDetails(order.id);
-          // Use available email sources: user email, shipping email, or payment intent email
-          const emailAddress = userEmail || shippingAddress?.email || paymentIntent.receipt_email;
+          console.log(`[ORDER CREATE] Created order ${order.id} for seller ${sellerId}`);
           
-          if (orderDetails && emailAddress) {
-            const emailData = {
-              customerEmail: emailAddress,
-              customerName: shippingAddress?.name || `${orderDetails.buyerFirstName || ''} ${orderDetails.buyerLastName || ''}`.trim() || 'Customer',
-              orderId: orderDetails.id,
-              orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
-              orderTotal: orderDetails.total,
-              orderItems: orderDetails.items || [],
-              shippingAddress: orderDetails.shippingAddress || shippingAddress,
-              shopName: orderDetails.sellerShopName || 'Curio Market Seller',
-              sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
-            };
-            
-            // Send buyer confirmation email
-            console.log('[ORDER CREATE] Sending confirmation email to buyer:', emailAddress);
-            console.log('[ORDER CREATE] Email data:', JSON.stringify(emailData, null, 2));
-            const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
-            if (buyerEmailResult) {
-              console.log('[ORDER CREATE] ✅ Buyer confirmation email sent successfully');
-            } else {
-              console.error('[ORDER CREATE] ❌ Buyer confirmation email failed to send');
+          // Create order items based on cart items for this seller
+          const sellerCartItems = cartItems.filter(item => item.listing?.sellerId === sellerId);
+          
+          for (const cartItem of sellerCartItems) {
+            const listing = await storage.getListing(cartItem.listingId);
+            if (!listing) {
+              console.warn(`[ORDER CREATE] Listing ${cartItem.listingId} not found during order creation`);
+              continue;
             }
             
-            // Send seller notification email
-            if (orderDetails.sellerEmail && orderDetails.sellerEmail !== 'seller@curiosities.market') {
-              console.log('[ORDER CREATE] Sending order notification to seller:', orderDetails.sellerEmail);
-              const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
-              if (sellerEmailResult) {
-                console.log('[ORDER CREATE] ✅ Seller notification email sent successfully');
-              } else {
-                console.error('[ORDER CREATE] ❌ Seller notification email failed to send');
-              }
-            } else {
-              console.log('[ORDER CREATE] ⚠️ No valid seller email found for order notification');
-            }
+            await storage.createOrderItem({
+              orderId: order.id,
+              listingId: cartItem.listingId,
+              quantity: cartItem.quantity || 1,
+              price: listing.price,
+              title: listing.title
+            });
             
-          } else {
-            console.log('[ORDER CREATE] ❌ No email address available for order confirmation');
-            console.log('[ORDER CREATE] Debug - userEmail:', userEmail);
-            console.log('[ORDER CREATE] Debug - shippingAddress?.email:', shippingAddress?.email);
-            console.log('[ORDER CREATE] Debug - paymentIntent.receipt_email:', paymentIntent.receipt_email);
+            // Deduct inventory atomically
+            const newStockQuantity = Math.max(0, (listing.stockQuantity || 0) - (cartItem.quantity || 1));
+            await storage.updateListingStock(listing.id, newStockQuantity);
+            
+            console.log(`[ORDER CREATE] Updated stock for ${listing.title}: ${listing.stockQuantity} -> ${newStockQuantity}`);
           }
-        } catch (emailError: any) {
-          console.error('[ORDER CREATE] ❌ Email sending failed with error:', emailError);
-          console.error('[ORDER CREATE] Email error stack:', emailError.stack);
-          // Continue processing even if email fails
+          
+          createdOrders.push(order);
+          
+          // Send order confirmation emails (non-blocking)
+          try {
+            const orderDetails = await storage.getOrderWithDetails(order.id);
+            if (orderDetails && userEmail) {
+              const emailData = {
+                customerEmail: userEmail,
+                customerName: shippingAddress.name || 'Customer',
+                orderId: orderDetails.id,
+                orderNumber: `#${orderDetails.id.slice(-8).toUpperCase()}`,
+                orderTotal: orderDetails.total,
+                orderItems: orderDetails.items || [],
+                shippingAddress: shippingAddress,
+                shopName: seller.shopName || 'Curio Market Seller',
+                sellerEmail: seller.contactEmail || 'seller@curiosities.market'
+              };
+              
+              // Send emails asynchronously (don't block order creation)
+              emailService.sendOrderConfirmation(emailData).catch(error => {
+                console.error(`[ORDER CREATE] Email sending failed for order ${order.id}:`, error);
+              });
+            }
+          } catch (emailError) {
+            console.error(`[ORDER CREATE] Email setup failed for order ${order.id}:`, emailError);
+            // Continue with order creation even if email fails
+          }
+          
+        } catch (error: any) {
+          console.error(`[ORDER CREATE] Failed to create order for seller ${sellerId}:`, error);
+          return res.status(500).json({ error: `Order creation failed: ${error.message}` });
         }
       }
       
-      // Clear the cart after successful order creation
+      console.log(`[ORDER CREATE] Successfully created ${createdOrders.length} orders`);
+      
+      // Step 4: Clear cart after successful order creation (prevents double-processing)
       try {
-        // Try to clear cart based on user ID if authenticated
-        if (req.isAuthenticated() && req.user?.claims?.sub) {
-          const cart = await storage.getOrCreateCart(req.user.claims.sub);
-          await storage.clearCart(cart.id);
-          console.log('[ORDER CREATE] Cart cleared for authenticated user');
-        } 
-        // Fallback: clear cart based on session ID
-        else if (req.sessionID) {
-          const cart = await storage.getOrCreateCart(undefined, req.sessionID);
-          await storage.clearCart(cart.id);
-          console.log('[ORDER CREATE] Cart cleared for session user');
-        }
+        const cart = await storage.getOrCreateCart(userId, sessionId);
+        await storage.clearCart(cart.id);
+        console.log(`[ORDER CREATE] Cart ${cart.id} cleared successfully`);
       } catch (cartError) {
         console.error('[ORDER CREATE] Failed to clear cart:', cartError);
-        // Don't fail the entire order creation if cart clearing fails
+        // Don't fail the order creation if cart clearing fails
       }
       
-      res.json({ orders: createdOrders, success: true });
+      res.json({ 
+        orders: createdOrders, 
+        success: true,
+        message: `Successfully created ${createdOrders.length} orders from ${validatedPayments.length} payments`,
+        orderIds: createdOrders.map(o => o.id)
+      });
     } catch (error: any) {
       console.error("Error creating order:", error);
       res.status(500).json({ error: error.message || "Failed to create order" });
