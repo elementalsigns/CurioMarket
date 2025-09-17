@@ -32,6 +32,7 @@ import {
   Download,
   AlertCircle
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AdminStats {
   totalUsers: number;
@@ -45,11 +46,31 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [banReason, setBanReason] = useState("");
   const [refundAmount, setRefundAmount] = useState("");
   const [adminAction, setAdminAction] = useState("");
+
+  // SURGICAL ADMIN CHECK: Only proceed if user exists and has admin role
+  if (!user || (user as any).role !== 'admin') {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Access Denied
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>You need admin privileges to access this page.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Fetch admin statistics
   const { data: stats } = useQuery({
