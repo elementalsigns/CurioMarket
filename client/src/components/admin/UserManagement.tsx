@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, UserX, UserCheck, Eye, MoreHorizontal, Users, Mail, Calendar, Shield, AlertTriangle, Loader2 } from "lucide-react";
+import { Search, UserX, UserCheck, Eye, MoreHorizontal, Users, Mail, Calendar, Shield, AlertTriangle, Loader2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface User {
@@ -81,9 +82,12 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [isUnbanDialogOpen, setIsUnbanDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
   
   const limit = 10;
 
@@ -148,6 +152,33 @@ export function UserManagement() {
     },
   });
 
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest('DELETE', `/api/admin/users/${userId}`, {
+        confirmDeletion: 'I understand this action is irreversible'
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "Account Deleted",
+        description: data.message || "The user account has been permanently deleted.",
+      });
+      setIsDeleteDialogOpen(false);
+      setSelectedUser(null);
+      setDeleteConfirmation("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deletion Failed",
+        description: error.message || "Failed to delete user account",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleBanUser = () => {
     if (selectedUser && banReason.trim()) {
       banUserMutation.mutate({ userId: selectedUser.id, reason: banReason.trim() });
@@ -158,6 +189,25 @@ export function UserManagement() {
     if (selectedUser) {
       unbanUserMutation.mutate(selectedUser.id);
     }
+  };
+
+  const handleDeleteUser = () => {
+    if (selectedUser && deleteConfirmation === "I understand this action is irreversible") {
+      deleteUserMutation.mutate(selectedUser.id);
+    }
+  };
+
+  // Safety checks for deletion
+  const canDeleteUser = (user: User) => {
+    // Prevent self-deletion
+    if (currentUser && typeof currentUser === 'object' && 'id' in currentUser && user.id === (currentUser as any).id) {
+      return false;
+    }
+    // Prevent deleting other admin users
+    if (user.role === 'admin') {
+      return false;
+    }
+    return true;
   };
 
   const formatDate = (dateString: string) => {
@@ -363,6 +413,20 @@ export function UserManagement() {
                               <UserCheck className="h-4 w-4" />
                             </Button>
                           ) : null}
+                          {canDeleteUser(user) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                              className="text-red-700 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-950"
+                              data-testid={`button-delete-${user.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -569,6 +633,94 @@ export function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-2xl" data-testid="dialog-delete-confirmation">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete User Account
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="text-red-700 dark:text-red-400 p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="font-medium">⚠️ DANGER: Permanent Account Deletion</span>
+                </div>
+                <p className="text-sm">
+                  You are about to permanently delete the account for <strong>"{selectedUser?.email}"</strong>.
+                  This action cannot be undone and will result in complete data loss.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-sm mb-2">The following data will be permanently deleted:</h4>
+                <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                  <li>• User profile and account information</li>
+                  <li>• All orders (both as buyer and seller)</li>
+                  <li>• All product listings and shop data</li>
+                  <li>• Messages and conversation history</li>
+                  <li>• Reviews and ratings</li>
+                  <li>• Favorites and wishlists</li>
+                  <li>• Analytics and activity data</li>
+                  <li>• Payment and transaction history</li>
+                  <li>• Verification records and documents</li>
+                </ul>
+              </div>
+              
+              <div className="border-l-4 border-red-500 pl-4 bg-red-50 dark:bg-red-950 p-3 rounded">
+                <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                  🔒 This action is IRREVERSIBLE. Once deleted, the user's data cannot be recovered.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="py-4">
+            <Label htmlFor="delete-confirmation" className="text-sm font-medium text-red-700 dark:text-red-400">
+              To confirm deletion, type the exact phrase below:
+              <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 rounded border font-mono text-xs">
+                I understand this action is irreversible
+              </div>
+            </Label>
+            <Input
+              id="delete-confirmation"
+              placeholder="Type the exact phrase above to confirm"
+              value={deleteConfirmation}
+              onChange={(e) => setDeleteConfirmation(e.target.value)}
+              className="mt-2 border-red-300 focus:border-red-500 focus:ring-red-500"
+              data-testid="input-delete-confirmation"
+            />
+            {deleteConfirmation && deleteConfirmation !== "I understand this action is irreversible" && (
+              <p className="text-xs text-red-500 mt-1" data-testid="text-confirmation-mismatch">
+                Please type exactly "I understand this action is irreversible" to continue
+              </p>
+            )}
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeleteConfirmation("");
+                setSelectedUser(null);
+              }}
+              data-testid="button-cancel-delete"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleteUserMutation.isPending || deleteConfirmation !== "I understand this action is irreversible"}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-500"
+              data-testid="button-confirm-delete"
+            >
+              {deleteUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteUserMutation.isPending ? "Deleting..." : "Delete Account Forever"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

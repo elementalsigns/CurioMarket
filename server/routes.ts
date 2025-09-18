@@ -8,7 +8,46 @@ import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authService } from "./auth-service";
-import { insertSellerSchema, insertListingSchema, listings, sellers, orders, orderItems, users, type User } from "@shared/schema";
+import { 
+  insertSellerSchema, 
+  insertListingSchema, 
+  listings, 
+  sellers, 
+  orders, 
+  orderItems, 
+  users, 
+  type User,
+  sessions,
+  analyticsEvents,
+  searchAnalytics,
+  notifications,
+  flags,
+  savedSearches,
+  verificationRequests,
+  verificationAuditLog,
+  identityVerificationSessions,
+  eventAttendees,
+  events,
+  messages,
+  messageThreadParticipants,
+  messageThreads,
+  reviews,
+  favorites,
+  shopFollows,
+  wishlists,
+  wishlistItems,
+  carts,
+  cartItems,
+  listingVariations,
+  listingImages,
+  shareEvents,
+  sellerMetricsDaily,
+  listingMetricsDaily,
+  sellerAnalytics,
+  promotions,
+  payouts,
+  sellerReviewQueue
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, or, sql } from "drizzle-orm";
 import { verificationService } from "./verificationService";
@@ -6182,6 +6221,340 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error unbanning user:", error);
       res.status(500).json({ error: "Failed to unban user" });
+    }
+  });
+
+  // Delete a user account completely (admin only)
+  app.delete('/api/admin/users/:userId', requireAdminAuth, requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { confirmDeletion, adminPassword } = req.body;
+      const adminId = req.user.claims.sub;
+
+      // Safety check 1: Require explicit confirmation
+      if (!confirmDeletion || confirmDeletion !== 'I understand this action is irreversible') {
+        return res.status(400).json({ 
+          error: "Explicit confirmation required",
+          required: "confirmDeletion must equal 'I understand this action is irreversible'"
+        });
+      }
+
+      // Safety check 2: Verify admin performing the action
+      const adminUser = await storage.getUser(adminId);
+      if (!adminUser || adminUser.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      // Safety check 3: Verify target user exists
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Safety check 4: Prevent admin from deleting themselves
+      if (userId === adminId) {
+        return res.status(400).json({ error: "Cannot delete your own admin account" });
+      }
+
+      // Safety check 5: Extra protection for other admin accounts
+      if (targetUser.role === 'admin') {
+        return res.status(400).json({ 
+          error: "Cannot delete other admin accounts",
+          hint: "Admin accounts can only be deleted by direct database access"
+        });
+      }
+
+      console.log(`[ADMIN-DELETE] Starting user deletion process for user ${userId} by admin ${adminId}`);
+      
+      // Begin transaction for atomicity
+      const deletionSummary = await db.transaction(async (tx) => {
+        const summary = {
+          userId,
+          userEmail: targetUser.email,
+          deletedBy: adminId,
+          deletedByEmail: adminUser.email,
+          deletedAt: new Date().toISOString(),
+          recordsDeleted: {} as Record<string, number>
+        };
+
+        // Get seller ID if user is a seller (needed for cascading deletes)
+        const sellerProfile = await tx.query.sellers.findFirst({
+          where: eq(sellers.userId, userId)
+        });
+        const sellerId = sellerProfile?.id;
+
+        // Phase 1: Delete direct user references (no dependencies)
+        console.log(`[ADMIN-DELETE] Phase 1: Deleting direct user references`);
+
+        // Sessions
+        const deletedSessions = await tx.delete(sessions).where(eq(sessions.sid, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.sessions = deletedSessions.length;
+
+        // Analytics events
+        const deletedAnalyticsEvents = await tx.delete(analyticsEvents).where(eq(analyticsEvents.buyerId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.analyticsEvents = deletedAnalyticsEvents.length;
+
+        // Search analytics
+        const deletedSearchAnalytics = await tx.delete(searchAnalytics).where(eq(searchAnalytics.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.searchAnalytics = deletedSearchAnalytics.length;
+
+        // Notifications
+        const deletedNotifications = await tx.delete(notifications).where(eq(notifications.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.notifications = deletedNotifications.length;
+
+        // Flags (reports submitted by user)
+        const deletedFlags = await tx.delete(flags).where(eq(flags.reporterId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.flags = deletedFlags.length;
+
+        // Saved searches
+        const deletedSavedSearches = await tx.delete(savedSearches).where(eq(savedSearches.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.savedSearches = deletedSavedSearches.length;
+
+        // Verification requests
+        const deletedVerificationRequests = await tx.delete(verificationRequests).where(eq(verificationRequests.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.verificationRequests = deletedVerificationRequests.length;
+
+        // Verification audit log
+        const deletedVerificationAudit = await tx.delete(verificationAuditLog).where(eq(verificationAuditLog.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.verificationAuditLog = deletedVerificationAudit.length;
+
+        // Identity verification sessions
+        const deletedIdentityVerifications = await tx.delete(identityVerificationSessions).where(eq(identityVerificationSessions.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.identityVerificationSessions = deletedIdentityVerifications.length;
+
+        // Phase 2: Delete user events and participations
+        console.log(`[ADMIN-DELETE] Phase 2: Deleting user events and participations`);
+
+        // Event attendees
+        const deletedEventAttendees = await tx.delete(eventAttendees).where(eq(eventAttendees.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.eventAttendees = deletedEventAttendees.length;
+
+        // Events created by user
+        const deletedEvents = await tx.delete(events).where(eq(events.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.events = deletedEvents.length;
+
+        // Phase 3: Delete messaging and social interactions
+        console.log(`[ADMIN-DELETE] Phase 3: Deleting messaging and social interactions`);
+
+        // Messages sent by user
+        const deletedMessages = await tx.delete(messages).where(eq(messages.senderId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.messages = deletedMessages.length;
+
+        // Message thread participants
+        const deletedThreadParticipants = await tx.delete(messageThreadParticipants).where(eq(messageThreadParticipants.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.messageThreadParticipants = deletedThreadParticipants.length;
+
+        // Message threads where user is buyer or seller
+        const deletedMessageThreads = await tx.delete(messageThreads).where(
+          or(
+            eq(messageThreads.buyerId, userId),
+            eq(messageThreads.sellerId, userId)
+          )
+        ).returning({ count: sql`1` });
+        summary.recordsDeleted.messageThreads = deletedMessageThreads.length;
+
+        // Reviews by or about user
+        const deletedReviews = await tx.delete(reviews).where(
+          or(
+            eq(reviews.buyerId, userId),
+            eq(reviews.sellerId, userId)
+          )
+        ).returning({ count: sql`1` });
+        summary.recordsDeleted.reviews = deletedReviews.length;
+
+        // Favorites
+        const deletedFavorites = await tx.delete(favorites).where(eq(favorites.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.favorites = deletedFavorites.length;
+
+        // Shop follows
+        const deletedShopFollows = await tx.delete(shopFollows).where(eq(shopFollows.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.shopFollows = deletedShopFollows.length;
+
+        // Phase 4: Delete user's wishlists and carts
+        console.log(`[ADMIN-DELETE] Phase 4: Deleting wishlists and carts`);
+
+        // Get wishlist IDs for cascading delete
+        const userWishlists = await tx.query.wishlists.findMany({
+          where: eq(wishlists.userId, userId),
+          columns: { id: true }
+        });
+        
+        // Delete wishlist items
+        let deletedWishlistItems = 0;
+        for (const wishlist of userWishlists) {
+          const deleted = await tx.delete(wishlistItems).where(eq(wishlistItems.wishlistId, wishlist.id)).returning({ count: sql`1` });
+          deletedWishlistItems += deleted.length;
+        }
+        summary.recordsDeleted.wishlistItems = deletedWishlistItems;
+
+        // Delete wishlists
+        const deletedWishlists = await tx.delete(wishlists).where(eq(wishlists.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.wishlists = deletedWishlists.length;
+
+        // Get cart IDs for cascading delete
+        const userCarts = await tx.query.carts.findMany({
+          where: eq(carts.userId, userId),
+          columns: { id: true }
+        });
+
+        // Delete cart items
+        let deletedCartItems = 0;
+        for (const cart of userCarts) {
+          const deleted = await tx.delete(cartItems).where(eq(cartItems.cartId, cart.id)).returning({ count: sql`1` });
+          deletedCartItems += deleted.length;
+        }
+        summary.recordsDeleted.cartItems = deletedCartItems;
+
+        // Delete carts
+        const deletedCarts = await tx.delete(carts).where(eq(carts.userId, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.carts = deletedCarts.length;
+
+        // Phase 5: Delete seller-related data (if user is/was a seller)
+        if (sellerId) {
+          console.log(`[ADMIN-DELETE] Phase 5: Deleting seller-related data for seller ${sellerId}`);
+
+          // Get listing IDs for cascading delete
+          const sellerListings = await tx.query.listings.findMany({
+            where: eq(listings.sellerId, sellerId),
+            columns: { id: true }
+          });
+
+          // Delete listing variations
+          let deletedListingVariations = 0;
+          for (const listing of sellerListings) {
+            const deleted = await tx.delete(listingVariations).where(eq(listingVariations.listingId, listing.id)).returning({ count: sql`1` });
+            deletedListingVariations += deleted.length;
+          }
+          summary.recordsDeleted.listingVariations = deletedListingVariations;
+
+          // Delete listing images
+          let deletedListingImages = 0;
+          for (const listing of sellerListings) {
+            const deleted = await tx.delete(listingImages).where(eq(listingImages.listingId, listing.id)).returning({ count: sql`1` });
+            deletedListingImages += deleted.length;
+          }
+          summary.recordsDeleted.listingImages = deletedListingImages;
+
+          // Delete share events (through listings)
+          let deletedShareEvents = 0;
+          for (const listing of sellerListings) {
+            const deleted = await tx.delete(shareEvents).where(eq(shareEvents.listingId, listing.id)).returning({ count: sql`1` });
+            deletedShareEvents += deleted.length;
+          }
+          summary.recordsDeleted.shareEvents = deletedShareEvents;
+
+          // Seller analytics and metrics
+          const deletedSellerMetrics = await tx.delete(sellerMetricsDaily).where(eq(sellerMetricsDaily.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.sellerMetricsDaily = deletedSellerMetrics.length;
+
+          const deletedListingMetrics = await tx.delete(listingMetricsDaily).where(eq(listingMetricsDaily.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.listingMetricsDaily = deletedListingMetrics.length;
+
+          const deletedSellerAnalytics = await tx.delete(sellerAnalytics).where(eq(sellerAnalytics.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.sellerAnalytics = deletedSellerAnalytics.length;
+
+          // Promotions
+          const deletedPromotions = await tx.delete(promotions).where(eq(promotions.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.promotions = deletedPromotions.length;
+
+          // Payouts
+          const deletedPayouts = await tx.delete(payouts).where(eq(payouts.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.payouts = deletedPayouts.length;
+
+          // Seller review queue
+          const deletedSellerReviewQueue = await tx.delete(sellerReviewQueue).where(eq(sellerReviewQueue.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.sellerReviewQueue = deletedSellerReviewQueue.length;
+
+          // Delete listings
+          const deletedListings = await tx.delete(listings).where(eq(listings.sellerId, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.listings = deletedListings.length;
+
+          // Delete seller profile
+          const deletedSeller = await tx.delete(sellers).where(eq(sellers.id, sellerId)).returning({ count: sql`1` });
+          summary.recordsDeleted.sellers = deletedSeller.length;
+        }
+
+        // Phase 6: Delete orders (user as buyer or seller)
+        console.log(`[ADMIN-DELETE] Phase 6: Deleting orders`);
+
+        // Get order IDs where user is buyer or seller
+        const userOrders = await tx.query.orders.findMany({
+          where: or(
+            eq(orders.buyerId, userId),
+            sellerId ? eq(orders.sellerId, sellerId) : sql`false`
+          ),
+          columns: { id: true }
+        });
+
+        // Delete order items
+        let deletedOrderItems = 0;
+        for (const order of userOrders) {
+          const deleted = await tx.delete(orderItems).where(eq(orderItems.orderId, order.id)).returning({ count: sql`1` });
+          deletedOrderItems += deleted.length;
+        }
+        summary.recordsDeleted.orderItems = deletedOrderItems;
+
+        // Delete orders
+        const deletedOrders = await tx.delete(orders).where(
+          or(
+            eq(orders.buyerId, userId),
+            sellerId ? eq(orders.sellerId, sellerId) : sql`false`
+          )
+        ).returning({ count: sql`1` });
+        summary.recordsDeleted.orders = deletedOrders.length;
+
+        // Phase 7: Final cleanup - delete user record
+        console.log(`[ADMIN-DELETE] Phase 7: Deleting user record`);
+        
+        const deletedUsers = await tx.delete(users).where(eq(users.id, userId)).returning({ count: sql`1` });
+        summary.recordsDeleted.users = deletedUsers.length;
+
+        console.log(`[ADMIN-DELETE] User deletion completed successfully:`, summary);
+        return summary;
+      });
+
+      // Audit log the deletion
+      console.log(`[AUDIT-LOG] Admin ${adminId} (${adminUser.email}) deleted user account ${userId} (${targetUser.email})`, {
+        action: "deleted_user_account",
+        targetType: "user", 
+        targetId: userId,
+        adminId,
+        details: {
+          targetUserEmail: targetUser.email,
+          deletionSummary
+        },
+        severity: "high",
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`[ADMIN-DELETE] User ${userId} successfully deleted by admin ${adminId}`);
+      
+      res.json({
+        success: true,
+        message: `User account ${targetUser.email} has been completely deleted`,
+        summary: deletionSummary
+      });
+
+    } catch (error) {
+      console.error("Error deleting user account:", error);
+      
+      // Log the failed attempt
+      console.error(`[AUDIT-LOG] Failed user deletion attempt by admin ${req.user?.claims?.sub || "unknown"}`, {
+        action: "delete_user_account_failed",
+        targetType: "user",
+        targetId: req.params.userId,
+        adminId: req.user?.claims?.sub || "unknown",
+        details: {
+          error: error instanceof Error ? error.message : "Unknown error"
+        },
+        severity: "high",
+        timestamp: new Date().toISOString()
+      });
+
+      res.status(500).json({ 
+        error: "Failed to delete user account",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

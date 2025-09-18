@@ -68,36 +68,36 @@ export default function AdminPage() {
         </div>
         
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-            <TabsTrigger value="analytics" className="flex items-center gap-2" data-testid="tab-analytics">
+          <TabsList className="flex w-full overflow-x-auto gap-2 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-x-visible">
+            <TabsTrigger value="analytics" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-analytics">
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2" data-testid="tab-users">
+            <TabsTrigger value="users" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-users">
               <Users className="h-4 w-4" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="shops" className="flex items-center gap-2" data-testid="tab-shops">
+            <TabsTrigger value="shops" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-shops">
               <Store className="h-4 w-4" />
               Shops
             </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2" data-testid="tab-content">
+            <TabsTrigger value="content" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-content">
               <Flag className="h-4 w-4" />
               Moderation
             </TabsTrigger>
-            <TabsTrigger value="disputes" className="flex items-center gap-2" data-testid="tab-disputes">
+            <TabsTrigger value="disputes" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-disputes">
               <Scale className="h-4 w-4" />
               Disputes
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2" data-testid="tab-events">
+            <TabsTrigger value="events" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-events">
               <Calendar className="h-4 w-4" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="system" className="flex items-center gap-2" data-testid="tab-system">
+            <TabsTrigger value="system" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-system">
               <Settings2 className="h-4 w-4" />
               System
             </TabsTrigger>
-            <TabsTrigger value="database" className="flex items-center gap-2" data-testid="tab-database">
+            <TabsTrigger value="database" className="flex items-center gap-2 min-w-fit whitespace-nowrap" data-testid="tab-database">
               <Database className="h-4 w-4" />
               Database
             </TabsTrigger>
