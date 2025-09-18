@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, like, or, sql, count, avg } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, like, or, sql, count, avg, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -2560,36 +2560,40 @@ export class DatabaseStorage implements IStorage {
 
     const listingIds = sellerListings.map(l => l.id);
 
-    // Get orders data for the period
-    const ordersData = await db
-      .select({
-        id: orders.id,
-        total: orders.total,
-        platformFee: orders.platformFee,
-        createdAt: orders.createdAt,
-        items: sql<any[]>`
-          COALESCE(
-            (SELECT JSON_AGG(JSON_BUILD_OBJECT(
-              'listingId', ${orderItems.listingId},
-              'quantity', ${orderItems.quantity},
-              'price', ${orderItems.price}
-            ))
-            FROM ${orderItems}
-            WHERE ${orderItems.orderId} = ${orders.id}),
-            '[]'::json
+    // Get orders data for the period - handle empty listingIds case
+    let ordersData = [];
+    
+    if (listingIds.length > 0) {
+      ordersData = await db
+        .select({
+          id: orders.id,
+          total: orders.total,
+          platformFee: orders.platformFee,
+          createdAt: orders.createdAt,
+          items: sql<any[]>`
+            COALESCE(
+              (SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                'listingId', ${orderItems.listingId},
+                'quantity', ${orderItems.quantity},
+                'price', ${orderItems.price}
+              ))
+              FROM ${orderItems}
+              WHERE ${orderItems.orderId} = ${orders.id}),
+              '[]'::json
+            )
+          `
+        })
+        .from(orders)
+        .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+        .where(
+          and(
+            inArray(orderItems.listingId, listingIds),
+            sql`${orders.createdAt} >= ${dateRange.from}`,
+            sql`${orders.createdAt} <= ${dateRange.to}`,
+            eq(orders.status, 'paid')
           )
-        `
-      })
-      .from(orders)
-      .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
-      .where(
-        and(
-          sql`${orderItems.listingId} = ANY(${listingIds})`,
-          sql`${orders.createdAt} >= ${dateRange.from}`,
-          sql`${orders.createdAt} <= ${dateRange.to}`,
-          eq(orders.status, 'paid')
-        )
-      );
+        );
+    }
 
     // Calculate totals
     const totalRevenue = ordersData.reduce((sum, order) => sum + parseFloat(order.total), 0);
@@ -2603,10 +2607,15 @@ export class DatabaseStorage implements IStorage {
     const conversionRate = totalViews > 0 ? (totalOrders / totalViews) * 100 : 0;
 
     // Get favorites count
-    const favoritesResult = await db
-      .select({ count: count() })
-      .from(favorites)
-      .where(sql`${favorites.listingId} = ANY(${listingIds})`);
+    // Get favorites count for the listings - handle empty array case
+    let favoritesResult = [{ count: 0 }];
+    
+    if (listingIds.length > 0) {
+      favoritesResult = await db
+        .select({ count: count() })
+        .from(favorites)
+        .where(inArray(favorites.listingId, listingIds));
+    }
     
     const totalFavorites = favoritesResult[0]?.count || 0;
 
@@ -2618,15 +2627,19 @@ export class DatabaseStorage implements IStorage {
     
     const totalFollowers = followersResult[0]?.count || 0;
 
-    // Get reviews data
-    const reviewsData = await db
-      .select({
-        rating: reviews.rating,
-        count: count()
-      })
-      .from(reviews)
-      .where(sql`${reviews.listingId} = ANY(${listingIds})`)
-      .groupBy(reviews.rating);
+    // Get reviews data - handle empty array case
+    let reviewsData = [];
+    
+    if (listingIds.length > 0) {
+      reviewsData = await db
+        .select({
+          rating: reviews.rating,
+          count: count()
+        })
+        .from(reviews)
+        .where(inArray(reviews.listingId, listingIds))
+        .groupBy(reviews.rating);
+    }
 
     const totalReviews = reviewsData.reduce((sum, r) => sum + Number(r.count), 0);
     const weightedRatingSum = reviewsData.reduce((sum, r) => sum + (r.rating * Number(r.count)), 0);

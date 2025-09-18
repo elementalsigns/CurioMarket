@@ -32,7 +32,7 @@ export function getSession() {
     httpOnly: true,
     secure: isProduction, // Only HTTPS in production
     maxAge: sessionTtl,
-    sameSite: isProduction ? 'none' as const : 'lax' as const, // 'none' for cross-site compatibility in production
+    sameSite: 'lax' as const, // Safari compatible setting for same-site requests
     domain: isProduction ? '.curiosities.market' : undefined, // Production domain scope
   };
   

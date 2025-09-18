@@ -2317,12 +2317,8 @@ function PayoutTracker({ sellerId }: { sellerId: string }) {
       // Redirect to Stripe onboarding
       window.location.href = data.onboardingUrl;
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to start Stripe setup",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      console.error("Stripe setup error:", error);
     },
   });
 
