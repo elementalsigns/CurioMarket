@@ -98,6 +98,7 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
+              {console.log(`[SAFARI TEST] isSeller=${isSeller}, userRole=${(user as any)?.role}, capabilities=${JSON.stringify((user as any)?.capabilities)} → Display: "${isSeller ? 'Curator' : 'Collector'}"`)}
               Welcome back, {isSeller ? 'Curator' : 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
