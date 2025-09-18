@@ -17,6 +17,17 @@ export default function Home() {
   
   // SURGICAL FIX: Only show role-specific text when auth is stable
   const isAuthReady = !isLoading && user !== undefined;
+  
+  // DEBUG: Track the exact authentication state
+  console.log('[HOME DEBUG]', {
+    user: user ? 'EXISTS' : user === null ? 'NULL' : 'UNDEFINED',
+    isLoading,
+    isSeller,
+    isAuthReady,
+    userCapabilities: (user as any)?.capabilities,
+    userRole: (user as any)?.role,
+    timestamp: new Date().toISOString()
+  });
   const { toast } = useToast();
   
   // Debug production user detection
