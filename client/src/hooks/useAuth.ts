@@ -3,15 +3,18 @@ import { getQueryFn } from "@/lib/queryClient";
 import { useEffect } from "react";
 
 export function useAuth() {
+  // SURGICAL FIX: Force fresh data for specific admin user in production
+  const shouldForceFresh = window.location.hostname.includes('curiosities.market');
+  
   const { data: user, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/auth/user", shouldForceFresh ? Date.now() : 'stable'],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: 3, // More retries for production reliability
     refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchOnMount: true, // Refetch when component mounts
-    refetchInterval: 30000, // Check every 30 seconds for production
-    staleTime: 1 * 60 * 1000, // Shorter stale time for production
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchInterval: shouldForceFresh ? 10000 : 30000, // Faster refresh in production
+    staleTime: shouldForceFresh ? 0 : 1 * 60 * 1000, // No stale time in production
+    gcTime: 5 * 60 * 1000, // Shorter cache in production
     networkMode: 'online', // Ensure network requests in production
   });
 
