@@ -584,7 +584,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
 }
 
 export default function SellerDashboard() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAuthReady } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -616,26 +616,22 @@ export default function SellerDashboard() {
   }) as { data: { count: number } | undefined };
 
   useEffect(() => {
-    // SURGICAL FIX: Universal authentication timing fix
-    // Give authentication time to load before redirecting
-    if (!authLoading && !user) {
-      // Wait 3 seconds to allow authentication to fully load
-      const redirectDelay = 3000;
-      
+    // SURGICAL FIX: Use isAuthReady to avoid race conditions
+    // Only redirect when auth is fully ready and user is definitely not authenticated
+    if (isAuthReady && !user) {
       toast({
         title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        description: "You need to sign in to access the seller dashboard",
         variant: "destructive",
       });
-      setTimeout(() => {
-        // Only redirect if still no user after delay
-        if (!user) {
-          window.location.href = "/api/login";
-        }
-      }, redirectDelay);
+      
+      // Redirect to signin page with next parameter, not directly to Replit login
+      const currentPath = window.location.pathname;
+      const redirectUrl = `/signin?next=${encodeURIComponent(currentPath)}`;
+      window.location.href = redirectUrl;
       return;
     }
-  }, [user, authLoading, toast]);
+  }, [user, isAuthReady, toast]);
 
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {

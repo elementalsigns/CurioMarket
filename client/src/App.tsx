@@ -226,7 +226,7 @@ function Router() {
           <Route path="/seller/onboard" component={() => <ProtectedRoute><SellerOnboarding /></ProtectedRoute>} />
           <Route path="/seller/onboarding" component={() => <ProtectedRoute><SellerOnboardingSimple /></ProtectedRoute>} />
           <Route path="/seller/start" component={() => <ProtectedRoute><SellerStart /></ProtectedRoute>} />
-          <Route path="/seller/dashboard" component={() => <ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
+          <Route path="/seller/dashboard" component={SellerDashboard} />
           <Route path="/seller/orders" component={() => <ProtectedRoute><SellerOrders /></ProtectedRoute>} />
           <Route path="/seller/analytics" component={() => <ProtectedRoute><SellerAnalytics /></ProtectedRoute>} />
           <Route path="/seller/inventory-management" component={() => <ProtectedRoute><InventoryManagement /></ProtectedRoute>} />
