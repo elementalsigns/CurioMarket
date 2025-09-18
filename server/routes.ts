@@ -1817,12 +1817,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get seller profile
   app.get('/api/seller/profile', requireSellerAccess, async (req: any, res) => {
     try {
-      // Use same authentication method as PUT endpoint
-      if (!req.user?.claims?.sub) {
-        return res.status(401).json({ error: "Authentication required" });
+      // Extract user ID using same method as requireSellerAccess middleware
+      let userId = null;
+      if (req.user && req.user.claims && req.user.claims.sub) {
+        userId = req.user.claims.sub;
+      } else if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+        userId = req.user.id || (req.user.claims && req.user.claims.sub);
+      } else if (req.session && req.session.passport && req.session.passport.user) {
+        userId = req.session.passport.user;
       }
       
-      const userId = req.user.claims.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
       const seller = await storage.getSellerByUserId(userId);
       if (!seller) {
         return res.status(404).json({ message: "Seller profile not found" });
