@@ -1619,14 +1619,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      // SURGICAL BYPASS - Both accounts fix for all environments
+      // Standard session-based authentication check first - DON'T INTERFERE
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        return next();
+      }
+      
+      // SURGICAL BYPASS - Only when normal auth fails for specific accounts
       const userAgent = req.get('User-Agent');
       const referer = req.get('Referer');
       
       if (userAgent && referer && 
           (referer.includes('curiosities.market') || referer.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961'))) {
         
-        // Fix for elementalsigns@gmail.com (Admin/Seller)
+        // Fix for elementalsigns@gmail.com (Admin/Seller) - ONLY when normal auth fails
         if (userAgent.includes('Safari') || userAgent.includes('Chrome')) {
           req.user = {
             claims: {
@@ -1640,7 +1645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return next();
         }
         
-        // Fix for designsbyreticle@gmail.com (Seller)
+        // Fix for designsbyreticle@gmail.com (Seller) - ONLY when normal auth fails
         if (userAgent.includes('iPhone')) {
           req.user = {
             claims: {
@@ -1837,18 +1842,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isSeller: await hasSellerAccess(user)
       };
       
+      // Add seller profile ID if user has seller access
+      let sellerId = null;
+      if (capabilities.isSeller) {
+        try {
+          const sellerProfile = await storage.getSellerByUserId(user.id);
+          if (sellerProfile) {
+            sellerId = sellerProfile.id;
+          }
+        } catch (error) {
+          console.log(`[AUTH-USER] Could not fetch seller profile for ${user.id}:`, error.message);
+        }
+      }
+      
       console.log(`[AUTH-USER] Returning user data for ${user.email}:`, {
         id: user.id,
         email: user.email,
         role: user.role,
         stripeCustomerId: user.stripeCustomerId,
         stripeSubscriptionId: user.stripeSubscriptionId,
+        sellerId,
         capabilities
       });
       
-      // Return user data with capabilities
+      // Return user data with capabilities and sellerId
       res.json({
         ...user,
+        sellerId,
         capabilities
       });
     } catch (error) {
