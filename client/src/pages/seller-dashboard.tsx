@@ -616,13 +616,11 @@ export default function SellerDashboard() {
   }) as { data: { count: number } | undefined };
 
   useEffect(() => {
-    // SURGICAL FIX: Production authentication timing fix
-    const isProduction = window.location.hostname === 'curiosities.market' || 
-                         window.location.hostname === 'www.curiosities.market';
-    
+    // SURGICAL FIX: Universal authentication timing fix
+    // Give authentication time to load before redirecting
     if (!authLoading && !user) {
-      // In production, wait longer for authentication to load
-      const redirectDelay = isProduction ? 2000 : 500;
+      // Wait 3 seconds to allow authentication to fully load
+      const redirectDelay = 3000;
       
       toast({
         title: "Unauthorized",
@@ -630,7 +628,10 @@ export default function SellerDashboard() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        // Only redirect if still no user after delay
+        if (!user) {
+          window.location.href = "/api/login";
+        }
       }, redirectDelay);
       return;
     }
