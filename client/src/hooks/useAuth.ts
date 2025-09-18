@@ -7,7 +7,7 @@ export function useAuth() {
   const isProduction = window.location.hostname === 'curiosities.market' || 
                        window.location.hostname === 'www.curiosities.market';
   
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading, isFetching, error } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: 3, // More retries for production reliability
@@ -77,11 +77,15 @@ export function useAuth() {
   // Determine effective role for UI routing
   // SURGICAL FIX: Preserve admin role, otherwise use seller if applicable
   const effectiveRole = (user as any)?.role === 'admin' ? 'admin' : (isSeller ? 'seller' : (user as any)?.role);
+  
+  // SURGICAL FIX: Only consider auth ready when not loading AND not fetching
+  const isAuthReady = !isLoading && !isFetching;
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
+    isAuthReady,
     authError: error,
     isSeller,
     effectiveRole,

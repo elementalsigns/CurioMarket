@@ -57,18 +57,28 @@ import Messages from "@/pages/messages";
 
 // Authentication guard component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAuthReady } = useAuth();
   const [, setLocation] = useLocation();
   
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // SURGICAL FIX: Only redirect when auth is fully ready and user is not authenticated
+    if (isAuthReady && !isAuthenticated) {
       const currentPath = window.location.pathname;
       const redirectUrl = `/signin?next=${encodeURIComponent(currentPath)}`;
       setLocation(redirectUrl);
     }
-  }, [isAuthenticated, isLoading, setLocation]);
+  }, [isAuthenticated, isAuthReady, setLocation]);
   
   if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+  
+  // SURGICAL FIX: Show loading while auth is not ready
+  if (!isAuthReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
