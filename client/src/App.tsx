@@ -122,16 +122,22 @@ function Router() {
           localStorage.setItem('curio_user_id', userId);
         }
         
+        // PRODUCTION FIX: Check if this is production domain
+        const isProduction = window.location.hostname.endsWith('curiosities.market');
+        
         console.log('[PRODUCTION REDIRECT] User loaded:', {
           userId,
           role: userRole,
           path: currentPath,
           timestamp: new Date().toISOString(),
-          isProduction: import.meta.env.PROD
+          isProduction,
+          isSeller: userRole === 'seller' || userRole === 'admin',
+          hasStripeId: !!(user as any).stripeCustomerId,
+          shouldShowDashboard: (userRole === 'seller' || userRole === 'admin') && !!(user as any).stripeCustomerId
         });
         
         // Method 1: Check user role (primary method)
-        if (userRole === 'seller') {
+        if (userRole === 'seller' || userRole === 'admin') {
           if (currentPath === '/subscribe' || 
               currentPath === '/seller/subscription' || 
               currentPath === '/seller/start') {
@@ -139,6 +145,17 @@ function Router() {
             // Use replace to prevent back button issues
             window.location.replace('/seller/dashboard');
             return;
+          }
+          
+          // PRODUCTION FIX: For production, ensure seller dashboard access works  
+          if (isProduction && currentPath === '/seller/dashboard') {
+            console.log('[PRODUCTION REDIRECT] Direct seller dashboard access - ensuring auth state');
+            // Force a brief delay to ensure auth state is fully resolved
+            setTimeout(() => {
+              if (!window.location.pathname.includes('/seller/dashboard')) {
+                window.location.replace('/seller/dashboard');
+              }
+            }, 100);
           }
         }
         
