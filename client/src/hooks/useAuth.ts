@@ -23,6 +23,7 @@ export function useAuth() {
         role: (user as any).role,
         email: (user as any).email,
         stripeCustomerId: (user as any).stripeCustomerId,
+        capabilities: (user as any).capabilities,
         timestamp: new Date().toISOString()
       });
     }
@@ -40,6 +41,34 @@ export function useAuth() {
     !!(user as any).stripeSubscriptionId || 
     !!(user as any).sellerId
   );
+  
+  // Debug isSeller calculation (moved to existing useEffect to avoid hook order issues)
+  useEffect(() => {
+    if (user) {
+      console.log('[PRODUCTION AUTH] User loaded:', {
+        id: (user as any).id,
+        role: (user as any).role,
+        email: (user as any).email,
+        stripeCustomerId: (user as any).stripeCustomerId,
+        capabilities: (user as any).capabilities,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Inline seller debug to avoid hook order issues
+      console.log('[SELLER DEBUG]', {
+        hasCapabilitiesIsSeller: !!(user as any).capabilities?.isSeller,
+        isAdmin: (user as any).role === 'admin',
+        isSeller: (user as any).role === 'seller',
+        hasStripeSubId: !!(user as any).stripeSubscriptionId,
+        hasSellerId: !!(user as any).sellerId,
+        finalIsSeller: isSeller,
+        capabilities: (user as any).capabilities
+      });
+    }
+    if (error) {
+      console.error('[PRODUCTION AUTH] Auth error:', error);
+    }
+  }, [user, error, isSeller]);
   
   // Determine effective role for UI routing
   // SURGICAL FIX: Preserve admin role, otherwise use seller if applicable

@@ -19,8 +19,7 @@ export default function Home() {
   // Debug production user detection
   useEffect(() => {
     if (user) {
-      // SURGICAL FIX: Include admin users as sellers 
-      const isSeller = (user as any)?.role === 'seller' || (user as any)?.role === 'admin';
+      // SURGICAL FIX: Use isSeller from useAuth hook (don't override it)
       const hasStripeId = !!(user as any)?.stripeCustomerId;
       console.log('[PRODUCTION REDIRECT] User loaded:', {
         userId: (user as any)?.id,
@@ -33,7 +32,7 @@ export default function Home() {
         shouldShowDashboard: isSeller || hasStripeId
       });
     }
-  }, [user]);
+  }, [user, isSeller]);
 
   const { data: featuredListings, error: featuredError } = useQuery({
     queryKey: ["/api/listings/featured"],
