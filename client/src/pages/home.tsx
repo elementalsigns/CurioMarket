@@ -19,7 +19,8 @@ export default function Home() {
   // Debug production user detection
   useEffect(() => {
     if (user) {
-      const isSeller = (user as any)?.role === 'seller';
+      // SURGICAL FIX: Include admin users as sellers 
+      const isSeller = (user as any)?.role === 'seller' || (user as any)?.role === 'admin';
       const hasStripeId = !!(user as any)?.stripeCustomerId;
       console.log('[PRODUCTION REDIRECT] User loaded:', {
         userId: (user as any)?.id,
@@ -51,7 +52,8 @@ export default function Home() {
   });
 
   // Determine if user should see seller dashboard
-  const showSellerDashboard = (user as any)?.role === 'seller' || !!sellerProfile;
+  // SURGICAL FIX: Include admin users as sellers
+  const showSellerDashboard = (user as any)?.role === 'seller' || (user as any)?.role === 'admin' || !!sellerProfile;
 
   useEffect(() => {
     if (featuredError && isUnauthorizedError(featuredError as Error)) {
