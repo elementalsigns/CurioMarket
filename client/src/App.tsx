@@ -57,11 +57,15 @@ import Messages from "@/pages/messages";
 
 // Authentication guard component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, isAuthReady } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   
+  // SURGICAL FIX: Derive authentication state from user existence
+  const isAuthenticated = Boolean(user);
+  const isAuthReady = !isLoading;
+  
   useEffect(() => {
-    // SURGICAL FIX: Only redirect when auth is fully ready and user is not authenticated
+    // Only redirect when auth is fully ready and user is not authenticated
     if (isAuthReady && !isAuthenticated) {
       const currentPath = window.location.pathname;
       const redirectUrl = `/signin?next=${encodeURIComponent(currentPath)}`;
@@ -77,15 +81,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // SURGICAL FIX: Show loading while auth is not ready
-  if (!isAuthReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-  
   if (!isAuthenticated) {
     return null; // Will redirect via useEffect
   }
@@ -94,7 +89,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  
+  // SURGICAL FIX: Derive authentication state from user existence
+  const isAuthenticated = Boolean(user);
 
   // Auto-redirect paid sellers away from subscription pages with LOCAL STORAGE persistence
   useEffect(() => {
