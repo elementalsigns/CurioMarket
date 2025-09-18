@@ -616,7 +616,14 @@ export default function SellerDashboard() {
   }) as { data: { count: number } | undefined };
 
   useEffect(() => {
+    // SURGICAL FIX: Production authentication timing fix
+    const isProduction = window.location.hostname === 'curiosities.market' || 
+                         window.location.hostname === 'www.curiosities.market';
+    
     if (!authLoading && !user) {
+      // In production, wait longer for authentication to load
+      const redirectDelay = isProduction ? 2000 : 500;
+      
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
@@ -624,7 +631,7 @@ export default function SellerDashboard() {
       });
       setTimeout(() => {
         window.location.href = "/api/login";
-      }, 500);
+      }, redirectDelay);
       return;
     }
   }, [user, authLoading, toast]);
