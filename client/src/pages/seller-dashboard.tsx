@@ -595,11 +595,28 @@ export default function SellerDashboard() {
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["/api/seller/dashboard", "v2"],
     queryFn: async () => {
+      console.log('[SELLER-DASHBOARD] Fetching dashboard data...');
       const response = await fetch("/api/seller/dashboard", { 
         credentials: 'include',
         cache: 'no-cache' // Force fresh request
       });
-      return await response.json();
+      
+      console.log('[SELLER-DASHBOARD] API Response status:', response.status);
+      
+      if (!response.ok) {
+        console.error('[SELLER-DASHBOARD] API Error:', response.status, response.statusText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('[SELLER-DASHBOARD] Parsed dashboard data:', {
+        hasSeller: !!data?.seller,
+        sellerId: data?.seller?.id,
+        hasListings: !!data?.listings,
+        listingsCount: data?.listings?.length || 0
+      });
+      
+      return data;
     },
     enabled: Boolean(user && ((user as any)?.role === 'seller' || (user as any)?.stripeCustomerId)),
     retry: 3,
