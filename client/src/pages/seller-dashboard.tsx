@@ -898,7 +898,7 @@ export default function SellerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="analytics" className="space-y-6" data-testid="dashboard-tabs">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 relative z-50">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 relative z-50 mb-8 sm:mb-6">
             <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="inventory" data-testid="tab-inventory">Inventory</TabsTrigger>
@@ -911,7 +911,7 @@ export default function SellerDashboard() {
           </TabsList>
 
           {/* Analytics Tab - NEW COMPREHENSIVE ANALYTICS SECTION */}
-          <TabsContent value="analytics" className="space-y-6 pb-16 sm:pb-0" data-testid="content-analytics">
+          <TabsContent value="analytics" className="space-y-6 pb-16 sm:pb-0 mt-0" data-testid="content-analytics">
             <AnalyticsOverview sellerId={seller.id} />
           </TabsContent>
 
