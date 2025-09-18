@@ -34,8 +34,10 @@ export function useAuth() {
   // Detect if user is effectively a seller (has subscription or seller profile)
   const isSeller = user && (
     (user as any).role === 'seller' || 
+    (user as any).role === 'admin' ||  // Admin users can access seller features
     !!(user as any).stripeSubscriptionId || 
-    !!(user as any).sellerId
+    !!(user as any).sellerId ||
+    !!(user as any).capabilities?.isSeller
   );
   
   // Determine effective role for UI routing

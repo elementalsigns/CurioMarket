@@ -143,55 +143,7 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       }
     }
     
-    // Method 5: SURGICAL FIX - Direct bypass for designsbyreticle@gmail.com seller dashboard access
-    if (!userId && 
-        debugInfo.userAgent?.includes('iPhone') && 
-        debugInfo.referer?.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961') &&
-        req.url?.includes('seller')) {
-      // Use known user ID for designsbyreticle@gmail.com
-      const designsByReticleUserId = '6835edd9-7c78-4fc4-8cee-49a358eed9d0';
-      try {
-        const targetUser = await storage.getUser(designsByReticleUserId);
-        if (targetUser && targetUser.role === 'seller' && targetUser.email === 'designsbyreticle@gmail.com') {
-          userId = targetUser.id;
-          
-          // CRITICAL: Also set req.user for endpoint authentication
-          req.user = {
-            claims: { sub: userId },
-            email: targetUser.email
-          };
-          
-          console.log(`[CAPABILITY] SURGICAL BYPASS activated for designsbyreticle@gmail.com: ${userId}`);
-        }
-      } catch (error) {
-        console.log('[CAPABILITY] Surgical bypass lookup failed:', error.message);
-      }
-    }
-    
-    // Method 6: SURGICAL FIX - Direct bypass for elementalsigns@gmail.com seller dashboard access  
-    if (!userId && 
-        (debugInfo.userAgent?.includes('Safari') || debugInfo.userAgent?.includes('Chrome')) && 
-        (debugInfo.referer?.includes('curiosities.market') || debugInfo.referer?.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961')) &&
-        (req.url?.includes('seller') || req.url?.includes('api/auth/user'))) {
-      // Use known user ID for elementalsigns@gmail.com
-      const elementalSignsUserId = '46848882';
-      try {
-        const targetUser = await storage.getUser(elementalSignsUserId);
-        if (targetUser && targetUser.role === 'admin' && targetUser.email === 'elementalsigns@gmail.com') {
-          userId = targetUser.id;
-          
-          // CRITICAL: Also set req.user for endpoint authentication
-          req.user = {
-            claims: { sub: userId },
-            email: targetUser.email
-          };
-          
-          console.log(`[CAPABILITY] SURGICAL BYPASS activated for elementalsigns@gmail.com: ${userId}`);
-        }
-      } catch (error) {
-        console.log('[CAPABILITY] Surgical bypass lookup failed for elementalsigns:', error.message);
-      }
-    }
+    // Surgical bypasses removed - use normal authentication only
     
     if (!userId) {
       console.log('[CAPABILITY] All authentication methods failed for seller access:', debugInfo);
@@ -1616,62 +1568,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(authInfo);
   });
   
-  // WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
+  // CLEAN AUTH MIDDLEWARE - Standard authentication only
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      // Standard session-based authentication check first - DON'T INTERFERE
+      // Standard session-based authentication check
       if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
       }
       
-      // SURGICAL BYPASS - Only when normal auth fails for specific accounts
-      const userAgent = req.get('User-Agent');
-      const referer = req.get('Referer');
-      
-      if (userAgent && referer && 
-          (referer.includes('curiosities.market') || referer.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961'))) {
-        
-        // Fix for elementalsigns@gmail.com (Admin/Seller) - ONLY when normal auth fails
-        if (userAgent.includes('Safari') || userAgent.includes('Chrome')) {
-          req.user = {
-            claims: {
-              sub: '46848882',  // elementalsigns@gmail.com
-              email: 'elementalsigns@gmail.com', 
-              given_name: 'Artem',
-              family_name: 'Mortis'
-            }
-          };
-          console.log('[AUTH] SURGICAL BYPASS activated for elementalsigns@gmail.com in requireAuth');
-          return next();
-        }
-        
-        // Fix for designsbyreticle@gmail.com (Seller) - ONLY when normal auth fails
-        if (userAgent.includes('iPhone')) {
-          req.user = {
-            claims: {
-              sub: '6835edd9-7c78-4fc4-8cee-49a358eed9d0',  // designsbyreticle@gmail.com
-              email: 'designsbyreticle@gmail.com', 
-              given_name: 'Designs',
-              family_name: 'ByReticle'
-            }
-          };
-          console.log('[AUTH] SURGICAL BYPASS activated for designsbyreticle@gmail.com in requireAuth');
-          return next();
-        }
-      }
-      
-      // Legacy development bypass for consistent authentication across all endpoints
-      if (process.env.NODE_ENV === 'development') {
-        req.user = {
-          claims: {
-            sub: '46848882',  // Development user
-            email: 'elementalsigns@gmail.com', 
-            given_name: 'Artem',
-            family_name: 'Mortis'
-          }
-        };
-        return next();
-      }
+      // Development bypass removed for clean authentication
 
       // Standard session-based authentication check for production
       if (req.isAuthenticated && req.isAuthenticated()) {
@@ -1688,19 +1593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user in development
   const requireAdminAuth = async (req: any, res: any, next: any) => {
     try {
-      // SURGICAL: Only bypass admin endpoints OR /api/auth/user in development environment
-      const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
-      if (process.env.NODE_ENV === 'development' && isAdminPath) {
-        req.user = {
-          claims: {
-            sub: '46848882',  // Admin user only
-            email: 'elementalsigns@gmail.com', 
-            given_name: 'Artem',
-            family_name: 'Mortis'
-          }
-        };
-        return next();
-      }
+      // Admin bypass removed for clean authentication
 
       // Standard session-based authentication check for all other cases
       if (req.isAuthenticated && req.isAuthenticated()) {
