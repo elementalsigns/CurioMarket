@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -59,14 +59,27 @@ import Messages from "@/pages/messages";
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [hasWaited, setHasWaited] = useState(false);
   
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // SURGICAL FIX: Add 3-second delay to let authentication fully load
+    if (!isLoading && !isAuthenticated && !hasWaited) {
+      const timer = setTimeout(() => {
+        setHasWaited(true);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, isLoading, hasWaited]);
+  
+  useEffect(() => {
+    // Only redirect after the 3-second wait and if still not authenticated
+    if (hasWaited && !isLoading && !isAuthenticated) {
       const currentPath = window.location.pathname;
       const redirectUrl = `/signin?next=${encodeURIComponent(currentPath)}`;
       setLocation(redirectUrl);
     }
-  }, [isAuthenticated, isLoading, setLocation]);
+  }, [hasWaited, isAuthenticated, isLoading, setLocation]);
   
   if (isLoading) {
     return (
@@ -76,6 +89,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   
+  // SURGICAL FIX: Show loading during the 3-second grace period
+  if (!isAuthenticated && !hasWaited) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+  
+  // After 3-second wait, if still not authenticated, let the redirect logic handle it
   if (!isAuthenticated) {
     return null; // Will redirect via useEffect
   }
