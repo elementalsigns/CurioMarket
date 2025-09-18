@@ -74,11 +74,6 @@ export function useAuth() {
   // SURGICAL FIX: Preserve admin role, otherwise use seller if applicable
   const effectiveRole = (user as any)?.role === 'admin' ? 'admin' : (isSeller ? 'seller' : (user as any)?.role);
 
-  // Live testing log
-  if (user && isSeller !== undefined) {
-    console.log(`[LIVE TEST] useAuth returning: isSeller=${isSeller}, role=${(user as any)?.role}, capabilities=${JSON.stringify((user as any)?.capabilities)}`);
-  }
-
   return {
     user,
     isLoading,

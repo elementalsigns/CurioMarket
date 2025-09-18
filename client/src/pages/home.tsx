@@ -98,7 +98,6 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              {console.log(`[LIVE TEST] Welcome text rendering: isSeller=${isSeller} → Showing "${isSeller ? 'Curator' : 'Collector'}"`)}
               Welcome back, {isSeller ? 'Curator' : 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
