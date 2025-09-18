@@ -34,13 +34,13 @@ export function useAuth() {
 
   // Detect if user is effectively a seller (has subscription or seller profile)
   // SURGICAL FIX: Prioritize backend capabilities, fallback to legacy checks
-  const isSeller = user && (
+  const isSeller = Boolean(user && (
     !!(user as any).capabilities?.isSeller ||
     (user as any).role === 'admin' ||
     (user as any).role === 'seller' || 
     !!(user as any).stripeSubscriptionId || 
     !!(user as any).sellerId
-  );
+  ));
   
   // Debug isSeller calculation (moved to existing useEffect to avoid hook order issues)
   useEffect(() => {
