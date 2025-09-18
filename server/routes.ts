@@ -211,6 +211,14 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       }
     }
     
+    // Set up req.user object that downstream routes expect
+    req.user = {
+      claims: {
+        sub: userId
+      },
+      id: userId
+    };
+    
     console.log(`[CAPABILITY] User ${userId} granted seller access with seller ID: ${req.sellerId || 'none'}`);
     return next();
   } catch (error) {
