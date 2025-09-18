@@ -14,6 +14,9 @@ import { Link } from "wouter";
 
 export default function Home() {
   const { user, isLoading, isSeller } = useAuth();
+  
+  // SURGICAL FIX: Only show role-specific text when auth is stable
+  const isAuthReady = !isLoading && user !== undefined;
   const { toast } = useToast();
   
   // Debug production user detection
@@ -98,11 +101,10 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              {console.log(`[SAFARI TEST] isSeller=${isSeller}, userRole=${(user as any)?.role}, capabilities=${JSON.stringify((user as any)?.capabilities)} → Display: "${isSeller ? 'Curator' : 'Collector'}"`)}
-              Welcome back, {isSeller ? 'Curator' : 'Collector'}
+              Welcome back{isAuthReady ? `, ${isSeller ? 'Curator' : 'Collector'}` : ''}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
-              {isSeller ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection'}
+              {isAuthReady ? (isSeller ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection') : 'Loading your personalized experience...'}
             </p>
           </div>
 
