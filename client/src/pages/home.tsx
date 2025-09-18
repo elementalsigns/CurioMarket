@@ -13,7 +13,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Link } from "wouter";
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isSeller } = useAuth();
   const { toast } = useToast();
   
   // Debug production user detection
@@ -52,8 +52,8 @@ export default function Home() {
   });
 
   // Determine if user should see seller dashboard
-  // SURGICAL FIX: Include admin users as sellers
-  const showSellerDashboard = (user as any)?.role === 'seller' || (user as any)?.role === 'admin' || !!sellerProfile;
+  // SURGICAL FIX: Use isSeller from useAuth (reads capabilities)
+  const showSellerDashboard = isSeller;
 
   useEffect(() => {
     if (featuredError && isUnauthorizedError(featuredError as Error)) {
@@ -99,10 +99,10 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              Welcome back, {sellerProfile ? 'Curator' : 'Collector'}
+              Welcome back, {isSeller ? 'Curator' : 'Collector'}
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
-              {sellerProfile ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection'}
+              {isSeller ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection'}
             </p>
           </div>
 

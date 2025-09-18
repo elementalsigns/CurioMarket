@@ -32,8 +32,9 @@ export function useAuth() {
   }, [user, error]);
 
   // Detect if user is effectively a seller (has subscription or seller profile)
-  // SURGICAL FIX: Admin users always have seller access
+  // SURGICAL FIX: Prioritize backend capabilities, fallback to legacy checks
   const isSeller = user && (
+    !!(user as any).capabilities?.isSeller ||
     (user as any).role === 'admin' ||
     (user as any).role === 'seller' || 
     !!(user as any).stripeSubscriptionId || 
