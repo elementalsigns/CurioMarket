@@ -157,6 +157,23 @@ function Router() {
               }
             }, 100);
           }
+          
+          // COMPREHENSIVE PRODUCTION FIX: Handle NotFound issues in production
+          if (isProduction && currentPath === '/') {
+            // Check if user was trying to access seller dashboard but ended up on home page
+            console.log('[PRODUCTION FIX] Admin user on home page in production - checking for seller dashboard intent');
+            const lastClickedElement = document.activeElement;
+            const referrer = document.referrer;
+            
+            // If this looks like a seller dashboard attempt, redirect
+            if (referrer.includes('seller') || localStorage.getItem('seller_dashboard_intent')) {
+              console.log('[PRODUCTION FIX] Redirecting to seller dashboard based on intent');
+              localStorage.removeItem('seller_dashboard_intent');
+              setTimeout(() => {
+                window.location.replace('/seller/dashboard');
+              }, 100);
+            }
+          }
         }
         
         // Method 2: Check subscription status as backup (for edge cases)

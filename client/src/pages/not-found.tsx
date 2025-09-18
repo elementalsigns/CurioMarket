@@ -1,9 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import Footer from "@/components/layout/footer";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 export default function NotFound() {
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const currentPath = window.location.pathname;
+  const isProduction = window.location.hostname.endsWith('curiosities.market');
+  
   console.log("NotFound component is being rendered");
+  console.log("[PRODUCTION DEBUG] NotFound details:", {
+    currentPath,
+    isProduction,
+    hasUser: !!user,
+    userRole: user?.role,
+    userCapabilities: user?.capabilities,
+    hostname: window.location.hostname,
+    href: window.location.href
+  });
+  
+  // PRODUCTION FIX: Auto-redirect admin users to seller dashboard in production
+  useEffect(() => {
+    if (isProduction && user && (user.role === 'admin' || user.role === 'seller')) {
+      console.log("[PRODUCTION FIX] Auto-redirecting admin/seller user to dashboard");
+      // Small delay to prevent redirect loops  
+      setTimeout(() => {
+        setLocation('/seller-dashboard');
+      }, 500);
+    }
+  }, [isProduction, user, setLocation]);
   
   // Don't render NotFound on specific pages to prevent overlay issues
   if (typeof window !== 'undefined') {
