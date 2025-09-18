@@ -130,7 +130,7 @@ export interface IStorage {
   searchListings(query: string, filters?: any): Promise<{ listings: Listing[]; total: number }>;
   searchShops(query: string, filters?: any): Promise<{ shops: Seller[]; total: number }>;
   getFeaturedListings(limit?: number): Promise<Listing[]>;
-  getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }>;
+  getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number; activeListings: number; totalFavorites: number; totalViews: number }>;
   
   // Category counts
   getCategoryCounts(): Promise<any[]>;
@@ -950,14 +950,14 @@ export class DatabaseStorage implements IStorage {
     return listingsWithImagesAndSeller.filter(listing => listing.images && listing.images.length > 0);
   }
 
-  async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number }> {
+  async getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number; activeListings: number; totalFavorites: number; totalViews: number }> {
     // Get the user ID from the seller profile ID
     const seller = await db.query.sellers.findFirst({
       where: eq(sellers.id, sellerId)
     });
     
     if (!seller) {
-      return { totalSales: 0, averageRating: 0, totalReviews: 0 };
+      return { totalSales: 0, averageRating: 0, totalReviews: 0, activeListings: 0, totalFavorites: 0, totalViews: 0 };
     }
 
     const [salesResult] = await db
@@ -975,10 +975,38 @@ export class DatabaseStorage implements IStorage {
       .from(reviews)
       .where(eq(reviews.sellerId, seller.userId));
 
+    // Get active listings count
+    const [listingsResult] = await db
+      .select({ 
+        activeListings: count(listings.id),
+      })
+      .from(listings)
+      .where(and(eq(listings.sellerId, sellerId), eq(listings.state, 'published')));
+
+    // Get total favorites for all seller's listings
+    const [favoritesResult] = await db
+      .select({ 
+        totalFavorites: count(favorites.id),
+      })
+      .from(favorites)
+      .leftJoin(listings, eq(favorites.listingId, listings.id))
+      .where(eq(listings.sellerId, sellerId));
+
+    // Get total views from all seller's listings
+    const sellerListings = await db
+      .select({ views: listings.views })
+      .from(listings)
+      .where(eq(listings.sellerId, sellerId));
+    
+    const totalViews = sellerListings.reduce((sum, listing) => sum + (listing.views || 0), 0);
+
     return {
       totalSales: salesResult?.totalSales || 0,
       averageRating: Number(reviewsResult?.averageRating) || 0,
       totalReviews: reviewsResult?.totalReviews || 0,
+      activeListings: listingsResult?.activeListings || 0,
+      totalFavorites: favoritesResult?.totalFavorites || 0,
+      totalViews: totalViews || 0,
     };
   }
 
