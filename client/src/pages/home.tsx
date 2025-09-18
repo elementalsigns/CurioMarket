@@ -112,7 +112,7 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              {(user as any)?.email === 'elementalsigns@gmail.com' ? 
+              {(user as any)?.id === '46848882' ? 
                 'Welcome back, Curator' : 
                 `Welcome back${isAuthReady ? `, ${isSeller ? 'Curator' : 'Collector'}` : ''}`
               }
