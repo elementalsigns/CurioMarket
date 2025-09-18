@@ -47,7 +47,7 @@ export default function Home() {
 
   const { data: sellerProfile } = useQuery({
     queryKey: ["/api/seller/profile"],
-    enabled: !!user && (user as any)?.role === 'seller',
+    enabled: !!user && ((user as any)?.role === 'seller' || (user as any)?.role === 'admin'),
     retry: false, // Don't retry if user is not a seller
   });
 
