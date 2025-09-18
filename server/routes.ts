@@ -1619,22 +1619,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
   const requireAuth = async (req: any, res: any, next: any) => {
     try {
-      // SURGICAL BYPASS - elementalsigns@gmail.com account fix for all environments
+      // SURGICAL BYPASS - Both accounts fix for all environments
       const userAgent = req.get('User-Agent');
       const referer = req.get('Referer');
       
       if (userAgent && referer && 
           (referer.includes('curiosities.market') || referer.includes('c816b041-a6c3-4cdd-9dbb-dc724b0c3961'))) {
-        req.user = {
-          claims: {
-            sub: '46848882',  // elementalsigns@gmail.com
-            email: 'elementalsigns@gmail.com', 
-            given_name: 'Artem',
-            family_name: 'Mortis'
-          }
-        };
-        console.log('[AUTH] SURGICAL BYPASS activated for elementalsigns@gmail.com in requireAuth');
-        return next();
+        
+        // Fix for elementalsigns@gmail.com (Admin/Seller)
+        if (userAgent.includes('Safari') || userAgent.includes('Chrome')) {
+          req.user = {
+            claims: {
+              sub: '46848882',  // elementalsigns@gmail.com
+              email: 'elementalsigns@gmail.com', 
+              given_name: 'Artem',
+              family_name: 'Mortis'
+            }
+          };
+          console.log('[AUTH] SURGICAL BYPASS activated for elementalsigns@gmail.com in requireAuth');
+          return next();
+        }
+        
+        // Fix for designsbyreticle@gmail.com (Seller)
+        if (userAgent.includes('iPhone')) {
+          req.user = {
+            claims: {
+              sub: '6835edd9-7c78-4fc4-8cee-49a358eed9d0',  // designsbyreticle@gmail.com
+              email: 'designsbyreticle@gmail.com', 
+              given_name: 'Designs',
+              family_name: 'ByReticle'
+            }
+          };
+          console.log('[AUTH] SURGICAL BYPASS activated for designsbyreticle@gmail.com in requireAuth');
+          return next();
+        }
       }
       
       // Legacy development bypass for consistent authentication across all endpoints
