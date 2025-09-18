@@ -112,7 +112,10 @@ export default function Home() {
               }}
               data-testid="welcome-title"
             >
-              Welcome back{isAuthReady ? `, ${(user as any)?.email === 'elementalsigns@gmail.com' ? 'Curator' : (isSeller ? 'Curator' : 'Collector')}` : ''}
+              {(user as any)?.email === 'elementalsigns@gmail.com' ? 
+                'Welcome back, Curator' : 
+                `Welcome back${isAuthReady ? `, ${isSeller ? 'Curator' : 'Collector'}` : ''}`
+              }
             </h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto" data-testid="welcome-subtitle">
               {isAuthReady ? (isSeller ? 'Manage your shop and discover new treasures to offer' : 'Discover new oddities and manage your collection') : 'Loading your personalized experience...'}
