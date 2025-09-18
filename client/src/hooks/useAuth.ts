@@ -32,14 +32,17 @@ export function useAuth() {
   }, [user, error]);
 
   // Detect if user is effectively a seller (has subscription or seller profile)
+  // SURGICAL FIX: Admin users always have seller access
   const isSeller = user && (
+    (user as any).role === 'admin' ||
     (user as any).role === 'seller' || 
     !!(user as any).stripeSubscriptionId || 
     !!(user as any).sellerId
   );
   
   // Determine effective role for UI routing
-  const effectiveRole = isSeller ? 'seller' : (user as any)?.role;
+  // SURGICAL FIX: Preserve admin role, otherwise use seller if applicable
+  const effectiveRole = (user as any)?.role === 'admin' ? 'admin' : (isSeller ? 'seller' : (user as any)?.role);
 
   return {
     user,
