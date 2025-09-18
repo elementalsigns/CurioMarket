@@ -152,7 +152,9 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
     }
     // Method 3: Last resort - check passport session
     else if (req.session && req.session.passport && req.session.passport.user) {
-      userId = req.session.passport.user;
+      const passportUser = req.session.passport.user;
+      // Handle both string userId and full user object formats
+      userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
       console.log(`[CAPABILITY] Passport session auth success for user: ${userId}`);
     }
     // Method 4: JWT Bearer token (for magic login mobile fix)

@@ -127,13 +127,15 @@ export async function setupAuth(app: Express) {
       }
     };
 
-    // Get configured domains and add production domain if not present
+    // Get configured domains and add production domains if not present
     const configuredDomains = process.env.REPLIT_DOMAINS?.split(",") || [];
-    const productionDomain = "www.curiosities.market";
+    const productionDomains = ["curiosities.market", "www.curiosities.market"];
     
-    // Add production domain if not in configured domains
-    if (!configuredDomains.includes(productionDomain)) {
-      configuredDomains.push(productionDomain);
+    // Add production domains if not in configured domains
+    for (const domain of productionDomains) {
+      if (!configuredDomains.includes(domain)) {
+        configuredDomains.push(domain);
+      }
     }
     
     for (const domain of configuredDomains) {
@@ -159,13 +161,29 @@ export async function setupAuth(app: Express) {
       console.log("Available strategies:", Object.keys((passport as any)._strategies || {}));
       
       // Find matching strategy - include localhost for development
-      const strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+      let strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
           (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
           (hostname === 'localhost' && key.includes('.replit.dev'))
         )
       );
+      
+      // Fallback strategy selection for production domain mismatch
+      if (!strategyName && hostname.endsWith('curiosities.market')) {
+        // Try flipping between apex and www
+        const altHostname = hostname.startsWith('www.') ? hostname.slice(4) : 'www.' + hostname;
+        strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+          key.startsWith('replitauth:') && key.includes(altHostname)
+        );
+        
+        // Final fallback: first production strategy
+        if (!strategyName) {
+          strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+            key.startsWith('replitauth:') && (key.includes('curiosities.market'))
+          );
+        }
+      }
       
       if (!strategyName) {
         console.error("No matching auth strategy found for hostname:", hostname);
@@ -182,13 +200,29 @@ export async function setupAuth(app: Express) {
       const hostname = req.hostname;
       
       // Find matching strategy - include localhost for development
-      const strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+      let strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
         key.startsWith('replitauth:') && (
           key.includes(hostname) || 
           (hostname === '127.0.0.1' && key.includes('.replit.dev')) ||
           (hostname === 'localhost' && key.includes('.replit.dev'))
         )
       );
+      
+      // Fallback strategy selection for production domain mismatch
+      if (!strategyName && hostname.endsWith('curiosities.market')) {
+        // Try flipping between apex and www
+        const altHostname = hostname.startsWith('www.') ? hostname.slice(4) : 'www.' + hostname;
+        strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+          key.startsWith('replitauth:') && key.includes(altHostname)
+        );
+        
+        // Final fallback: first production strategy
+        if (!strategyName) {
+          strategyName = Object.keys((passport as any)._strategies || {}).find(key => 
+            key.startsWith('replitauth:') && (key.includes('curiosities.market'))
+          );
+        }
+      }
       
       if (!strategyName) {
         console.error("No matching auth strategy found for callback:", hostname);
