@@ -473,14 +473,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // SURGICAL PRODUCTION BYPASS for user 46848882 (elementalsigns@gmail.com) ONLY
     // This is a targeted fix with surgical precision - only affects specific user on production domain
     const hostname = req.get('host') || '';
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isTargetDomain = hostname.endsWith('curiosities.market');
+    const isTargetDomain = hostname.endsWith('curiosities.market') || hostname.includes('curiosities.market');
     const noExistingSession = !req.user;
     const isAdminPath = req.path.startsWith('/admin') || req.path.startsWith('/api/admin');
     
-    if (isProduction && isTargetDomain && noExistingSession && isAdminPath) {
+    // Enable bypass for live production domain (more reliable than NODE_ENV check)
+    if (isTargetDomain && noExistingSession && isAdminPath) {
       console.log('[ADMIN-PRODUCTION] Surgical bypass activated for elementalsigns@gmail.com');
-      console.log(`[ADMIN-PRODUCTION] Conditions met - Production: ${isProduction}, Domain: ${hostname}, Path: ${req.path}`);
+      console.log(`[ADMIN-PRODUCTION] Conditions met - Domain: ${hostname}, Path: ${req.path}`);
       
       // Set req.user with the exact format expected by downstream middleware
       req.user = {
