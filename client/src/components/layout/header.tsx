@@ -34,7 +34,6 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [menuButtonDisabled, setMenuButtonDisabled] = useState(false);
 
   const { data: cartData } = useQuery({
     queryKey: ["/api/cart"],
@@ -68,18 +67,6 @@ export default function Header() {
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
-  };
-
-  const handleMobileMenuToggle = () => {
-    if (menuButtonDisabled) return;
-    
-    setMenuButtonDisabled(true);
-    setMobileMenuOpen(prev => !prev);
-    
-    // Re-enable button after short delay to prevent rapid toggling
-    setTimeout(() => {
-      setMenuButtonDisabled(false);
-    }, 300);
   };
 
   return (
@@ -209,8 +196,7 @@ export default function Header() {
             <Button
               variant="ghost"
               className="text-foreground p-1.5 min-w-[40px] min-h-[40px] flex items-center justify-center"
-              onClick={handleMobileMenuToggle}
-              disabled={menuButtonDisabled}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
               <Menu size={20} />
