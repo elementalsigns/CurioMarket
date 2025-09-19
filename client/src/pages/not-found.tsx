@@ -1,49 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import Footer from "@/components/layout/footer";
-import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 
 export default function NotFound() {
-  const [, setLocation] = useLocation();
-  const { user, isLoading } = useAuth();
-  const currentPath = window.location.pathname;
-  const isProduction = window.location.hostname.endsWith('curiosities.market');
-  
   console.log("NotFound component is being rendered");
-  console.log("[PRODUCTION DEBUG] NotFound details:", {
-    currentPath,
-    isProduction,
-    hasUser: !!user,
-    userRole: user?.role,
-    userCapabilities: user?.capabilities,
-    hostname: window.location.hostname,
-    href: window.location.href
-  });
   
-  // SURGICAL FIX: Enhanced home page detection - prevent NotFound on authenticated home page
+  // Don't render NotFound on specific pages to prevent overlay issues
   if (typeof window !== 'undefined') {
     const path = window.location.pathname;
-    const isAuthenticated = Boolean(user);
-    
-    console.log("[NOTFOUND DEBUG] Path check:", {
-      path,
-      pathLength: path.length,
-      pathCharCodes: Array.from(path).map(c => c.charCodeAt(0)),
-      isRoot: path === '/',
-      isAuthenticated,
-      isLoading,
-      shouldPreventRender: path === '/' && !isLoading && isAuthenticated
-    });
-    
-    // SURGICAL FIX: Prevent NotFound when authenticated user is on home page
-    if (path === '/' && !isLoading && isAuthenticated) {
-      console.log("[NOTFOUND PREVENTION] Authenticated user on home page - returning null");
-      return null;
-    }
-    
-    // Original logic for other pages
     if (path === '/' || 
         path === '/seller/guide' || 
         path === '/safety' || 
@@ -71,21 +35,9 @@ export default function NotFound() {
         path.startsWith('/admin') ||
         path.startsWith('/subscribe') ||
         path.startsWith('/api/')) {
-      console.log("[NOTFOUND DEBUG] Path matched exclusion list - returning null");
       return null;
     }
   }
-  
-  // PRODUCTION FIX: Auto-redirect admin users to seller dashboard in production
-  useEffect(() => {
-    if (isProduction && user && (user.role === 'admin' || user.role === 'seller')) {
-      console.log("[PRODUCTION FIX] Auto-redirecting admin/seller user to dashboard");
-      // Small delay to prevent redirect loops  
-      setTimeout(() => {
-        setLocation('/seller-dashboard');
-      }, 500);
-    }
-  }, [isProduction, user, setLocation]);
   
   return (
     <div className="min-h-screen w-full flex flex-col bg-zinc-950">

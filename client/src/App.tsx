@@ -122,22 +122,16 @@ function Router() {
           localStorage.setItem('curio_user_id', userId);
         }
         
-        // PRODUCTION FIX: Check if this is production domain
-        const isProduction = window.location.hostname.endsWith('curiosities.market');
-        
         console.log('[PRODUCTION REDIRECT] User loaded:', {
           userId,
           role: userRole,
           path: currentPath,
           timestamp: new Date().toISOString(),
-          isProduction,
-          isSeller: userRole === 'seller' || userRole === 'admin',
-          hasStripeId: !!(user as any).stripeCustomerId,
-          shouldShowDashboard: (userRole === 'seller' || userRole === 'admin') && !!(user as any).stripeCustomerId
+          isProduction: import.meta.env.PROD
         });
         
         // Method 1: Check user role (primary method)
-        if (userRole === 'seller' || userRole === 'admin') {
+        if (userRole === 'seller') {
           if (currentPath === '/subscribe' || 
               currentPath === '/seller/subscription' || 
               currentPath === '/seller/start') {
@@ -145,34 +139,6 @@ function Router() {
             // Use replace to prevent back button issues
             window.location.replace('/seller/dashboard');
             return;
-          }
-          
-          // PRODUCTION FIX: For production, ensure seller dashboard access works  
-          if (isProduction && currentPath === '/seller/dashboard') {
-            console.log('[PRODUCTION REDIRECT] Direct seller dashboard access - ensuring auth state');
-            // Force a brief delay to ensure auth state is fully resolved
-            setTimeout(() => {
-              if (!window.location.pathname.includes('/seller/dashboard')) {
-                window.location.replace('/seller/dashboard');
-              }
-            }, 100);
-          }
-          
-          // COMPREHENSIVE PRODUCTION FIX: Handle NotFound issues in production
-          if (isProduction && currentPath === '/') {
-            // Check if user was trying to access seller dashboard but ended up on home page
-            console.log('[PRODUCTION FIX] Admin user on home page in production - checking for seller dashboard intent');
-            const lastClickedElement = document.activeElement;
-            const referrer = document.referrer;
-            
-            // If this looks like a seller dashboard attempt, redirect
-            if (referrer.includes('seller') || localStorage.getItem('seller_dashboard_intent')) {
-              console.log('[PRODUCTION FIX] Redirecting to seller dashboard based on intent');
-              localStorage.removeItem('seller_dashboard_intent');
-              setTimeout(() => {
-                window.location.replace('/seller/dashboard');
-              }, 100);
-            }
           }
         }
         
@@ -211,20 +177,6 @@ function Router() {
     checkAndRedirect();
   }, [user, isLoading]);
 
-  // SURGICAL FIX: Add detailed route debugging with render tracking
-  const currentPath = window.location.pathname;
-  const renderId = Math.random().toString(36).substr(2, 9);
-  console.log(`[ROUTE DEBUG ${renderId}]`, {
-    currentPath,
-    isLoading,
-    isAuthenticated,
-    user: user ? 'EXISTS' : 'NONE',
-    userRole: (user as any)?.role,
-    shouldShowHome: !isLoading && isAuthenticated,
-    shouldShowLanding: !isLoading && !isAuthenticated,
-    timestamp: new Date().toISOString()
-  });
-
   return (
     <Switch>
       {isLoading ? (
@@ -235,11 +187,8 @@ function Router() {
         </Route>
       ) : (
         <>
-          {/* SURGICAL FIX: Explicit route matching for home page */}
-          <Route path="/" component={() => {
-            console.log('[ROOT ROUTE] Rendering home page - authenticated:', isAuthenticated);
-            return isAuthenticated ? <Home /> : <Landing />;
-          }} />
+          {/* Public routes - always accessible */}
+          <Route path="/" component={isAuthenticated ? Home : Landing} />
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/shop/:sellerId" component={() => <ShopPage />} />

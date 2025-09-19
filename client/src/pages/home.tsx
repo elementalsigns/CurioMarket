@@ -164,15 +164,7 @@ export default function Home() {
                       Manage your listings and view analytics
                     </p>
                     <Link to="/seller/dashboard">
-                      <Button 
-                        className="bg-gothic-red hover:bg-gothic-red/80" 
-                        data-testid="button-seller-dashboard"
-                        onClick={() => {
-                          // PRODUCTION FIX: Set intent flag for production routing
-                          localStorage.setItem('seller_dashboard_intent', 'true');
-                          console.log('[PRODUCTION FIX] Seller Dashboard button clicked - intent set');
-                        }}
-                      >
+                      <Button className="bg-gothic-red hover:bg-gothic-red/80" data-testid="button-seller-dashboard">
                         View Dashboard
                       </Button>
                     </Link>
