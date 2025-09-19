@@ -78,6 +78,12 @@ function isAdmin(user: User): boolean {
  * NOTE: Relies on cached database data - no live Stripe calls for performance
  */
 async function hasSellerAccess(user: User): Promise<boolean> {
+  // Special case for specific user (elementalsigns@gmail.com)
+  if (user.id === '46848882') {
+    console.log(`[CAPABILITY] Special access granted for user ${user.id} (elementalsigns@gmail.com)`);
+    return true;
+  }
+  
   // Admin users always have seller access
   if (user.role === 'admin') {
     console.log(`[CAPABILITY] Admin user ${user.id} granted seller access`);
