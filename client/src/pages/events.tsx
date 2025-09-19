@@ -547,11 +547,11 @@ export default function EventsPage() {
                               {(event.contactEmail || event.contactPhone || event.website) && (
                                 <div className="mt-4 pt-4 border-t border-border">
                                   <div className="flex flex-wrap gap-4 text-sm">
-                                    {event.contactEmail && (
+                                    {event.contactEmail && event.contactEmail.trim() && (
                                       <div className="flex items-center space-x-2">
                                         <Mail size={14} className="text-red-600" />
                                         <a 
-                                          href={`mailto:${event.contactEmail}`} 
+                                          href={`mailto:${event.contactEmail.trim()}`} 
                                           className="hover:text-red-600 transition-colors"
                                           data-testid={`event-email-${event.id}`}
                                         >
@@ -559,11 +559,11 @@ export default function EventsPage() {
                                         </a>
                                       </div>
                                     )}
-                                    {event.contactPhone && (
+                                    {event.contactPhone && event.contactPhone.trim() && (
                                       <div className="flex items-center space-x-2">
                                         <Phone size={14} className="text-red-600" />
                                         <a 
-                                          href={`tel:${event.contactPhone}`} 
+                                          href={`tel:${event.contactPhone.trim()}`} 
                                           className="hover:text-red-600 transition-colors"
                                           data-testid={`event-phone-${event.id}`}
                                         >
