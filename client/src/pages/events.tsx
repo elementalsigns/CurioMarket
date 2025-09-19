@@ -31,17 +31,22 @@ const createEventSchema = z.object({
   contactPhone: z.string().optional(),
   website: z.string().optional().or(z.literal("")).refine((val) => {
     if (!val || val === "") return true;
-    // Allow www.domain.com format
-    if (/^www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(val)) return true;
-    // Safe URL validation without throwing errors
+    
+    // Safe URL validation using regex patterns without throwing errors
     const isValidUrl = (urlString: string): boolean => {
-      try {
-        new URL(urlString);
-        return true;
-      } catch {
-        return false;
-      }
+      if (!urlString || urlString.trim().length < 7) return false;
+      const trimmed = urlString.trim();
+      
+      // Check for basic URL patterns - protocol + domain
+      const fullUrlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+      // Check for www.domain.com format
+      const wwwPattern = /^www\.[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*(\/.*)?$/i;
+      // Check for domain.com format (without www)
+      const domainPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*(\/.*)?$/i;
+      
+      return fullUrlPattern.test(trimmed) || wwwPattern.test(trimmed) || domainPattern.test(trimmed);
     };
+    
     // Try as-is first, then with https:// prefix
     return isValidUrl(val) || isValidUrl(`https://${val}`);
   }, "Please enter a valid website URL (e.g., www.example.com or https://example.com)"),
@@ -576,14 +581,19 @@ export default function EventsPage() {
                                       </div>
                                     )}
                                     {event.website && (() => {
-                                      // Safe URL validation function that doesn't throw errors
+                                      // Safe URL validation using regex patterns without throwing errors
                                       const isValidUrl = (urlString: string): boolean => {
-                                        try {
-                                          new URL(urlString);
-                                          return true;
-                                        } catch {
-                                          return false;
-                                        }
+                                        if (!urlString || urlString.trim().length < 7) return false;
+                                        const trimmed = urlString.trim();
+                                        
+                                        // Check for basic URL patterns - protocol + domain
+                                        const fullUrlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+                                        // Check for www.domain.com format
+                                        const wwwPattern = /^www\.[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*(\/.*)?$/i;
+                                        // Check for domain.com format (without www)
+                                        const domainPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})*(\/.*)?$/i;
+                                        
+                                        return fullUrlPattern.test(trimmed) || wwwPattern.test(trimmed) || domainPattern.test(trimmed);
                                       };
 
                                       // Ensure website URL has proper protocol to prevent invalid navigation
