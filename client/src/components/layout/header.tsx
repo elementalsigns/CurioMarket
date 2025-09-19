@@ -227,7 +227,6 @@ export default function Header() {
                   }
                 }}
                 onTouchStart={(e) => {
-                  e.preventDefault();
                   if (e.currentTarget && e.currentTarget.style) {
                     e.currentTarget.style.setProperty('color', '#dc2626', 'important');
                     e.currentTarget.style.setProperty('text-shadow', '0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(220, 38, 38, 0.8)', 'important');
