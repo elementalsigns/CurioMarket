@@ -211,6 +211,20 @@ function Router() {
     checkAndRedirect();
   }, [user, isLoading]);
 
+  // SURGICAL FIX: Add detailed route debugging with render tracking
+  const currentPath = window.location.pathname;
+  const renderId = Math.random().toString(36).substr(2, 9);
+  console.log(`[ROUTE DEBUG ${renderId}]`, {
+    currentPath,
+    isLoading,
+    isAuthenticated,
+    user: user ? 'EXISTS' : 'NONE',
+    userRole: (user as any)?.role,
+    shouldShowHome: !isLoading && isAuthenticated,
+    shouldShowLanding: !isLoading && !isAuthenticated,
+    timestamp: new Date().toISOString()
+  });
+
   return (
     <Switch>
       {isLoading ? (
@@ -221,8 +235,11 @@ function Router() {
         </Route>
       ) : (
         <>
-          {/* Public routes - always accessible */}
-          <Route path="/" component={isAuthenticated ? Home : Landing} />
+          {/* SURGICAL FIX: Explicit route matching for home page */}
+          <Route path="/" component={() => {
+            console.log('[ROOT ROUTE] Rendering home page - authenticated:', isAuthenticated);
+            return isAuthenticated ? <Home /> : <Landing />;
+          }} />
           <Route path="/browse" component={Browse} />
           <Route path="/product/:slug" component={Product} />
           <Route path="/shop/:sellerId" component={() => <ShopPage />} />
