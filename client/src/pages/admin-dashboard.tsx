@@ -53,8 +53,8 @@ export default function AdminDashboard() {
   const [refundAmount, setRefundAmount] = useState("");
   const [adminAction, setAdminAction] = useState("");
 
-  // SURGICAL ADMIN CHECK: Only proceed if user exists and has admin role
-  if (!user || (user as any).role !== 'admin') {
+  // SURGICAL ADMIN CHECK: Only proceed if user exists and has admin role (check effectiveRole first)
+  if (!user || ((user as any).effectiveRole !== 'admin' && (user as any).role !== 'admin')) {
     return (
       <div className="container mx-auto p-6">
         <Card>

@@ -68,6 +68,7 @@ import { eq, and, desc, asc, ilike, like, or, sql, count, avg, inArray } from "d
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserStripeInfo(id: string, stripeData: { customerId: string; subscriptionId: string }): Promise<User>;
@@ -268,6 +269,11 @@ export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
   }
 
@@ -2561,7 +2567,13 @@ export class DatabaseStorage implements IStorage {
     const listingIds = sellerListings.map(l => l.id);
 
     // Get orders data for the period - handle empty listingIds case
-    let ordersData = [];
+    let ordersData: {
+      id: string;
+      total: string;
+      platformFee: string | null;
+      createdAt: Date | null;
+      items: any[];
+    }[] = [];
     
     if (listingIds.length > 0) {
       ordersData = await db
@@ -2628,7 +2640,10 @@ export class DatabaseStorage implements IStorage {
     const totalFollowers = followersResult[0]?.count || 0;
 
     // Get reviews data - handle empty array case
-    let reviewsData = [];
+    let reviewsData: {
+      rating: number;
+      count: number;
+    }[] = [];
     
     if (listingIds.length > 0) {
       reviewsData = await db
