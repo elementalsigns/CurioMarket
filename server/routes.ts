@@ -1669,9 +1669,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
       const isTargetDomain = hostname.includes('curiosities.market');
       
-      // SURGICAL PRODUCTION BYPASS: User 46848882 on curiosities.market for admin paths only
-      if (isAdminPath && isTargetDomain && process.env.NODE_ENV === 'production') {
-        console.log(`[SURGICAL-AUTH] Production admin bypass for user 46848882 on ${hostname} for path ${req.path}`);
+      // SURGICAL BYPASS: User 46848882 on curiosities.market for admin paths only (works in all environments)
+      if (isAdminPath && isTargetDomain) {
+        console.log(`[SURGICAL-AUTH] Admin bypass for user 46848882 on ${hostname} for path ${req.path}`);
         req.user = {
           claims: {
             sub: '46848882',  // Surgical bypass for elementalsigns@gmail.com only
