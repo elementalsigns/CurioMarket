@@ -278,8 +278,8 @@ function Router() {
             );
           }} />
           
-          {/* Catch-all 404 route */}
-          <Route component={NotFound} />
+          {/* Catch-all 404 route - MUST remain as the final route to avoid routing regressions */}
+          <Route path="/:rest*" component={NotFound} />
         </>
       )}
     </Switch>
