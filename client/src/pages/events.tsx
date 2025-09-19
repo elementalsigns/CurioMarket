@@ -33,13 +33,17 @@ const createEventSchema = z.object({
     if (!val || val === "") return true;
     // Allow www.domain.com format
     if (/^www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(val)) return true;
-    // Allow full URLs with protocol
-    try {
-      new URL(val);
-      return true;
-    } catch {
-      return false;
-    }
+    // Safe URL validation without throwing errors
+    const isValidUrl = (urlString: string): boolean => {
+      try {
+        new URL(urlString);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    // Try as-is first, then with https:// prefix
+    return isValidUrl(val) || isValidUrl(`https://${val}`);
   }, "Please enter a valid website URL (e.g., www.example.com or https://example.com)"),
   tags: z.string().optional(),
   status: z.enum(["draft", "published"]),
@@ -572,33 +576,48 @@ export default function EventsPage() {
                                       </div>
                                     )}
                                     {event.website && (() => {
-                                      // Ensure website URL has proper protocol to prevent invalid navigation
-                                      let websiteUrl = event.website;
-                                      try {
-                                        // If the URL doesn't start with http/https, add https://
-                                        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
-                                          websiteUrl = `https://${websiteUrl}`;
+                                      // Safe URL validation function that doesn't throw errors
+                                      const isValidUrl = (urlString: string): boolean => {
+                                        try {
+                                          new URL(urlString);
+                                          return true;
+                                        } catch {
+                                          return false;
                                         }
-                                        // Validate URL format
-                                        new URL(websiteUrl);
-                                        return (
-                                          <div className="flex items-center space-x-2">
-                                            <Globe size={14} className="text-red-600" />
-                                            <a 
-                                              href={websiteUrl} 
-                                              target="_blank" 
-                                              rel="noopener noreferrer"
-                                              className="hover:text-red-600 transition-colors"
-                                              data-testid={`event-website-${event.id}`}
-                                            >
-                                              Visit Website
-                                            </a>
-                                          </div>
-                                        );
-                                      } catch (error) {
-                                        // If URL is invalid, don't render the link to prevent navigation errors
+                                      };
+
+                                      // Ensure website URL has proper protocol to prevent invalid navigation
+                                      let websiteUrl = event.website.trim();
+                                      
+                                      // Skip empty or invalid base cases
+                                      if (!websiteUrl || websiteUrl.length < 3) {
                                         return null;
                                       }
+                                      
+                                      // If the URL doesn't start with http/https, add https://
+                                      if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+                                        websiteUrl = `https://${websiteUrl}`;
+                                      }
+                                      
+                                      // Safe validation without throwing errors
+                                      if (!isValidUrl(websiteUrl)) {
+                                        return null;
+                                      }
+                                      
+                                      return (
+                                        <div className="flex items-center space-x-2">
+                                          <Globe size={14} className="text-red-600" />
+                                          <a 
+                                            href={websiteUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="hover:text-red-600 transition-colors"
+                                            data-testid={`event-website-${event.id}`}
+                                          >
+                                            Visit Website
+                                          </a>
+                                        </div>
+                                      );
                                     })()}
                                   </div>
                                 </div>
