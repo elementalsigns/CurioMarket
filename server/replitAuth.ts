@@ -190,8 +190,12 @@ export async function setupAuth(app: Express) {
         return res.status(500).json({ error: "Authentication strategy not found" });
       }
       
+      // Check if this is for the specific user who needs consent bypass (user ID: 46848882)
+      const currentUser = req.user as any;
+      const isTargetUser = currentUser && (currentUser.claims?.sub === '46848882' || currentUser.id === '46848882');
+      
       passport.authenticate(strategyName, {
-        prompt: "login consent",
+        prompt: isTargetUser ? "login" : "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
       })(req, res, next);
     });
