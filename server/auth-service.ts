@@ -1,4 +1,4 @@
-import * as client from "openid-client";
+import * as openidClient from "openid-client";
 import { storage } from "./storage";
 import type { RequestHandler } from "express";
 
@@ -35,10 +35,7 @@ export class AuthService {
     try {
       console.log('[AUTH] Initializing with issuer:', this.config.issuerUrl);
       
-      const issuer = await client.discovery(
-        new URL(this.config.issuerUrl),
-        this.config.clientId
-      );
+      const issuer = await openidClient.Issuer.discover(this.config.issuerUrl);
 
       this.oidcClient = new issuer.Client({
         client_id: this.config.clientId,
