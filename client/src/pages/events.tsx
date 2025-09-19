@@ -571,20 +571,35 @@ export default function EventsPage() {
                                         </a>
                                       </div>
                                     )}
-                                    {event.website && (
-                                      <div className="flex items-center space-x-2">
-                                        <Globe size={14} className="text-red-600" />
-                                        <a 
-                                          href={event.website} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="hover:text-red-600 transition-colors"
-                                          data-testid={`event-website-${event.id}`}
-                                        >
-                                          Visit Website
-                                        </a>
-                                      </div>
-                                    )}
+                                    {event.website && (() => {
+                                      // Ensure website URL has proper protocol to prevent invalid navigation
+                                      let websiteUrl = event.website;
+                                      try {
+                                        // If the URL doesn't start with http/https, add https://
+                                        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+                                          websiteUrl = `https://${websiteUrl}`;
+                                        }
+                                        // Validate URL format
+                                        new URL(websiteUrl);
+                                        return (
+                                          <div className="flex items-center space-x-2">
+                                            <Globe size={14} className="text-red-600" />
+                                            <a 
+                                              href={websiteUrl} 
+                                              target="_blank" 
+                                              rel="noopener noreferrer"
+                                              className="hover:text-red-600 transition-colors"
+                                              data-testid={`event-website-${event.id}`}
+                                            >
+                                              Visit Website
+                                            </a>
+                                          </div>
+                                        );
+                                      } catch (error) {
+                                        // If URL is invalid, don't render the link to prevent navigation errors
+                                        return null;
+                                      }
+                                    })()}
                                   </div>
                                 </div>
                               )}
