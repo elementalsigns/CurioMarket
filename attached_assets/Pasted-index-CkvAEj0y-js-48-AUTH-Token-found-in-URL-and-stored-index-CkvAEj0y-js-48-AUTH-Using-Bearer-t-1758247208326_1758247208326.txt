@@ -1,0 +1,117 @@
+index-CkvAEj0y.js:48 [AUTH] Token found in URL and stored
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: false, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: false, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-CkvAEj0y.js:577 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'buyer', path: '/', timestamp: '2025-09-19T01:58:38.786Z', isProduction: true, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [PRODUCTION AUTH] User loaded: {id: '46848882', role: 'buyer', email: 'elementalsigns@gmail.com', stripeCustomerId: 'cus_SxseUxXvlQBmUv', capabilities: {…}, …}
+index-CkvAEj0y.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: false, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-CkvAEj0y.js:893 [PRODUCTION REDIRECT] User loaded: {userId: '46848882', role: 'buyer', path: '/', timestamp: '2025-09-19T01:58:38.789Z', isProduction: true}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48  GET https://www.curiosities.market/api/seller/profile 403 (Forbidden)
+(anonymous) @ index-CkvAEj0y.js:48
+a @ index-CkvAEj0y.js:48
+v @ index-CkvAEj0y.js:48
+start @ index-CkvAEj0y.js:48
+fetch @ index-CkvAEj0y.js:48
+wf @ index-CkvAEj0y.js:48
+onSubscribe @ index-CkvAEj0y.js:48
+subscribe @ index-CkvAEj0y.js:48
+(anonymous) @ index-CkvAEj0y.js:48
+wM @ index-CkvAEj0y.js:38
+Mv @ index-CkvAEj0y.js:40
+Kc @ index-CkvAEj0y.js:40
+gU @ index-CkvAEj0y.js:40
+hl @ index-CkvAEj0y.js:40
+Fk @ index-CkvAEj0y.js:40
+el @ index-CkvAEj0y.js:38
+(anonymous) @ index-CkvAEj0y.js:40
+setTimeout
+i @ index-CkvAEj0y.js:48
+o @ index-CkvAEj0y.js:48
+batch @ index-CkvAEj0y.js:48
+la @ index-CkvAEj0y.js:48
+setData @ index-CkvAEj0y.js:48
+onSuccess @ index-CkvAEj0y.js:48
+u @ index-CkvAEj0y.js:48
+Promise.then
+v @ index-CkvAEj0y.js:48
+start @ index-CkvAEj0y.js:48
+fetch @ index-CkvAEj0y.js:48
+wf @ index-CkvAEj0y.js:48
+onSubscribe @ index-CkvAEj0y.js:48
+subscribe @ index-CkvAEj0y.js:48
+(anonymous) @ index-CkvAEj0y.js:48
+wM @ index-CkvAEj0y.js:38
+Mv @ index-CkvAEj0y.js:40
+Kc @ index-CkvAEj0y.js:40
+Fk @ index-CkvAEj0y.js:40
+el @ index-CkvAEj0y.js:38
+gU @ index-CkvAEj0y.js:40
+hl @ index-CkvAEj0y.js:40
+eR @ index-CkvAEj0y.js:40
+w @ index-CkvAEj0y.js:25
+M @ index-CkvAEj0y.js:25
+index-CkvAEj0y.js:48 [AUTH] API call failed with status: 403
+index-CkvAEj0y.js:48 [AUTH] URL: /api/seller/profile
+index-CkvAEj0y.js:48 [AUTH] Public route or auth page, not redirecting to login
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}isAuthReady: trueisLoading: falseisSeller: truetimestamp: "2025-09-19T01:59:10.226Z"user: "EXISTS"userCapabilities: {isAdmin: false, isSeller: false}userRole: "buyer"[[Prototype]]: Object
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:48 [AUTH] Getting token from localStorage: Found
+index-CkvAEj0y.js:48 [AUTH] Using Bearer token for API call
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
+index-CkvAEj0y.js:577 [HOME DEBUG] {user: 'EXISTS', isLoading: false, isSeller: true, isAuthReady: true, userCapabilities: {…}, …}
