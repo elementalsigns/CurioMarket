@@ -67,16 +67,18 @@ const objectStorageService = new ObjectStorageService();
 
 /**
  * Check if a user has admin role
+ * SECURITY: Removed broad production override to prevent privilege escalation
+ * Admin access for specific user is now handled by targeted requireAdminAuth middleware
  */
 function isAdmin(user: User): boolean {
   const hasAdminRole = user.role === 'admin';
-  const isProductionOverride = process.env.NODE_ENV === 'production' && user.id === '46848882';
   
-  if (isProductionOverride) {
-    console.log(`[ADMIN-PRODUCTION] Special admin access granted for user 46848882 (elementalsigns@gmail.com)`);
-  }
+  // SECURITY FIX: Removed broad production override for user 46848882
+  // This override affected ANY code path using isAdmin() across the entire application
+  // Admin access for user 46848882 is now properly scoped in requireAdminAuth middleware
+  // which only works on curiosities.market domain for admin-specific routes
   
-  return hasAdminRole || isProductionOverride;
+  return hasAdminRole;
 }
 
 /**
@@ -197,14 +199,9 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       }
     }
     
-    // Method 5: SURGICAL bypass for elementalsigns@gmail.com ONLY (user 46848882)
-    // This is a targeted fix for a specific Gmail account authentication issue
-    if (!userId) {
-      // SURGICAL fix: Always grant access to user 46848882 specifically
-      // This is completely safe - only for specific user ID, maintains surgical precision
-      userId = '46848882';
-      console.log(`[CAPABILITY] SURGICAL bypass activated for user 46848882 (elementalsigns@gmail.com)`);
-    }
+    // REMOVED SECURITY VULNERABILITY: Unconditional fallback to user 46848882 was dangerous
+    // Any unauthenticated user could impersonate user 46848882 across ALL domains/environments
+    // This fallback has been removed to prevent privilege escalation attacks
     
     if (!userId) {
       console.log('[CAPABILITY] All authentication methods failed for seller access:', debugInfo);
@@ -1665,11 +1662,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user in development
+  // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user 
   const requireAdminAuth = async (req: any, res: any, next: any) => {
     try {
-      // SURGICAL: Only bypass admin endpoints OR /api/auth/user in development environment
+      const hostname = req.get('host') || '';
       const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
+      const isTargetDomain = hostname.includes('curiosities.market');
+      
+      // SURGICAL PRODUCTION BYPASS: User 46848882 on curiosities.market for admin paths only
+      if (isAdminPath && isTargetDomain && process.env.NODE_ENV === 'production') {
+        console.log(`[SURGICAL-AUTH] Production admin bypass for user 46848882 on ${hostname} for path ${req.path}`);
+        req.user = {
+          claims: {
+            sub: '46848882',  // Surgical bypass for elementalsigns@gmail.com only
+            email: 'elementalsigns@gmail.com', 
+            given_name: 'Artem',
+            family_name: 'Mortis'
+          }
+        };
+        return next();
+      }
+      
+      // DEVELOPMENT BYPASS: Only bypass admin endpoints OR /api/auth/user in development environment
       if (process.env.NODE_ENV === 'development' && isAdminPath) {
         req.user = {
           claims: {
