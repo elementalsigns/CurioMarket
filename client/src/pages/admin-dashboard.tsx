@@ -262,7 +262,7 @@ export default function AdminDashboard() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="verification" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 bg-zinc-900">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-zinc-900">
             <TabsTrigger value="verification" data-testid="tab-verification">Verifications</TabsTrigger>
             <TabsTrigger value="disputes" data-testid="tab-disputes">Disputes</TabsTrigger>
             <TabsTrigger value="moderation" data-testid="tab-moderation">Moderation</TabsTrigger>
