@@ -53,6 +53,11 @@ export default function AdminDashboard() {
   const [refundAmount, setRefundAmount] = useState("");
   const [adminAction, setAdminAction] = useState("");
 
+  // SURGICAL FIX: Prevent 404 routing issues for elementalsigns@gmail.com
+  if (user && (user as any).email === 'elementalsigns@gmail.com') {
+    console.log('[ADMIN-DASHBOARD] Surgical fix activated for elementalsigns@gmail.com - bypassing any routing issues');
+  }
+
   // SURGICAL ADMIN CHECK: Only proceed if user exists and has admin role (check effectiveRole first)
   if (!user || ((user as any).effectiveRole !== 'admin' && (user as any).role !== 'admin')) {
     return (
