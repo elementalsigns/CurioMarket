@@ -2082,20 +2082,52 @@ export class DatabaseStorage implements IStorage {
     // Get real shops from database with owner information
     const offset = (params.page - 1) * params.limit;
     
-    const shopsWithOwners = await db
+    // Build where conditions based on status filter
+    let whereCondition = undefined;
+    if (params.status === 'active') {
+      whereCondition = eq(sellers.isActive, true);
+    } else if (params.status === 'inactive') {
+      whereCondition = eq(sellers.isActive, false);
+    }
+    // If status is 'all' or anything else, don't add where condition (show all)
+    
+    // Build query with conditional where clause (FIXED: Proper Drizzle pattern)
+    const baseQuery = db
       .select({
         id: sellers.id,
+        userId: sellers.userId,
         shopName: sellers.shopName,
-        ownerName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
-        totalListings: sql<number>`(SELECT COUNT(*) FROM ${listings} WHERE ${listings.sellerId} = ${sellers.id})`,
-        verificationStatus: sql<string>`'approved'`, // Default status
-        isActive: sellers.isActive
+        bio: sellers.bio,
+        location: sellers.location,
+        isActive: sellers.isActive,
+        businessVerified: sellers.businessVerified,
+        verificationStatus: sellers.verificationStatus,
+        riskScore: sellers.riskScore,
+        createdAt: sellers.createdAt,
+        updatedAt: sellers.updatedAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          accountStatus: users.accountStatus
+        },
+        _count: {
+          listings: sql<number>`(SELECT COUNT(*) FROM ${listings} WHERE ${listings.sellerId} = ${sellers.id} AND ${listings.state} = 'published')`,
+          orders: sql<number>`(SELECT COUNT(*) FROM ${orders} WHERE ${orders.sellerId} = ${sellers.id})`
+        }
       })
       .from(sellers)
-      .leftJoin(users, eq(sellers.userId, users.id))
-      .limit(params.limit)
-      .offset(offset);
+      .leftJoin(users, eq(sellers.userId, users.id));
     
+    // Apply where condition and pagination in one chain (FIXED: No reassignment)
+    const finalQuery = whereCondition 
+      ? baseQuery.where(whereCondition).limit(params.limit).offset(offset)
+      : baseQuery.limit(params.limit).offset(offset);
+    
+    const shopsWithOwners = await finalQuery;
+    
+    // FIXED: Return just the array to match IStorage contract Promise<any[]>
     return shopsWithOwners;
   }
 
