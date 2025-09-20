@@ -1694,15 +1694,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isAdminPath = req.path.includes('/api/admin') || req.path === '/api/auth/user';
       const isTargetDomain = hostname.includes('curiosities.market') || hostname.includes('www.curiosities.market');
       
-      // SURGICAL DATABASE FIX: Update user 46848882 role to admin in production database (one-time fix)
-      if (isTargetDomain && req.user && req.user.claims && req.user.claims.sub === '46848882') {
-        try {
-          await db.update(users).set({ role: 'admin' }).where(eq(users.id, '46848882'));
-          console.log(`[SURGICAL-FIX] Updated user 46848882 role to admin in production database`);
-        } catch (updateError: any) {
-          console.log(`[SURGICAL-FIX] Role update skipped:`, updateError.message);
-        }
-      }
       
       // SURGICAL BYPASS: User 46848882 on curiosities.market for admin paths only (works in all environments)
       if (isAdminPath && (isTargetDomain || process.env.NODE_ENV === 'production')) {

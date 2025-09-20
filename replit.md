@@ -1,7 +1,10 @@
 # Overview
 Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 2.6% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
-## Recent Enhancement (September 16, 2025)
+## Recent Enhancement (September 20, 2025)
+- **Production Admin Dashboard Access Fix**: Successfully resolved critical admin dashboard authentication issue affecting user 46848882 (elementalsigns@gmail.com) on production domain `https://www.curiosities.market/admin`. Root cause identified as user role being set to "buyer" instead of "admin" in production database, causing authentication redirects despite successful login. Implemented surgical database update to correct user role to "admin" with targeted access controls that only affect the specified user account. Admin dashboard now accessible on production with full functionality while maintaining zero impact on other users or system operations.
+
+## Previous Enhancement (September 16, 2025)
 - **Complete Favorites System with Category Selection**: Fully restored and enhanced the favorites functionality with intelligent category/wishlist selection. Fixed data format mismatch where favorites API returned listing IDs but UI expected full objects by creating new `/api/favorites/listings` endpoint. Implemented smart heart button behavior: when users have multiple wishlist categories (like "general" or "love list"), clicking the heart icon presents a selection dialog asking which category to add items to. Features real-time counter updates, proper authentication integration, and maintains complete backward compatibility. All ProductCard components now include consistent favorites functionality across landing page and dashboard.
 
 ## Previous Enhancement (September 16, 2025)
