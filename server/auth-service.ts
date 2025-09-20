@@ -35,7 +35,7 @@ export class AuthService {
     try {
       console.log('[AUTH] Initializing with issuer:', this.config.issuerUrl);
       
-      const issuer = await openidClient.Issuer.discover(this.config.issuerUrl);
+      const issuer = await (openidClient as any).Issuer.discover(this.config.issuerUrl);
 
       this.oidcClient = new issuer.Client({
         client_id: this.config.clientId,
