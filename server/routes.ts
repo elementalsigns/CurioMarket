@@ -1665,6 +1665,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return next();
       }
 
+      // PRODUCTION LOGGING for curiosities.market requests
+      const hostname = req.get('host') || '';
+      if (hostname.includes('curiosities.market')) {
+        console.log(`[PRODUCTION-AUTH] Request from ${hostname} - path: ${req.path}`);
+        console.log(`[PRODUCTION-AUTH] Cookies: ${req.headers.cookie ? 'Present' : 'Missing'}`);
+        console.log(`[PRODUCTION-AUTH] isAuthenticated: ${req.isAuthenticated ? req.isAuthenticated() : 'undefined'}`);
+        console.log(`[PRODUCTION-AUTH] Session ID: ${req.sessionID || 'undefined'}`);
+        console.log(`[PRODUCTION-AUTH] User object: ${req.user ? 'Present' : 'Missing'}`);
+      }
+
       // Standard session-based authentication check for production
       if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
