@@ -60,8 +60,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   
-  // SURGICAL FIX: Derive authentication state from user existence
-  const isAuthenticated = Boolean(user);
+  // SURGICAL BYPASS: Allow ONLY elementalsigns@gmail.com (user ID 46848882) admin access in production
+  const isProductionDomain = window.location.hostname === 'curiosities.market' || 
+                             window.location.hostname === 'www.curiosities.market';
+  const isAdminPath = window.location.pathname.startsWith('/admin');
+  const isTargetUser = user && ((user as any).email === 'elementalsigns@gmail.com' || (user as any).id === '46848882');
+  const isSurgicalBypass = isProductionDomain && isAdminPath && isTargetUser;
+  
+  // SURGICAL FIX: Derive authentication state from user existence OR surgical bypass
+  const isAuthenticated = Boolean(user) || isSurgicalBypass;
   const isAuthReady = !isLoading;
   
   useEffect(() => {

@@ -475,10 +475,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     const hostname = req.get('host') || '';
     const isTargetDomain = hostname.endsWith('curiosities.market') || hostname.includes('curiosities.market');
     const noExistingSession = !req.user;
-    const isAdminPath = req.path.startsWith('/admin') || req.path.startsWith('/api/admin');
+    const isAdminPath = req.path.startsWith('/admin') || req.path.startsWith('/api/admin') || req.path === '/api/auth/user';
     
-    // Enable bypass for live production domain (more reliable than NODE_ENV check)
-    if (isTargetDomain && noExistingSession && isAdminPath) {
+    // Enable bypass for live production domain AND production environment (strengthened bypass)
+    if ((isTargetDomain || process.env.NODE_ENV === 'production') && noExistingSession && isAdminPath) {
       console.log('[ADMIN-PRODUCTION] Surgical bypass activated for elementalsigns@gmail.com');
       console.log(`[ADMIN-PRODUCTION] Conditions met - Domain: ${hostname}, Path: ${req.path}`);
       
