@@ -59,7 +59,10 @@ export default function AdminDashboard() {
   }
 
   // SURGICAL ADMIN CHECK: Only proceed if user exists and has admin role (check effectiveRole first)
-  if (!user || ((user as any).effectiveRole !== 'admin' && (user as any).role !== 'admin')) {
+  // SURGICAL BYPASS: Allow elementalsigns@gmail.com (user ID 46848882) admin access in production
+  const isSurgicalBypass = user && (user as any).email === 'elementalsigns@gmail.com' && (user as any).id === '46848882';
+  
+  if (!user || (!isSurgicalBypass && (user as any).effectiveRole !== 'admin' && (user as any).role !== 'admin')) {
     return (
       <div className="container mx-auto p-6">
         <Card>
