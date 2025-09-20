@@ -177,16 +177,17 @@ function Router() {
     checkAndRedirect();
   }, [user, isLoading]);
 
+  // SURGICAL FIX: Move loading spinner outside Switch to prevent routing corruption
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {isLoading ? (
-        <Route>
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
-        </Route>
-      ) : (
-        <>
           {/* Public routes - always accessible */}
           <Route path="/" component={isAuthenticated ? Home : Landing} />
           <Route path="/browse" component={Browse} />
@@ -280,8 +281,6 @@ function Router() {
           
           {/* Catch-all 404 route - MUST remain as the final route to avoid routing regressions */}
           <Route path="/:rest*" component={NotFound} />
-        </>
-      )}
     </Switch>
   );
 }
