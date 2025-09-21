@@ -1046,7 +1046,7 @@ export class DatabaseStorage implements IStorage {
         totalSales: sum(orders.total),
       })
       .from(orders)
-      .where(and(eq(orders.sellerId, sellerId), eq(orders.status, 'fulfilled')));
+      .where(and(eq(orders.sellerId, sellerId), inArray(orders.status, ['fulfilled', 'delivered', 'shipped'])));
 
     const [reviewsResult] = await db
       .select({ 
@@ -2725,7 +2725,7 @@ export class DatabaseStorage implements IStorage {
             inArray(orderItems.listingId, listingIds),
             sql`${orders.createdAt} >= ${dateRange.from}`,
             sql`${orders.createdAt} <= ${dateRange.to}`,
-            eq(orders.status, 'paid')
+            inArray(orders.status, ['fulfilled', 'delivered', 'shipped'])
           )
         );
     }
