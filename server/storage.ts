@@ -1023,22 +1023,22 @@ export class DatabaseStorage implements IStorage {
       {
         slug: "taxidermy",
         name: "Taxidermy",
-        count: 3, // Realistic count for demo
+        count: 0, // Updated to match actual database count
       },
       {
         slug: "wet-specimens",
         name: "Wet Specimens",
-        count: 5, // Realistic count for demo
+        count: 0, // Updated to match actual database count
       },
       {
         slug: "occult", 
         name: "Occult",
-        count: 7, // Realistic count for demo
+        count: 0, // Updated to match actual database count
       },
       {
         slug: "bones-skulls",
         name: "Bones & Skulls", 
-        count: 8, // Realistic count for demo
+        count: 1, // Updated to match actual database count
       }
     ];
   }
