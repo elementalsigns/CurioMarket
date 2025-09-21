@@ -258,8 +258,8 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-500">
-                ${stats?.totalRevenue?.toLocaleString() || 0}
+              <div className="text-2xl font-bold text-green-500" data-testid="text-platform-revenue">
+                ${stats?.totalRevenue ? Number(stats.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
               </div>
             </CardContent>
           </Card>
