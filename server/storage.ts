@@ -2020,26 +2020,37 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAdminStats(): Promise<any> {
-    // Get real data from database
-    const [totalUsers] = await db.select({ count: sql<number>`count(*)` }).from(users);
-    const [totalSellers] = await db.select({ count: sql<number>`count(*)` }).from(sellers);
-    const [totalListings] = await db.select({ count: sql<number>`count(*)` }).from(listings);
-    const [totalOrders] = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    // Get real data from database with explicit casting to ensure numbers
+    const [totalUsers] = await db.select({ 
+      count: sql<string>`CAST(COUNT(*) AS TEXT)` 
+    }).from(users);
+    
+    const [totalSellers] = await db.select({ 
+      count: sql<string>`CAST(COUNT(*) AS TEXT)` 
+    }).from(sellers);
+    
+    const [totalListings] = await db.select({ 
+      count: sql<string>`CAST(COUNT(*) AS TEXT)` 
+    }).from(listings);
+    
+    const [totalOrders] = await db.select({ 
+      count: sql<string>`CAST(COUNT(*) AS TEXT)` 
+    }).from(orders);
     
     // Calculate total revenue from all completed orders (fulfilled + delivered)
     const [revenueResult] = await db.select({ 
-      total: sql<number>`COALESCE(SUM(CAST(${orders.total} AS DECIMAL)), 0)` 
+      total: sql<string>`CAST(COALESCE(SUM(CAST(${orders.total} AS DECIMAL)), 0) AS TEXT)` 
     }).from(orders).where(inArray(orders.status, ['fulfilled', 'delivered']));
     
     return {
-      totalUsers: totalUsers.count,
-      totalSellers: totalSellers.count,
-      totalListings: totalListings.count,
-      totalOrders: totalOrders.count,
+      totalUsers: parseInt(totalUsers.count) || 0,
+      totalSellers: parseInt(totalSellers.count) || 0,
+      totalListings: parseInt(totalListings.count) || 0,
+      totalOrders: parseInt(totalOrders.count) || 0,
       pendingVerifications: 0, // No verification queue in current schema
       disputedOrders: 0, // No disputes in current schema
       flaggedContent: 0, // No flags in current schema
-      totalRevenue: Number(revenueResult.total) || 0
+      totalRevenue: parseFloat(revenueResult.total) || 0
     };
   }
 
