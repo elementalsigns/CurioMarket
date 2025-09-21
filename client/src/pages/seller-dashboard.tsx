@@ -1814,7 +1814,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                       <FormControl>
                         <div className="space-y-2">
                           <div className="flex items-center">
-                            <span className="text-sm text-foreground/70 mr-2">curiosities.market/shop/</span>
+                            <span className="text-sm text-foreground/70 mr-2">www.curiosities.market/shop/</span>
                             <Input {...field} placeholder="my-shop-name" data-testid="input-shop-slug" />
                           </div>
                           <p className="text-xs text-foreground/60">
