@@ -63,6 +63,15 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
   const seller = fetchedData?.seller;
   const listings = fetchedData?.listings || [];
   
+  // Fetch seller reviews
+  const { data: reviewsData } = useQuery({
+    queryKey: ["/api/seller/public", sellerId, "reviews"],
+    queryFn: () => fetch(`/api/seller/public/${sellerId}/reviews`).then(res => res.json()),
+    enabled: !isPreview && !!sellerId,
+  });
+
+  const reviews = reviewsData || [];
+  
   // Check if user is following this seller
   const { data: followingData } = useQuery({
     queryKey: ["/api/user/following"],
@@ -512,15 +521,95 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
 
           {/* Reviews Tab */}
           <TabsContent value="reviews" className="space-y-6" data-testid="tab-panel-reviews">
-            <Card className="glass-effect">
-              <CardContent className="p-12 text-center">
-                <Star className="mx-auto mb-4 text-zinc-500" size={48} />
-                <h3 className="text-xl font-serif text-white mb-2">Reviews</h3>
-                <p className="text-zinc-400">
-                  Customer reviews will appear here when available.
-                </p>
-              </CardContent>
-            </Card>
+            {reviews.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-garamond text-white">Customer Reviews</h2>
+                  <Badge variant="outline" className="text-zinc-300">
+                    <Star className="w-3 h-3 mr-1" />
+                    {reviews.length} reviews
+                  </Badge>
+                </div>
+                
+                <div className="space-y-4">
+                  {reviews.map((review: any) => (
+                    <Card key={review.id} className="glass-effect">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-zinc-700 text-white">
+                              {review.buyerName?.charAt(0)?.toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex text-yellow-400">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : ''}`} />
+                                ))}
+                              </div>
+                              <span className="text-sm text-zinc-400">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
+                              {review.verified && (
+                                <Badge variant="outline" className="text-xs">Verified Purchase</Badge>
+                              )}
+                            </div>
+                            
+                            {review.title && (
+                              <h4 className="font-semibold text-white mb-2">{review.title}</h4>
+                            )}
+                            
+                            <p className="text-zinc-300 mb-3">{review.content}</p>
+                            
+                            {review.listingTitle && (
+                              <p className="text-sm text-zinc-400 mb-3">
+                                Product: <span className="text-zinc-300">{review.listingTitle}</span>
+                              </p>
+                            )}
+                            
+                            {review.photos && review.photos.length > 0 && (
+                              <div className="flex gap-2 mb-3">
+                                {review.photos.map((photo: string, index: number) => (
+                                  <img
+                                    key={index}
+                                    src={photo}
+                                    alt={`Review photo ${index + 1}`}
+                                    className="w-16 h-16 object-cover rounded border border-zinc-700"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            
+                            {review.sellerResponse && (
+                              <div className="mt-4 p-3 bg-zinc-800/50 rounded border-l-2 border-red-600">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-sm font-medium text-white">Shop Owner Response</span>
+                                  <span className="text-xs text-zinc-400">
+                                    {new Date(review.sellerResponseDate).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-zinc-300">{review.sellerResponse}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Card className="glass-effect">
+                <CardContent className="p-12 text-center">
+                  <Star className="mx-auto mb-4 text-zinc-500" size={48} />
+                  <h3 className="text-xl font-serif text-white mb-2">No Reviews Yet</h3>
+                  <p className="text-zinc-400">
+                    This shop hasn't received any reviews yet. Be the first to leave a review after making a purchase!
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* About Tab */}

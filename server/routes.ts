@@ -2414,6 +2414,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get public seller reviews (for shop pages)
+  app.get('/api/seller/public/:sellerId/reviews', async (req, res) => {
+    try {
+      const { sellerId } = req.params;
+      const seller = await storage.getSellerByIdentifier(sellerId);
+      
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      const reviews = await storage.getSellerReviews(seller.id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching public seller reviews:", error);
+      res.status(500).json({ message: "Failed to fetch seller reviews" });
+    }
+  });
+
   // ==================== SELLER ONBOARDING ====================
   
   // Create seller subscription
