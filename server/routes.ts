@@ -6220,6 +6220,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin dashboard statistics with timestamp (cache busting)
+  app.get('/api/admin/stats/:timestamp', requireAdminAuth, requireAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ error: "Failed to fetch admin statistics" });
+    }
+  });
+
   // Get all users for admin management
   app.get('/api/admin/users', requireAdminAuth, requireAdmin, async (req: any, res) => {
     try {
