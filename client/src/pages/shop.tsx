@@ -628,6 +628,20 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
               </Card>
             )}
 
+            {/* Full Announcement */}
+            {displayData?.announcement && (
+              <Card className="glass-effect">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Shop Announcement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-zinc-300 whitespace-pre-line" data-testid="shop-announcement-full">
+                    {displayData.announcement}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Shop Stats */}
             <Card className="glass-effect">
               <CardHeader>
