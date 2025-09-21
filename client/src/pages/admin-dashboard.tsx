@@ -30,9 +30,11 @@ import {
   Package,
   X,
   Download,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import EventsTable from "@/components/admin/EventsTable";
 
 interface AdminStats {
   totalUsers: number;
@@ -272,6 +274,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
             <TabsTrigger value="shops" data-testid="tab-shops">Shops</TabsTrigger>
+            <TabsTrigger value="events" data-testid="tab-events">
+              <Calendar className="h-4 w-4 mr-2" />
+              Events
+            </TabsTrigger>
             <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
             <TabsTrigger value="export" data-testid="tab-export">Data Export</TabsTrigger>
           </TabsList>
@@ -847,6 +853,24 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Events Management */}
+          <TabsContent value="events">
+            <Card className="bg-zinc-900 border-zinc-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Event Management
+                </CardTitle>
+                <CardDescription>
+                  Manage all events on the platform, moderate content, and control event status.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <EventsTable />
               </CardContent>
             </Card>
           </TabsContent>

@@ -256,7 +256,7 @@ function Router() {
           <Route path="/profile" component={() => <ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/account" component={() => <ProtectedRoute><AccountManager /></ProtectedRoute>} />
           <Route path="/verification" component={() => <ProtectedRoute><Verification /></ProtectedRoute>} />
-          <Route path="/admin" component={() => <ProtectedRoute><AdminPage /></ProtectedRoute>} />
+          <Route path="/admin" component={() => <ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/cleanup" component={() => <ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/set-admin" component={() => <ProtectedRoute><SetAdminPage /></ProtectedRoute>} />
           <Route path="/wishlists" component={() => <ProtectedRoute><Wishlists /></ProtectedRoute>} />
