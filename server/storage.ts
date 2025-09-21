@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, like, or, sql, count, avg, inArray, ne } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, like, or, sql, count, avg, sum, inArray, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -1043,7 +1043,7 @@ export class DatabaseStorage implements IStorage {
 
     const [salesResult] = await db
       .select({ 
-        totalSales: count(orders.id),
+        totalSales: sum(orders.total),
       })
       .from(orders)
       .where(and(eq(orders.sellerId, sellerId), eq(orders.status, 'fulfilled')));
