@@ -692,6 +692,154 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Bottom Reviews Section (like Etsy) */}
+        {!isPreview && (
+          <div className="mt-12 pt-8 border-t border-zinc-800">
+            {/* Announcement Section */}
+            {displayData?.bio && (
+              <div className="mb-8">
+                <h3 className="text-lg font-serif text-white mb-3">Announcement</h3>
+                <p className="text-zinc-300 text-sm leading-relaxed max-w-4xl">
+                  {displayData.bio.length > 200 
+                    ? `${displayData.bio.substring(0, 200)}...` 
+                    : displayData.bio
+                  }
+                </p>
+                {displayData.bio.length > 200 && (
+                  <button 
+                    onClick={() => setActiveTab('about')}
+                    className="text-red-400 hover:text-red-300 text-sm mt-2 underline"
+                  >
+                    Read more
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Reviews Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-serif text-white mb-2">Reviews</h3>
+                  {reviews.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-zinc-400">Average item review</span>
+                      <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => {
+                          const avgRating = reviews.reduce((acc: number, review: any) => acc + review.rating, 0) / reviews.length;
+                          return (
+                            <Star key={i} className={`w-4 h-4 ${i < Math.round(avgRating) ? 'fill-current' : ''}`} />
+                          );
+                        })}
+                      </div>
+                      <span className="text-zinc-400">({reviews.length})</span>
+                    </div>
+                  )}
+                </div>
+                {reviews.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-zinc-400">Sort by:</span>
+                    <select className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded px-3 py-1">
+                      <option>Suggested</option>
+                      <option>Newest</option>
+                      <option>Highest Rated</option>
+                      <option>Lowest Rated</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {reviews.slice(0, 5).map((review: any) => (
+                    <div key={review.id} className="flex gap-4 pb-6 border-b border-zinc-800 last:border-b-0">
+                      <Avatar className="h-12 w-12 flex-shrink-0">
+                        <AvatarFallback className="bg-zinc-700 text-white">
+                          {review.buyerName?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-medium text-white">
+                            {review.buyerName?.split('@')[0] || 'Anonymous'}
+                          </span>
+                          <span className="text-sm text-zinc-400">
+                            on {new Date(review.createdAt).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+                        
+                        <div className="flex text-yellow-400 mb-3">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : ''}`} />
+                          ))}
+                        </div>
+                        
+                        <p className="text-zinc-300 mb-3">{review.content}</p>
+                        
+                        {review.photos && review.photos.length > 0 && (
+                          <div className="flex gap-2 mb-3">
+                            {review.photos.map((photo: string, index: number) => (
+                              <img
+                                key={index}
+                                src={photo}
+                                alt={`Review photo ${index + 1}`}
+                                className="w-20 h-20 object-cover rounded border border-zinc-700"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        
+                        {review.listingTitle && (
+                          <div className="flex items-start gap-3 p-3 bg-zinc-900/50 rounded border border-zinc-800">
+                            <div className="w-12 h-12 bg-zinc-800 rounded flex-shrink-0"></div>
+                            <span className="text-sm text-zinc-300">{review.listingTitle}</span>
+                          </div>
+                        )}
+                        
+                        {review.sellerResponse && (
+                          <div className="mt-4 ml-8 p-3 bg-zinc-800/50 rounded">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-medium text-white">Shop owner response</span>
+                              <span className="text-xs text-zinc-400">
+                                {new Date(review.sellerResponseDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-zinc-300">{review.sellerResponse}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {reviews.length > 5 && (
+                    <div className="text-center pt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab('reviews')}
+                        className="text-white border-white hover:bg-white/10"
+                      >
+                        View all {reviews.length} reviews
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Star className="mx-auto mb-4 text-zinc-500" size={48} />
+                  <h4 className="text-lg font-serif text-white mb-2">No reviews yet</h4>
+                  <p className="text-zinc-400">
+                    This shop hasn't received any reviews yet. Be the first to leave a review!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {!isPreview && <Footer />}
