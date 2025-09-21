@@ -85,7 +85,20 @@ export default function AdminDashboard() {
   // Fetch admin statistics (force cache refresh for revenue fix)
   const { data: stats } = useQuery({
     queryKey: ['/api/admin/stats', Date.now()], // Add timestamp to force refresh
-    queryFn: ({ queryKey }) => apiRequest('GET', queryKey[0] + '/' + queryKey[1]),
+    queryFn: async ({ queryKey }) => {
+      const response = await apiRequest('GET', queryKey[0] + '/' + queryKey[1]);
+      // Ensure we return the response directly since backend sends the stats object at top level
+      return response || {
+        totalUsers: 0,
+        totalSellers: 0,
+        totalListings: 0,
+        totalOrders: 0,
+        pendingVerifications: 0,
+        disputedOrders: 0,
+        flaggedContent: 0,
+        totalRevenue: 0
+      };
+    },
     retry: false,
     staleTime: 0, // Force fresh data
     gcTime: 0, // Don't cache (TanStack Query v5 syntax)
