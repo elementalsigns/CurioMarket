@@ -82,9 +82,6 @@ export default function CategoryGrid() {
                   <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
                     {category.name}
                   </h3>
-                  <p className="text-sm text-white/80 mt-1" data-testid={`category-count-${category.id}`}>
-                    {category.count} items
-                  </p>
                 </div>
               </div>
             </div>
