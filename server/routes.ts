@@ -1968,6 +1968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update seller profile
       const updateData = {
         shopName: req.body.shopName || seller.shopName,
+        shopSlug: req.body.shopSlug || seller.shopSlug,
         bio: req.body.bio || seller.bio,
         location: req.body.location || seller.location,
         policies: req.body.policies || seller.policies,
@@ -1980,6 +1981,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating seller profile:", error);
       res.status(500).json({ error: "Failed to update seller profile" });
+    }
+  });
+
+  // Check shop slug availability (for real-time validation)
+  app.get('/api/seller/slug-available/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      // Normalize slug
+      const normalizedSlug = slug?.toLowerCase().trim();
+      
+      // Check if slug format is valid and not reserved
+      if (!storage.validateShopSlug(normalizedSlug)) {
+        return res.json({ 
+          available: false, 
+          error: "Invalid format or reserved word" 
+        });
+      }
+
+      // Check availability in database
+      const isAvailable = await storage.isShopSlugAvailable(normalizedSlug);
+      res.json({ available: isAvailable });
+    } catch (error: any) {
+      console.error("Error checking slug availability:", error);
+      res.status(500).json({ error: "Failed to check availability" });
     }
   });
 

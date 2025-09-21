@@ -80,6 +80,8 @@ export interface IStorage {
   getSellerByShopSlug(shopSlug: string): Promise<Seller | undefined>;
   getSellerByIdentifier(identifier: string): Promise<Seller | undefined>;
   updateSeller(id: string, updates: Partial<InsertSeller>): Promise<Seller>;
+  validateShopSlug(slug: string): boolean;
+  isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -320,17 +322,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Shop slug validation
-  private validateShopSlug(slug: string): boolean {
-    // Check if slug is valid: 3-50 characters, alphanumeric + hyphens, no spaces
-    const slugRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]{2,48}[a-zA-Z0-9]$/;
+  validateShopSlug(slug: string): boolean {
+    // Must be 3-30 characters
+    if (!slug || slug.length < 3 || slug.length > 30) return false;
+    
+    // Must not match UUID pattern to avoid collisions
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) return false;
+    
+    // Must match valid slug pattern
+    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) return false;
     
     // Reserved words that cannot be used as shop slugs
-    const reservedWords = ['admin', 'api', 'shop', 'seller', 'user', 'auth', 'login', 'register', 'cart', 'checkout', 'search', 'categories', 'help', 'about', 'contact', 'terms', 'privacy', 'support', 'dashboard'];
+    const reservedWords = [
+      'admin', 'api', 'app', 'dashboard', 'shop', 'seller', 'buy', 'sell',
+      'login', 'logout', 'register', 'signup', 'account', 'profile', 'settings',
+      'help', 'support', 'terms', 'privacy', 'about', 'contact', 'www', 'mail',
+      'email', 'ftp', 'blog', 'news', 'forum', 'store', 'cart', 'checkout',
+      'payment', 'billing', 'order', 'orders', 'category', 'categories',
+      'search', 'browse', 'featured', 'new', 'popular', 'trending', 'auth',
+      'user', 'users'
+    ];
     
-    return slugRegex.test(slug) && !reservedWords.includes(slug.toLowerCase());
+    return !reservedWords.includes(slug.toLowerCase());
   }
 
-  private async isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean> {
+  async isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean> {
     let whereConditions = [eq(sellers.shopSlug, slug)];
     
     // Exclude current seller when updating
@@ -347,7 +363,7 @@ export class DatabaseStorage implements IStorage {
     // Validate and check shop slug if provided
     if (seller.shopSlug) {
       if (!this.validateShopSlug(seller.shopSlug)) {
-        throw new Error('Invalid shop slug format. Must be 3-50 characters, alphanumeric with hyphens only, and not a reserved word.');
+        throw new Error('Invalid shop slug format. Must be 3-30 characters, alphanumeric with hyphens only, and not a reserved word.');
       }
       
       if (!(await this.isShopSlugAvailable(seller.shopSlug))) {
@@ -388,7 +404,7 @@ export class DatabaseStorage implements IStorage {
     if (updates.shopSlug !== undefined) {
       if (updates.shopSlug) {
         if (!this.validateShopSlug(updates.shopSlug)) {
-          throw new Error('Invalid shop slug format. Must be 3-50 characters, alphanumeric with hyphens only, and not a reserved word.');
+          throw new Error('Invalid shop slug format. Must be 3-30 characters, alphanumeric with hyphens only, and not a reserved word.');
         }
         
         if (!(await this.isShopSlugAvailable(updates.shopSlug, id))) {
