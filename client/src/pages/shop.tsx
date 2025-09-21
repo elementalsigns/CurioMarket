@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Star, 
   MapPin, 
@@ -46,6 +47,7 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
   const { sellerId } = useParams();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'items' | 'reviews' | 'about' | 'policies'>('items');
   const [, setLocation] = useLocation();
   
   const { user, isAuthenticated } = useAuth();
@@ -336,9 +338,193 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Column - Shop Info */}
-          <div className="space-y-6">
+        {/* Tab Navigation */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-zinc-800/50 mb-6">
+            <TabsTrigger value="items" className="data-[state=active]:bg-red-600/20 data-[state=active]:text-red-400" data-testid="tab-items">
+              Items
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="data-[state=active]:bg-red-600/20 data-[state=active]:text-red-400" data-testid="tab-reviews">
+              Reviews
+            </TabsTrigger>
+            <TabsTrigger value="about" className="data-[state=active]:bg-red-600/20 data-[state=active]:text-red-400" data-testid="tab-about">
+              About
+            </TabsTrigger>
+            <TabsTrigger value="policies" className="data-[state=active]:bg-red-600/20 data-[state=active]:text-red-400" data-testid="tab-policies">
+              Shop Policies
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Items Tab */}
+          <TabsContent value="items" className="space-y-6" data-testid="tab-panel-items">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Left Sidebar - Search & Category Filters */}
+              {!isPreview && (
+                <div className="space-y-6">
+                  {/* Search */}
+                  <Card className="glass-effect">
+                    <CardContent className="p-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                        <Input
+                          placeholder={`Search all ${totalItems} items`}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder-zinc-400"
+                          data-testid="shop-search"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Category Filters */}
+                  <Card className="glass-effect">
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        {/* All Items */}
+                        <button
+                          onClick={() => setSelectedCategory('all')}
+                          className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
+                            selectedCategory === 'all'
+                              ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+                              : 'hover:bg-zinc-800/50 text-zinc-300'
+                          }`}
+                          data-testid="category-filter-all"
+                        >
+                          <span className="font-medium">All</span>
+                          <span className="text-sm">{totalItems}</span>
+                        </button>
+
+                        {/* Category Filters */}
+                        {categoryCounts.map((category) => (
+                          <button
+                            key={category.slug}
+                            onClick={() => setSelectedCategory(category.slug)}
+                            className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
+                              selectedCategory === category.slug
+                                ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+                                : 'hover:bg-zinc-800/50 text-zinc-300'
+                            }`}
+                            data-testid={`category-filter-${category.slug}`}
+                          >
+                            <span>{category.name}</span>
+                            <span className="text-sm">{category.count}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Main Content - Listings */}
+              <div className={`space-y-6 ${!isPreview ? 'lg:col-span-3' : 'lg:col-span-4'}`}>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-garamond text-white">
+                    {selectedCategory === 'all' ? 'All Items' : categoryCounts.find(c => c.slug === selectedCategory)?.name || 'Items'}
+                    {isPreview && <span className="text-lg text-zinc-400"> (Sample)</span>}
+                    {searchQuery && <span className="text-lg text-zinc-400"> - "{searchQuery}"</span>}
+                  </h2>
+                  <Badge variant="outline" className="text-zinc-300">
+                    <Package className="w-3 h-3 mr-1" />
+                    {isPreview ? "12" : filteredListings.length} items
+                  </Badge>
+                </div>
+
+                {isPreview ? (
+                  // Show sample listings for preview
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4].map((i) => (
+                      <Card key={i} className="glass-effect">
+                        <div className="aspect-square bg-zinc-800 rounded-t-lg flex items-center justify-center">
+                          <Package className="w-12 h-12 text-zinc-600" />
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-serif font-semibold text-white mb-2">
+                            Sample Product {i}
+                          </h3>
+                          <p className="text-zinc-400 text-sm mb-3">
+                            This is a sample product that will be replaced with your actual listings.
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-red-400 font-bold">$29.99</span>
+                            <Badge variant="secondary">Available</Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : filteredListings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="shop-listings">
+                    {filteredListings.map((listing: any) => (
+                      <ProductCard key={listing.id} listing={listing} />
+                    ))}
+                  </div>
+                ) : searchQuery || selectedCategory !== 'all' ? (
+                  <Card className="glass-effect">
+                    <CardContent className="p-12 text-center">
+                      <Package className="mx-auto mb-4 text-zinc-500" size={48} />
+                      <h3 className="text-xl font-serif text-white mb-2">No Items Found</h3>
+                      <p className="text-zinc-400 mb-4">
+                        {searchQuery 
+                          ? `No items match "${searchQuery}"` 
+                          : `No items in ${categoryCounts.find(c => c.slug === selectedCategory)?.name || 'this category'}`
+                        }
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        {searchQuery && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setSearchQuery('')}
+                            className="text-white border-white hover:bg-white/10"
+                          >
+                            Clear Search
+                          </Button>
+                        )}
+                        {selectedCategory !== 'all' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setSelectedCategory('all')}
+                            className="text-white border-white hover:bg-white/10"
+                          >
+                            View All Items
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="glass-effect">
+                    <CardContent className="p-12 text-center">
+                      <Package className="mx-auto mb-4 text-zinc-500" size={48} />
+                      <h3 className="text-xl font-serif text-white mb-2">No Items Yet</h3>
+                      <p className="text-zinc-400">
+                        This shop hasn't listed any items for sale yet. Check back later!
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-6" data-testid="tab-panel-reviews">
+            <Card className="glass-effect">
+              <CardContent className="p-12 text-center">
+                <Star className="mx-auto mb-4 text-zinc-500" size={48} />
+                <h3 className="text-xl font-serif text-white mb-2">Reviews</h3>
+                <p className="text-zinc-400">
+                  Customer reviews will appear here when available.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* About Tab */}
+          <TabsContent value="about" className="space-y-6" data-testid="tab-panel-about">
             {/* About Shop */}
             {displayData?.bio && (
               <Card className="glass-effect">
@@ -373,7 +559,10 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
+          {/* Policies Tab */}
+          <TabsContent value="policies" className="space-y-6" data-testid="tab-panel-policies">
             {/* Shop Policies */}
             {displayData?.policies && (
               <Card className="glass-effect">
@@ -412,158 +601,8 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                 </CardContent>
               </Card>
             )}
-          </div>
-
-          {/* Middle Column - Category Filters */}
-          {!isPreview && (
-            <div className="space-y-6">
-              {/* Search */}
-              <Card className="glass-effect">
-                <CardContent className="p-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <Input
-                      placeholder={`Search all ${totalItems} items`}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder-zinc-400"
-                      data-testid="shop-search"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Category Filters */}
-              <Card className="glass-effect">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    {/* All Items */}
-                    <button
-                      onClick={() => setSelectedCategory('all')}
-                      className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
-                        selectedCategory === 'all'
-                          ? 'bg-red-600/20 text-red-400 border border-red-600/30'
-                          : 'hover:bg-zinc-800/50 text-zinc-300'
-                      }`}
-                      data-testid="category-filter-all"
-                    >
-                      <span className="font-medium">All</span>
-                      <span className="text-sm">{totalItems}</span>
-                    </button>
-
-                    {/* Category Filters */}
-                    {categoryCounts.map((category) => (
-                      <button
-                        key={category.slug}
-                        onClick={() => setSelectedCategory(category.slug)}
-                        className={`w-full text-left p-2 rounded transition-colors flex items-center justify-between ${
-                          selectedCategory === category.slug
-                            ? 'bg-red-600/20 text-red-400 border border-red-600/30'
-                            : 'hover:bg-zinc-800/50 text-zinc-300'
-                        }`}
-                        data-testid={`category-filter-${category.slug}`}
-                      >
-                        <span>{category.name}</span>
-                        <span className="text-sm">{category.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Right Column - Listings */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-garamond text-white">
-                {selectedCategory === 'all' ? 'All Items' : categoryCounts.find(c => c.slug === selectedCategory)?.name || 'Items'}
-                {isPreview && <span className="text-lg text-zinc-400"> (Sample)</span>}
-                {searchQuery && <span className="text-lg text-zinc-400"> - "{searchQuery}"</span>}
-              </h2>
-              <Badge variant="outline" className="text-zinc-300">
-                <Package className="w-3 h-3 mr-1" />
-                {isPreview ? "12" : filteredListings.length} items
-              </Badge>
-            </div>
-
-            {isPreview ? (
-              // Show sample listings for preview
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <Card key={i} className="glass-effect">
-                    <div className="aspect-square bg-zinc-800 rounded-t-lg flex items-center justify-center">
-                      <Package className="w-12 h-12 text-zinc-600" />
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-serif font-semibold text-white mb-2">
-                        Sample Product {i}
-                      </h3>
-                      <p className="text-zinc-400 text-sm mb-3">
-                        This is a sample product that will be replaced with your actual listings.
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-red-400 font-bold">$29.99</span>
-                        <Badge variant="secondary">Available</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : filteredListings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="shop-listings">
-                {filteredListings.map((listing: any) => (
-                  <ProductCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            ) : searchQuery || selectedCategory !== 'all' ? (
-              <Card className="glass-effect">
-                <CardContent className="p-12 text-center">
-                  <Package className="mx-auto mb-4 text-zinc-500" size={48} />
-                  <h3 className="text-xl font-serif text-white mb-2">No Items Found</h3>
-                  <p className="text-zinc-400 mb-4">
-                    {searchQuery 
-                      ? `No items match "${searchQuery}"` 
-                      : `No items in ${categoryCounts.find(c => c.slug === selectedCategory)?.name || 'this category'}`
-                    }
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    {searchQuery && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSearchQuery('')}
-                        className="text-white border-white hover:bg-white/10"
-                      >
-                        Clear Search
-                      </Button>
-                    )}
-                    {selectedCategory !== 'all' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSelectedCategory('all')}
-                        className="text-white border-white hover:bg-white/10"
-                      >
-                        View All Items
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="glass-effect">
-                <CardContent className="p-12 text-center">
-                  <Package className="mx-auto mb-4 text-zinc-500" size={48} />
-                  <h3 className="text-xl font-serif text-white mb-2">No Items Yet</h3>
-                  <p className="text-zinc-400">
-                    This shop hasn't listed any items for sale yet. Check back later!
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {!isPreview && <Footer />}
