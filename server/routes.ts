@@ -2253,7 +2253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/seller/public/:sellerId', async (req, res) => {
     try {
       const { sellerId } = req.params;
-      const seller = await storage.getSeller(sellerId);
+      const seller = await storage.getSellerByIdentifier(sellerId);
       
       if (!seller) {
         return res.status(404).json({ message: "Seller not found" });
