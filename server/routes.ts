@@ -2062,6 +2062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shopName: req.body.shopName || seller.shopName,
         shopSlug: req.body.shopSlug || seller.shopSlug,
         bio: req.body.bio || seller.bio,
+        announcement: req.body.announcement || seller.announcement,
         location: req.body.location || seller.location,
         policies: req.body.policies || seller.policies,
         banner: req.body.banner || req.body.bannerImageUrl || seller.banner,

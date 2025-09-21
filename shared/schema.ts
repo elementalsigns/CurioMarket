@@ -121,6 +121,7 @@ export const sellers = pgTable("sellers", {
   shopName: varchar("shop_name").notNull(),
   shopSlug: varchar("shop_slug").unique(), // Optional custom shop URL slug
   bio: text("bio"),
+  announcement: text("announcement"), // Shop announcement for front page
   banner: varchar("banner"),
   avatar: varchar("avatar"),
   location: varchar("location"),

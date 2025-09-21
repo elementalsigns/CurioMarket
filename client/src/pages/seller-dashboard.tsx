@@ -1546,6 +1546,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
       shopName: seller?.shopName || "",
       shopSlug: seller?.shopSlug || "",
       bio: seller?.bio || "",
+      announcement: seller?.announcement || "",
       location: seller?.location || "",
       policies: seller?.policies || "",
       shippingInfo: seller?.shippingInfo || "",
@@ -1861,6 +1862,25 @@ function ShopProfileManager({ seller }: { seller: any }) {
                 )}
               />
 
+              <FormField
+                control={profileForm.control}
+                name="announcement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Shop Announcement</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Share special updates, sales, new arrivals, or important announcements with your customers..."
+                        rows={3}
+                        data-testid="input-announcement"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Policies */}
               <div className="space-y-4">
                 <h4 className="font-medium">Shop Policies</h4>
@@ -1983,6 +2003,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
                   previewData={{
                     shopName: profileForm.watch("shopName") || seller?.shopName,
                     bio: profileForm.watch("bio") || seller?.bio,
+                    announcement: profileForm.watch("announcement") || seller?.announcement,
                     location: profileForm.watch("location") || seller?.location,
                     policies: profileForm.watch("policies") || seller?.policies,
                     shippingInfo: profileForm.watch("shippingInfo") || seller?.shippingInfo,

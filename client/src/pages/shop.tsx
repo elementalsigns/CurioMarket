@@ -697,16 +697,16 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
         {!isPreview && (
           <div className="mt-12 pt-8 border-t border-zinc-800">
             {/* Announcement Section */}
-            {displayData?.bio && (
+            {displayData?.announcement && (
               <div className="mb-8">
                 <h3 className="text-lg font-serif text-white mb-3">Announcement</h3>
                 <p className="text-zinc-300 text-sm leading-relaxed max-w-4xl">
-                  {displayData.bio.length > 200 
-                    ? `${displayData.bio.substring(0, 200)}...` 
-                    : displayData.bio
+                  {displayData.announcement.length > 200 
+                    ? `${displayData.announcement.substring(0, 200)}...` 
+                    : displayData.announcement
                   }
                 </p>
-                {displayData.bio.length > 200 && (
+                {displayData.announcement.length > 200 && (
                   <button 
                     onClick={() => setActiveTab('about')}
                     className="text-red-400 hover:text-red-300 text-sm mt-2 underline"
