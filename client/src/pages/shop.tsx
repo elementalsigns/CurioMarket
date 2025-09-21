@@ -722,7 +722,16 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                 </p>
                 {displayData.announcement.length > 200 && (
                   <button 
-                    onClick={() => setActiveTab('about')}
+                    onClick={() => {
+                      setActiveTab('about');
+                      // Scroll to tabs section
+                      setTimeout(() => {
+                        const tabsElement = document.querySelector('[role="tabpanel"][data-state="active"]');
+                        if (tabsElement) {
+                          tabsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }}
                     className="text-red-400 hover:text-red-300 text-sm mt-2 underline"
                   >
                     Read more
