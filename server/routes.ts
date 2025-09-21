@@ -2379,7 +2379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get seller listings, sorted by display order for shop display
       const listingsResult = await storage.getListings({ 
-        sellerId, 
+        sellerId: seller.id, 
         sortByDisplayOrder: true 
       });
       
