@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, like, or, sql, count, avg, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, like, or, sql, count, avg, inArray, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -77,6 +77,8 @@ export interface IStorage {
   createSeller(seller: InsertSeller): Promise<Seller>;
   getSellerByUserId(userId: string): Promise<Seller | undefined>;
   getSeller(id: string): Promise<Seller | undefined>;
+  getSellerByShopSlug(shopSlug: string): Promise<Seller | undefined>;
+  getSellerByIdentifier(identifier: string): Promise<Seller | undefined>;
   updateSeller(id: string, updates: Partial<InsertSeller>): Promise<Seller>;
   
   // Category operations
@@ -317,8 +319,42 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Shop slug validation
+  private validateShopSlug(slug: string): boolean {
+    // Check if slug is valid: 3-50 characters, alphanumeric + hyphens, no spaces
+    const slugRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]{2,48}[a-zA-Z0-9]$/;
+    
+    // Reserved words that cannot be used as shop slugs
+    const reservedWords = ['admin', 'api', 'shop', 'seller', 'user', 'auth', 'login', 'register', 'cart', 'checkout', 'search', 'categories', 'help', 'about', 'contact', 'terms', 'privacy', 'support', 'dashboard'];
+    
+    return slugRegex.test(slug) && !reservedWords.includes(slug.toLowerCase());
+  }
+
+  private async isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean> {
+    let whereConditions = [eq(sellers.shopSlug, slug)];
+    
+    // Exclude current seller when updating
+    if (excludeSellerId) {
+      whereConditions.push(ne(sellers.id, excludeSellerId));
+    }
+    
+    const [existingSeller] = await db.select().from(sellers).where(and(...whereConditions));
+    return !existingSeller;
+  }
+
   // Seller operations
   async createSeller(seller: InsertSeller): Promise<Seller> {
+    // Validate and check shop slug if provided
+    if (seller.shopSlug) {
+      if (!this.validateShopSlug(seller.shopSlug)) {
+        throw new Error('Invalid shop slug format. Must be 3-50 characters, alphanumeric with hyphens only, and not a reserved word.');
+      }
+      
+      if (!(await this.isShopSlugAvailable(seller.shopSlug))) {
+        throw new Error('Shop slug is already taken. Please choose a different one.');
+      }
+    }
+    
     const [newSeller] = await db.insert(sellers).values(seller).returning();
     return newSeller;
   }
@@ -333,7 +369,34 @@ export class DatabaseStorage implements IStorage {
     return seller;
   }
 
+  async getSellerByShopSlug(shopSlug: string): Promise<Seller | undefined> {
+    const [seller] = await db.select().from(sellers).where(eq(sellers.shopSlug, shopSlug));
+    return seller;
+  }
+
+  async getSellerByIdentifier(identifier: string): Promise<Seller | undefined> {
+    // Try to get by shop slug first, then by ID for backward compatibility
+    let seller = await this.getSellerByShopSlug(identifier);
+    if (!seller) {
+      seller = await this.getSeller(identifier);
+    }
+    return seller;
+  }
+
   async updateSeller(id: string, updates: Partial<InsertSeller>): Promise<Seller> {
+    // Validate and check shop slug if being updated
+    if (updates.shopSlug !== undefined) {
+      if (updates.shopSlug) {
+        if (!this.validateShopSlug(updates.shopSlug)) {
+          throw new Error('Invalid shop slug format. Must be 3-50 characters, alphanumeric with hyphens only, and not a reserved word.');
+        }
+        
+        if (!(await this.isShopSlugAvailable(updates.shopSlug, id))) {
+          throw new Error('Shop slug is already taken. Please choose a different one.');
+        }
+      }
+    }
+    
     const [seller] = await db
       .update(sellers)
       .set({ ...updates, updatedAt: new Date() })
