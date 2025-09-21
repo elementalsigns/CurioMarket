@@ -730,24 +730,6 @@ export const insertSellerSchema = createInsertSchema(sellers).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-}).extend({
-  shopSlug: z.string()
-    .optional()
-    .transform((val) => val?.toLowerCase().trim())
-    .refine(
-      (val) => {
-        if (!val) return true; // Optional field
-        // Must be 3-30 characters
-        if (val.length < 3 || val.length > 30) return false;
-        // Must not match UUID pattern to avoid collisions
-        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)) return false;
-        // Must match valid slug pattern
-        return /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(val);
-      },
-      {
-        message: "Shop slug must be 3-30 characters, start and end with alphanumeric characters, contain only lowercase letters, numbers, and hyphens, and cannot look like a UUID",
-      }
-    ),
 });
 
 export const insertListingSchema = createInsertSchema(listings).omit({

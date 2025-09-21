@@ -77,11 +77,7 @@ export interface IStorage {
   createSeller(seller: InsertSeller): Promise<Seller>;
   getSellerByUserId(userId: string): Promise<Seller | undefined>;
   getSeller(id: string): Promise<Seller | undefined>;
-  getSellerByShopSlug(shopSlug: string): Promise<Seller | undefined>;
-  getSellerByIdentifier(identifier: string): Promise<Seller | undefined>;
   updateSeller(id: string, updates: Partial<InsertSeller>): Promise<Seller>;
-  validateShopSlug(slug: string): boolean;
-  isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
