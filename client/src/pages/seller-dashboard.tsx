@@ -1544,6 +1544,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
   const profileForm = useForm({
     defaultValues: {
       shopName: seller?.shopName || "",
+      shopSlug: seller?.shopSlug || "",
       bio: seller?.bio || "",
       location: seller?.location || "",
       policies: seller?.policies || "",
@@ -1798,6 +1799,28 @@ function ShopProfileManager({ seller }: { seller: any }) {
                       <FormLabel>Shop Name *</FormLabel>
                       <FormControl>
                         <Input {...field} data-testid="input-shop-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={profileForm.control}
+                  name="shopSlug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Custom Shop URL</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <span className="text-sm text-foreground/70 mr-2">curiosities.market/shop/</span>
+                            <Input {...field} placeholder="my-shop-name" data-testid="input-shop-slug" />
+                          </div>
+                          <p className="text-xs text-foreground/60">
+                            Create a custom URL for your shop (optional). Use 3-30 characters, letters, numbers, and hyphens only.
+                          </p>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
