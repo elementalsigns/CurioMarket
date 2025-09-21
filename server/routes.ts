@@ -135,19 +135,105 @@ async function hasSellerAccess(user: User): Promise<boolean> {
  */
 const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
   try {
-    // SURGICAL BYPASS: ONLY for elementalsigns@gmail.com (46848882) on production domain for admin dashboard
-    const isProductionDomain = req.get('host')?.includes('curiosities.market');
-    const isAdminRequest = req.get('referer')?.includes('/admin') || req.originalUrl?.includes('/admin');
-    const sessionUserId = req.session?.passport?.user;
-    const isTargetUser = sessionUserId === '46848882' || sessionUserId === 46848882;
-    
-    if (isProductionDomain && isAdminRequest && isTargetUser) {
-      console.log(`[SURGICAL ADMIN BYPASS] ✅ Granting admin dashboard access to elementalsigns@gmail.com`);
+    // DEVELOPMENT BYPASS - Same as requireAuth for consistency
+    if (process.env.NODE_ENV !== 'production') {
       req.user = {
-        claims: { sub: '46848882' },
-        id: '46848882'
+        claims: {
+          sub: '46848882',  // Development user
+          email: 'elementalsigns@gmail.com', 
+          given_name: 'Artem',
+          family_name: 'Mortis'
+        }
       };
+      console.log('[CAPABILITY] Development bypass activated for user 46848882');
+      
+      // Skip all authentication checks and go directly to capability check
+      const userId = '46848882';
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        console.log(`[CAPABILITY] User ${userId} not found in database`);
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check seller access using capability system
+      const hasAccess = await hasSellerAccess(user);
+      if (!hasAccess) {
+        console.log(`[CAPABILITY] User ${userId} denied seller access`);
+        return res.status(403).json({ message: "Seller access required" });
+      }
+      
+      // AUTO-PROVISIONING: If user is admin and doesn't have seller profile, create one
+      if (user.role === 'admin') {
+        try {
+          let sellerProfile = await storage.getSellerByUserId(userId);
+          
+          if (!sellerProfile) {
+            console.log(`[CAPABILITY] Auto-provisioning seller profile for admin user ${userId}`);
+            sellerProfile = await storage.createSeller({
+              userId: userId,
+              shopName: `${user.email || userId} Admin Shop`,
+              bio: 'Administrator seller profile - auto-provisioned',
+              isActive: true,
+              verificationStatus: 'approved' // Admins are pre-approved
+            });
+            console.log(`[CAPABILITY] ✅ Created seller profile ${sellerProfile.id} for admin user ${userId}`);
+          } else if (!sellerProfile.isActive) {
+            // Reactivate existing but inactive profile for admin
+            await storage.updateSeller(sellerProfile.id, { isActive: true });
+            console.log(`[CAPABILITY] ✅ Reactivated seller profile ${sellerProfile.id} for admin user ${userId}`);
+          }
+          
+          // Attach seller info to request for downstream handlers
+          req.sellerId = sellerProfile.id;
+          req.sellerProfile = sellerProfile;
+          
+        } catch (provisionError) {
+          console.error(`[CAPABILITY] Error auto-provisioning seller profile for admin ${userId}:`, provisionError);
+          // Don't fail the request - admin might still be able to access some seller functionality
+        }
+      } else {
+        // For non-admin users, just try to get existing seller profile
+        try {
+          const sellerProfile = await storage.getSellerByUserId(userId);
+          if (sellerProfile) {
+            req.sellerId = sellerProfile.id;
+            req.sellerProfile = sellerProfile;
+          }
+        } catch (error) {
+          console.error(`[CAPABILITY] Error getting seller profile for user ${userId}:`, error);
+        }
+      }
+      
+      // Set up req.user object that downstream routes expect
+      req.user = {
+        claims: {
+          sub: userId
+        },
+        id: userId
+      };
+      
+      console.log(`[CAPABILITY] User ${userId} granted seller access with seller ID: ${req.sellerId || 'none'}`);
       return next();
+    }
+    
+    // SURGICAL BYPASS: ONLY for elementalsigns@gmail.com (46848882) on production domain for admin dashboard
+    else {
+      const isProductionDomain = req.get('host')?.includes('curiosities.market');
+      const isAdminRequest = req.get('referer')?.includes('/admin') || req.originalUrl?.includes('/admin');
+      const passportUser = req.session?.passport?.user;
+      // Fix: Handle both string userId and full user object formats
+      const extractedUserId = typeof passportUser === 'string' ? passportUser : (passportUser?.id || passportUser?.claims?.sub);
+      const isTargetUser = extractedUserId === '46848882';
+      
+      if (isProductionDomain && isAdminRequest && isTargetUser) {
+        console.log(`[SURGICAL ADMIN BYPASS] ✅ Granting admin dashboard access to elementalsigns@gmail.com`);
+        req.user = {
+          claims: { sub: '46848882' },
+          id: '46848882'
+        };
+        // Continue to capability check below
+      }
     }
     
     // Enhanced debugging for authentication failures
@@ -186,6 +272,12 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
       // Handle both string userId and full user object formats
       userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
       console.log(`[CAPABILITY] Passport session auth success for user: ${userId}`);
+      
+      // SURGICAL FIX: Set req.user to normalize downstream logic
+      if (typeof passportUser === 'object') {
+        req.user = passportUser;
+        console.log(`[CAPABILITY] Normalized req.user from passport session for user: ${userId}`);
+      }
     }
     // Method 4: JWT Bearer token (for magic login mobile fix)
     else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
