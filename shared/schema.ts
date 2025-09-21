@@ -119,6 +119,7 @@ export const sellers = pgTable("sellers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
   shopName: varchar("shop_name").notNull(),
+  shopSlug: varchar("shop_slug").unique(), // Optional custom shop URL slug
   bio: text("bio"),
   banner: varchar("banner"),
   avatar: varchar("avatar"),
