@@ -2689,46 +2689,24 @@ export class DatabaseStorage implements IStorage {
 
     const listingIds = sellerListings.map(l => l.id);
 
-    // Get orders data for the period - handle empty listingIds case
-    let ordersData: {
-      id: string;
-      total: string;
-      platformFee: string | null;
-      createdAt: Date | null;
-      items: any[];
-    }[] = [];
-    
-    if (listingIds.length > 0) {
-      ordersData = await db
-        .select({
-          id: orders.id,
-          total: orders.total,
-          platformFee: orders.platformFee,
-          createdAt: orders.createdAt,
-          items: sql<any[]>`
-            COALESCE(
-              (SELECT JSON_AGG(JSON_BUILD_OBJECT(
-                'listingId', ${orderItems.listingId},
-                'quantity', ${orderItems.quantity},
-                'price', ${orderItems.price}
-              ))
-              FROM ${orderItems}
-              WHERE ${orderItems.orderId} = ${orders.id}),
-              '[]'::json
-            )
-          `
-        })
-        .from(orders)
-        .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
-        .where(
-          and(
-            inArray(orderItems.listingId, listingIds),
-            sql`${orders.createdAt} >= ${dateRange.from}`,
-            sql`${orders.createdAt} <= ${dateRange.to}`,
-            inArray(orders.status, ['fulfilled', 'delivered', 'shipped'])
-          )
-        );
-    }
+    // Get orders data for the period using same approach as stats function
+    const ordersData = await db
+      .select({
+        id: orders.id,
+        total: orders.total,
+        platformFee: orders.platformFee,
+        createdAt: orders.createdAt,
+        items: sql<any[]>`'[]'::json`
+      })
+      .from(orders)
+      .where(
+        and(
+          eq(orders.sellerId, sellerId),
+          sql`${orders.createdAt} >= ${dateRange.from}`,
+          sql`${orders.createdAt} <= ${dateRange.to}`,
+          inArray(orders.status, ['fulfilled', 'delivered', 'shipped'])
+        )
+      );
 
     // Calculate totals
     const totalRevenue = ordersData.reduce((sum, order) => sum + parseFloat(order.total), 0);
