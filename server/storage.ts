@@ -2039,7 +2039,7 @@ export class DatabaseStorage implements IStorage {
       pendingVerifications: 0, // No verification queue in current schema
       disputedOrders: 0, // No disputes in current schema
       flaggedContent: 0, // No flags in current schema
-      totalRevenue: revenueResult.total || 0
+      totalRevenue: Number(revenueResult.total) || 0
     };
   }
 
