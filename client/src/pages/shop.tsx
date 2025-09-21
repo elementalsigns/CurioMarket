@@ -55,9 +55,10 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
 
   // In preview mode, use previewData; otherwise fetch from API
   const { data: fetchedData, isLoading } = useQuery({
-    queryKey: ["/api/seller/public", sellerId],
+    queryKey: ["/api/seller/public", sellerId, Date.now()],
     queryFn: () => fetch(`/api/seller/public/${sellerId}`).then(res => res.json()),
     enabled: !isPreview && !!sellerId,
+    staleTime: 0, // Force fresh data
   });
 
   const seller = fetchedData?.seller;
