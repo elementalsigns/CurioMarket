@@ -2026,10 +2026,10 @@ export class DatabaseStorage implements IStorage {
     const [totalListings] = await db.select({ count: sql<number>`count(*)` }).from(listings);
     const [totalOrders] = await db.select({ count: sql<number>`count(*)` }).from(orders);
     
-    // Calculate total revenue from all fulfilled orders
+    // Calculate total revenue from all completed orders (fulfilled + delivered)
     const [revenueResult] = await db.select({ 
       total: sql<number>`COALESCE(SUM(CAST(${orders.total} AS DECIMAL)), 0)` 
-    }).from(orders).where(eq(orders.status, 'fulfilled'));
+    }).from(orders).where(inArray(orders.status, ['fulfilled', 'delivered']));
     
     return {
       totalUsers: totalUsers.count,

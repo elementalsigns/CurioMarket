@@ -82,10 +82,12 @@ export default function AdminDashboard() {
     );
   }
 
-  // Fetch admin statistics
+  // Fetch admin statistics (force cache refresh for revenue fix)
   const { data: stats } = useQuery({
-    queryKey: ['/api/admin/stats'],
+    queryKey: ['/api/admin/stats', Date.now()], // Add timestamp to force refresh
     retry: false,
+    staleTime: 0, // Force fresh data
+    gcTime: 0, // Don't cache (TanStack Query v5 syntax)
   }) as { data: AdminStats | undefined };
 
   // Fetch verification queue
