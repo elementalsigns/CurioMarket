@@ -1017,30 +1017,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategoryCounts(): Promise<any[]> {
-    // Since this is a development environment, return sample data with realistic counts
-    // that would be dynamically calculated from the listings table in production
-    return [
-      {
-        slug: "taxidermy",
-        name: "Taxidermy",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "wet-specimens",
-        name: "Wet Specimens",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "occult", 
-        name: "Occult",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "bones-skulls",
-        name: "Bones & Skulls", 
-        count: 1, // Updated to match actual database count
-      }
+    // Query database for actual category counts
+    const categories = [
+      { slug: "taxidermy", name: "Taxidermy" },
+      { slug: "wet-specimens", name: "Wet Specimens" },
+      { slug: "occult", name: "Occult" },
+      { slug: "bones-skulls", name: "Bones & Skulls" }
     ];
+
+    const categoryCountsPromises = categories.map(async (category) => {
+      const [result] = await db.select({ 
+        count: sql<string>`CAST(COUNT(*) AS TEXT)` 
+      }).from(listings)
+        .where(
+          and(
+            eq(listings.state, 'active'),
+            sql`${listings.categoryIds} && ARRAY[${category.slug}]::text[]`
+          )
+        );
+      
+      return {
+        slug: category.slug,
+        name: category.name,
+        count: parseInt(result.count) || 0
+      };
+    });
+
+    return await Promise.all(categoryCountsPromises);
   }
 
   // Enhanced Product Management
