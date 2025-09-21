@@ -84,6 +84,20 @@ export function EventsTable() {
   // Fetch events with search and filtering
   const { data: eventsData, isLoading, error } = useQuery<EventsResponse>({
     queryKey: ['/api/admin/events', { search, status: statusFilter !== 'all' ? statusFilter : undefined, page, limit }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      const url = `/api/admin/events?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch events: ${response.statusText}`);
+      }
+      return response.json();
+    },
     staleTime: 30000, // 30 seconds
   });
 
