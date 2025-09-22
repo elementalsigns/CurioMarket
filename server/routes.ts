@@ -7323,25 +7323,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       
       
-      // Helper to convert dates - handle datetime-local inputs as Eastern Time
+      // Parse dates directly - frontend sends UTC ISO strings
       const toDate = (v: any): Date => {
         if (!v || String(v).trim() === "") {
           throw new Error("Date is required");
         }
-        const dateStr = String(v).trim();
-        // For datetime-local format, treat as Eastern Time
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
-          // Append timezone offset for Eastern Time (-05:00 EST or -04:00 EDT)
-          // Use -05:00 as default (EST) - this will be consistent
-          const easternStr = `${dateStr}:00-05:00`;
-          const d = new Date(easternStr);
-          if (isNaN(d.getTime())) {
-            throw new Error(`Invalid date: ${v}`);
-          }
-          return d;
-        }
-        // For other formats, parse normally
-        const d = new Date(dateStr);
+        const d = new Date(String(v).trim());
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }
@@ -7352,20 +7339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!v || String(v).trim() === "") {
           return null;
         }
-        const dateStr = String(v).trim();
-        // For datetime-local format, treat as Eastern Time
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)) {
-          // Append timezone offset for Eastern Time (-05:00 EST or -04:00 EDT)  
-          // Use -05:00 as default (EST) - this will be consistent
-          const easternStr = `${dateStr}:00-05:00`;
-          const d = new Date(easternStr);
-          if (isNaN(d.getTime())) {
-            throw new Error(`Invalid date: ${v}`);
-          }
-          return d;
-        }
-        // For other formats, parse normally
-        const d = new Date(dateStr);
+        const d = new Date(String(v).trim());
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }
