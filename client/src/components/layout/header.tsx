@@ -105,18 +105,23 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/browse?category=funeral" className="flex items-center">
-                    Funeral
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
                   <Link to="/browse?category=fine-art" className="flex items-center">
                     Fine Art
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=funeral" className="flex items-center">
+                    Funeral
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=jewelry" className="flex items-center">
                     Jewelry
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/browse?category=medical-art" className="flex items-center">
+                    Medical Art
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -137,11 +142,6 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/browse?category=vintage" className="flex items-center">
                     Vintage
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/browse?category=medical-art" className="flex items-center">
-                    Medical Art
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
