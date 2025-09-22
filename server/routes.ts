@@ -7393,6 +7393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contactEmail: nullIfEmpty(req.body.contactEmail),
         contactPhone: nullIfEmpty(req.body.contactPhone),
         website: nullIfEmpty(req.body.website),
+        imageUrl: nullIfEmpty(req.body.imageUrl),
         tags: Array.isArray(req.body.tags) ? req.body.tags : [],
         status: req.body.status || 'active',
         userId,
