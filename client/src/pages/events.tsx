@@ -701,8 +701,8 @@ export default function EventsPage() {
                                 <div className="flex items-center space-x-2">
                                   <Clock size={16} className="text-red-600" />
                                   <span data-testid={`event-time-${event.id}`}>
-                                    {event.eventDate ? format(new Date(event.eventDate), "h:mm a") : "Time TBD"}
-                                    {event.endDate && ` - ${format(new Date(event.endDate), "h:mm a")}`}
+                                    {event.eventDate ? new Date(event.eventDate).toLocaleTimeString([], { timeZone: 'UTC', hour: 'numeric', minute: '2-digit' }) : "Time TBD"}
+                                    {event.endDate && ` - ${new Date(event.endDate).toLocaleTimeString([], { timeZone: 'UTC', hour: 'numeric', minute: '2-digit' })}`}
                                   </span>
                                 </div>
                                 
