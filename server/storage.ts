@@ -85,7 +85,7 @@ export interface IStorage {
   
   // Listing operations
   createListing(listing: InsertListing): Promise<Listing>;
-  getListings(filters?: { categoryId?: string; sellerId?: string; search?: string; limit?: number; offset?: number }): Promise<{ listings: Listing[]; total: number }>;
+  getListings(filters?: { categoryId?: string; sellerId?: string; search?: string; tags?: string[]; limit?: number; offset?: number }): Promise<{ listings: Listing[]; total: number }>;
   getListing(id: string): Promise<Listing | undefined>;
   getListingBySlug(slug: string): Promise<Listing | undefined>;
   updateListing(id: string, updates: Partial<InsertListing>): Promise<Listing>;
@@ -469,6 +469,7 @@ export class DatabaseStorage implements IStorage {
     categoryId?: string; 
     sellerId?: string; 
     search?: string; 
+    tags?: string[];
     limit?: number; 
     offset?: number;
     state?: string;
@@ -499,6 +500,14 @@ export class DatabaseStorage implements IStorage {
           ilike(listings.speciesOrMaterial, `%${filters.search}%`),
           sql`${`%${filters.search}%`} ILIKE ANY(${listings.tags})`
         )
+      );
+    }
+
+    if (filters?.tags && filters.tags.length > 0) {
+      // Normalize tags to lowercase for case-insensitive matching
+      const normalizedTags = filters.tags.map(tag => tag.toLowerCase());
+      conditions.push(
+        sql`${listings.tags} && ${normalizedTags}`
       );
     }
 

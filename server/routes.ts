@@ -3590,13 +3590,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { 
         search, 
         category, 
+        tags,
         limit = 100, 
         offset = 0 
       } = req.query;
 
+      // Parse tags parameter (can be comma-separated string or array)
+      let parsedTags: string[] | undefined;
+      if (tags) {
+        if (Array.isArray(tags)) {
+          parsedTags = tags as string[];
+        } else if (typeof tags === 'string') {
+          parsedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+        }
+      }
+
       const result = await storage.getListings({
         search: search as string,
         categoryId: category as string,
+        tags: parsedTags,
         limit: parseInt(limit as string),
         offset: parseInt(offset as string),
         state: 'published'
