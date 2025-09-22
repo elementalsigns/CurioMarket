@@ -358,11 +358,6 @@ export default function EventsPage() {
                                 {...field} 
                                 type="datetime-local" 
                                 data-testid="input-event-date"
-                                onChange={(e) => {
-                                  // Treat datetime-local as UTC to prevent timezone conversion
-                                  const value = e.target.value;
-                                  field.onChange(value ? value + 'Z' : value);
-                                }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -381,11 +376,6 @@ export default function EventsPage() {
                                 {...field} 
                                 type="datetime-local"
                                 data-testid="input-end-date"
-                                onChange={(e) => {
-                                  // Treat datetime-local as UTC to prevent timezone conversion
-                                  const value = e.target.value;
-                                  field.onChange(value ? value + 'Z' : value);
-                                }}
                               />
                             </FormControl>
                             <FormMessage />
