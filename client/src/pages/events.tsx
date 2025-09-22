@@ -194,6 +194,7 @@ export default function EventsPage() {
 
   // Group events by date for calendar view
   const groupedEvents = filteredEvents.reduce((acc: { [key: string]: Event[] }, event) => {
+    if (!event.eventDate) return acc; // Skip events with null dates
     const dateKey = format(new Date(event.eventDate), "yyyy-MM-dd");
     if (!acc[dateKey]) {
       acc[dateKey] = [];
@@ -700,7 +701,7 @@ export default function EventsPage() {
                                 <div className="flex items-center space-x-2">
                                   <Clock size={16} className="text-red-600" />
                                   <span data-testid={`event-time-${event.id}`}>
-                                    {format(new Date(event.eventDate), "h:mm a")}
+                                    {event.eventDate ? format(new Date(event.eventDate), "h:mm a") : "Time TBD"}
                                     {event.endDate && ` - ${format(new Date(event.endDate), "h:mm a")}`}
                                   </span>
                                 </div>
