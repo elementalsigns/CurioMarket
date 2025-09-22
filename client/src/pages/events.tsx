@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, parseISO, isAfter, startOfDay } from "date-fns";
-import { Calendar, MapPin, Clock, Users, Search, Plus, DollarSign, Globe, Mail, Phone } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, Search, Plus, DollarSign, Globe, Mail, Phone, Upload, X } from "lucide-react";
 import type { Event } from "@shared/schema";
 
 // Form schema for creating events
@@ -51,6 +51,7 @@ const createEventSchema = z.object({
     return isValidUrl(val) || isValidUrl(`https://${val}`);
   }, "Please enter a valid website URL (e.g., www.example.com or https://example.com)"),
   tags: z.string().optional(),
+  imageUrl: z.string().optional(),
   status: z.enum(["draft", "published"]),
 });
 
@@ -61,6 +62,10 @@ export default function EventsPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterState, setFilterState] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  
+  // Image upload states
+  const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>("");
   
   const queryClient = useQueryClient();
 
@@ -123,6 +128,7 @@ export default function EventsPage() {
         contactEmail: data.contactEmail || null,
         contactPhone: data.contactPhone || null,
         website: data.website || null,
+        imageUrl: data.imageUrl || null,
       };
       
       const response = await fetch("/api/events", {
@@ -143,6 +149,7 @@ export default function EventsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setIsCreateDialogOpen(false);
       form.reset();
+      setImagePreview("");
     },
   });
 
@@ -161,6 +168,7 @@ export default function EventsPage() {
       contactPhone: "",
       website: "",
       tags: "",
+      imageUrl: "",
       status: "published",
     },
   });
@@ -196,6 +204,53 @@ export default function EventsPage() {
 
   // Sort dates
   const sortedDates = Object.keys(groupedEvents).sort();
+
+  // Image upload functionality
+  const handleImageUpload = async (file: File, setValue: (field: "imageUrl", value: string) => void) => {
+    setIsUploading(true);
+    try {
+      // Get upload URL from backend
+      const response = await fetch('/api/events/image/upload-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
+
+      const { uploadURL, displayURL } = await response.json();
+
+      // Upload file to the signed URL
+      const uploadResponse = await fetch(uploadURL, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      // Set preview and form value
+      const previewURL = URL.createObjectURL(file);
+      setImagePreview(previewURL);
+      setValue("imageUrl", displayURL);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (setValue: (field: "imageUrl", value: string) => void) => {
+    setImagePreview("");
+    setValue("imageUrl", "");
+  };
 
   const onSubmit = (data: CreateEventFormData) => {
     createEventMutation.mutate(data);
@@ -430,6 +485,67 @@ export default function EventsPage() {
                               placeholder="taxidermy, specimens, victorian, antiques"
                               data-testid="input-tags"
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Image</FormLabel>
+                          <FormControl>
+                            <div className="space-y-4">
+                              {!imagePreview && (
+                                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                                  <div className="mx-auto w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-4">
+                                    <Upload className="h-6 w-6 text-muted-foreground" />
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mb-4">
+                                    Upload a logo or flyer for your event (optional)
+                                  </p>
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        await handleImageUpload(file, form.setValue);
+                                      }
+                                    }}
+                                    disabled={isUploading}
+                                    data-testid="input-event-image"
+                                  />
+                                  {isUploading && (
+                                    <p className="text-sm text-muted-foreground mt-2">Uploading...</p>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {imagePreview && (
+                                <div className="relative">
+                                  <img
+                                    src={imagePreview}
+                                    alt="Event preview"
+                                    className="w-full h-48 object-cover rounded-lg"
+                                    data-testid="img-event-preview"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => removeImage(form.setValue)}
+                                    data-testid="button-remove-image"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
