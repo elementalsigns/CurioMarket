@@ -101,12 +101,12 @@ export default function EventsPage() {
   });
 
   // Get unique states from all events for filter dropdown
-  const availableStates = [...new Set(
+  const availableStates = Array.from(new Set(
     events
       .map(event => extractStateFromLocation(event.location))
       .filter(state => state !== '')
       .map(state => state.length === 2 ? state.toUpperCase() : state)
-  )].sort();
+  )).sort();
 
   // Create event mutation
   const createEventMutation = useMutation({
