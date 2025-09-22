@@ -4010,7 +4010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search listings with category filtering
   app.get('/api/search', async (req, res) => {
     try {
-      const { q, category, limit = 100, offset = 0 } = req.query;
+      const { q, category, tags, limit = 100, offset = 0 } = req.query;
       
       let categoryId = category as string;
       
@@ -4024,12 +4024,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           categoryId = categoryRecord?.id || '';
         }
       }
+
+      // Parse tags parameter (can be comma-separated string or array)
+      let parsedTags: string[] | undefined;
+      if (tags) {
+        if (Array.isArray(tags)) {
+          parsedTags = tags as string[];
+        } else if (typeof tags === 'string') {
+          parsedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+        }
+      }
       
       // Search for both products and shops
       const [productResult, shopResult] = await Promise.all([
         // Search listings/products
         storage.searchListings(q as string, {
           categoryId,
+          tags: parsedTags,
           limit: parseInt(limit as string),
           offset: parseInt(offset as string)
         }),

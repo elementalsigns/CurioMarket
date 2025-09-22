@@ -21,6 +21,7 @@ export default function Browse() {
     minPrice: "",
     maxPrice: "",
     sortBy: "newest",
+    tags: [] as string[],
   });
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -38,8 +39,10 @@ export default function Browse() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category') || "";
     const q = urlParams.get('q') || "";
+    const tagsParam = urlParams.get('tags') || "";
+    const tags = tagsParam ? tagsParam.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
     
-    setFilters(prev => ({ ...prev, category }));
+    setFilters(prev => ({ ...prev, category, tags }));
     setSearchQuery(q);
     setInitialized(true);
   }, [location]);
@@ -49,6 +52,7 @@ export default function Browse() {
     const params = new URLSearchParams();
     if (newSearchQuery) params.set('q', newSearchQuery);
     if (newFilters.category) params.set('category', newFilters.category);
+    if (newFilters.tags && newFilters.tags.length > 0) params.set('tags', newFilters.tags.join(','));
     if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
     if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
     
@@ -80,6 +84,7 @@ export default function Browse() {
         const params = new URLSearchParams();
         if (searchQuery) params.append("q", searchQuery);
         if (filters.category) params.append("category", filters.category);
+        if (filters.tags && filters.tags.length > 0) params.append("tags", filters.tags.join(','));
         if (filters.minPrice) params.append("minPrice", filters.minPrice);
         if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
         params.append("limit", ITEMS_PER_PAGE.toString());
@@ -98,7 +103,7 @@ export default function Browse() {
     };
 
     fetchResults();
-  }, [initialized, filters.category, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
+  }, [initialized, filters.category, filters.tags, searchQuery, filters.minPrice, filters.maxPrice, filters.sortBy]);
 
   const loadMoreResults = async () => {
     if (!searchResults || isLoadingMore) return;
@@ -108,6 +113,7 @@ export default function Browse() {
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
       if (filters.category) params.append("category", filters.category);
+      if (filters.tags && filters.tags.length > 0) params.append("tags", filters.tags.join(','));
       if (filters.minPrice) params.append("minPrice", filters.minPrice);
       if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
       params.append("limit", ITEMS_PER_PAGE.toString());
