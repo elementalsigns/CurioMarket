@@ -319,70 +319,78 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="glass-effect">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-foreground/60 text-sm">Total Sales</p>
-                  <p className="text-2xl font-bold text-green-500" data-testid="analytics-sales">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground/60 text-sm truncate">Total Sales</p>
+                  <p className="text-2xl font-bold text-green-500 truncate" data-testid="analytics-sales">
                     {sellerStats.totalSales || 0}
                   </p>
-                  <p className="text-xs text-green-500/70">
+                  <p className="text-xs text-green-500/70 truncate">
                     Completed orders
                   </p>
                 </div>
-                <DollarSign className="text-green-500" size={24} />
+                <div className="flex-shrink-0">
+                  <DollarSign className="text-green-500" size={24} />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-effect">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-foreground/60 text-sm">Avg Rating</p>
-                  <p className="text-2xl font-bold text-yellow-500" data-testid="analytics-rating">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground/60 text-sm truncate">Avg Rating</p>
+                  <p className="text-2xl font-bold text-yellow-500 truncate" data-testid="analytics-rating">
                     {sellerStats.averageRating ? sellerStats.averageRating.toFixed(1) : '0.0'}
                   </p>
-                  <p className="text-xs text-yellow-500/70">
+                  <p className="text-xs text-yellow-500/70 truncate">
                     {sellerStats.totalReviews || 0} reviews
                   </p>
                 </div>
-                <Star className="text-yellow-500" size={24} />
+                <div className="flex-shrink-0">
+                  <Star className="text-yellow-500" size={24} />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-effect">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-foreground/60 text-sm">Customer Satisfaction</p>
-                  <p className="text-2xl font-bold text-purple-500" data-testid="analytics-satisfaction">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground/60 text-sm truncate">Customer Satisfaction</p>
+                  <p className="text-2xl font-bold text-purple-500 truncate" data-testid="analytics-satisfaction">
                     {sellerStats.averageRating >= 4.5 ? 'Excellent' : 
                      sellerStats.averageRating >= 4.0 ? 'Great' : 
                      sellerStats.averageRating >= 3.0 ? 'Good' : 'Building'}
                   </p>
-                  <p className="text-xs text-purple-500/70">
+                  <p className="text-xs text-purple-500/70 truncate">
                     Based on reviews
                   </p>
                 </div>
-                <TrendingUp className="text-purple-500" size={24} />
+                <div className="flex-shrink-0">
+                  <TrendingUp className="text-purple-500" size={24} />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-effect">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-foreground/60 text-sm">Total Favorites</p>
-                  <p className="text-2xl font-bold text-purple-500" data-testid="analytics-favorites">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground/60 text-sm truncate">Total Favorites</p>
+                  <p className="text-2xl font-bold text-purple-500 truncate" data-testid="analytics-favorites">
                     {sellerStats.totalFavorites || 0}
                   </p>
-                  <p className="text-xs text-purple-500/70">
+                  <p className="text-xs text-purple-500/70 truncate">
                     People who favorited
                   </p>
                 </div>
-                <Heart className="text-purple-500" size={24} />
+                <div className="flex-shrink-0">
+                  <Heart className="text-purple-500" size={24} />
+                </div>
               </div>
             </CardContent>
           </Card>
