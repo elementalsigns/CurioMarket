@@ -679,25 +679,12 @@ export default function EventsPage() {
                                 <h3 className="text-xl font-serif font-bold mb-2" data-testid={`event-title-${event.id}`}>
                                   {event.title}
                                 </h3>
-                                <div className="flex items-start gap-3">
-                                  <Badge 
-                                    variant={event.status === 'published' ? 'default' : 'secondary'}
-                                    data-testid={`event-status-${event.id}`}
-                                  >
-                                    {event.status}
-                                  </Badge>
-                                  {/* Event Image */}
-                                  {event.imageUrl && (
-                                    <div className="w-16 flex-shrink-0">
-                                      <img 
-                                        src={event.imageUrl} 
-                                        alt={`${event.title} event image`}
-                                        className="w-full h-12 object-cover rounded-lg shadow-md"
-                                        data-testid={`event-image-${event.id}`}
-                                      />
-                                    </div>
-                                  )}
-                                </div>
+                                <Badge 
+                                  variant={event.status === 'published' ? 'default' : 'secondary'}
+                                  data-testid={`event-status-${event.id}`}
+                                >
+                                  {event.status}
+                                </Badge>
                               </div>
                               
                               <p className="text-foreground/80 mb-4" data-testid={`event-description-${event.id}`}>
@@ -826,6 +813,18 @@ export default function EventsPage() {
                                 </div>
                               )}
                             </div>
+                            
+                            {/* Event Image - Right Side */}
+                            {event.imageUrl && (
+                              <div className="md:w-32 md:flex-shrink-0">
+                                <img 
+                                  src={event.imageUrl} 
+                                  alt={`${event.title} event image`}
+                                  className="w-full h-20 md:h-24 object-cover rounded-lg shadow-md"
+                                  data-testid={`event-image-${event.id}`}
+                                />
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
