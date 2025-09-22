@@ -72,6 +72,13 @@ export default function EventsPage() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (data: CreateEventFormData) => {
+      // Debug: Log form values to identify date issue
+      console.log("=== FRONTEND EVENT FORM DEBUG ===");
+      console.log("Raw form data:", data);
+      console.log("eventDate value:", data.eventDate);
+      console.log("endDate value:", data.endDate);
+      console.log("===========================");
+      
       const eventData = {
         ...data,
         price: data.price ? parseFloat(data.price) : null,
