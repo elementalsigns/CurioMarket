@@ -7330,12 +7330,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Is tags array?", Array.isArray(req.body.tags));
       console.log("============================");
       
-      // Helper to convert dates
+      // Helper to convert dates - handle datetime-local inputs properly
       const toDate = (v: any): Date => {
         if (!v || String(v).trim() === "") {
           throw new Error("Date is required");
         }
-        const d = new Date(v);
+        // For datetime-local strings, ensure they're treated as local time
+        const dateStr = String(v).trim();
+        // If it's a datetime-local format (YYYY-MM-DDTHH:mm), append seconds to avoid timezone issues
+        const normalizedStr = dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/) ? `${dateStr}:00` : dateStr;
+        const d = new Date(normalizedStr);
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }
@@ -7346,7 +7350,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!v || String(v).trim() === "") {
           return null;
         }
-        const d = new Date(v);
+        // For datetime-local strings, ensure they're treated as local time  
+        const dateStr = String(v).trim();
+        const normalizedStr = dateStr.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/) ? `${dateStr}:00` : dateStr;
+        const d = new Date(normalizedStr);
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }
