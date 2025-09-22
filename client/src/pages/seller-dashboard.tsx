@@ -940,7 +940,7 @@ export default function SellerDashboard() {
           </TabsList>
 
           {/* Analytics Tab - NEW COMPREHENSIVE ANALYTICS SECTION */}
-          <TabsContent value="analytics" className="space-y-6 pb-16 sm:pb-0 mt-6" data-testid="content-analytics">
+          <TabsContent value="analytics" className="space-y-6 pb-16 sm:pb-0 pt-16" data-testid="content-analytics">
             <AnalyticsOverview sellerId={seller.id} />
           </TabsContent>
 
