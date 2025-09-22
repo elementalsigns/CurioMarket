@@ -323,7 +323,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground/60 text-sm truncate">Total Sales</p>
                   <p className="text-2xl font-bold text-green-500 truncate" data-testid="analytics-sales">
-                    {sellerStats.totalSales || 0}
+                    {(sellerStats as any)?.totalSales || 0}
                   </p>
                   <p className="text-xs text-green-500/70 truncate">
                     Completed orders
@@ -342,10 +342,10 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground/60 text-sm truncate">Avg Rating</p>
                   <p className="text-2xl font-bold text-yellow-500 truncate" data-testid="analytics-rating">
-                    {sellerStats.averageRating ? sellerStats.averageRating.toFixed(1) : '0.0'}
+                    {(sellerStats as any)?.averageRating ? (sellerStats as any).averageRating.toFixed(1) : '0.0'}
                   </p>
                   <p className="text-xs text-yellow-500/70 truncate">
-                    {sellerStats.totalReviews || 0} reviews
+                    {(sellerStats as any)?.totalReviews || 0} reviews
                   </p>
                 </div>
                 <div className="flex-shrink-0">
@@ -361,9 +361,9 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground/60 text-sm truncate">Customer Satisfaction</p>
                   <p className="text-2xl font-bold text-purple-500 truncate" data-testid="analytics-satisfaction">
-                    {sellerStats.averageRating >= 4.5 ? 'Excellent' : 
-                     sellerStats.averageRating >= 4.0 ? 'Great' : 
-                     sellerStats.averageRating >= 3.0 ? 'Good' : 'Building'}
+                    {(sellerStats as any)?.averageRating >= 4.5 ? 'Excellent' : 
+                     (sellerStats as any)?.averageRating >= 4.0 ? 'Great' : 
+                     (sellerStats as any)?.averageRating >= 3.0 ? 'Good' : 'Building'}
                   </p>
                   <p className="text-xs text-purple-500/70 truncate">
                     Based on reviews
@@ -382,7 +382,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground/60 text-sm truncate">Total Favorites</p>
                   <p className="text-2xl font-bold text-purple-500 truncate" data-testid="analytics-favorites">
-                    {sellerStats.totalFavorites || 0}
+                    {(sellerStats as any)?.totalFavorites || 0}
                   </p>
                   <p className="text-xs text-purple-500/70 truncate">
                     People who favorited
@@ -401,7 +401,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
                 <div>
                   <p className="text-foreground/60 text-sm">Total Views</p>
                   <p className="text-2xl font-bold text-orange-500" data-testid="analytics-views">
-                    {sellerStats.totalViews || 0}
+                    {(sellerStats as any)?.totalViews || 0}
                   </p>
                   <p className="text-xs text-orange-500/70">
                     Item page views
@@ -431,10 +431,10 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
               <div>
                 <p className="text-foreground/60 text-sm">Total Revenue</p>
                 <p className="text-2xl font-bold text-green-500" data-testid="analytics-revenue">
-                  ${analytics.totalRevenue ? analytics.totalRevenue.toFixed(2) : '0.00'}
+                  ${(analytics as any)?.totalRevenue ? (analytics as any).totalRevenue.toFixed(2) : '0.00'}
                 </p>
                 <p className="text-xs text-green-500/70">
-                  Net: ${analytics.netRevenue ? analytics.netRevenue.toFixed(2) : '0.00'}
+                  Net: ${(analytics as any)?.netRevenue ? (analytics as any).netRevenue.toFixed(2) : '0.00'}
                 </p>
               </div>
               <DollarSign className="text-green-500" size={24} />
@@ -448,10 +448,10 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
               <div>
                 <p className="text-foreground/60 text-sm">Total Orders</p>
                 <p className="text-2xl font-bold text-blue-500" data-testid="analytics-orders">
-                  {analytics.totalOrders || 0}
+                  {(analytics as any)?.totalOrders || 0}
                 </p>
                 <p className="text-xs text-blue-500/70">
-                  Avg: ${analytics.averageOrderValue ? analytics.averageOrderValue.toFixed(2) : '0.00'}
+                  Avg: ${(analytics as any)?.averageOrderValue ? (analytics as any).averageOrderValue.toFixed(2) : '0.00'}
                 </p>
               </div>
               <Package className="text-blue-500" size={24} />
@@ -465,10 +465,10 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
               <div>
                 <p className="text-foreground/60 text-sm">Total Views</p>
                 <p className="text-2xl font-bold text-purple-500" data-testid="analytics-views">
-                  {analytics.totalViews ? analytics.totalViews.toLocaleString() : '0'}
+                  {(analytics as any)?.totalViews ? (analytics as any).totalViews.toLocaleString() : '0'}
                 </p>
                 <p className="text-xs text-purple-500/70">
-                  {analytics.conversionRate ? analytics.conversionRate.toFixed(2) : '0.0'}% conversion
+                  {(analytics as any)?.conversionRate ? (analytics as any).conversionRate.toFixed(2) : '0.0'}% conversion
                 </p>
               </div>
               <Eye className="text-purple-500" size={24} />
@@ -482,10 +482,10 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
               <div>
                 <p className="text-foreground/60 text-sm">Engagement</p>
                 <p className="text-2xl font-bold text-orange-500" data-testid="analytics-favorites">
-                  {analytics.totalFavorites || 0}
+                  {(analytics as any)?.totalFavorites || 0}
                 </p>
                 <p className="text-xs text-orange-500/70">
-                  {analytics.totalFollowers || 0} followers
+                  {(analytics as any)?.totalFollowers || 0} followers
                 </p>
               </div>
               <Star className="text-orange-500" size={24} />
@@ -495,7 +495,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
       </div>
 
       {/* Revenue Trend Chart */}
-      {analytics.revenueByDay && Array.isArray(analytics.revenueByDay) && analytics.revenueByDay.length > 0 && (
+      {(analytics as any)?.revenueByDay && Array.isArray((analytics as any).revenueByDay) && (analytics as any).revenueByDay.length > 0 && (
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -505,7 +505,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {analytics.revenueByDay.map((day: any, index: number) => (
+              {(analytics as any).revenueByDay.map((day: any, index: number) => (
                 <div key={day.date} className="flex items-center justify-between p-2 hover:bg-muted/20 rounded">
                   <div>
                     <p className="font-medium">{new Date(day.date).toLocaleDateString()}</p>
@@ -522,7 +522,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
       )}
 
       {/* Top Performing Listings */}
-      {analytics.topListings && Array.isArray(analytics.topListings) && analytics.topListings.length > 0 && (
+      {(analytics as any)?.topListings && Array.isArray((analytics as any).topListings) && (analytics as any).topListings.length > 0 && (
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -532,7 +532,7 @@ function AnalyticsOverview({ sellerId }: { sellerId: string }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {analytics.topListings.map((item: any, index: number) => (
+              {(analytics as any).topListings.map((item: any, index: number) => (
                 <div key={item.listing.id} className="flex items-center justify-between p-4 border border-border/20 rounded-lg">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
@@ -2011,14 +2011,14 @@ function ShopProfileManager({ seller }: { seller: any }) {
                   previewData={{
                     shopName: profileForm.watch("shopName") || seller?.shopName,
                     bio: profileForm.watch("bio") || seller?.bio,
-                    announcement: profileForm.watch("announcement") || seller?.announcement,
+                    announcement: profileForm.watch("announcement") || (seller as any)?.announcement,
                     location: profileForm.watch("location") || seller?.location,
                     policies: profileForm.watch("policies") || seller?.policies,
                     shippingInfo: profileForm.watch("shippingInfo") || seller?.shippingInfo,
                     returnPolicy: profileForm.watch("returnPolicy") || seller?.returnPolicy,
                     bannerImageUrl: bannerUrl || seller?.bannerImageUrl,
                     avatarImageUrl: avatarUrl || seller?.avatarImageUrl,
-                  }}
+                  } as any}
                 />
               </div>
             </DialogContent>
@@ -2410,7 +2410,7 @@ function PayoutTracker({ sellerId }: { sellerId: string }) {
     );
   }
 
-  const stripeData = payoutData?.stripeData;
+  const stripeData = (payoutData as any)?.stripeData;
 
   if (!stripeData) {
     return (
