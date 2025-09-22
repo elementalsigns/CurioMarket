@@ -7366,10 +7366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!v || String(v).trim() === "") {
           throw new Error("Date is required");
         }
-        // Treat datetime-local as UTC to prevent timezone conversion
-        const dateStr = String(v).trim();
-        const utcDateStr = dateStr.includes('Z') ? dateStr : dateStr + 'Z';
-        const d = new Date(utcDateStr);
+        const d = new Date(String(v).trim());
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }
@@ -7380,10 +7377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!v || String(v).trim() === "") {
           return null;
         }
-        // Treat datetime-local as UTC to prevent timezone conversion
-        const dateStr = String(v).trim();
-        const utcDateStr = dateStr.includes('Z') ? dateStr : dateStr + 'Z';
-        const d = new Date(utcDateStr);
+        const d = new Date(String(v).trim());
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date: ${v}`);
         }

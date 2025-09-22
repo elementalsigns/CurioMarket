@@ -116,12 +116,10 @@ export default function EventsPage() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (data: CreateEventFormData) => {
-      const toUtc = (s?: string | null) => (s ? new Date(s).toISOString() : null);
-      
       const eventData = {
         ...data,
-        eventDate: toUtc(data.eventDate),
-        endDate: toUtc(data.endDate || null),
+        eventDate: data.eventDate,
+        endDate: data.endDate || null,
         price: data.price ? parseFloat(data.price) : null,
         maxAttendees: data.maxAttendees ? parseInt(data.maxAttendees) : null,
         tags: data.tags ? data.tags.split(",").map(tag => tag.trim()).filter(Boolean) : [],
