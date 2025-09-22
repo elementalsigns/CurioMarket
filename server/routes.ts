@@ -4039,7 +4039,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!uuidPattern.test(category)) {
           // It's a slug, convert to ID
           const categoryRecord = await storage.getCategoryBySlug(category);
-          categoryId = categoryRecord?.id || '';
+          if (!categoryRecord) {
+            // Category slug not found, return empty results instead of all results
+            return res.json({
+              listings: [],
+              listingsTotal: 0,
+              shops: [],
+              shopsTotal: 0,
+              total: 0
+            });
+          }
+          categoryId = categoryRecord.id;
         }
       }
 
