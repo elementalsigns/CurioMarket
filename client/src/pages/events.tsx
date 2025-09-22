@@ -673,7 +673,19 @@ export default function EventsPage() {
                     {groupedEvents[date].map((event) => (
                       <Card key={event.id} className="hover:shadow-lg transition-shadow" data-testid={`event-card-${event.id}`}>
                         <CardContent className="p-6">
-                          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                            {/* Event Image */}
+                            {event.imageUrl && (
+                              <div className="md:w-48 md:flex-shrink-0">
+                                <img 
+                                  src={event.imageUrl} 
+                                  alt={`${event.title} event image`}
+                                  className="w-full h-32 md:h-36 object-cover rounded-lg shadow-md"
+                                  data-testid={`event-image-${event.id}`}
+                                />
+                              </div>
+                            )}
+                            
                             <div className="flex-1">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-xl font-serif font-bold mb-2" data-testid={`event-title-${event.id}`}>
