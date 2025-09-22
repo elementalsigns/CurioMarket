@@ -59,15 +59,54 @@ type CreateEventFormData = z.infer<typeof createEventSchema>;
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterState, setFilterState] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
   const queryClient = useQueryClient();
+
+  // Function to extract state from location string
+  const extractStateFromLocation = (location: string): string => {
+    const usStates = [
+      'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+      'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+      'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+      'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+      'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+      'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 
+      'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 
+      'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 
+      'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 
+      'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 
+      'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 
+      'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 
+      'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 
+      'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 
+      'West Virginia', 'Wisconsin', 'Wyoming'
+    ];
+
+    // Check for state abbreviations or full names in the location
+    for (const state of usStates) {
+      const statePattern = new RegExp(`\\b${state}\\b`, 'i');
+      if (statePattern.test(location)) {
+        return state.length === 2 ? state.toUpperCase() : state;
+      }
+    }
+    return '';
+  };
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["/api/events"],
     select: (data: Event[]) => data || [],
   });
+
+  // Get unique states from all events for filter dropdown
+  const availableStates = [...new Set(
+    events
+      .map(event => extractStateFromLocation(event.location))
+      .filter(state => state !== '')
+      .map(state => state.length === 2 ? state.toUpperCase() : state)
+  )].sort();
 
   // Create event mutation
   const createEventMutation = useMutation({
@@ -126,7 +165,7 @@ export default function EventsPage() {
     },
   });
 
-  // Filter events based on search and status
+  // Filter events based on search, status, and state
   const filteredEvents = events.filter((event: Event) => {
     const matchesSearch = searchTerm === "" || 
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,7 +175,13 @@ export default function EventsPage() {
     
     const matchesStatus = filterStatus === "all" || event.status === filterStatus;
     
-    return matchesSearch && matchesStatus;
+    const eventState = extractStateFromLocation(event.location);
+    const matchesState = filterState === "all" || 
+      (eventState && (eventState === filterState || 
+       (eventState.length === 2 && eventState.toUpperCase() === filterState) ||
+       (eventState.length > 2 && eventState === filterState)));
+    
+    return matchesSearch && matchesStatus && matchesState;
   });
 
   // Group events by date for calendar view
@@ -459,6 +504,17 @@ export default function EventsPage() {
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={filterState} onValueChange={setFilterState}>
+              <SelectTrigger className="w-full md:w-48" data-testid="select-state-filter">
+                <SelectValue placeholder="Filter by state" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {availableStates.map((state) => (
+                  <SelectItem key={state} value={state}>{state}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Calendar View */}
@@ -469,7 +525,7 @@ export default function EventsPage() {
                   <Calendar className="mx-auto mb-4 text-muted-foreground" size={64} />
                   <h3 className="text-xl font-semibold mb-2">No events found</h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm || filterStatus !== "all" 
+                    {searchTerm || filterStatus !== "all" || filterState !== "all"
                       ? "Try adjusting your search or filter criteria."
                       : "Be the first to host an oddities event!"
                     }
