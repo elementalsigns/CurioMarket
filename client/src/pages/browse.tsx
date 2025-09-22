@@ -164,7 +164,7 @@ export default function Browse() {
               filters={filters}
               onFiltersChange={handleFiltersChange}
               onClearFilters={() => {
-                setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
+                setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest", tags: [] });
                 setSearchQuery("");
                 setLocation('/browse');
               }}
@@ -411,7 +411,7 @@ export default function Browse() {
                   variant="outline" 
                   onClick={() => {
                     setSearchQuery("");
-                    setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest" });
+                    setFilters({ category: "", minPrice: "", maxPrice: "", sortBy: "newest", tags: [] });
                     setLocation('/browse');
                   }}
                   data-testid="button-clear-search"
