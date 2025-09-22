@@ -7327,6 +7327,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         page: parseInt(page as string),
         limit: parseInt(limit as string)
       });
+      
+      // Events already have correct field names from Drizzle
       res.json(events);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -7341,6 +7343,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!event) {
         return res.status(404).json({ error: "Event not found" });
       }
+      
+      // Event already has correct field names from Drizzle
       res.json(event);
     } catch (error) {
       console.error("Error fetching event:", error);
