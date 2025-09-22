@@ -173,6 +173,19 @@ export default function Browse() {
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
+            {/* Back to Home Button */}
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation('/')}
+                className="text-zinc-400 hover:text-white"
+                data-testid="button-home"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                Back to Home
+              </Button>
+            </div>
+
             {/* Search Bar */}
             <Card className="bg-zinc-900/50 border-zinc-800">
               <CardContent className="p-6">
