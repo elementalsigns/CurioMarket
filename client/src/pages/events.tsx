@@ -492,7 +492,7 @@ export default function EventsPage() {
                   <div className="flex items-center space-x-3">
                     <Calendar className="text-red-600" size={24} />
                     <h2 className="text-2xl font-serif font-bold" data-testid={`date-header-${date}`}>
-                      {format(new Date(date), "EEEE, MMMM d, yyyy")}
+                      {format(new Date(date + "T12:00:00"), "EEEE, MMMM d, yyyy")}
                     </h2>
                     <div className="flex-1 h-px bg-border"></div>
                   </div>
