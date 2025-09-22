@@ -37,6 +37,10 @@ const categoryImages = {
   "wholesale": {
     icon: "📦",
     image: undefined, // Can add specific image later if needed
+  },
+  "fine-art": {
+    icon: "🎨",
+    image: undefined, // Can add specific image later if needed
   }
 };
 
