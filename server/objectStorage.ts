@@ -191,6 +191,81 @@ export class ObjectStorageService {
     });
   }
 
+  // Gets the upload URL for event images
+  async getEventImageUploadURL(): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    if (!privateObjectDir) {
+      throw new Error(
+        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
+          "tool and set PRIVATE_OBJECT_DIR env var."
+      );
+    }
+
+    const eventImageId = randomUUID();
+    const fullPath = `${privateObjectDir}/event-images/${eventImageId}`;
+
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+
+    // Sign URL for PUT method with TTL
+    return signObjectURL({
+      bucketName,
+      objectName,
+      method: "PUT",
+      ttlSec: 900,
+    });
+  }
+
+  // Gets the event image file from the object path  
+  async getEventImageFile(objectPath: string): Promise<File> {
+    if (!objectPath.startsWith("/objects/event-images/")) {
+      throw new ObjectNotFoundError();
+    }
+
+    const parts = objectPath.slice(1).split("/");
+    if (parts.length < 3) {
+      throw new ObjectNotFoundError();
+    }
+
+    const imageId = parts.slice(2).join("/");
+    let imageDir = this.getPrivateObjectDir();
+    if (!imageDir.endsWith("/")) {
+      imageDir = `${imageDir}/`;
+    }
+    const objectImagePath = `${imageDir}event-images/${imageId}`;
+    const { bucketName, objectName } = parseObjectPath(objectImagePath);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const imageFile = bucket.file(objectName);
+    const [exists] = await imageFile.exists();
+    if (!exists) {
+      throw new ObjectNotFoundError();
+    }
+    return imageFile;
+  }
+
+  // Normalize event image path for serving
+  normalizeEventImagePath(rawPath: string): string {
+    if (!rawPath.startsWith("https://storage.googleapis.com/")) {
+      return rawPath;
+    }
+  
+    // Extract the path from the URL by removing query parameters and domain
+    const url = new URL(rawPath);
+    const rawObjectPath = url.pathname;
+  
+    let imageDir = this.getPrivateObjectDir();
+    if (!imageDir.endsWith("/")) {
+      imageDir = `${imageDir}/`;
+    }
+  
+    if (!rawObjectPath.startsWith(`${imageDir}event-images/`)) {
+      return rawObjectPath;
+    }
+  
+    // Extract the image ID from the path
+    const imageId = rawObjectPath.slice(`${imageDir}event-images/`.length);
+    return `/objects/event-images/${imageId}`;
+  }
+
   // Gets the review photo file from the object path.
   async getReviewPhotoFile(objectPath: string): Promise<File> {
     if (!objectPath.startsWith("/objects/review-photos/")) {

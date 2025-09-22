@@ -1883,6 +1883,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Event image upload URL
+  app.post('/api/events/image/upload-url', requireAuth, async (req: any, res) => {
+    try {
+      console.log('[EVENT-IMAGE-UPLOAD] Event image upload URL requested by user:', req.user?.claims?.sub || req.user?.id);
+      
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getEventImageUploadURL();
+      const displayURL = objectStorageService.normalizeEventImagePath(uploadURL);
+      
+      console.log('[EVENT-IMAGE-UPLOAD] Generated event image upload URL');
+      
+      res.json({ uploadURL, displayURL });
+    } catch (error) {
+      console.error("[EVENT-IMAGE-UPLOAD] Error getting event image upload URL:", error);
+      res.status(500).json({ error: "Failed to get event image upload URL" });
+    }
+  });
+
   // Update user profile including profile picture
   app.put('/api/user/profile', requireAuth, async (req: any, res) => {
     try {
@@ -5768,6 +5786,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       objectStorageService.downloadObject(photoFile, res);
     } catch (error: any) {
       console.error("Error serving review photo:", error);
+      if (error?.name === 'ObjectNotFoundError') {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Serve event images
+  app.get("/objects/event-images/:imageId(*)", async (req: any, res) => {
+    try {
+      const ObjectStorageService = (await import('./objectStorage')).ObjectStorageService;
+      const objectStorageService = new ObjectStorageService();
+      const imageFile = await objectStorageService.getEventImageFile(req.path);
+      objectStorageService.downloadObject(imageFile, res);
+    } catch (error: any) {
+      console.error("Error serving event image:", error);
       if (error?.name === 'ObjectNotFoundError') {
         return res.sendStatus(404);
       }
