@@ -676,11 +676,11 @@ export default function EventsPage() {
                           <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                             {/* Event Image */}
                             {event.imageUrl && (
-                              <div className="md:w-48 md:flex-shrink-0">
+                              <div className="md:w-32 md:flex-shrink-0">
                                 <img 
                                   src={event.imageUrl} 
                                   alt={`${event.title} event image`}
-                                  className="w-full h-32 md:h-36 object-cover rounded-lg shadow-md"
+                                  className="w-full h-20 md:h-24 object-cover rounded-lg shadow-md"
                                   data-testid={`event-image-${event.id}`}
                                 />
                               </div>
