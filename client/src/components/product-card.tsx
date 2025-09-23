@@ -247,7 +247,7 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
               </div>
               
               {listing.seller && (
-                <p className="text-sm font-medium text-gothic-red" data-testid={`product-seller-${listing.id}`}>
+                <p className="text-sm font-medium text-gothic-red truncate" data-testid={`product-seller-${listing.id}`}>
                   {listing.seller.shopName || 'Shop Name Not Set'}
                 </p>
               )}
