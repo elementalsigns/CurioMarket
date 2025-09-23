@@ -78,7 +78,7 @@ export default function CategoryGrid() {
           <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
             <div className="aspect-square bg-cover bg-center relative" style={{
               backgroundImage: `url(${category.image})`,
-              backgroundPosition: category.slug === 'wet-specimens' ? '30% center' : 'center'
+              backgroundPosition: category.slug === 'wet-specimens' ? '15% center' : 'center'
             }}>
               <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
               <div className="absolute inset-0 flex items-center justify-center">
