@@ -76,7 +76,10 @@ export default function CategoryGrid() {
       {categories.map((category: any) => (
         <Link key={category.id} to={`/browse?category=${category.slug}`}>
           <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
-            <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
+            <div className="aspect-square bg-cover bg-center relative" style={{
+              backgroundImage: `url(${category.image})`,
+              backgroundPosition: category.slug === 'wet-specimens' ? '40% center' : 'center'
+            }}>
               <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white">
