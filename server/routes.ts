@@ -7745,6 +7745,11 @@ This message was sent via the Curio Market contact form.
     const { width, height } = req.params;
     const { text = "Image", bg = "666666", color = "white" } = req.query;
     
+    // Special case: If this is the taxidermy crow image, serve the uploaded mouse image
+    if (text && decodeURIComponent(text as string).includes("Vintage+Taxidermy+Crow")) {
+      return res.sendFile(path.resolve("attached_assets/phonto_1758643407429.jpg"));
+    }
+    
     const w = parseInt(width) || 400;
     const h = parseInt(height) || 300;
     const bgColor = `#${bg.replace('#', '')}`;
