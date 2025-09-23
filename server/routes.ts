@@ -5821,6 +5821,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve general object entities (profile pics, banners, etc.)
   app.get("/objects/:objectPath(*)", async (req: any, res) => {
+    // Check for local files first (for development/uploaded images)
+    if (req.params.objectPath.startsWith('listings/')) {
+      const localPath = path.resolve('public', req.params.objectPath);
+      try {
+        const fs = await import('fs');
+        if (fs.existsSync(localPath)) {
+          return res.sendFile(localPath);
+        }
+      } catch (error) {
+        console.error("Error serving local file:", error);
+      }
+    }
+    
     try {
       const ObjectStorageService = (await import('./objectStorage')).ObjectStorageService;
       const objectStorageService = new ObjectStorageService();
@@ -7744,11 +7757,6 @@ This message was sent via the Curio Market contact form.
   app.get("/api/placeholder/:width/:height", (req: any, res) => {
     const { width, height } = req.params;
     const { text = "Image", bg = "666666", color = "white" } = req.query;
-    
-    // Special case: If this is the taxidermy crow image, serve the uploaded mouse image
-    if (text && decodeURIComponent(text as string).includes("Vintage+Taxidermy+Crow")) {
-      return res.sendFile(path.resolve("attached_assets/phonto_1758643407429.jpg"));
-    }
     
     const w = parseInt(width) || 400;
     const h = parseInt(height) || 300;
