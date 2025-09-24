@@ -11,6 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { API_BASE_URL } from './config';
 
 const { width } = Dimensions.get('window');
 
@@ -30,8 +31,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   // This connects to your existing Curio Market backend
-  // Change this to your actual domain when testing on device
-  const API_BASE_URL = 'http://localhost:5000';
 
   useEffect(() => {
     fetchProducts();
