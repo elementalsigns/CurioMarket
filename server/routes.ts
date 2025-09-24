@@ -4063,11 +4063,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // If there's a general query, check if it matches any category names
+      let matchingCategoryIds: string[] = [];
+      if (q && typeof q === 'string' && q.trim()) {
+        const categories = await storage.getCategoriesByName(q.trim());
+        matchingCategoryIds = categories.map((cat: any) => cat.id);
+      }
+
       // Search for both products and shops
       const [productResult, shopResult] = await Promise.all([
         // Search listings/products
         storage.searchListings(q as string, {
           categoryId,
+          categoryIds: matchingCategoryIds,
           tags: parsedTags,
           limit: parseInt(limit as string),
           offset: parseInt(offset as string)

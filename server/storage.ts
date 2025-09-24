@@ -81,11 +81,12 @@ export interface IStorage {
   
   // Category operations
   getCategories(): Promise<Category[]>;
+  getCategoriesByName(query: string): Promise<Category[]>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
   
   // Listing operations
   createListing(listing: InsertListing): Promise<Listing>;
-  getListings(filters?: { categoryId?: string; sellerId?: string; search?: string; tags?: string[]; limit?: number; offset?: number }): Promise<{ listings: Listing[]; total: number }>;
+  getListings(filters?: { categoryId?: string; categoryIds?: string[]; sellerId?: string; search?: string; tags?: string[]; limit?: number; offset?: number }): Promise<{ listings: Listing[]; total: number }>;
   getListing(id: string): Promise<Listing | undefined>;
   getListingBySlug(slug: string): Promise<Listing | undefined>;
   updateListing(id: string, updates: Partial<InsertListing>): Promise<Listing>;
@@ -422,6 +423,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(categories).orderBy(asc(categories.name));
   }
 
+  async getCategoriesByName(query: string): Promise<Category[]> {
+    return await db
+      .select()
+      .from(categories)
+      .where(
+        or(
+          ilike(categories.name, `%${query}%`),
+          ilike(categories.slug, `%${query}%`)
+        )
+      )
+      .orderBy(asc(categories.name));
+  }
+
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
     const [category] = await db.select().from(categories).where(eq(categories.slug, slug));
     return category;
@@ -467,6 +481,7 @@ export class DatabaseStorage implements IStorage {
 
   async getListings(filters?: { 
     categoryId?: string; 
+    categoryIds?: string[];
     sellerId?: string; 
     search?: string; 
     tags?: string[];
@@ -480,6 +495,11 @@ export class DatabaseStorage implements IStorage {
     if (filters?.categoryId) {
       // Check if the category ID is in the category_ids array
       conditions.push(sql`${filters.categoryId} = ANY(${listings.categoryIds})`);
+    }
+
+    if (filters?.categoryIds && filters.categoryIds.length > 0) {
+      // Check if any of the category IDs are in the category_ids array
+      conditions.push(sql`${listings.categoryIds} && ${filters.categoryIds}`);
     }
     
     if (filters?.sellerId) {
@@ -1091,11 +1111,11 @@ export class DatabaseStorage implements IStorage {
     const totalViews = sellerListings.reduce((sum, listing) => sum + (listing.views || 0), 0);
 
     return {
-      totalSales: salesResult?.totalSales || 0,
+      totalSales: Number(salesResult?.totalSales) || 0,
       averageRating: Number(reviewsResult?.averageRating) || 0,
-      totalReviews: reviewsResult?.totalReviews || 0,
-      activeListings: listingsResult?.activeListings || 0,
-      totalFavorites: favoritesResult?.totalFavorites || 0,
+      totalReviews: Number(reviewsResult?.totalReviews) || 0,
+      activeListings: Number(listingsResult?.activeListings) || 0,
+      totalFavorites: Number(favoritesResult?.totalFavorites) || 0,
       totalViews: totalViews || 0,
     };
   }
