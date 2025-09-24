@@ -79,7 +79,7 @@ export default function Landing() {
       {/* Announcement Bar - Black & Red Theme */}
       <div className="bg-primary text-primary-foreground text-center py-2 px-4">
         <p className="text-sm font-medium">
-          Free shipping on orders over $75 • Support independent collectors and artists
+          Many items over $75 ship for free
         </p>
       </div>
       {/* Hero Section - Foxblood Noir Style */}
