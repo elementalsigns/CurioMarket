@@ -54,6 +54,7 @@ import ShopPage from "@/pages/shop";
 import OrderConfirmation from "@/pages/order-confirmation";
 import OrderDetails from "@/pages/order-details";
 import Messages from "@/pages/messages";
+import MobilePage from "@/pages/mobile";
 
 // Authentication guard component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -210,6 +211,7 @@ function Router() {
           <Route path="/prohibited" component={ProhibitedItemsStandalone} />
           <Route path="/cookies" component={CookiesPolicyStandalone} />
           <Route path="/events" component={Events} />
+          <Route path="/mobile" component={MobilePage} />
           <Route path="/signin" component={SignInOnly} />
           <Route path="/signup" component={SignIn} />
           <Route path="/incognito-auth" component={IncognitoAuth} />
