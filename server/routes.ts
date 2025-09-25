@@ -4187,6 +4187,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Listing not found" });
       }
 
+      console.log(`[SIMILAR] Current listing ${listingId} tags:`, currentListing.tags);
+
       // Find similar items based on tags and category
       const result = await storage.getListings({
         tags: currentListing.tags || undefined,
@@ -4196,10 +4198,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         state: 'published'
       });
 
+      console.log(`[SIMILAR] Found ${result.listings.length} potential similar items`);
+
       // Filter out the current listing from results
       const similarListings = result.listings
         .filter(listing => listing.id !== listingId)
         .slice(0, parseInt(limit as string)); // Limit to requested number
+
+      console.log(`[SIMILAR] After filtering: ${similarListings.length} similar items`);
 
       // Add images to each listing
       const listingsWithImages = await Promise.all(
@@ -4209,7 +4215,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
 
-      res.json(listingsWithImages);
+      res.json({
+        debug: {
+          currentListingId: listingId,
+          currentListingTags: currentListing.tags,
+          potentialMatches: result.listings.length,
+          afterFiltering: similarListings.length,
+          categoryId: currentListing.categoryIds?.[0]
+        },
+        items: listingsWithImages
+      });
     } catch (error) {
       console.error("Error fetching similar listings:", error);
       res.status(500).json({ error: "Failed to fetch similar listings" });
