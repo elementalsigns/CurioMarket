@@ -4175,6 +4175,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get similar items based on tags and category
+  app.get('/api/listings/:id/similar', async (req, res) => {
+    try {
+      const { limit = 8 } = req.query;
+      const listingId = req.params.id;
+      
+      // Get the current listing first
+      const currentListing = await storage.getListing(listingId);
+      if (!currentListing) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+
+      // Find similar items based on tags and category
+      const result = await storage.getListings({
+        tags: currentListing.tags,
+        categoryId: currentListing.categoryIds?.[0], // Use first category if available
+        limit: parseInt(limit as string) + 1, // Get one extra to exclude current item
+        offset: 0,
+        state: 'published'
+      });
+
+      // Filter out the current listing from results
+      const similarListings = result.listings
+        .filter(listing => listing.id !== listingId)
+        .slice(0, parseInt(limit as string)); // Limit to requested number
+
+      // Add images to each listing
+      const listingsWithImages = await Promise.all(
+        similarListings.map(async (listing) => {
+          const images = await storage.getListingImages(listing.id);
+          return { ...listing, images };
+        })
+      );
+
+      res.json(listingsWithImages);
+    } catch (error) {
+      console.error("Error fetching similar listings:", error);
+      res.status(500).json({ error: "Failed to fetch similar listings" });
+    }
+  });
+
   // Parameterized search route for messaging system
   app.get('/api/search/:searchTerm', async (req, res) => {
     try {
