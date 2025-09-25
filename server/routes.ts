@@ -2103,17 +2103,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Normalize slug
       const normalizedSlug = slug?.toLowerCase().trim();
       
-      // Check if slug format is valid and not reserved
-      if (!storage.validateShopSlug(normalizedSlug)) {
+      // Detailed validation with specific error messages
+      if (!normalizedSlug || normalizedSlug.length < 3 || normalizedSlug.length > 30) {
         return res.json({ 
           available: false, 
-          error: "Invalid format or reserved word" 
+          error: "Must be 3-30 characters long" 
+        });
+      }
+      
+      // Check for UUID pattern
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedSlug)) {
+        return res.json({ 
+          available: false, 
+          error: "Cannot use UUID format" 
+        });
+      }
+      
+      // Check format (alphanumeric with hyphens)
+      if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(normalizedSlug)) {
+        return res.json({ 
+          available: false, 
+          error: "Only letters, numbers, and hyphens allowed. Must start and end with letter or number." 
+        });
+      }
+      
+      // Check reserved words (exact matches only)
+      const reservedWords = [
+        'admin', 'api', 'app', 'dashboard', 'shop', 'seller', 'buy', 'sell',
+        'login', 'logout', 'register', 'signup', 'account', 'profile', 'settings',
+        'help', 'support', 'terms', 'privacy', 'about', 'contact', 'www', 'mail',
+        'email', 'ftp', 'blog', 'news', 'forum', 'store', 'cart', 'checkout',
+        'payment', 'billing', 'order', 'orders', 'category', 'categories',
+        'search', 'browse', 'featured', 'new', 'popular', 'trending', 'auth',
+        'user', 'users'
+      ];
+      
+      if (reservedWords.includes(normalizedSlug)) {
+        return res.json({ 
+          available: false, 
+          error: `"${normalizedSlug}" is a reserved word. Please choose a different name.` 
         });
       }
 
       // Check availability in database
       const isAvailable = await storage.isShopSlugAvailable(normalizedSlug);
-      res.json({ available: isAvailable });
+      if (!isAvailable) {
+        return res.json({ 
+          available: false, 
+          error: "This custom URL is already taken. Please choose a different one." 
+        });
+      }
+      
+      res.json({ available: true });
     } catch (error: any) {
       console.error("Error checking slug availability:", error);
       res.status(500).json({ error: "Failed to check availability" });

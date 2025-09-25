@@ -329,7 +329,7 @@ export class DatabaseStorage implements IStorage {
     // Must match valid slug pattern
     if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) return false;
     
-    // Reserved words that cannot be used as shop slugs
+    // Reserved words that cannot be used as EXACT shop slugs
     const reservedWords = [
       'admin', 'api', 'app', 'dashboard', 'shop', 'seller', 'buy', 'sell',
       'login', 'logout', 'register', 'signup', 'account', 'profile', 'settings',
@@ -340,6 +340,7 @@ export class DatabaseStorage implements IStorage {
       'user', 'users'
     ];
     
+    // Use exact match (equality) instead of substring check
     return !reservedWords.includes(slug.toLowerCase());
   }
 
