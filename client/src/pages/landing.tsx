@@ -131,7 +131,7 @@ export default function Landing() {
                 <span className="text-sm text-foreground/60">Popular:</span>
                 {[
                   { name: 'Taxidermy', slug: 'taxidermy' },
-                  { name: 'Vintage Medical', slug: 'vintage-medical' },
+                  { name: 'Vintage', slug: 'vintage' },
                   { name: 'Wet Specimens', slug: 'wet-specimens' },
                   { name: 'Bones & Skulls', slug: 'bones-skulls' }
                 ].map((tag) => (
