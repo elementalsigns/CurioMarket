@@ -23,24 +23,43 @@ export default function MobilePage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('[MOBILE] Starting fetch from /api/listings/featured');
+      
       const response = await fetch('/api/listings/featured');
+      console.log('[MOBILE] Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch products');
+        throw new Error(`HTTP ${response.status}: Failed to fetch products`);
       }
       
       const data = await response.json();
-      setProducts(data);
+      console.log('[MOBILE] Received data:', data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setProducts(data);
+        console.log('[MOBILE] Set products successfully, count:', data.length);
+      } else {
+        console.warn('[MOBILE] Data is not an array:', data);
+        setProducts([]);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      console.error('Error fetching products:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[MOBILE] Error fetching products:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
+      console.log('[MOBILE] Fetch completed, loading set to false');
     }
   };
 
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+  const formatPrice = (price: number | string | undefined | null) => {
+    const numPrice = typeof price === 'number' ? price : parseFloat(String(price || 0));
+    if (isNaN(numPrice)) {
+      return '$0.00';
+    }
+    return `$${numPrice.toFixed(2)}`;
   };
 
   if (loading) {
