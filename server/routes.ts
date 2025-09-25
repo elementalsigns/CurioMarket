@@ -4189,7 +4189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find similar items based on tags and category
       const result = await storage.getListings({
-        tags: currentListing.tags,
+        tags: currentListing.tags || undefined,
         categoryId: currentListing.categoryIds?.[0], // Use first category if available
         limit: parseInt(limit as string) + 1, // Get one extra to exclude current item
         offset: 0,
