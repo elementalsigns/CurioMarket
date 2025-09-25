@@ -867,7 +867,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" data-testid="stats-cards">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8" data-testid="stats-cards">
           <Card className="glass-effect">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -888,7 +888,7 @@ export default function SellerDashboard() {
                 <div>
                   <p className="text-foreground/60 text-sm">Active Listings</p>
                   <p className="text-2xl font-bold text-gothic-purple" data-testid="stat-active-listings">
-                    {listings.filter((l: any) => l.state === 'published').length}
+                    {stats.activeListings}
                   </p>
                 </div>
                 <Package className="text-gothic-purple" size={24} />
@@ -906,6 +906,20 @@ export default function SellerDashboard() {
                   </p>
                 </div>
                 <Users className="text-yellow-500/60" size={24} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-effect">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-foreground/60 text-sm">Total Views</p>
+                  <p className="text-2xl font-bold text-blue-500" data-testid="stat-total-views">
+                    {stats.totalViews}
+                  </p>
+                </div>
+                <Eye className="text-blue-500" size={24} />
               </div>
             </CardContent>
           </Card>
