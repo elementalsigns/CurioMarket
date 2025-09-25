@@ -543,7 +543,7 @@ export class DatabaseStorage implements IStorage {
       // Normalize tags to lowercase for case-insensitive matching
       const normalizedTags = filters.tags.map(tag => tag.toLowerCase());
       conditions.push(
-        sql`${listings.tags} && ${normalizedTags}`
+        sql`${listings.tags} && ARRAY[${sql.join(normalizedTags.map(tag => sql`${tag}`), sql`, `)}]`
       );
     }
 
