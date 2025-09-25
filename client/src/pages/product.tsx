@@ -46,11 +46,6 @@ export default function Product() {
     enabled: !!user,
   }) as { data: any[] };
 
-  const { data: similarItems = [] } = useQuery({
-    queryKey: ["/api/listings", listing?.id, "similar"],
-    enabled: !!listing?.id,
-    queryFn: () => fetch(`/api/listings/${listing.id}/similar?limit=8`).then(res => res.json()),
-  });
 
   const isFavorite = Array.isArray(favorites) && favorites.includes(listing?.id);
 
@@ -553,55 +548,6 @@ export default function Product() {
           </div>
         )}
 
-        {/* Similar Items Section */}
-        {similarItems.length > 0 && (
-          <div className="mt-16" data-testid="similar-items-section">
-            <h2 className="text-2xl font-serif font-bold mb-6">You may also like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {similarItems.map((item: any) => (
-                <Card key={item.id} className="glass-effect group hover:ring-1 hover:ring-red-600 transition-all" data-testid={`similar-item-${item.id}`}>
-                  <CardContent className="p-0">
-                    <div className="aspect-square relative overflow-hidden rounded-t-lg">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 z-10 text-white bg-black/50 hover:bg-black/70 rounded-full p-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          // Handle favorite logic here if needed
-                        }}
-                      >
-                        <Heart size={16} />
-                      </Button>
-                      <a href={`/product/${item.slug}`} className="block h-full">
-                        {item.images?.[0]?.url ? (
-                          <img
-                            src={item.images[0].url}
-                            alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-4xl">
-                            📦
-                          </div>
-                        )}
-                      </a>
-                    </div>
-                    <div className="p-4">
-                      <a href={`/product/${item.slug}`} className="block hover:text-red-400 transition-colors">
-                        <h3 className="font-medium text-sm line-clamp-2 mb-2">{item.title}</h3>
-                      </a>
-                      <div className="flex items-center justify-between">
-                        <div className="text-lg font-bold text-red-600">${item.price}</div>
-                        <div className="text-xs text-foreground/60">{item.seller?.shopName || 'Shop'}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <Footer />
