@@ -320,14 +320,17 @@ export class DatabaseStorage implements IStorage {
 
   // Shop slug validation
   validateShopSlug(slug: string): boolean {
+    // Normalize slug (same as slug availability check)
+    const normalizedSlug = slug?.toLowerCase().trim();
+    
     // Must be 3-30 characters
-    if (!slug || slug.length < 3 || slug.length > 30) return false;
+    if (!normalizedSlug || normalizedSlug.length < 3 || normalizedSlug.length > 30) return false;
     
     // Must not match UUID pattern to avoid collisions
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) return false;
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(normalizedSlug)) return false;
     
     // Must match valid slug pattern
-    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) return false;
+    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(normalizedSlug)) return false;
     
     // Reserved words that cannot be used as EXACT shop slugs
     const reservedWords = [
@@ -341,7 +344,7 @@ export class DatabaseStorage implements IStorage {
     ];
     
     // Use exact match (equality) instead of substring check
-    return !reservedWords.includes(slug.toLowerCase());
+    return !reservedWords.includes(normalizedSlug);
   }
 
   async isShopSlugAvailable(slug: string, excludeSellerId?: string): Promise<boolean> {
@@ -360,13 +363,19 @@ export class DatabaseStorage implements IStorage {
   async createSeller(seller: InsertSeller): Promise<Seller> {
     // Validate and check shop slug if provided
     if (seller.shopSlug) {
+      // Normalize shop slug before validation
+      const normalizedSlug = seller.shopSlug.toLowerCase().trim();
+      
       if (!this.validateShopSlug(seller.shopSlug)) {
         throw new Error('Invalid shop slug format. Must be 3-30 characters, alphanumeric with hyphens only, and not a reserved word.');
       }
       
-      if (!(await this.isShopSlugAvailable(seller.shopSlug))) {
+      if (!(await this.isShopSlugAvailable(normalizedSlug))) {
         throw new Error('Shop slug is already taken. Please choose a different one.');
       }
+      
+      // Use normalized slug for saving
+      seller.shopSlug = normalizedSlug;
     }
     
     const [newSeller] = await db.insert(sellers).values(seller).returning();
@@ -401,13 +410,19 @@ export class DatabaseStorage implements IStorage {
     // Validate and check shop slug if being updated
     if (updates.shopSlug !== undefined) {
       if (updates.shopSlug) {
+        // Normalize shop slug before validation
+        const normalizedSlug = updates.shopSlug.toLowerCase().trim();
+        
         if (!this.validateShopSlug(updates.shopSlug)) {
           throw new Error('Invalid shop slug format. Must be 3-30 characters, alphanumeric with hyphens only, and not a reserved word.');
         }
         
-        if (!(await this.isShopSlugAvailable(updates.shopSlug, id))) {
+        if (!(await this.isShopSlugAvailable(normalizedSlug, id))) {
           throw new Error('Shop slug is already taken. Please choose a different one.');
         }
+        
+        // Use normalized slug for saving
+        updates.shopSlug = normalizedSlug;
       }
     }
     
