@@ -2091,6 +2091,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedSeller);
     } catch (error: any) {
       console.error("Error updating seller profile:", error);
+      
+      // Pass through validation errors with specific messages
+      if (error.message && (
+        error.message.includes('shop slug') || 
+        error.message.includes('Shop slug') ||
+        error.message.includes('already taken') ||
+        error.message.includes('Invalid shop slug format') ||
+        error.message.includes('reserved word')
+      )) {
+        return res.status(400).json({ error: error.message });
+      }
+      
       res.status(500).json({ error: "Failed to update seller profile" });
     }
   });
