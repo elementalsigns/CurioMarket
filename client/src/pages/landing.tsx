@@ -181,16 +181,16 @@ export default function Landing() {
           <div className="mt-12">
             <div className="flex flex-wrap gap-3 justify-center">
               {[
-                { name: 'Taxidermy & Bones', slug: 'taxidermy-bones' }, 
-                { name: 'Vintage Medical', slug: 'vintage-medical' }, 
-                { name: 'Gothic Decor', slug: 'gothic-home-decor' }, 
-                { name: 'Oddities & Curiosities', slug: 'oddities-curiosities' },
-                { name: 'Antique Specimens', slug: 'antique-specimens' },
+                { name: 'Taxidermy', slug: 'taxidermy' }, 
+                { name: 'Bones & Skulls', slug: 'bones-skulls' }, 
+                { name: 'Medical Art', slug: 'medical-art' }, 
+                { name: 'Wet Specimens', slug: 'wet-specimens' },
+                { name: 'Antique', slug: 'antique' },
+                { name: 'Vintage', slug: 'vintage' },
                 { name: 'Jewelry', slug: 'jewelry' },
                 { name: 'Occult', slug: 'occult' },
-                { name: 'Victorian Era', slug: 'victorian-era' },
-                { name: 'Macabre Art', slug: 'macabre-art' },
-                { name: 'Scientific Instruments', slug: 'scientific-instruments' },
+                { name: 'Wall Art', slug: 'wall-art' },
+                { name: 'Crystals', slug: 'crystals' },
                 { name: 'Murderabilia', slug: 'murderabilia' }
               ].map((category) => (
                 <Link key={category.slug} to={`/browse?category=${category.slug}`}>
