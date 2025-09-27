@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ProductCard from "@/components/product-card";
@@ -37,7 +38,9 @@ import {
   ExternalLink,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Database,
+  Download
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -1496,13 +1499,123 @@ export default function AccountManager() {
               )}
 
               {activeTab === "privacy" && (
-                <div data-testid="privacy">
+                <div data-testid="privacy" className="space-y-6">
                   <h2 className="text-xl font-bold mb-4">Privacy Settings</h2>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Privacy & Security</h3>
-                      <p className="text-muted-foreground">Control your privacy settings and account security.</p>
+                  
+                  {/* Profile Visibility */}
+                  <Card className="glass-effect">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="text-gothic-red" size={20} />
+                        Profile Visibility
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Public Profile</p>
+                          <p className="text-sm text-muted-foreground">Allow others to view your profile and purchase history</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Show Online Status</p>
+                          <p className="text-sm text-muted-foreground">Display when you're active on the platform</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Communication */}
+                  <Card className="glass-effect">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageSquare className="text-gothic-red" size={20} />
+                        Communication
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Allow Messages from Buyers</p>
+                          <p className="text-sm text-muted-foreground">Let potential buyers contact you directly</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Allow Messages from Other Sellers</p>
+                          <p className="text-sm text-muted-foreground">Enable networking with other marketplace sellers</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Notifications */}
+                  <Card className="glass-effect">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="text-gothic-red" size={20} />
+                        Email Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Order Updates</p>
+                          <p className="text-sm text-muted-foreground">Get notified about new orders and payments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Messages</p>
+                          <p className="text-sm text-muted-foreground">Email alerts for new messages</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Marketing Emails</p>
+                          <p className="text-sm text-muted-foreground">Platform updates and promotional content</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Data & Privacy */}
+                  <Card className="glass-effect">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="text-gothic-red" size={20} />
+                        Data & Privacy
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Analytics Sharing</p>
+                          <p className="text-sm text-muted-foreground">Help improve the platform with anonymous usage data</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Personalized Recommendations</p>
+                          <p className="text-sm text-muted-foreground">Use browsing history to suggest relevant items</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="pt-4 border-t border-border/30">
+                        <Button variant="outline" className="w-full">
+                          <Download className="mr-2" size={16} />
+                          Download My Data
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
