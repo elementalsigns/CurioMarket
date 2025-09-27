@@ -3744,7 +3744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get featured listings - MUST be before /:id route
   app.get('/api/listings/featured', async (req, res) => {
     try {
-      const { limit = 8 } = req.query;
+      const { limit = 12 } = req.query;
       const listings = await storage.getFeaturedListings(parseInt(limit as string));
       res.json(listings);
     } catch (error) {
