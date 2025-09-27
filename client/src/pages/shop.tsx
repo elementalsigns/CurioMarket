@@ -304,11 +304,18 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                   )}
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>4.8 (127 reviews)</span>
+                    <span>
+                      {reviews.length > 0 
+                        ? `${(reviews.reduce((acc: number, review: any) => acc + review.rating, 0) / reviews.length).toFixed(1)} (${reviews.length} review${reviews.length === 1 ? '' : 's'})`
+                        : 'No reviews yet'
+                      }
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    <span>234 followers</span>
+                    <span>
+                      {displayData?.followerCount ?? 0} follower{(displayData?.followerCount ?? 0) === 1 ? '' : 's'}
+                    </span>
                   </div>
                 </div>
               </div>
