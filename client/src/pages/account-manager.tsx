@@ -33,7 +33,11 @@ import {
   Users,
   MessageSquare,
   FileText,
-  Trash2
+  Trash2,
+  ExternalLink,
+  Clock,
+  CheckCircle,
+  AlertCircle
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -127,6 +131,13 @@ export default function AccountManager() {
       return response.json();
     },
     enabled: !!user && !!sellerData,
+  });
+
+  // Get subscription data for billing
+  const { data: subscriptionData } = useQuery({
+    queryKey: ["/api/subscription/status"],
+    enabled: !!user,
+    retry: false,
   });
 
   const sellerListings = sellerDashboardData?.listings;
@@ -1112,16 +1123,198 @@ export default function AccountManager() {
 
               {activeTab === "billing" && (
                 <div data-testid="billing">
-                  <h2 className="text-xl font-bold mb-4">{isSeller ? "Billing & Payouts" : "Payment Methods"}</h2>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Payment Settings</h3>
-                      <p className="text-muted-foreground">
-                        {isSeller ? "Manage your subscription and payout methods." : "Manage your payment methods and billing."}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <h2 className="text-xl font-bold mb-6">{isSeller ? "Billing & Payouts" : "Payment Methods"}</h2>
+                  
+                  {isSeller ? (
+                    <div className="space-y-6">
+                      {/* Seller Subscription */}
+                      <Card className="glass-effect">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <CreditCard className="text-gothic-red" size={20} />
+                            Seller Subscription
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-foreground/60">Current Plan</p>
+                              <p className="font-semibold">Seller Pro - $10/month</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Status</p>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="text-green-500" size={16} />
+                                <span className="font-semibold text-green-500">Active</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Next Billing</p>
+                              <p className="font-semibold">
+                                {subscriptionData?.nextBilling ? 
+                                  new Date(subscriptionData.nextBilling).toLocaleDateString() : 
+                                  "Loading..."
+                                }
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Payment Method</p>
+                              <p className="font-semibold">•••• •••• •••• 4242</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" className="w-full">
+                            <ExternalLink className="mr-2" size={16} />
+                            Manage Subscription
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Payout Settings */}
+                      <Card className="glass-effect">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <DollarSign className="text-gothic-red" size={20} />
+                            Payout Settings
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-foreground/60">Available Balance</p>
+                              <p className="text-2xl font-bold text-green-500">
+                                ${sellerDashboardData?.seller?.availableBalance || "0.00"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Pending</p>
+                              <p className="text-2xl font-bold text-yellow-500">
+                                ${sellerDashboardData?.seller?.pendingBalance || "0.00"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Next Payout</p>
+                              <div className="flex items-center gap-2">
+                                <Clock className="text-blue-500" size={16} />
+                                <span className="font-semibold">
+                                  {sellerDashboardData?.seller?.nextPayoutDate ? 
+                                    new Date(sellerDashboardData.seller.nextPayoutDate).toLocaleDateString() : 
+                                    "No pending payouts"
+                                  }
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm text-foreground/60">Bank Account</p>
+                              <p className="font-semibold">Chase •••• 4567</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" className="w-full">
+                            <ExternalLink className="mr-2" size={16} />
+                            Manage Bank Account (Stripe)
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Fee Information */}
+                      <Card className="glass-effect">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="text-gothic-red" size={20} />
+                            Fee Structure
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-foreground/70">Platform Fee</span>
+                            <span className="font-semibold">2.6%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-foreground/70">Stripe Processing</span>
+                            <span className="font-semibold">2.9% + $0.30</span>
+                          </div>
+                          <div className="border-t border-border/30 pt-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold">Total Fees</span>
+                              <span className="font-semibold text-gothic-red">~5.5%</span>
+                            </div>
+                          </div>
+                          <div className="bg-green-500/10 p-3 rounded-lg border border-green-500/30">
+                            <p className="text-xs text-green-400 font-medium">
+                              Example: $100 sale = $94.20 in your pocket
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Recent Activity */}
+                      <Card className="glass-effect">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Clock className="text-gothic-red" size={20} />
+                            Recent Activity
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="text-green-500" size={16} />
+                                <div>
+                                  <p className="font-medium">Subscription Payment</p>
+                                  <p className="text-sm text-foreground/60">Monthly seller fee</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold">-$10.00</p>
+                                <p className="text-sm text-foreground/60">Dec 26, 2024</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <DollarSign className="text-green-500" size={16} />
+                                <div>
+                                  <p className="font-medium">Payout Sent</p>
+                                  <p className="text-sm text-foreground/60">Weekly earnings</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-green-500">+$87.50</p>
+                                <p className="text-sm text-foreground/60">Dec 23, 2024</p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    /* Buyer Payment Methods */
+                    <Card className="glass-effect">
+                      <CardContent className="p-8 text-center">
+                        <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
+                        <p className="text-muted-foreground mb-6">
+                          Your payment methods are securely managed during checkout.
+                        </p>
+                        <div className="space-y-4">
+                          <div className="p-4 border border-border/30 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <CreditCard className="text-blue-500" size={20} />
+                                <div>
+                                  <p className="font-medium">•••• •••• •••• 4242</p>
+                                  <p className="text-sm text-foreground/60">Expires 12/2025</p>
+                                </div>
+                              </div>
+                              <Badge>Default</Badge>
+                            </div>
+                          </div>
+                          <Button variant="outline" className="w-full">
+                            Add Payment Method
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               )}
 
