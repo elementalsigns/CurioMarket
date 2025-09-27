@@ -546,7 +546,7 @@ export default function AccountManager() {
                               <Star className="h-5 w-5 text-muted-foreground" />
                               <div>
                                 <p className="text-sm font-medium">Avg Rating</p>
-                                <p className="text-2xl font-bold">{(sellerStats as any)?.averageRating || "N/A"}</p>
+                                <p className="text-2xl font-bold">{(sellerStats as any)?.averageRating ? (sellerStats as any).averageRating.toFixed(1) : "N/A"}</p>
                               </div>
                             </div>
                           </CardContent>
