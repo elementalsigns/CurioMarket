@@ -99,7 +99,21 @@ export default function AccountManager() {
       accountData: {
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
-      }
+      },
+      // Seller business data (if user is a seller)
+      ...(sellerData && {
+        shopInformation: {
+          profile: sellerData,
+          stats: sellerStats,
+          dashboard: sellerDashboardData
+        },
+        listings: sellerListings || [],
+        salesHistory: {
+          orders: sellerOrders || [],
+          revenue: sellerStats,
+          transactions: sellerOrders || []
+        }
+      })
     };
     
     const dataStr = JSON.stringify(userData, null, 2);
