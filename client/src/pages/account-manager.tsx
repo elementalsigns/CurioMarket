@@ -67,6 +67,57 @@ export default function AccountManager() {
   
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [currentProfileImage, setCurrentProfileImage] = useState<string | null>(null);
+  
+  // Privacy settings state
+  const [privacySettings, setPrivacySettings] = useState({
+    publicProfile: true,
+    showOnlineStatus: false,
+    allowBuyerMessages: true,
+    allowSellerMessages: false,
+    orderNotifications: true,
+    messageNotifications: true,
+    marketingEmails: false,
+    analyticsSharing: true,
+    personalizedRecommendations: true
+  });
+
+  // Update privacy setting function
+  const updatePrivacySetting = (key: keyof typeof privacySettings, value: boolean) => {
+    setPrivacySettings(prev => ({ ...prev, [key]: value }));
+    // In a real app, this would save to backend
+    toast({
+      title: "Privacy Setting Updated",
+      description: "Your preference has been saved.",
+    });
+  };
+
+  // Download user data function
+  const downloadUserData = () => {
+    const userData = {
+      profile: user,
+      privacySettings,
+      accountData: {
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+      }
+    };
+    
+    const dataStr = JSON.stringify(userData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'my-curio-market-data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Data Downloaded",
+      description: "Your data has been downloaded successfully.",
+    });
+  };
 
   const form = useForm({
     defaultValues: {
@@ -1516,14 +1567,20 @@ export default function AccountManager() {
                           <p className="font-medium">Public Profile</p>
                           <p className="text-sm text-muted-foreground">Allow others to view your profile and purchase history</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.publicProfile}
+                          onCheckedChange={(checked) => updatePrivacySetting('publicProfile', checked)}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Show Online Status</p>
                           <p className="text-sm text-muted-foreground">Display when you're active on the platform</p>
                         </div>
-                        <Switch />
+                        <Switch 
+                          checked={privacySettings.showOnlineStatus}
+                          onCheckedChange={(checked) => updatePrivacySetting('showOnlineStatus', checked)}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1542,14 +1599,20 @@ export default function AccountManager() {
                           <p className="font-medium">Allow Messages from Buyers</p>
                           <p className="text-sm text-muted-foreground">Let potential buyers contact you directly</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.allowBuyerMessages}
+                          onCheckedChange={(checked) => updatePrivacySetting('allowBuyerMessages', checked)}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Allow Messages from Other Sellers</p>
                           <p className="text-sm text-muted-foreground">Enable networking with other marketplace sellers</p>
                         </div>
-                        <Switch />
+                        <Switch 
+                          checked={privacySettings.allowSellerMessages}
+                          onCheckedChange={(checked) => updatePrivacySetting('allowSellerMessages', checked)}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1568,21 +1631,30 @@ export default function AccountManager() {
                           <p className="font-medium">Order Updates</p>
                           <p className="text-sm text-muted-foreground">Get notified about new orders and payments</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.orderNotifications}
+                          onCheckedChange={(checked) => updatePrivacySetting('orderNotifications', checked)}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Messages</p>
                           <p className="text-sm text-muted-foreground">Email alerts for new messages</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.messageNotifications}
+                          onCheckedChange={(checked) => updatePrivacySetting('messageNotifications', checked)}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Marketing Emails</p>
                           <p className="text-sm text-muted-foreground">Platform updates and promotional content</p>
                         </div>
-                        <Switch />
+                        <Switch 
+                          checked={privacySettings.marketingEmails}
+                          onCheckedChange={(checked) => updatePrivacySetting('marketingEmails', checked)}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1601,17 +1673,27 @@ export default function AccountManager() {
                           <p className="font-medium">Analytics Sharing</p>
                           <p className="text-sm text-muted-foreground">Help improve the platform with anonymous usage data</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.analyticsSharing}
+                          onCheckedChange={(checked) => updatePrivacySetting('analyticsSharing', checked)}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Personalized Recommendations</p>
                           <p className="text-sm text-muted-foreground">Use browsing history to suggest relevant items</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch 
+                          checked={privacySettings.personalizedRecommendations}
+                          onCheckedChange={(checked) => updatePrivacySetting('personalizedRecommendations', checked)}
+                        />
                       </div>
                       <div className="pt-4 border-t border-border/30">
-                        <Button variant="outline" className="w-full">
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={downloadUserData}
+                        >
                           <Download className="mr-2" size={16} />
                           Download My Data
                         </Button>
