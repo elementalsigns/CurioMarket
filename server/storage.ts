@@ -136,6 +136,9 @@ export interface IStorage {
   
   // Category counts
   getCategoryCounts(): Promise<any[]>;
+  
+  // Active seller count for stats
+  getActiveSellerCount(): Promise<number>;
 
   // Enhanced Product Management
   createListingVariation(variation: InsertListingVariation): Promise<ListingVariation>;
@@ -1161,6 +1164,15 @@ export class DatabaseStorage implements IStorage {
         count: 1, // Updated to match actual database count
       }
     ];
+  }
+
+  async getActiveSellerCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(sellers)
+      .where(eq(sellers.isActive, true));
+    
+    return Number(result?.count) || 0;
   }
 
   // Enhanced Product Management

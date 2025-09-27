@@ -4176,6 +4176,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Get active seller count for landing page stats
+  app.get("/api/stats/active-sellers", async (req, res) => {
+    try {
+      const count = await storage.getActiveSellerCount();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching active seller count:", error);
+      res.status(500).json({ error: "Failed to fetch active seller count" });
+    }
+  });
+
   // Parameterized search route for messaging system
   app.get('/api/search/:searchTerm', async (req, res) => {
     try {

@@ -12,7 +12,22 @@ import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+function ActiveSellersDisplay() {
+  const { data: activeSellerCount, isLoading } = useQuery({
+    queryKey: ["/api/stats/active-sellers"],
+    queryFn: () => fetch("/api/stats/active-sellers").then(res => res.json()),
+    refetchInterval: 30000, // Update every 30 seconds
+  });
 
+  if (isLoading) {
+    return <div className="text-2xl font-bold text-primary">...</div>;
+  }
+
+  const count = activeSellerCount?.count || 0;
+  const formattedCount = count > 1000 ? `${(count / 1000).toFixed(1)}K+` : `${count}`;
+
+  return <div className="text-2xl font-bold text-primary">{formattedCount}</div>;
+}
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -379,7 +394,7 @@ export default function Landing() {
               {/* Floating Stats */}
               <Card className="absolute -top-6 -right-6 glass-effect border border-primary/30 shadow-lg" data-testid="stat-sellers">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-primary">2.3K+</div>
+                  <ActiveSellersDisplay />
                   <div className="text-sm text-foreground/80">Active Sellers</div>
                 </CardContent>
               </Card>
