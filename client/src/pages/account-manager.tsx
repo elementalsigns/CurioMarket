@@ -1168,7 +1168,7 @@ export default function AccountManager() {
                             onClick={() => window.open('https://billing.stripe.com/p/login', '_blank')}
                           >
                             <ExternalLink className="mr-2" size={16} />
-                            Manage Subscription
+                            Manage Subscription (Stripe)
                           </Button>
                         </CardContent>
                       </Card>
@@ -1212,7 +1212,11 @@ export default function AccountManager() {
                               <p className="font-semibold text-blue-500">Managed by Stripe</p>
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full">
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => window.open('https://billing.stripe.com/p/login', '_blank')}
+                          >
                             <ExternalLink className="mr-2" size={16} />
                             Manage Bank Account (Stripe)
                           </Button>
