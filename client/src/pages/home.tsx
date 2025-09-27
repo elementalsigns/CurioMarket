@@ -228,7 +228,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="recently-viewed-grid">
-            {Array.isArray(featuredListings) && (featuredListings as any)?.map((listing: any) => (
+            {Array.isArray(featuredListings) && (featuredListings as any)
+              ?.slice(0, Math.floor((featuredListings as any).length / 6) * 6)
+              ?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}
           </div>
