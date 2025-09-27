@@ -1162,7 +1162,11 @@ export default function AccountManager() {
                               <p className="font-semibold">•••• •••• •••• 4242</p>
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full">
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => window.open('https://billing.stripe.com/p/login', '_blank')}
+                          >
                             <ExternalLink className="mr-2" size={16} />
                             Manage Subscription
                           </Button>
