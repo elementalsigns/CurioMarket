@@ -1159,7 +1159,7 @@ export default function AccountManager() {
                             </div>
                             <div>
                               <p className="text-sm text-foreground/60">Payment Method</p>
-                              <p className="font-semibold">•••• •••• •••• 4242</p>
+                              <p className="font-semibold text-blue-500">Managed by Stripe</p>
                             </div>
                           </div>
                           <Button 
@@ -1209,7 +1209,7 @@ export default function AccountManager() {
                             </div>
                             <div>
                               <p className="text-sm text-foreground/60">Bank Account</p>
-                              <p className="font-semibold">Chase •••• 4567</p>
+                              <p className="font-semibold text-blue-500">Managed by Stripe</p>
                             </div>
                           </div>
                           <Button variant="outline" className="w-full">
@@ -1265,7 +1265,7 @@ export default function AccountManager() {
                                 <CheckCircle className="text-green-500" size={16} />
                                 <div>
                                   <p className="font-medium">Subscription Payment</p>
-                                  <p className="text-sm text-foreground/60">Monthly seller fee</p>
+                                  <p className="text-sm text-foreground/60">Monthly seller fee (via Stripe)</p>
                                 </div>
                               </div>
                               <div className="text-right">
@@ -1278,7 +1278,7 @@ export default function AccountManager() {
                                 <DollarSign className="text-green-500" size={16} />
                                 <div>
                                   <p className="font-medium">Payout Sent</p>
-                                  <p className="text-sm text-foreground/60">Weekly earnings</p>
+                                  <p className="text-sm text-foreground/60">Weekly earnings (via Stripe)</p>
                                 </div>
                               </div>
                               <div className="text-right">
