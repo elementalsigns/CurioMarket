@@ -1151,8 +1151,8 @@ export default function AccountManager() {
                             <div>
                               <p className="text-sm text-foreground/60">Next Billing</p>
                               <p className="font-semibold">
-                                {subscriptionData?.nextBilling ? 
-                                  new Date(subscriptionData.nextBilling).toLocaleDateString() : 
+                                {subscriptionData?.nextBillingDate ? 
+                                  new Date(subscriptionData.nextBillingDate).toLocaleDateString() : 
                                   "Loading..."
                                 }
                               </p>
