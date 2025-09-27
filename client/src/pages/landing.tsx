@@ -257,7 +257,7 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="featured-grid">
-            {Array.isArray(featuredListings) && featuredListings.slice(0, 6).map((listing: any) => {
+            {Array.isArray(featuredListings) && featuredListings.slice(0, 12).map((listing: any) => {
               const isFavorited = Array.isArray(userFavorites) && userFavorites.includes(listing.id);
               return (
                 <ProductCard 
