@@ -524,7 +524,7 @@ export default function AccountManager() {
                               <ShoppingBag className="h-5 w-5 text-muted-foreground" />
                               <div>
                                 <p className="text-sm font-medium">Total Sales</p>
-                                <p className="text-2xl font-bold">{(sellerStats as any)?.totalSales || 0}</p>
+                                <p className="text-2xl font-bold">{(sellerStats as any)?.totalSales ? (sellerStats as any).totalSales.toLocaleString() : 0}</p>
                               </div>
                             </div>
                           </CardContent>
@@ -535,7 +535,7 @@ export default function AccountManager() {
                               <DollarSign className="h-5 w-5 text-muted-foreground" />
                               <div>
                                 <p className="text-sm font-medium">Revenue</p>
-                                <p className="text-2xl font-bold">${(sellerStats as any)?.totalRevenue || "0.00"}</p>
+                                <p className="text-2xl font-bold">${(sellerStats as any)?.totalRevenue ? Number(sellerStats.totalRevenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "0.00"}</p>
                               </div>
                             </div>
                           </CardContent>
