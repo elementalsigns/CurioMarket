@@ -3475,6 +3475,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create Stripe Customer Portal session
+  app.post('/api/stripe/customer-portal', requireAuth, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.stripeCustomerId) {
+        return res.status(400).json({ error: "No Stripe customer found" });
+      }
+
+      // Get the current domain for return URL
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const returnUrl = `${protocol}://${host}/account`;
+
+      // Create customer portal session
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: user.stripeCustomerId,
+        return_url: returnUrl,
+      });
+
+      res.json({ url: portalSession.url });
+    } catch (error: any) {
+      console.error('Error creating customer portal session:', error);
+      res.status(500).json({ error: 'Failed to create portal session' });
+    }
+  });
+
   // Cancel seller subscription
   app.post('/api/seller/subscription/cancel', requireSellerAccess, async (req: any, res) => {
     if (!stripe) {

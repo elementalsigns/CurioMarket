@@ -1233,7 +1233,18 @@ export default function AccountManager() {
                           <Button 
                             variant="outline" 
                             className="w-full"
-                            onClick={() => window.open('https://billing.stripe.com/p/login', '_blank')}
+                            onClick={async () => {
+                              try {
+                                const response = await apiRequest('/api/stripe/customer-portal', {
+                                  method: 'POST'
+                                });
+                                if (response.url) {
+                                  window.open(response.url, '_blank');
+                                }
+                              } catch (error) {
+                                console.error('Failed to create portal session:', error);
+                              }
+                            }}
                           >
                             <ExternalLink className="mr-2" size={16} />
                             Manage Subscription (Stripe)
@@ -1283,7 +1294,18 @@ export default function AccountManager() {
                           <Button 
                             variant="outline" 
                             className="w-full"
-                            onClick={() => window.open('https://billing.stripe.com/p/login', '_blank')}
+                            onClick={async () => {
+                              try {
+                                const response = await apiRequest('/api/stripe/customer-portal', {
+                                  method: 'POST'
+                                });
+                                if (response.url) {
+                                  window.open(response.url, '_blank');
+                                }
+                              } catch (error) {
+                                console.error('Failed to create portal session:', error);
+                              }
+                            }}
                           >
                             <ExternalLink className="mr-2" size={16} />
                             Manage Bank Account (Stripe)
