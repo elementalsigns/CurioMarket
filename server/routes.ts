@@ -1433,6 +1433,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.save();
       }
       
+      // SURGICAL FIX: Migrate session cart to user cart when Bearer token is used
+      if (userId && sessionId) {
+        await storage.migrateSessionCartToUser(sessionId, userId);
+      }
       
       // Get cart items
       const cart = await storage.getOrCreateCart(userId, sessionId);

@@ -817,6 +817,46 @@ export class DatabaseStorage implements IStorage {
     await db.delete(cartItems).where(eq(cartItems.cartId, cart.id));
   }
 
+  async migrateSessionCartToUser(sessionId: string, userId: string): Promise<void> {
+    // Get session cart and user cart
+    const sessionCart = await this.getOrCreateCart(undefined, sessionId);
+    const userCart = await this.getOrCreateCart(userId);
+    
+    if (sessionCart.id === userCart.id) {
+      return; // Already the same cart
+    }
+    
+    // Get items from session cart
+    const sessionItems = await this.getCartItems(sessionCart.id);
+    
+    if (sessionItems.length > 0) {
+      // Move items to user cart
+      for (const item of sessionItems) {
+        // Check if item already exists in user cart
+        const existing = await db.select()
+          .from(cartItems)
+          .where(and(eq(cartItems.cartId, userCart.id), eq(cartItems.listingId, item.listingId)));
+        
+        if (existing.length > 0) {
+          // Update quantity
+          await db.update(cartItems)
+            .set({ quantity: existing[0].quantity + item.quantity })
+            .where(eq(cartItems.id, existing[0].id));
+        } else {
+          // Add new item to user cart
+          await db.insert(cartItems).values({
+            cartId: userCart.id,
+            listingId: item.listingId,
+            quantity: item.quantity
+          });
+        }
+      }
+      
+      // Clear session cart
+      await this.clearCart(sessionCart.id);
+    }
+  }
+
   // Social sharing analytics (disabled - shareEvents table doesn't exist)
   async trackShareEvent(shareData: any): Promise<void> {
     // await db.insert(shareEvents).values(shareData);
