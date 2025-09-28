@@ -1404,8 +1404,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
       const sessionId = req.sessionID;
+      
+      // Ensure session is saved for guest users (matches cart endpoint)
+      if (!userId) {
+        req.session.save();
+      }
       
       console.log('[CHECKOUT-DEBUG] Getting cart for userId:', userId, 'sessionId:', sessionId);
       
