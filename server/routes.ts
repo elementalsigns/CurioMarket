@@ -1404,7 +1404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      let userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
+      let userId = (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null;
       
       // Add Bearer token support (for production authenticated users)
       if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {

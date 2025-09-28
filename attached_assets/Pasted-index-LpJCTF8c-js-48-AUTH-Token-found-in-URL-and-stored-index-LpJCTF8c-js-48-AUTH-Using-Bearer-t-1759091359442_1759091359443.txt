@@ -1,0 +1,59 @@
+index-LpJCTF8c.js:48 [AUTH] Token found in URL and stored
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:577 [HOME DEBUG] Object
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+index-LpJCTF8c.js:577 [PRODUCTION REDIRECT] User loaded: Object
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+index-LpJCTF8c.js:893 [PRODUCTION REDIRECT] User loaded: Object
+index-LpJCTF8c.js:577 [HOME DEBUG] Object
+index-LpJCTF8c.js:577 [HOME DEBUG] Object
+index-LpJCTF8c.js:577 [HOME DEBUG] Object
+index-LpJCTF8c.js:577 [HOME DEBUG] Object
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+index-LpJCTF8c.js:597 [CHECKOUT] Initializing multi-seller checkout for items: 1
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Adding Bearer token to request
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [PRODUCTION AUTH] User loaded: Object
+index-LpJCTF8c.js:533 [SELLER DEBUG] Object
+api/cart/checkout:1  Failed to load resource: the server responded with a status of 500 ()
+index-LpJCTF8c.js:597 [CHECKOUT] Failed to initialize checkout: Error: 500: {"error":"req.isAuthenticated is not a function"}
+    at de (index-LpJCTF8c.js:48:44253)
+    at async h (index-LpJCTF8c.js:597:19224)
+h @ index-LpJCTF8c.js:597
+index-LpJCTF8c.js:597 [CHECKOUT] Initializing multi-seller checkout for items: 1
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Adding Bearer token to request
+api/cart/checkout:1  Failed to load resource: the server responded with a status of 500 ()
+index-LpJCTF8c.js:597 [CHECKOUT] Failed to initialize checkout: Error: 500: {"error":"req.isAuthenticated is not a function"}
+    at de (index-LpJCTF8c.js:48:44253)
+    at async h (index-LpJCTF8c.js:597:19224)
+h @ index-LpJCTF8c.js:597
+index-LpJCTF8c.js:48 [AUTH] Getting token from localStorage: Found
+index-LpJCTF8c.js:48 [AUTH] Using Bearer token for API call
