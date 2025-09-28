@@ -1435,7 +1435,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // SURGICAL FIX: Migrate session cart to user cart when Bearer token is used
       if (userId && sessionId) {
+        console.log('[CART-MIGRATION] Attempting migration: sessionId=', sessionId, 'userId=', userId);
         await storage.migrateSessionCartToUser(sessionId, userId);
+        console.log('[CART-MIGRATION] Migration completed');
       }
       
       // Get cart items

@@ -818,18 +818,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async migrateSessionCartToUser(sessionId: string, userId: string): Promise<void> {
+    console.log('[CART-MIGRATION] Starting migration: sessionId=', sessionId, 'userId=', userId);
+    
     // Get session cart and user cart
     const sessionCart = await this.getOrCreateCart(undefined, sessionId);
     const userCart = await this.getOrCreateCart(userId);
     
     if (sessionCart.id === userCart.id) {
+      console.log('[CART-MIGRATION] Same cart detected, skipping');
       return; // Already the same cart
     }
     
     // Get items from session cart
     const sessionItems = await this.getCartItems(sessionCart.id);
+    console.log('[CART-MIGRATION] Found', sessionItems.length, 'items in session cart');
     
     if (sessionItems.length > 0) {
+      console.log('[CART-MIGRATION] Migrating items to user cart');
       // Move items to user cart
       for (const item of sessionItems) {
         // Check if item already exists in user cart
@@ -842,6 +847,7 @@ export class DatabaseStorage implements IStorage {
           await db.update(cartItems)
             .set({ quantity: existing[0].quantity + item.quantity })
             .where(eq(cartItems.id, existing[0].id));
+          console.log('[CART-MIGRATION] Updated quantity for listing', item.listingId);
         } else {
           // Add new item to user cart
           await db.insert(cartItems).values({
@@ -849,12 +855,67 @@ export class DatabaseStorage implements IStorage {
             listingId: item.listingId,
             quantity: item.quantity
           });
+          console.log('[CART-MIGRATION] Added new item to user cart:', item.listingId);
         }
       }
       
       // Clear session cart
       await this.clearCart(sessionCart.id);
+      console.log('[CART-MIGRATION] Cleared session cart');
+    } else {
+      console.log('[CART-MIGRATION] No items in session cart, checking for orphaned session carts');
+      
+      // FALLBACK: Look for any session carts with items that could belong to this user
+      // This handles sessionId mismatch scenarios
+      const orphanedCarts = await db.select({
+        cartId: carts.id,
+        sessionId: carts.sessionId,
+        itemCount: sql<number>`COUNT(${cartItems.id})`
+      })
+      .from(carts)
+      .leftJoin(cartItems, eq(carts.id, cartItems.cartId))
+      .where(and(
+        ne(carts.id, userCart.id), // Not the user cart
+        ne(carts.id, sessionCart.id), // Not current session cart
+        sql`${carts.sessionId} IS NOT NULL`, // Has session ID
+        sql`${carts.userId} IS NULL` // Is session cart (no user)
+      ))
+      .groupBy(carts.id, carts.sessionId)
+      .having(sql`COUNT(${cartItems.id}) > 0`);
+      
+      console.log('[CART-MIGRATION] Found', orphanedCarts.length, 'orphaned carts with items');
+      
+      if (orphanedCarts.length > 0) {
+        // Migrate from the most recent orphaned cart
+        const mostRecentCart = orphanedCarts[0];
+        console.log('[CART-MIGRATION] Migrating from orphaned cart:', mostRecentCart.cartId);
+        
+        const orphanedItems = await this.getCartItems(mostRecentCart.cartId);
+        for (const item of orphanedItems) {
+          const existing = await db.select()
+            .from(cartItems)
+            .where(and(eq(cartItems.cartId, userCart.id), eq(cartItems.listingId, item.listingId)));
+          
+          if (existing.length > 0) {
+            await db.update(cartItems)
+              .set({ quantity: existing[0].quantity + item.quantity })
+              .where(eq(cartItems.id, existing[0].id));
+          } else {
+            await db.insert(cartItems).values({
+              cartId: userCart.id,
+              listingId: item.listingId,
+              quantity: item.quantity
+            });
+          }
+        }
+        
+        // Clear orphaned cart
+        await this.clearCart(mostRecentCart.cartId);
+        console.log('[CART-MIGRATION] Completed fallback migration from orphaned cart');
+      }
     }
+    
+    console.log('[CART-MIGRATION] Migration process completed');
   }
 
   // Social sharing analytics (disabled - shareEvents table doesn't exist)
