@@ -1408,23 +1408,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
           const payload = jwt.verify(token, secret) as any;
           
-          if (payload.scope === 'seller' && payload.aud === 'curio-market') {
+          if ((payload.scope === 'seller' || payload.scope === 'buyer') && payload.aud === 'curio-market') {
             // Resolve user by sub (can be userId or email)
             if (payload.sub.includes('@')) {
               // Email-based lookup
               const user = await storage.getUserByEmail(payload.sub);
               if (user) {
                 userId = user.id;
-                console.log(`[CHECKOUT] Bearer token auth success for email: ${payload.sub}, user: ${userId}`);
               }
             } else {
               // Direct user ID
               userId = payload.sub;
-              console.log(`[CHECKOUT] Bearer token auth success for user: ${userId}`);
             }
           }
         } catch (error) {
-          console.log(`[CHECKOUT] Bearer token verification failed:`, error instanceof Error ? error.message : String(error));
+          // Silent fail - fallback to session authentication
         }
       }
       
@@ -1438,7 +1436,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get cart items
       const cart = await storage.getOrCreateCart(userId, sessionId);
-      
       const cartItems = await storage.getCartItems(cart.id);
       
       if (!cartItems || cartItems.length === 0) {
