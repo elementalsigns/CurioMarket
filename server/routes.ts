@@ -1392,7 +1392,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
   app.post("/api/cart/checkout", async (req: any, res) => {
+    console.log('[CHECKOUT-DEBUG] Checkout request received');
+    console.log('[CHECKOUT-DEBUG] Request body:', req.body);
+    console.log('[CHECKOUT-DEBUG] Session ID:', req.sessionID);
+    console.log('[CHECKOUT-DEBUG] User ID:', req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null);
+    
     if (!stripe) {
+      console.log('[CHECKOUT-DEBUG] Stripe not configured');
       return res.status(500).json({ error: "Stripe not configured" });
     }
 
@@ -1401,9 +1407,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
       const sessionId = req.sessionID;
       
+      console.log('[CHECKOUT-DEBUG] Getting cart for userId:', userId, 'sessionId:', sessionId);
+      
       // Get cart items
       const cart = await storage.getOrCreateCart(userId, sessionId);
+      console.log('[CHECKOUT-DEBUG] Cart found:', cart);
+      
       const cartItems = await storage.getCartItems(cart.id);
+      console.log('[CHECKOUT-DEBUG] Cart items found:', cartItems?.length || 0, 'items');
       
       if (!cartItems || cartItems.length === 0) {
         return res.status(400).json({ error: "Cart is empty" });
