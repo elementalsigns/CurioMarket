@@ -1404,7 +1404,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
+      let userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
+      
+      // Add Bearer token support (for production authenticated users)
+      if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.slice(7);
+          const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
+          const payload = jwt.verify(token, secret) as any;
+          
+          if (payload.scope === 'seller' && payload.aud === 'curio-market') {
+            if (payload.sub.includes('@')) {
+              const user = await storage.getUserByEmail(payload.sub);
+              if (user) userId = user.id;
+            } else {
+              userId = payload.sub;
+            }
+            console.log('[CHECKOUT-DEBUG] Bearer token auth success for user:', userId);
+          }
+        } catch (error) {
+          console.log('[CHECKOUT-DEBUG] Bearer token verification failed:', error instanceof Error ? error.message : String(error));
+        }
+      }
+      
       const sessionId = req.sessionID;
       
       // Ensure session is saved for guest users (matches cart endpoint)
