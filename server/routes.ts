@@ -1442,6 +1442,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const cartItems = await storage.getCartItems(cart.id);
       console.log('[CHECKOUT-DEBUG] Cart items found:', cartItems?.length || 0, 'items');
+      console.log('[CHECKOUT-DEBUG] Cart ID being used:', cart.id);
+      console.log('[CHECKOUT-DEBUG] Full cartItems result:', JSON.stringify(cartItems, null, 2));
       
       if (!cartItems || cartItems.length === 0) {
         return res.status(400).json({ error: "Cart is empty" });
