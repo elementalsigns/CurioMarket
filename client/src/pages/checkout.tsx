@@ -489,10 +489,8 @@ export default function Checkout() {
     setIsLoadingCheckout(true);
     setInitializationError(null);
     console.log('[CHECKOUT] Initializing multi-seller checkout for items:', items.length);
-    console.log('[CHECKOUT-DEBUG] About to make POST request to /api/cart/checkout');
     
     try {
-      console.log('[CHECKOUT-DEBUG] Calling apiRequest with POST /api/cart/checkout');
       const data = await apiRequest("POST", "/api/cart/checkout", { 
         shippingAddress: {} // Will be collected in the form
       });
@@ -506,7 +504,6 @@ export default function Checkout() {
         throw new Error('Invalid response format from server');
       }
     } catch (error: any) {
-      console.error('[CHECKOUT-DEBUG] apiRequest failed with error:', error);
       console.error('[CHECKOUT] Failed to initialize checkout:', error);
       setInitializationError(error.message || 'Failed to initialize checkout');
       toast({

@@ -1392,19 +1392,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
   app.post("/api/cart/checkout", async (req: any, res) => {
-    console.log('[CHECKOUT-DEBUG] Checkout request received');
-    console.log('[CHECKOUT-DEBUG] Request body:', req.body);
-    console.log('[CHECKOUT-DEBUG] Session ID:', req.sessionID);
-    console.log('[CHECKOUT-DEBUG] User ID:', (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null);
     
     if (!stripe) {
-      console.log('[CHECKOUT-DEBUG] Stripe not configured');
       return res.status(500).json({ error: "Stripe not configured" });
     }
 
     try {
       const { shippingAddress } = req.body;
-      let userId = (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null;
+      let userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
       
       // Add Bearer token support (for production authenticated users)
       if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
@@ -1420,10 +1415,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               userId = payload.sub;
             }
-            console.log('[CHECKOUT-DEBUG] Bearer token auth success for user:', userId);
           }
         } catch (error) {
-          console.log('[CHECKOUT-DEBUG] Bearer token verification failed:', error instanceof Error ? error.message : String(error));
         }
       }
       
@@ -1434,16 +1427,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.save();
       }
       
-      console.log('[CHECKOUT-DEBUG] Getting cart for userId:', userId, 'sessionId:', sessionId);
       
       // Get cart items
       const cart = await storage.getOrCreateCart(userId, sessionId);
-      console.log('[CHECKOUT-DEBUG] Cart found:', cart);
       
       const cartItems = await storage.getCartItems(cart.id);
-      console.log('[CHECKOUT-DEBUG] Cart items found:', cartItems?.length || 0, 'items');
-      console.log('[CHECKOUT-DEBUG] Cart ID being used:', cart.id);
-      console.log('[CHECKOUT-DEBUG] Full cartItems result:', JSON.stringify(cartItems, null, 2));
       
       if (!cartItems || cartItems.length === 0) {
         return res.status(400).json({ error: "Cart is empty" });
