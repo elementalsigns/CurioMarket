@@ -1395,7 +1395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('[CHECKOUT-DEBUG] Checkout request received');
     console.log('[CHECKOUT-DEBUG] Request body:', req.body);
     console.log('[CHECKOUT-DEBUG] Session ID:', req.sessionID);
-    console.log('[CHECKOUT-DEBUG] User ID:', req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null);
+    console.log('[CHECKOUT-DEBUG] User ID:', (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null);
     
     if (!stripe) {
       console.log('[CHECKOUT-DEBUG] Stripe not configured');
@@ -1430,7 +1430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.sessionID;
       
       // Ensure session is saved for guest users (matches cart endpoint)
-      if (!userId) {
+      if (!userId && req.session && typeof req.session.save === 'function') {
         req.session.save();
       }
       
