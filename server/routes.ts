@@ -1749,17 +1749,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get seller's connected account
       const seller = await storage.getSellerByUserId(sellerId);
-      if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
-        return res.status(400).json({ 
-          error: `Seller account not set up for payments`,
-          sellerId 
-        });
+      
+      // SURGICAL FIX: Allow purchases even if seller hasn't completed Stripe Connect setup
+      // The platform will hold funds until seller completes onboarding
+      // Sellers can still buy from other sellers regardless of their own payout setup
+      if (!seller?.stripeConnectAccountId) {
+        console.log(`[PAYMENT-CONFIRM] WARNING: Seller ${sellerId} doesn't have Stripe Connect set up yet. Proceeding with standard payment (funds will be held until seller completes setup).`);
+        // Continue with payment - don't block the buyer
       }
       
       // SECURITY: First retrieve the PaymentIntent to validate metadata and authorization
-      const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
-        stripeAccount: seller.stripeConnectAccountId
-      });
+      // Only use stripeAccount if seller has Connect set up, otherwise use platform account
+      const retrieveOptions = seller?.stripeConnectAccountId 
+        ? { stripeAccount: seller.stripeConnectAccountId }
+        : {}; // Use platform's main account if seller hasn't set up Connect
+      
+      const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
       
       // SECURITY: Validate that this PaymentIntent belongs to the current user/session
       const paymentUserId = existingPaymentIntent.metadata?.userId;
@@ -1792,6 +1797,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Confirm the PaymentIntent with the saved payment method
+      // Only use connected account if seller has Stripe Connect set up
+      const confirmOptions = seller?.stripeConnectAccountId 
+        ? { stripeAccount: seller.stripeConnectAccountId }
+        : {}; // Use platform account if seller hasn't set up Connect
+      
       const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
         payment_method: paymentMethodId,
         return_url: `${req.protocol}://${req.get('host')}/order-confirmation`,
@@ -1807,9 +1817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         })
-      }, {
-        stripeAccount: seller.stripeConnectAccountId // Confirm on connected account
-      });
+      }, confirmOptions);
       
       console.log(`[PAYMENT-CONFIRM] Payment confirmed: ${paymentIntent.id}, status: ${paymentIntent.status}`);
       
