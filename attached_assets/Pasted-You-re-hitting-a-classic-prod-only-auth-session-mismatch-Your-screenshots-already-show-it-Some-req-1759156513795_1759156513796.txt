@@ -1,0 +1,112 @@
+You’re hitting a classic prod-only auth/session mismatch. Your screenshots already show it:
+Some requests log isAuthenticated: true, Session ID: ..., User object: Present.
+The very next calls to /api/cart/checkout show isAuthenticated: undefined, Session ID: undefined, User object: Missing → 401 Unauthorized.
+One code path tries to validate a Bearer token (this.oidcClient.userinfo is not a function), while the rest of your app uses cookie-based sessions.
+Also, one of your domains is failing to publish and you have both apex and www — cookies may not be sent on one of them.
+Below is a tight fix plan you can apply now. It standardizes auth, ensures cookies are sent on https://www.curiosities.market, and removes the fragile token branch from checkout.
+1) Standardize checkout to the same session middleware as the rest
+Server (Express + Passport)
+// server/index.js (or wherever you bootstrap Express)
+import session from 'express-session';
+import cors from 'cors';
+import passport from 'passport';
+
+const PROD = process.env.NODE_ENV === 'production';
+
+app.set('trust proxy', 1); // required behind Replit/Proxies for secure cookies
+
+app.use(cors({
+  origin: ['https://www.curiosities.market'], // only your prod origin
+  credentials: true,                           // allow cookies
+}));
+
+app.use(session({
+  name: 'cm.sid',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true,              // must be true on HTTPS
+    sameSite: 'none',          // allow cross-site if you render from another origin or use subdomains
+    domain: '.curiosities.market', // covers both www and apex; remove if you only serve www
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  },
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ONE consistent guard used everywhere in production:
+export function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated()) return next();
+  return res.status(401).json({ message: 'Authentication required' });
+}
+
+// Optional: debug breadcrumbs to verify cookie/session on prod
+app.use((req, _res, next) => {
+  if (req.path.startsWith('/api/')) {
+    console.log('[PRODUCTION-AUTH]', {
+      path: req.path,
+      cookiesPresent: !!req.headers.cookie,
+      sessionId: req.sessionID,
+      userPresent: !!req.user,
+      isAuthFn: typeof req.isAuthenticated === 'function',
+      isAuth: req.isAuthenticated?.() ?? 'n/a',
+      host: req.headers.host,
+      origin: req.headers.origin,
+    });
+  }
+  next();
+});
+Routes
+// routes/cart.js
+import { isAuthenticated } from '../index.js';
+
+router.post('/api/cart/checkout', isAuthenticated, async (req, res) => {
+  // ... your checkout logic
+});
+Remove any checkout-specific middleware like createAuthMiddleware(authService) that expects a Bearer token. Your logs show that path fails in prod.
+2) Frontend must send cookies
+Wherever you call your APIs (cart add, fetch, checkout), include credentials:
+await fetch('/api/cart/checkout', {
+  method: 'POST',
+  credentials: 'include',               // 🔑 send cm.sid
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload),
+});
+If you use Axios:
+axios.post('/api/cart/checkout', payload, { withCredentials: true });
+3) Stick to a single production hostname
+Right now you have:
+https://www.curiosities.market (published/working)
+https://curiosities.market (shows failed in Replit UI)
+Action:
+Until apex is healthy, force all traffic to www and set cookie domain to .curiosities.market (as above) or drop the domain setting and only use www. If you keep both, make sure your DNS and Replit “Domains” page show green for both, and add an apex → www redirect at DNS or proxy level.
+4) Production flags & secrets
+NODE_ENV=production
+Strong SESSION_SECRET
+If you use any OAuth/OIDC, ensure the callback & allowed origins include https://www.curiosities.market only (not the Replit preview domain).
+5) CORS and proxies
+You already log:
+[CORS] Request from origin: https://www.curiosities.market, host: www.curiosities.market
+Keep CORS minimal and explicit as shown above. You already set app.set('trust proxy', 1) — that’s essential for secure: true cookies behind Replit.
+6) Quick validation steps (incognito)
+Open only https://www.curiosities.market in an Incognito window.
+Log in → open DevTools → Application → Cookies → verify cm.sid exists, Secure, SameSite=None, Domain .curiosities.market (or no domain if you chose only www).
+Add item to cart → call /api/cart → should log isAuthenticated: true, User object: Present.
+Click Checkout → /api/cart/checkout should now 200.
+7) If you really need token auth (optional)
+Your error this.oidcClient.userinfo is not a function means the OIDC client you’re using doesn’t expose userinfo that way (library version mismatch). The standard openid-client usage is:
+const { Issuer } = await import('openid-client');
+const issuer = await Issuer.discover(process.env.OIDC_ISSUER);
+const client = new issuer.Client({ client_id, client_secret, redirect_uris, response_types: ['code'] });
+
+const tokenSet = await client.callback(redirectUri, params, { code_verifier });
+const userinfo = await client.userinfo(tokenSet); // note: client.userinfo(tokenSet)
+But unless you must support token-based mobile clients, skip this for web checkout and stick to sessions.
+8) Minimal diff to look for
+Replace any createAuthMiddleware(authService)/requireAuth that expects JWT with isAuthenticated.
+Ensure every cart/checkout route is behind the same guard used by your other working endpoints.
+Ensure credentials: 'include' client-side and the cookie settings above server-side.
+Do the above and your 401: {"message":"Unauthorized"} at checkout should disappear. If it doesn’t, run a fresh test and read your new [PRODUCTION-AUTH] log line — it will immediately tell you whether cookies, the session ID, or req.user are missing so you can zero in on the last mile.

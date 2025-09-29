@@ -1777,6 +1777,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware  
   await setupAuth(app);
 
+  // Production session debugging middleware
+  app.use((req: any, _res, next) => {
+    if (req.path.startsWith('/api/') && process.env.NODE_ENV === 'production') {
+      console.log('[PRODUCTION-AUTH]', {
+        path: req.path,
+        method: req.method,
+        cookiesPresent: !!req.headers.cookie,
+        sessionId: req.sessionID,
+        userPresent: !!req.user,
+        isAuthFn: typeof req.isAuthenticated === 'function',
+        isAuth: req.isAuthenticated?.() ?? 'n/a',
+        host: req.headers.host,
+        origin: req.headers.origin,
+      });
+    }
+    next();
+  });
+
   // Development-only login endpoint for testing authentication
   app.get('/api/auth/dev-login', async (req: any, res) => {
     if (process.env.NODE_ENV !== 'development') {

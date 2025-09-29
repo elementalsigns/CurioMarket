@@ -52,7 +52,7 @@ export function getSession() {
     httpOnly: true,
     secure: isProduction, // Only HTTPS in production
     maxAge: sessionTtl,
-    sameSite: 'lax' as const, // Safari compatible setting for same-site requests
+    sameSite: 'none' as const, // Allow cross-site cookies for authentication
     domain: isProduction ? '.curiosities.market' : undefined, // Production domain scope
   };
   
@@ -73,6 +73,7 @@ export function getSession() {
     });
     
     return session({
+      name: 'cm.sid', // Named session cookie for production
       secret: process.env.SESSION_SECRET!,
       store: sessionStore,
       resave: false,
@@ -83,6 +84,7 @@ export function getSession() {
     console.error("Session store error:", error);
     // Fallback to memory store in case of database issues
     return session({
+      name: 'cm.sid', // Named session cookie for production
       secret: process.env.SESSION_SECRET!,
       resave: false,
       saveUninitialized: true, // Allow session creation for guest users
