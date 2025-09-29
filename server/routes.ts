@@ -1418,8 +1418,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", requireAuth, async (req: any, res) => {
-    // PRODUCTION DEBUG: Add temporary debug headers
+  app.post("/api/cart/checkout", (req: any, res, next) => {
+    // PRODUCTION DEBUG: Add debug headers BEFORE auth check
     res.setHeader('X-Debug-Auth-State', JSON.stringify({
       hasUser: !!req.user,
       hasSession: !!req.session,
@@ -1429,6 +1429,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       userAgent: req.get('user-agent'),
       cookies: req.get('cookie') ? 'present' : 'missing'
     }));
+    next();
+  }, requireAuth, async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
