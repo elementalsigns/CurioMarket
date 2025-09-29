@@ -35,18 +35,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// SURGICAL FIX #10: Host normalization to fix session domain mismatch
-// www.curiosities.market -> curiosities.market (before session handling)
-app.use((req, res, next) => {
-  const host = req.get('host');
-  if (host === 'www.curiosities.market') {
-    const redirectUrl = `https://curiosities.market${req.originalUrl}`;
-    console.log(`[HOST-NORMALIZE] Redirecting www to bare domain: ${redirectUrl}`);
-    return res.redirect(301, redirectUrl);
-  }
-  next();
-});
-
 (async () => {
   // Register routes first (including health checks)
   const server = await registerRoutes(app);
