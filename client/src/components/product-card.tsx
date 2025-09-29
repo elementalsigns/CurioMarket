@@ -69,7 +69,7 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
     mutationFn: ({ listingId, quantity }: { listingId: string; quantity: number }) => 
       apiRequest("POST", "/api/cart/add", { listingId, quantity }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
         title: "Added to cart",
         description: "Item has been added to your cart.",
