@@ -1335,7 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        console.log(`[PAYMENT-INTENT] Seller ${seller.shopName}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
+        console.log(`[PAYMENT-INTENT] Seller ${seller?.shopName || sellerId}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
         
         // Create Direct Charge PaymentIntent on connected account
         const paymentIntent = await stripe.paymentIntents.create({
