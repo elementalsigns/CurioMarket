@@ -130,6 +130,24 @@ async function hasSellerAccess(user: User): Promise<boolean> {
 
 // FIXED AUTH MIDDLEWARE - Uses the EXACT working pattern from lines 282-290
 const requireAuth = async (req: any, res: any, next: any) => {
+  // PRODUCTION DEBUG: Log detailed auth state for checkout debugging
+  console.log('[AUTH-CHECKOUT-DEBUG] ===================================');
+  console.log('[AUTH-CHECKOUT-DEBUG] Path:', req.path);
+  console.log('[AUTH-CHECKOUT-DEBUG] Method:', req.method);
+  console.log('[AUTH-CHECKOUT-DEBUG] Host:', req.get('host'));
+  console.log('[AUTH-CHECKOUT-DEBUG] Has req.user:', !!req.user);
+  console.log('[AUTH-CHECKOUT-DEBUG] Has req.session:', !!req.session);
+  console.log('[AUTH-CHECKOUT-DEBUG] Session ID:', req.sessionID);
+  console.log('[AUTH-CHECKOUT-DEBUG] Cookie header present:', !!req.get('cookie'));
+  console.log('[AUTH-CHECKOUT-DEBUG] Has isAuthenticated fn:', typeof req.isAuthenticated);
+  if (req.isAuthenticated) {
+    console.log('[AUTH-CHECKOUT-DEBUG] isAuthenticated():', req.isAuthenticated());
+  }
+  if (req.session?.passport) {
+    console.log('[AUTH-CHECKOUT-DEBUG] Session passport:', JSON.stringify(req.session.passport));
+  }
+  console.log('[AUTH-CHECKOUT-DEBUG] ===================================');
+  
   // Development bypass
   if (process.env.NODE_ENV === 'development') {
     req.user = {
