@@ -4029,7 +4029,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get cart
   app.get('/api/cart', async (req: any, res) => {
     try {
-      const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
+      let userId = (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null;
+      
+      // Bearer token support (using exact same pattern as requireSellerAccess)
+      if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.slice(7);
+          const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
+          const payload = jwt.verify(token, secret) as any;
+          
+          if ((payload.scope === 'seller' || payload.scope === 'buyer') && payload.aud === 'curio-market') {
+            // Resolve user by sub (can be userId or email)
+            if (payload.sub.includes('@')) {
+              // Email-based lookup
+              const user = await storage.getUserByEmail(payload.sub);
+              if (user) {
+                userId = user.id;
+              }
+            } else {
+              // Direct user ID
+              userId = payload.sub;
+            }
+          }
+        } catch (error) {
+          // Silent fail - fallback to session authentication
+        }
+      }
+      
       const sessionId = req.sessionID;
       
       // Ensure session is saved for guest users
@@ -4050,7 +4076,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add to cart
   app.post('/api/cart/add', async (req: any, res) => {
     try {
-      const userId = req.isAuthenticated() ? req.user?.claims?.sub : null;
+      let userId = (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) ? req.user?.claims?.sub : null;
+      
+      // Bearer token support (using exact same pattern as requireSellerAccess)
+      if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.slice(7);
+          const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
+          const payload = jwt.verify(token, secret) as any;
+          
+          if ((payload.scope === 'seller' || payload.scope === 'buyer') && payload.aud === 'curio-market') {
+            // Resolve user by sub (can be userId or email)
+            if (payload.sub.includes('@')) {
+              // Email-based lookup
+              const user = await storage.getUserByEmail(payload.sub);
+              if (user) {
+                userId = user.id;
+              }
+            } else {
+              // Direct user ID
+              userId = payload.sub;
+            }
+          }
+        } catch (error) {
+          // Silent fail - fallback to session authentication
+        }
+      }
+      
       const sessionId = req.sessionID;
       const { listingId, quantity = 1 } = req.body;
       
