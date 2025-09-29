@@ -1630,11 +1630,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sellerId: sellerId
           });
         }
-        if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
-          return res.status(400).json({ 
-            error: `Seller account not set up for payments. Please contact support.`,
-            sellerId 
-          });
+        
+        // SURGICAL FIX: Allow purchases even if seller hasn't completed Stripe Connect setup
+        // The platform will hold funds until seller completes onboarding
+        if (!seller?.stripeConnectAccountId) {
+          console.log(`[CART-CHECKOUT] WARNING: Seller ${sellerId} doesn't have Stripe Connect set up. Proceeding with platform account (funds will be held until seller completes setup).`);
+          // Continue with payment on platform account - don't block the buyer
         }
         
         // Calculate seller totals
@@ -1658,12 +1659,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let paymentIntent;
         
         if (process.env.NODE_ENV === 'production') {
-          // Production: Use real Stripe with connected accounts
-          paymentIntent = await stripe.paymentIntents.create({
+          // Production: Use real Stripe
+          // Only use connected account if seller has Stripe Connect set up
+          const createOptions: any = {
             amount: Math.round(sellerTotal * 100),
             currency: "usd",
             payment_method_types: ['card'],
-            application_fee_amount: applicationFeeAmount,
             confirmation_method: 'manual',
             metadata: {
               userId: userId || 'guest',
@@ -1675,9 +1676,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               cartGroupId: Date.now().toString(),
               setupIntentId: setupIntent.id
             },
-          }, {
-            stripeAccount: seller.stripeConnectAccountId
-          });
+          };
+          
+          // Only add application_fee_amount if seller has Connect (otherwise goes to platform)
+          if (seller.stripeConnectAccountId) {
+            createOptions.application_fee_amount = applicationFeeAmount;
+          }
+          
+          // Create with or without Connect account
+          const stripeOptions = seller.stripeConnectAccountId 
+            ? { stripeAccount: seller.stripeConnectAccountId }
+            : {}; // Use platform account if no Connect
+          
+          paymentIntent = await stripe.paymentIntents.create(createOptions, stripeOptions);
         } else {
           // Development: Mock successful PaymentIntent response
           paymentIntent = {
@@ -1698,7 +1709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subtotal: Math.round(sellerSubtotal * 100), // Convert to cents
           shipping: Math.round(sellerShipping * 100), // Convert to cents
           platformFee: applicationFeeAmount, // Already in cents
-          ...(process.env.NODE_ENV === 'production' ? { stripeAccount: seller.stripeConnectAccountId } : {}),
+          ...(process.env.NODE_ENV === 'production' && seller.stripeConnectAccountId ? { stripeAccount: seller.stripeConnectAccountId } : {}),
           items: items.map(item => ({
             listingId: item.listingId,
             title: item.listing.title,
