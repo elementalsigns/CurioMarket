@@ -491,9 +491,24 @@ export default function Checkout() {
     console.log('[CHECKOUT] Initializing multi-seller checkout for items:', items.length);
     
     try {
-      const data = await apiRequest("POST", "/api/cart/checkout", { 
-        shippingAddress: {} // Will be collected in the form
+      // SURGICAL FIX: Use direct fetch to bypass apiRequest 401 issue
+      const response = await fetch("/api/cart/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          shippingAddress: {} // Will be collected in the form
+        }),
+        credentials: "include", // Explicit credentials for auth
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
+      }
+      
+      const data = await response.json();
       
       console.log('[CHECKOUT] Multi-seller checkout initialized:', data);
       
