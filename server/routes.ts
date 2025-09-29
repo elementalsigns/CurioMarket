@@ -1399,23 +1399,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      // SURGICAL FIX: Use same auth pattern as working authenticated routes
+      // PRODUCTION FIX: Use robust auth logic that works in production
       let userId = null;
       
       // Development bypass for consistent authentication
       if (process.env.NODE_ENV === 'development') {
         userId = '46848882';  // Development user
-      } else if (req.isAuthenticated && req.isAuthenticated()) {
-        userId = req.user?.claims?.sub;
+      } else {
+        // Use same robust authentication as other working routes
+        userId = req.user?.id || 
+                 req.user?.claims?.sub ||
+                 req.session?.passport?.user ||
+                 req.user?.sub ||
+                 req.user;
+        
+        console.log('[CART-CHECKOUT] Production auth check:', { 
+          hasReqUser: !!req.user,
+          hasSessionPassport: !!req.session?.passport?.user,
+          isAuthenticated: req.isAuthenticated?.(),
+          resolvedUserId: userId
+        });
       }
       
       const sessionId = req.sessionID;
       
-      // Get cart items
+      // Get cart items with validation logging
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const cartItems = await storage.getCartItems(cart.id);
       
+      console.log('[CART-CHECKOUT] Cart validation:', { 
+        cartId: cart.id,
+        userId: userId,
+        sessionId: sessionId,
+        itemCount: cartItems?.length || 0
+      });
+      
       if (!cartItems || cartItems.length === 0) {
+        console.log('[CART-CHECKOUT] EMPTY CART - userId:', userId, 'sessionId:', sessionId, 'cartId:', cart.id);
         return res.status(400).json({ error: "Cart is empty" });
       }
       
