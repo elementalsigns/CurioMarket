@@ -1404,7 +1404,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", requireAuth, async (req: any, res) => {
+  app.post("/api/cart/checkout", (req: any, res: any, next: any) => {
+    // PRODUCTION DEBUG - Log everything about the auth state
+    console.log('=== CHECKOUT AUTH DEBUG ===');
+    console.log('req.isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'function missing');
+    console.log('req.user exists:', !!req.user);
+    console.log('req.user:', JSON.stringify(req.user, null, 2));
+    console.log('req.sessionID:', req.sessionID);
+    console.log('hostname:', req.get('host'));
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('=== END DEBUG ===');
+    
+    requireAuth(req, res, next);
+  }, async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
