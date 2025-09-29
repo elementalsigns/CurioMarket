@@ -2757,15 +2757,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get next billing date from subscription
       const nextBillingDate = subscription.status === 'trialing' && subscription.trial_end 
         ? new Date(subscription.trial_end * 1000)
-        : new Date(subscription.current_period_end * 1000);
+        : new Date((subscription as any).current_period_end * 1000);
 
       res.json({ 
         hasActiveSubscription: isActive,
         subscriptionStatus: subscription.status,
         hasPaymentMethod: !!subscription.default_payment_method,
         nextBillingDate: nextBillingDate.toISOString(),
-        currentPeriodEnd: subscription.current_period_end,
-        currentPeriodStart: subscription.current_period_start,
+        currentPeriodEnd: (subscription as any).current_period_end,
+        currentPeriodStart: (subscription as any).current_period_start,
         trialEnd: subscription.trial_end
       });
     } catch (error) {
