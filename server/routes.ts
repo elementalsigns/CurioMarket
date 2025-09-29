@@ -6,7 +6,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { authService } from "./auth-service";
+import { authService, createAuthMiddleware } from "./auth-service";
 import { 
   insertSellerSchema, 
   insertListingSchema, 
@@ -127,43 +127,8 @@ async function hasSellerAccess(user: User): Promise<boolean> {
   return false;
 }
 
-// WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
-const requireAuth = async (req: any, res: any, next: any) => {
-  try {
-    // Development bypass for consistent authentication across all endpoints
-    if (process.env.NODE_ENV === 'development') {
-      req.user = {
-        claims: {
-          sub: '46848882',  // Development user
-          email: 'elementalsigns@gmail.com', 
-          given_name: 'Artem',
-          family_name: 'Mortis'
-        }
-      };
-      return next();
-    }
-
-    // PRODUCTION LOGGING for curiosities.market requests
-    const hostname = req.get('host') || '';
-    if (hostname.includes('curiosities.market')) {
-      console.log(`[PRODUCTION-AUTH] Request from ${hostname} - path: ${req.path}`);
-      console.log(`[PRODUCTION-AUTH] Cookies: ${req.headers.cookie ? 'Present' : 'Missing'}`);
-      console.log(`[PRODUCTION-AUTH] isAuthenticated: ${req.isAuthenticated ? req.isAuthenticated() : 'undefined'}`);
-      console.log(`[PRODUCTION-AUTH] Session ID: ${req.sessionID || 'undefined'}`);
-      console.log(`[PRODUCTION-AUTH] User object: ${req.user ? 'Present' : 'Missing'}`);
-    }
-
-    // Standard session-based authentication check for production
-    if (req.isAuthenticated && req.isAuthenticated()) {
-      return next();
-    }
-    
-    return res.status(401).json({ message: "Authentication required" });
-  } catch (error) {
-    console.error('[AUTH] Error in requireAuth:', error);
-    return res.status(401).json({ message: "Authentication required" });
-  }
-};
+// PROPER AUTH MIDDLEWARE - Uses the same system as other working routes
+const requireAuth = createAuthMiddleware(authService);
 
 /**
  * Middleware that requires seller access using capability-based authorization
