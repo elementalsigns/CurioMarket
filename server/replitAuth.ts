@@ -499,6 +499,23 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
       return next();
     }
     
+    // SURGICAL FIX #11: Diagnostic logging for checkout URL investigation
+    if (process.env.AUTH_DEBUG === 'true') {
+      console.log('===== AUTH FAILURE DIAGNOSTICS =====');
+      console.log('[AUTH-DEBUG] Host:', req.get('host'));
+      console.log('[AUTH-DEBUG] Origin:', req.headers.origin);
+      console.log('[AUTH-DEBUG] Referer:', req.headers.referer);
+      console.log('[AUTH-DEBUG] X-Forwarded-Host:', req.headers['x-forwarded-host']);
+      console.log('[AUTH-DEBUG] Original URL:', req.originalUrl);
+      console.log('[AUTH-DEBUG] Session ID:', req.sessionID);
+      console.log('[AUTH-DEBUG] Session exists:', !!req.session);
+      console.log('[AUTH-DEBUG] Cookies present:', Object.keys(req.cookies || {}));
+      console.log('[AUTH-DEBUG] cm.sid cookie:', req.cookies['cm.sid'] ? 'present' : 'missing');
+      console.log('[AUTH-DEBUG] Session passport user:', req.session?.passport?.user ? 'exists' : 'missing');
+      console.log('[AUTH-DEBUG] req.isAuthenticated():', req.isAuthenticated());
+      console.log('===================================');
+    }
+    
     console.log(`[AUTH] ❌ Authentication required - no valid token or session`);
     return res.status(401).json({ message: "Authentication required" });
   }
