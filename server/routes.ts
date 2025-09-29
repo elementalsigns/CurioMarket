@@ -1437,21 +1437,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[CART-CHECKOUT] Token payload:`, { sub: payload.sub, email: payload.email, scope: payload.scope, aud: payload.aud });
               
               if (payload.sub) {
-                // For seller tokens, verify scope and audience
-                if (payload.scope === 'seller' && payload.aud === 'curio-market') {
-                  // Direct user lookup by Replit user ID or email
-                  if (payload.sub.includes('@')) {
-                    const user = await storage.getUserByEmail(payload.sub);
-                    if (user) {
-                      userId = user.id;
-                      console.log(`[CART-CHECKOUT] Bearer token auth success via email: ${payload.sub}, user: ${userId}`);
-                    }
-                  } else {
-                    userId = payload.sub;
-                    console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
+                // Accept any valid token with a subject for checkout
+                if (payload.sub.includes('@')) {
+                  // Email-based lookup
+                  const user = await storage.getUserByEmail(payload.sub);
+                  if (user) {
+                    userId = user.id;
+                    console.log(`[CART-CHECKOUT] Bearer token auth success via email: ${payload.sub}, user: ${userId}`);
                   }
                 } else {
-                  console.log(`[CART-CHECKOUT] Token scope/aud mismatch. Expected: scope='seller', aud='curio-market'. Got:`, { scope: payload.scope, aud: payload.aud });
+                  // Direct user ID
+                  userId = payload.sub;
+                  console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
                 }
               }
             }
