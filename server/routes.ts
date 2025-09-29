@@ -4063,8 +4063,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.save();
       }
       
+      console.log('[CART-GET] userId=', userId, 'sessionId=', sessionId);
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const items = await storage.getCartItems(cart.id);
+      console.log('[CART-GET] cart.id=', cart.id);
       
       res.json({ cart, items });
     } catch (error) {
@@ -4111,7 +4113,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.save();
       }
       
+      console.log('[CART-ADD] userId=', userId, 'sessionId=', sessionId);
       const cart = await storage.getOrCreateCart(userId, sessionId);
+      console.log('[CART-ADD] cart.id=', cart.id);
       const cartItem = await storage.addToCart(cart.id, listingId, quantity);
       
       res.json(cartItem);
