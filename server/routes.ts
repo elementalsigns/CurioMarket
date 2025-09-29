@@ -4032,7 +4032,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // SURGICAL FIX: requireAuth middleware automatically sets up authenticated user
       const userId = req.user.claims.sub;
       const sessionId = req.sessionID;
-      console.log('[CART-DEBUG] GET /api/cart - userId:', userId, 'sessionId:', sessionId);
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const items = await storage.getCartItems(cart.id);
@@ -4051,7 +4050,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const sessionId = req.sessionID;
       const { listingId, quantity = 1 } = req.body;
-      console.log('[CART-DEBUG] POST /api/cart/add - userId:', userId, 'sessionId:', sessionId);
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const cartItem = await storage.addToCart(cart.id, listingId, quantity);
