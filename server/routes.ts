@@ -1398,66 +1398,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // PRODUCTION FIX: Use robust auth logic that works in production
       let userId = null;
       
-      // Development bypass for consistent authentication
+      // WORKING AUTH LOGIC - Same as other endpoints
       if (process.env.NODE_ENV === 'development') {
         userId = '46848882';  // Development user
+        console.log(`[CART-CHECKOUT] Development auth success for user: ${userId}`);
       } else {
-        // EXACT SAME authentication pattern as working routes
-        if (req.user && req.user.claims && req.user.claims.sub) {
-          userId = req.user.claims.sub;
-          console.log(`[CART-CHECKOUT] Standard auth success for user: ${userId}`);
-        }
-        // Method 2: Mobile fallback - check session authentication
-        else if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-          // Handle mobile browser session format
-          if (req.user.id) {
-            userId = req.user.id;
-            console.log(`[CART-CHECKOUT] Mobile session auth success for user: ${userId}`);
-          } else if (req.user.claims && req.user.claims.sub) {
-            userId = req.user.claims.sub;
-            console.log(`[CART-CHECKOUT] Mobile claims auth success for user: ${userId}`);
-          }
-        }
-        // Method 3: Last resort - check passport session
-        else if (req.session && req.session.passport && req.session.passport.user) {
-          const passportUser = req.session.passport.user;
-          // Handle both string userId and full user object formats
-          userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
-          console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
-        }
-        // Method 4: Bearer token using direct verification (working logic restored)
-        else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-          console.log(`[CART-CHECKOUT] Processing Bearer token...`);
-          try {
-            const token = req.headers.authorization.slice(7);
-            // Use base64 decode for Replit token format (no external dependencies)
-            const tokenParts = token.split('.');
-            if (tokenParts.length >= 2) {
-              const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-              console.log(`[CART-CHECKOUT] Token payload:`, { sub: payload.sub, email: payload.email, scope: payload.scope, aud: payload.aud });
-              
-              if (payload.sub) {
-                // Accept any valid token with a subject for checkout
-                if (payload.sub.includes('@')) {
-                  // Email-based lookup
-                  const user = await storage.getUserByEmail(payload.sub);
-                  if (user) {
-                    userId = user.id;
-                    console.log(`[CART-CHECKOUT] Bearer token auth success via email: ${payload.sub}, user: ${userId}`);
-                  }
-                } else {
-                  // Direct user ID
-                  userId = payload.sub;
-                  console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
-                }
-              }
-            }
-          } catch (error) {
-            console.log(`[CART-CHECKOUT] Bearer token verification failed:`, error.message);
-          }
-        }
+        // Use exact same pattern as working auth endpoints
+        console.log(`[CART-CHECKOUT] Auth debug:`, {
+          isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : 'undefined',
+          hasUser: !!req.user,
+          userKeys: req.user ? Object.keys(req.user) : [],
+          userClaims: req.user?.claims,
+          sessionID: req.sessionID
+        });
         
-        console.log('[CART-CHECKOUT] Final auth result:', { userId });
+        if (req.isAuthenticated && req.isAuthenticated()) {
+          userId = req.user?.claims?.sub;
+          console.log(`[CART-CHECKOUT] Production auth success for user: ${userId}`);
+        } else {
+          console.log(`[CART-CHECKOUT] Production auth failed - not authenticated`);
+        }
       }
       
       const sessionId = req.sessionID;
