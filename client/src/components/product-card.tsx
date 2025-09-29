@@ -66,8 +66,17 @@ export default function ProductCard({ listing, isFavorited = false, onToggleFavo
   const isInGeneralFavorites = userFavorites.includes(listing.id);
 
   const addToCartMutation = useMutation({
-    mutationFn: ({ listingId, quantity }: { listingId: string; quantity: number }) => 
-      apiRequest("POST", "/api/cart/add", { listingId, quantity }),
+    mutationFn: async ({ listingId, quantity }: { listingId: string; quantity: number }) => {
+      // SURGICAL FIX: Use session-only authentication to match cart GET requests
+      const response = await fetch("/api/cart/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId, quantity }),
+        credentials: "include", // Session cookies only, no Bearer token
+      });
+      if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
