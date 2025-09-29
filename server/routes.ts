@@ -129,7 +129,7 @@ async function hasSellerAccess(user: User): Promise<boolean> {
 }
 
 // PRODUCTION-COMPATIBLE AUTH MIDDLEWARE - Uses same pattern as other working routes  
-const requireAuth = (req: any, res: any, next: any) => {
+const requireAuth = async (req: any, res: any, next: any) => {
   // Development bypass
   if (process.env.NODE_ENV === 'development') {
     req.user = {
@@ -141,8 +141,26 @@ const requireAuth = (req: any, res: any, next: any) => {
     return next();
   }
 
-  // Production authentication - same pattern as working routes
+  // Production authentication - SURGICAL FIX: Set proper user format
   if (req.isAuthenticated && req.isAuthenticated()) {
+    // If req.user doesn't have claims format, reconstruct it
+    if (!req.user?.claims?.sub) {
+      try {
+        // Get user from session using auth service pattern
+        const sessionUser = await authService.getUserFromRequest(req);
+        if (sessionUser) {
+          req.user = {
+            claims: {
+              sub: sessionUser.id,
+              email: sessionUser.email
+            }
+          };
+          console.log('[AUTH] Reconstructed user claims for requireAuth:', sessionUser.id);
+        }
+      } catch (error) {
+        console.error('[AUTH] Error reconstructing user in requireAuth:', error);
+      }
+    }
     return next();
   }
   
