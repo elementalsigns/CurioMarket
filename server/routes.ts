@@ -1460,6 +1460,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let totalPlatformFee = 0;
       
       // Create one PaymentIntent per seller using Direct Charges (no automatic payment methods)
+      console.log('[DEBUG] About to enter seller loop. SellerGroups:', Object.keys(sellerGroups));
+      console.log('[DEBUG] SellerGroups entries:', Object.entries(sellerGroups).length);
       for (const [sellerId, items] of Object.entries(sellerGroups)) {
         // Get seller's connected account
         console.log(`[DEBUG] Looking up seller with ID: ${sellerId}`);
