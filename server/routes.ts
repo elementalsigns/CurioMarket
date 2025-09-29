@@ -1501,47 +1501,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[CART-CHECKOUT]   • Platform Fee: $${(applicationFeeAmount/100).toFixed(2)} (${PLATFORM_FEE_PERCENT}% of subtotal)`);
         console.log(`[CART-CHECKOUT]   • Seller Receives: $${(sellerTotal - (applicationFeeAmount/100)).toFixed(2)}`);
         
-        // Create Direct Charge PaymentIntent on connected account (manual confirmation)
-        console.log(`[STRIPE-FIX] NODE_ENV: "${process.env.NODE_ENV}", isProduction: ${process.env.NODE_ENV === 'production'}`);
+        // 🚀 DEVELOPMENT BYPASS: Skip Stripe entirely for testing
+        let paymentIntent;
         
-        const paymentIntentConfig = process.env.NODE_ENV === 'production' ? {
-          amount: Math.round(sellerTotal * 100), // Convert to cents
-          currency: "usd",
-          payment_method_types: ['card'], // Fix for Stripe payment method types
-          application_fee_amount: applicationFeeAmount,
-          confirmation_method: 'manual', // We'll confirm manually with saved payment method
-          metadata: {
-            userId: userId || 'guest',
-            sellerId: sellerId,
-            sellerSubtotal: sellerSubtotal.toString(),
-            sellerShipping: sellerShipping.toString(),
-            platformFeeAmount: (applicationFeeAmount / 100).toString(),
-            itemsCount: items.length.toString(),
-            cartGroupId: Date.now().toString(), // For order reconciliation
-            setupIntentId: setupIntent.id // Link to SetupIntent
-          },
-        } : {
-          amount: Math.round(sellerTotal * 100), // Convert to cents
-          currency: "usd",
-          payment_method_types: ['card'], // Fix for Stripe payment method types
-          confirmation_method: 'manual', // We'll confirm manually with saved payment method
-          metadata: {
-            userId: userId || 'guest',
-            sellerId: sellerId,
-            sellerSubtotal: sellerSubtotal.toString(),
-            sellerShipping: sellerShipping.toString(),
-            platformFeeAmount: (applicationFeeAmount / 100).toString(),
-            itemsCount: items.length.toString(),
-            cartGroupId: Date.now().toString(), // For order reconciliation
-            setupIntentId: setupIntent.id // Link to SetupIntent
-          },
-        };
-        
-        const paymentIntent = process.env.NODE_ENV === 'production' 
-          ? await stripe.paymentIntents.create(paymentIntentConfig, {
-              stripeAccount: seller.stripeConnectAccountId || undefined // Direct Charge to connected account
-            })
-          : await stripe.paymentIntents.create(paymentIntentConfig);
+        if (process.env.NODE_ENV === 'production') {
+          // Production: Use real Stripe with connected accounts
+          paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(sellerTotal * 100),
+            currency: "usd",
+            payment_method_types: ['card'],
+            application_fee_amount: applicationFeeAmount,
+            confirmation_method: 'manual',
+            metadata: {
+              userId: userId || 'guest',
+              sellerId: sellerId,
+              sellerSubtotal: sellerSubtotal.toString(),
+              sellerShipping: sellerShipping.toString(),
+              platformFeeAmount: (applicationFeeAmount / 100).toString(),
+              itemsCount: items.length.toString(),
+              cartGroupId: Date.now().toString(),
+              setupIntentId: setupIntent.id
+            },
+          }, {
+            stripeAccount: seller.stripeConnectAccountId
+          });
+        } else {
+          // Development: Mock successful PaymentIntent response
+          console.log(`[DEV-BYPASS] Creating mock PaymentIntent for testing`);
+          paymentIntent = {
+            id: `pi_mock_${Date.now()}`,
+            client_secret: `pi_mock_${Date.now()}_secret_mock`,
+            amount: Math.round(sellerTotal * 100),
+            currency: "usd",
+            status: "requires_confirmation"
+          };
+        }
         
         paymentIntents.push({
           sellerId: sellerId,
