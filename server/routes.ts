@@ -1406,19 +1406,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (process.env.NODE_ENV === 'development') {
         userId = '46848882';  // Development user
       } else {
-        // Use same robust authentication as other working routes
-        userId = req.user?.id || 
-                 req.user?.claims?.sub ||
-                 req.session?.passport?.user ||
-                 req.user?.sub ||
-                 req.user;
+        // EXACT SAME authentication pattern as working routes
+        if (req.user && req.user.claims && req.user.claims.sub) {
+          userId = req.user.claims.sub;
+          console.log(`[CART-CHECKOUT] Standard auth success for user: ${userId}`);
+        }
+        // Method 2: Mobile fallback - check session authentication
+        else if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+          // Handle mobile browser session format
+          if (req.user.id) {
+            userId = req.user.id;
+            console.log(`[CART-CHECKOUT] Mobile session auth success for user: ${userId}`);
+          } else if (req.user.claims && req.user.claims.sub) {
+            userId = req.user.claims.sub;
+            console.log(`[CART-CHECKOUT] Mobile claims auth success for user: ${userId}`);
+          }
+        }
+        // Method 3: Last resort - check passport session
+        else if (req.session && req.session.passport && req.session.passport.user) {
+          const passportUser = req.session.passport.user;
+          // Handle both string userId and full user object formats
+          userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
+          console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
+        }
         
-        console.log('[CART-CHECKOUT] Production auth check:', { 
-          hasReqUser: !!req.user,
-          hasSessionPassport: !!req.session?.passport?.user,
-          isAuthenticated: req.isAuthenticated?.(),
-          resolvedUserId: userId
-        });
+        console.log('[CART-CHECKOUT] Final auth result:', { userId });
       }
       
       const sessionId = req.sessionID;
