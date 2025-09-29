@@ -491,6 +491,11 @@ export default function Checkout() {
     console.log('[CHECKOUT] Initializing multi-seller checkout for items:', items.length);
     
     try {
+      // DEBUG: Log cookies before checkout
+      console.log('[CHECKOUT DEBUG] Cookies:', document.cookie);
+      console.log('[CHECKOUT DEBUG] Current domain:', window.location.hostname);
+      console.log('[CHECKOUT DEBUG] Has cm.sid cookie:', document.cookie.includes('cm.sid'));
+      
       // SURGICAL FIX: Use direct fetch to bypass apiRequest 401 issue
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
