@@ -7,6 +7,7 @@ import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
 interface CartSidebarProps {
@@ -17,9 +18,11 @@ interface CartSidebarProps {
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAuthReady } = useAuth();
 
   const { data: cartData, isLoading } = useQuery({
     queryKey: ["/api/cart"],
+    enabled: isAuthReady, // Wait for auth to be ready
   });
 
   const removeFromCartMutation = useMutation({
