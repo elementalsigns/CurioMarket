@@ -4029,7 +4029,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get cart
   app.get('/api/cart', async (req: any, res) => {
     try {
-      let userId = req.user?.claims?.sub || null;
+      // SURGICAL FIX: Use same auth pattern as other authenticated routes
+      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
       
       // Bearer token support (using exact same pattern as requireSellerAccess)
       if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
@@ -4077,7 +4078,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add to cart
   app.post('/api/cart/add', async (req: any, res) => {
     try {
-      let userId = req.user?.claims?.sub || null;
+      // SURGICAL FIX: Use same auth pattern as other authenticated routes
+      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
       
       // Bearer token support (using exact same pattern as requireSellerAccess)
       if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
