@@ -186,77 +186,16 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         }
       }
 
-      // Method 2: Check session-based authentication (fallback)
-      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        const sessionUser = req.user as any;
-        console.log('[AUTH] Session user found:', sessionUser.claims?.sub || sessionUser.id);
-        
-        if (sessionUser.claims && sessionUser.expires_at) {
-          const now = Math.floor(Date.now() / 1000);
-          
-          if (now <= sessionUser.expires_at) {
-            console.log('[AUTH] Success via session for user:', sessionUser.claims.sub);
-            return next();
-          }
-          
-          // Try to refresh session token
-          if (sessionUser.refresh_token) {
-            console.log('[AUTH] Attempting token refresh...');
-            const refreshedUser = await authService.refreshUserToken(sessionUser.refresh_token);
-            if (refreshedUser) {
-              req.user = {
-                claims: { sub: refreshedUser.id, email: refreshedUser.email },
-                access_token: refreshedUser.accessToken,
-                refresh_token: refreshedUser.refreshToken,
-                expires_at: refreshedUser.expiresAt,
-              };
-              return next();
-            }
-          }
-        } else if (sessionUser.claims) {
-          // For production users with valid sessions but no explicit token
-          console.log('[AUTH] Using session without explicit token for user:', sessionUser.claims.sub);
-          req.user = {
-            claims: sessionUser.claims,
-            access_token: 'session-based',
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-          };
-          return next();
-        }
-      }
-
-      // SURGICAL FIX: Handle authenticated sessions without claims (production case)
-      if (req.isAuthenticated && req.isAuthenticated()) {
-        console.log('[AUTH] Session authenticated but missing claims, reconstructing...');
-        
-        // Try to get user ID from session or req.user
-        let userId = null;
-        if (req.session?.passport?.user?.id) {
-          userId = req.session.passport.user.id;
-        } else if (req.user?.id) {
-          userId = req.user.id;
-        } else if (req.session?.passport?.user) {
-          // Passport sometimes stores just the ID directly
-          userId = req.session.passport.user;
-        }
-        
-        if (userId) {
-          try {
-            // Fetch user from database to get email
-            const user = await storage.getUser(userId);
-            if (user) {
-              console.log('[AUTH] Reconstructed claims for user:', userId);
-              req.user = {
-                claims: { sub: userId, email: user.email },
-                access_token: 'session-reconstructed',
-                expires_at: Math.floor(Date.now() / 1000) + 3600,
-              };
-              return next();
-            }
-          } catch (error) {
-            console.error('[AUTH] Error reconstructing claims:', error);
-          }
-        }
+      // Method 2: Use the WORKING authService.getUserFromRequest pattern
+      authUser = await authService.getUserFromRequest(req);
+      if (authUser) {
+        console.log('[AUTH] Auth success via authService for user:', authUser.id);
+        req.user = {
+          claims: { sub: authUser.id, email: authUser.email },
+          access_token: authUser.accessToken || 'session-based',
+          expires_at: authUser.expiresAt || (Math.floor(Date.now() / 1000) + 3600),
+        };
+        return next();
       }
 
       // Method 3: Development bypass for user ID 46848882
