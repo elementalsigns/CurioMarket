@@ -1506,7 +1506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
           payment_method_types: ['card'], // Fix for Stripe payment method types
-          application_fee_amount: applicationFeeAmount,
+          ...(process.env.NODE_ENV === 'production' ? { application_fee_amount: applicationFeeAmount } : {}),
           confirmation_method: 'manual', // We'll confirm manually with saved payment method
           metadata: {
             userId: userId || 'guest',
@@ -1519,7 +1519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             setupIntentId: setupIntent.id // Link to SetupIntent
           },
         }, process.env.NODE_ENV === 'production' ? {
-          stripeAccount: seller.stripeConnectAccountId // Direct Charge to connected account
+          stripeAccount: seller.stripeConnectAccountId || undefined // Direct Charge to connected account
         } : {});
         
         paymentIntents.push({
@@ -1531,7 +1531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subtotal: Math.round(sellerSubtotal * 100), // Convert to cents
           shipping: Math.round(sellerShipping * 100), // Convert to cents
           platformFee: applicationFeeAmount, // Already in cents
-          stripeAccount: seller.stripeConnectAccountId,
+          ...(process.env.NODE_ENV === 'production' ? { stripeAccount: seller.stripeConnectAccountId } : {}),
           items: items.map(item => ({
             listingId: item.listingId,
             title: item.listing.title,
