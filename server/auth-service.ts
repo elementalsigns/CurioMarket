@@ -1,4 +1,4 @@
-import * as openidClient from "openid-client";
+import * as client from "openid-client";
 import { storage } from "./storage";
 import type { RequestHandler } from "express";
 
@@ -35,14 +35,9 @@ export class AuthService {
     try {
       console.log('[AUTH] Initializing with issuer:', this.config.issuerUrl);
       
-      const issuer = await (openidClient as any).Issuer.discover(this.config.issuerUrl);
+      const config = await client.discovery(new URL(this.config.issuerUrl), this.config.clientId);
 
-      this.oidcClient = new issuer.Client({
-        client_id: this.config.clientId,
-        client_secret: this.config.clientSecret,
-        redirect_uris: [this.config.redirectUri],
-        response_types: ['code'],
-      });
+      this.oidcClient = config;
 
       this.isInitialized = true;
       console.log('[AUTH] Successfully initialized');
