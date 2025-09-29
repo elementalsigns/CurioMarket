@@ -1455,30 +1455,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('[CART-CHECKOUT] Created SetupIntent:', setupIntent.id);
       
-      console.log('[DEBUG] About to initialize arrays...');
       const paymentIntents = [];
-      console.log('[DEBUG] PaymentIntents array created');
       let totalAmount = 0;
-      console.log('[DEBUG] TotalAmount initialized');
       let totalPlatformFee = 0;
-      console.log('[DEBUG] TotalPlatformFee initialized');
       
-      // Create one PaymentIntent per seller using Direct Charges (no automatic payment methods)
-      console.log('[DEBUG] About to enter seller loop. SellerGroups:', Object.keys(sellerGroups));
-      console.log('[DEBUG] SellerGroups entries:', Object.entries(sellerGroups).length);
+      // Create one PaymentIntent per seller using Direct Charges
       for (const [sellerId, items] of Object.entries(sellerGroups)) {
         // Get seller's connected account
-        console.log(`[DEBUG] Looking up seller with ID: ${sellerId}`);
         const seller = await storage.getSeller(sellerId);
-        console.log(`[DEBUG] Seller lookup result:`, seller ? `Found: ${seller.shopName}` : 'NULL');
         
         // SURGICAL NULL CHECK - fail immediately if seller not found
         if (!seller) {
-          console.log(`[ERROR] Seller ${sellerId} not found in database!`);
           return res.status(400).json({ 
             error: `Seller not found: ${sellerId}. Please contact support.`,
-            sellerId: sellerId,
-            debug: 'SELLER_NOT_FOUND'
+            sellerId: sellerId
           });
         }
         if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
@@ -1517,6 +1507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const paymentIntent = await stripe.paymentIntents.create({
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
+          payment_method_types: ['card'], // Fix for Stripe payment method types
           application_fee_amount: applicationFeeAmount,
           confirmation_method: 'manual', // We'll confirm manually with saved payment method
           metadata: {
