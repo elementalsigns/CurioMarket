@@ -1429,6 +1429,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
           console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
         }
+        // Method 4: JWT Bearer token (MISSING FROM ORIGINAL FIX!)
+        else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+          try {
+            const token = req.headers.authorization.slice(7);
+            const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
+            const jwt = require('jsonwebtoken');
+            const payload = jwt.verify(token, secret) as any;
+            
+            if (payload.scope === 'seller' && payload.aud === 'curio-market') {
+              // Resolve user by sub (can be userId or email)
+              if (payload.sub.includes('@')) {
+                // Email-based lookup
+                const user = await storage.getUserByEmail(payload.sub);
+                if (user) {
+                  userId = user.id;
+                  console.log(`[CART-CHECKOUT] Bearer token auth success for email: ${payload.sub}, user: ${userId}`);
+                }
+              } else {
+                // Direct user ID
+                userId = payload.sub;
+                console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
+              }
+            }
+          } catch (error) {
+            console.log(`[CART-CHECKOUT] Bearer token verification failed:`, error);
+          }
+        }
         
         console.log('[CART-CHECKOUT] Final auth result:', { userId });
       }
