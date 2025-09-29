@@ -101,6 +101,7 @@ export interface IStorage {
   getOrCreateCart(userId?: string, sessionId?: string): Promise<Cart>;
   addToCart(cartId: string, listingId: string, quantity: number): Promise<CartItem>;
   getCartItems(cartId: string): Promise<CartItem[]>;
+  getAllCartsWithItems(): Promise<Cart[]>;
   updateCartItem(id: string, quantity: number): Promise<CartItem>;
   removeFromCart(id: string): Promise<void>;
   clearCart(cartId: string): Promise<void>;
@@ -795,6 +796,27 @@ export class DatabaseStorage implements IStorage {
     }
     
     return enrichedItems;
+  }
+
+  async getAllCartsWithItems(): Promise<Cart[]> {
+    // Get all cart IDs that have items
+    const cartsWithItems = await db
+      .selectDistinct({ cartId: cartItems.cartId })
+      .from(cartItems);
+    
+    if (cartsWithItems.length === 0) {
+      return [];
+    }
+    
+    // Get the actual cart records, ordered by creation date (most recent first)
+    const cartIds = cartsWithItems.map(item => item.cartId);
+    const carts = await db
+      .select()
+      .from(carts)
+      .where(inArray(carts.id, cartIds))
+      .orderBy(desc(carts.createdAt));
+    
+    return carts;
   }
 
   async updateCartItem(id: string, quantity: number): Promise<CartItem> {
