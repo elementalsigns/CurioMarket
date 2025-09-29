@@ -1401,37 +1401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", async (req: any, res) => {
-    // SURGICAL FIX #12: Production checkout authentication bypass
-    let userId = null;
-    
-    if (process.env.NODE_ENV === 'development') {
-      userId = '46848882';
-      console.log('[CHECKOUT-FIX] Development bypass active');
-    } else {
-      // Production: Use same proven strategy as admin bypass
-      const hostname = req.get('host') || '';
-      const isTargetDomain = hostname === 'www.curiosities.market' || hostname === 'curiosities.market';
-      
-      if (isTargetDomain) {
-        userId = '46848882'; // Same user who works in admin
-        console.log('[CHECKOUT-FIX] Production bypass for curiosities.market domain');
-        
-        // Set req.user for downstream compatibility
-        req.user = {
-          id: '46848882',
-          claims: {
-            sub: '46848882',
-            email: 'elementalsigns@gmail.com'
-          }
-        };
-      }
-    }
-    
-    if (!userId) {
-      console.log('[CHECKOUT-FIX] Authentication failed - domain not recognized');
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  app.post("/api/cart/checkout", requireAuth, async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
