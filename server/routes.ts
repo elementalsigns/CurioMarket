@@ -1401,7 +1401,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", requireAuth, async (req: any, res) => {
+  app.post("/api/cart/checkout", async (req: any, res) => {
+    // SURGICAL FIX: Custom auth check that works in production
+    let authenticated = false;
+    let userId = null;
+    
+    if (process.env.NODE_ENV === 'development') {
+      authenticated = true;
+      userId = '46848882';
+      console.log('[CHECKOUT-AUTH] Development bypass active');
+    } else {
+      // Production auth check - multiple strategies
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        try {
+          const sessionUser = await authService.getUserFromRequest(req);
+          if (sessionUser) {
+            authenticated = true;
+            userId = sessionUser.id;
+            console.log('[CHECKOUT-AUTH] Production session auth success:', userId);
+          }
+        } catch (error) {
+          console.error('[CHECKOUT-AUTH] Session auth failed:', error);
+        }
+      }
+    }
+    
+    if (!authenticated || !userId) {
+      console.log('[CHECKOUT-AUTH] Authentication failed - no valid session');
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
@@ -1409,31 +1437,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      // FIXED: Use session-based auth like other working endpoints
-      let userId = null;
-      
-      if (process.env.NODE_ENV === 'development') {
-        userId = '46848882';  // Development user
-        console.log(`[CART-CHECKOUT] Development auth success for user: ${userId}`);
-      } else {
-        // Use auth service to get user from session - same as other working routes
-        try {
-          const sessionUser = await authService.getUserFromRequest(req);
-          if (sessionUser) {
-            userId = sessionUser.id;
-            console.log(`[CART-CHECKOUT] Session auth success for user: ${userId}`);
-          } else {
-            console.log(`[CART-CHECKOUT] Session auth failed - no user found`);
-          }
-        } catch (error) {
-          console.error(`[CART-CHECKOUT] Auth error:`, error);
-        }
-      }
-      
-      if (!userId) {
-        console.log(`[CART-CHECKOUT] Authentication failed - no userId`);
-        return res.status(401).json({ message: "Unauthorized" });
-      }
       
       const sessionId = req.sessionID;
       console.log('[CART-CHECKOUT] Session debug:', { sessionId: sessionId, hasSession: !!req.session });
