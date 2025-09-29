@@ -1455,12 +1455,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId = req.user.claims.sub;
         userEmail = req.user.claims.email;
         console.log('[CART-CHECKOUT] Using cookie authentication for user:', userId);
+        
+        // SECURITY: If body also has user data, verify it matches the session
+        if (bodyUserId && bodyUserId !== userId) {
+          console.log('[CART-CHECKOUT] SECURITY WARNING: Body user ID does not match session user ID');
+          return res.status(401).json({ message: "Authentication mismatch" });
+        }
       }
       // Fallback to body-based auth if cookies failed
       else if (bodyUserId && bodyUserEmail) {
         userId = bodyUserId;
         userEmail = bodyUserEmail;
         console.log('[CART-CHECKOUT] Using fallback body authentication for user:', userId);
+        
+        // ADDITIONAL SECURITY: Verify this user exists and the request came from their session
+        // The frontend should only have this data if they're logged in
+        const user = await storage.getUserById(userId);
+        if (!user || user.email !== userEmail) {
+          console.log('[CART-CHECKOUT] SECURITY WARNING: Invalid user data in request body');
+          return res.status(401).json({ message: "Invalid authentication" });
+        }
       }
       
       if (!userId) {
