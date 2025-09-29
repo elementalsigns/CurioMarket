@@ -225,6 +225,40 @@ export function createAuthMiddleware(authService: AuthService): RequestHandler {
         }
       }
 
+      // SURGICAL FIX: Handle authenticated sessions without claims (production case)
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        console.log('[AUTH] Session authenticated but missing claims, reconstructing...');
+        
+        // Try to get user ID from session or req.user
+        let userId = null;
+        if (req.session?.passport?.user?.id) {
+          userId = req.session.passport.user.id;
+        } else if (req.user?.id) {
+          userId = req.user.id;
+        } else if (req.session?.passport?.user) {
+          // Passport sometimes stores just the ID directly
+          userId = req.session.passport.user;
+        }
+        
+        if (userId) {
+          try {
+            // Fetch user from database to get email
+            const user = await storage.getUser(userId);
+            if (user) {
+              console.log('[AUTH] Reconstructed claims for user:', userId);
+              req.user = {
+                claims: { sub: userId, email: user.email },
+                access_token: 'session-reconstructed',
+                expires_at: Math.floor(Date.now() / 1000) + 3600,
+              };
+              return next();
+            }
+          } catch (error) {
+            console.error('[AUTH] Error reconstructing claims:', error);
+          }
+        }
+      }
+
       // Method 3: Development bypass for user ID 46848882
       if (process.env.NODE_ENV === 'development' && hostname.includes('replit.dev')) {
         console.log('[AUTH] Development bypass for user 46848882');
