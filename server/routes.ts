@@ -1449,6 +1449,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[CART-CHECKOUT] Processing checkout for user: ${userId}`);
       
+      // Get sessionId from request
+      const sessionId = req.sessionID || req.session?.id;
+      
       // SURGICAL FIX: Multi-strategy cart lookup for production reliability
       let cart, cartItems;
       
