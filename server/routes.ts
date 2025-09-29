@@ -1470,7 +1470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // ADDITIONAL SECURITY: Verify this user exists and the request came from their session
         // The frontend should only have this data if they're logged in
-        const user = await storage.getUserById(userId);
+        const user = await storage.getUser(userId);
         if (!user || user.email !== userEmail) {
           console.log('[CART-CHECKOUT] SECURITY WARNING: Invalid user data in request body');
           return res.status(401).json({ message: "Invalid authentication" });
