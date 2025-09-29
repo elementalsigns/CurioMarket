@@ -1465,6 +1465,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[DEBUG] Looking up seller with ID: ${sellerId}`);
         const seller = await storage.getSeller(sellerId);
         console.log(`[DEBUG] Seller lookup result:`, seller ? `Found: ${seller.shopName}` : 'NULL');
+        
+        // SURGICAL NULL CHECK - fail immediately if seller not found
+        if (!seller) {
+          console.log(`[ERROR] Seller ${sellerId} not found in database!`);
+          return res.status(400).json({ 
+            error: `Seller not found: ${sellerId}. Please contact support.`,
+            sellerId: sellerId,
+            debug: 'SELLER_NOT_FOUND'
+          });
+        }
         if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
           return res.status(400).json({ 
             error: `Seller account not set up for payments. Please contact support.`,
