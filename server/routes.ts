@@ -141,29 +141,30 @@ const requireAuth = async (req: any, res: any, next: any) => {
     return next();
   }
 
-  // Production authentication - SURGICAL FIX: Set proper user format
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    // If req.user doesn't have claims format, reconstruct it
-    if (!req.user?.claims?.sub) {
-      try {
-        // Get user from session using auth service pattern
-        const sessionUser = await authService.getUserFromRequest(req);
-        if (sessionUser) {
-          req.user = {
-            claims: {
-              sub: sessionUser.id,
-              email: sessionUser.email
-            }
-          };
-          console.log('[AUTH] Reconstructed user claims for requireAuth:', sessionUser.id);
+  // Production authentication - Use authService.getUserFromRequest (working pattern)
+  try {
+    const sessionUser = await authService.getUserFromRequest(req);
+    if (sessionUser) {
+      req.user = {
+        claims: {
+          sub: sessionUser.id,
+          email: sessionUser.email
         }
-      } catch (error) {
-        console.error('[AUTH] Error reconstructing user in requireAuth:', error);
-      }
+      };
+      console.log('[AUTH] Auth success via authService for user:', sessionUser.id);
+      return next();
     }
+  } catch (error) {
+    console.error('[AUTH] Error in authService.getUserFromRequest:', error);
+  }
+  
+  // Fallback: Try req.isAuthenticated if authService fails
+  if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
+    console.log('[AUTH] Fallback auth success for user:', req.user.claims.sub);
     return next();
   }
   
+  console.log('[AUTH] Authentication failed - no valid user found');
   return res.status(401).json({ message: "Unauthorized" });
 };
 
