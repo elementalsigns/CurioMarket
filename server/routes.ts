@@ -1427,8 +1427,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { shippingAddress } = req.body;
       
-      // Get user ID from authenticated request
-      const userId = req.user?.claims?.sub;
+      // Get user ID from authenticated request - EXACT same pattern as working /api/auth/user endpoint
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
+      
       if (!userId) {
         console.log('[CART-CHECKOUT] No user ID found in authenticated request');
         return res.status(401).json({ message: "User not found" });
