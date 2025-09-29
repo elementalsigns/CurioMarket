@@ -1391,29 +1391,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { shippingAddress } = req.body;
-      // PRODUCTION FIX: Use robust auth logic that works in production
+      // FIXED: Use session-based auth like other working endpoints
       let userId = null;
       
-      // WORKING AUTH LOGIC - Same as other endpoints
       if (process.env.NODE_ENV === 'development') {
         userId = '46848882';  // Development user
         console.log(`[CART-CHECKOUT] Development auth success for user: ${userId}`);
       } else {
-        // Use exact same pattern as working auth endpoints
-        console.log(`[CART-CHECKOUT] Auth debug:`, {
-          isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : 'undefined',
-          hasUser: !!req.user,
-          userKeys: req.user ? Object.keys(req.user) : [],
-          userClaims: req.user?.claims,
-          sessionID: req.sessionID
-        });
-        
-        if (req.isAuthenticated && req.isAuthenticated()) {
-          userId = req.user?.claims?.sub;
-          console.log(`[CART-CHECKOUT] Production auth success for user: ${userId}`);
-        } else {
-          console.log(`[CART-CHECKOUT] Production auth failed - not authenticated`);
+        // Use auth service to get user from session - same as other working routes
+        try {
+          const sessionUser = await authService.getUserFromRequest(req);
+          if (sessionUser) {
+            userId = sessionUser.id;
+            console.log(`[CART-CHECKOUT] Session auth success for user: ${userId}`);
+          } else {
+            console.log(`[CART-CHECKOUT] Session auth failed - no user found`);
+          }
+        } catch (error) {
+          console.error(`[CART-CHECKOUT] Auth error:`, error);
         }
+      }
+      
+      if (!userId) {
+        console.log(`[CART-CHECKOUT] Authentication failed - no userId`);
+        return res.status(401).json({ message: "Unauthorized" });
       }
       
       const sessionId = req.sessionID;
