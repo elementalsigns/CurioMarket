@@ -21,14 +21,15 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { isAuthReady } = useAuth();
 
   const { data: cartData, isLoading } = useQuery({
-    queryKey: ["/api/cart"],
+    queryKey: ["cart"],
+    queryFn: () => apiRequest("GET", "/api/cart"),
     enabled: isAuthReady, // Wait for auth to be ready
   });
 
   const removeFromCartMutation = useMutation({
     mutationFn: (itemId: string) => apiRequest("DELETE", `/api/cart/items/${itemId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast({
         title: "Removed from cart",
         description: "Item has been removed from your cart.",
@@ -48,7 +49,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => 
       apiRequest("PUT", `/api/cart/items/${itemId}`, { quantity }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: (error: any) => {
       console.error("Update quantity error:", error);
