@@ -1,6 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { z } from "zod";
 import Stripe from "stripe";
@@ -983,37 +984,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect(301, redirectURL);
   });
 
-  // CORS configuration - CRITICAL for production authentication
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    const hostname = req.get('host') || '';
-    
-    // Allow requests from production and development domains
-    if (origin && (
-      origin.includes('curiosities.market') || 
-      origin.includes('localhost') || 
-      origin.includes('replit.dev')
-    )) {
-      res.header('Access-Control-Allow-Origin', origin);
-    } else if (!origin) {
-      // Allow same-origin requests (when origin header is not present)
-      res.header('Access-Control-Allow-Origin', '*');
-    }
-    
-    // Essential for cookie-based authentication
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, Cookie');
-    
-    // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-      return;
-    }
-    
-    console.log(`[CORS] Request from origin: ${origin || 'none'}, host: ${hostname}`);
-    next();
-  });
+  // CORS configuration - ChatGPT's exact specification for production authentication
+  app.use(cors({
+    origin: ['https://www.curiosities.market', 'https://curiosities.market', 'http://localhost:3000', /\.replit\.dev$/], // production + dev domains
+    credentials: true, // allow cookies
+  }));
 
   // Static file serving for assets
   app.use('/assets', express.static(path.join(process.cwd(), 'attached_assets')));
@@ -1777,10 +1752,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware  
   await setupAuth(app);
 
-  // Production session debugging middleware
+  // Session debugging middleware - works in all environments for debugging
   app.use((req: any, _res, next) => {
-    if (req.path.startsWith('/api/') && process.env.NODE_ENV === 'production') {
-      console.log('[PRODUCTION-AUTH]', {
+    if (req.path.startsWith('/api/cart/checkout') || req.path.startsWith('/api/auth/')) {
+      console.log('[AUTH-DEBUG]', {
         path: req.path,
         method: req.method,
         cookiesPresent: !!req.headers.cookie,
@@ -1790,6 +1765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAuth: req.isAuthenticated?.() ?? 'n/a',
         host: req.headers.host,
         origin: req.headers.origin,
+        env: process.env.NODE_ENV || 'undefined'
       });
     }
     next();
