@@ -128,7 +128,7 @@ async function hasSellerAccess(user: User): Promise<boolean> {
   return false;
 }
 
-// PRODUCTION-COMPATIBLE AUTH MIDDLEWARE - Uses same pattern as other working routes  
+// FIXED AUTH MIDDLEWARE - Uses working session pattern
 const requireAuth = async (req: any, res: any, next: any) => {
   // Development bypass
   if (process.env.NODE_ENV === 'development') {
@@ -141,30 +141,13 @@ const requireAuth = async (req: any, res: any, next: any) => {
     return next();
   }
 
-  // Production authentication - Use authService.getUserFromRequest (working pattern)
-  try {
-    const sessionUser = await authService.getUserFromRequest(req);
-    if (sessionUser) {
-      req.user = {
-        claims: {
-          sub: sessionUser.id,
-          email: sessionUser.email
-        }
-      };
-      console.log('[AUTH] Auth success via authService for user:', sessionUser.id);
-      return next();
-    }
-  } catch (error) {
-    console.error('[AUTH] Error in authService.getUserFromRequest:', error);
-  }
-  
-  // Fallback: Try req.isAuthenticated if authService fails
+  // Production: Use req.isAuthenticated() - the WORKING pattern
   if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
-    console.log('[AUTH] Fallback auth success for user:', req.user.claims.sub);
+    console.log('[AUTH] Session auth success for user:', req.user.claims.sub);
     return next();
   }
   
-  console.log('[AUTH] Authentication failed - no valid user found');
+  console.log('[AUTH] Authentication failed - no valid session');
   return res.status(401).json({ message: "Unauthorized" });
 };
 
