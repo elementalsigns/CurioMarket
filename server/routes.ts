@@ -4,7 +4,6 @@ import express from "express";
 import path from "path";
 import { z } from "zod";
 import Stripe from "stripe";
-import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { authService } from "./auth-service";
@@ -279,27 +278,16 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
         console.log(`[CAPABILITY] Normalized req.user from passport session for user: ${userId}`);
       }
     }
-    // Method 4: JWT Bearer token (for magic login mobile fix)
+    // Method 4: Bearer token using authService (ESM-compatible)
     else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       try {
         const token = req.headers.authorization.slice(7);
-        const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
-        const payload = jwt.verify(token, secret) as any;
-        
-        if (payload.scope === 'seller' && payload.aud === 'curio-market') {
-          // Resolve user by sub (can be userId or email)
-          if (payload.sub.includes('@')) {
-            // Email-based lookup
-            const user = await storage.getUserByEmail(payload.sub);
-            if (user) {
-              userId = user.id;
-              console.log(`[CAPABILITY] Bearer token auth success for email: ${payload.sub}, user: ${userId}`);
-            }
-          } else {
-            // Direct user ID
-            userId = payload.sub;
-            console.log(`[CAPABILITY] Bearer token auth success for user: ${userId}`);
-          }
+        const authUser = await authService.validateToken(token);
+        if (authUser) {
+          userId = authUser.id;
+          console.log(`[CAPABILITY] Bearer token auth success for user: ${userId}`);
+        } else {
+          console.log(`[CAPABILITY] Bearer token validation failed - no user returned`);
         }
       } catch (error) {
         console.log(`[CAPABILITY] Bearer token verification failed:`, error instanceof Error ? error.message : String(error));
@@ -1429,35 +1417,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
           console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
         }
-        // Method 4: JWT Bearer token with detailed debugging
+        // Method 4: Bearer token using authService (ESM-compatible)
         else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
           console.log(`[CART-CHECKOUT] Processing Bearer token...`);
           try {
             const token = req.headers.authorization.slice(7);
-            const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
-            console.log(`[CART-CHECKOUT] Using secret:`, secret ? 'SECRET_PRESENT' : 'NO_SECRET');
-            
-            const payload = jwt.verify(token, secret) as any;
-            console.log(`[CART-CHECKOUT] Token payload:`, { scope: payload.scope, aud: payload.aud, sub: payload.sub });
-            
-            if (payload.scope === 'seller' && payload.aud === 'curio-market') {
-              // Resolve user by sub (can be userId or email)
-              if (payload.sub.includes('@')) {
-                console.log(`[CART-CHECKOUT] Looking up user by email:`, payload.sub);
-                const user = await storage.getUserByEmail(payload.sub);
-                if (user) {
-                  userId = user.id;
-                  console.log(`[CART-CHECKOUT] Bearer token auth success for email: ${payload.sub}, user: ${userId}`);
-                } else {
-                  console.log(`[CART-CHECKOUT] No user found for email:`, payload.sub);
-                }
-              } else {
-                // Direct user ID
-                userId = payload.sub;
-                console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
-              }
+            const authUser = await authService.validateToken(token);
+            if (authUser) {
+              userId = authUser.id;
+              console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
             } else {
-              console.log(`[CART-CHECKOUT] Token scope/aud mismatch. Expected: scope='seller', aud='curio-market'. Got:`, { scope: payload.scope, aud: payload.aud });
+              console.log(`[CART-CHECKOUT] Bearer token validation failed - no user returned`);
             }
           } catch (error) {
             console.log(`[CART-CHECKOUT] Bearer token verification failed:`, error.message);
