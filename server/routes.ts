@@ -1502,6 +1502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[CART-CHECKOUT]   • Seller Receives: $${(sellerTotal - (applicationFeeAmount/100)).toFixed(2)}`);
         
         // Create Direct Charge PaymentIntent on connected account (manual confirmation)
+        console.log(`[STRIPE-FIX] NODE_ENV: "${process.env.NODE_ENV}", isProduction: ${process.env.NODE_ENV === 'production'}`);
         const paymentIntent = await stripe.paymentIntents.create({
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
