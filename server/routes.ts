@@ -1455,9 +1455,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('[CART-CHECKOUT] Created SetupIntent:', setupIntent.id);
       
+      console.log('[DEBUG] About to initialize arrays...');
       const paymentIntents = [];
+      console.log('[DEBUG] PaymentIntents array created');
       let totalAmount = 0;
+      console.log('[DEBUG] TotalAmount initialized');
       let totalPlatformFee = 0;
+      console.log('[DEBUG] TotalPlatformFee initialized');
       
       // Create one PaymentIntent per seller using Direct Charges (no automatic payment methods)
       console.log('[DEBUG] About to enter seller loop. SellerGroups:', Object.keys(sellerGroups));
