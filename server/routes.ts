@@ -1462,19 +1462,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const sessionId = req.sessionID;
       
-      // Get cart items with validation logging
-      const cart = await storage.getOrCreateCart(userId, sessionId);
-      const cartItems = await storage.getCartItems(cart.id);
+      // SURGICAL FIX: Multi-strategy cart lookup for production reliability
+      let cart, cartItems;
       
-      console.log('[CART-CHECKOUT] Cart validation:', { 
+      // Strategy 1: Standard lookup with userId and sessionId
+      cart = await storage.getOrCreateCart(userId, sessionId);
+      cartItems = await storage.getCartItems(cart.id);
+      
+      console.log('[CART-CHECKOUT] Strategy 1 - Standard lookup:', { 
         cartId: cart.id,
         userId: userId,
         sessionId: sessionId,
         itemCount: cartItems?.length || 0
       });
       
+      // Strategy 2: If no items found and we have userId, try session-only lookup  
+      if ((!cartItems || cartItems.length === 0) && sessionId) {
+        console.log('[CART-CHECKOUT] Strategy 2 - Trying session-only lookup');
+        const sessionCart = await storage.getOrCreateCart(undefined, sessionId);
+        const sessionItems = await storage.getCartItems(sessionCart.id);
+        
+        if (sessionItems && sessionItems.length > 0) {
+          cart = sessionCart;
+          cartItems = sessionItems;
+          console.log('[CART-CHECKOUT] Strategy 2 SUCCESS - Found', sessionItems.length, 'items in session cart');
+        }
+      }
+      
+      // Strategy 3: If still no items and we have userId, try userId-only lookup
+      if ((!cartItems || cartItems.length === 0) && userId) {
+        console.log('[CART-CHECKOUT] Strategy 3 - Trying userId-only lookup');
+        const userCart = await storage.getOrCreateCart(userId, undefined);
+        const userItems = await storage.getCartItems(userCart.id);
+        
+        if (userItems && userItems.length > 0) {
+          cart = userCart;
+          cartItems = userItems;
+          console.log('[CART-CHECKOUT] Strategy 3 SUCCESS - Found', userItems.length, 'items in user cart');
+        }
+      }
+      
+      console.log('[CART-CHECKOUT] Final cart validation:', { 
+        cartId: cart.id,
+        userId: userId,
+        sessionId: sessionId,
+        itemCount: cartItems?.length || 0,
+        strategy: 'multi-lookup'
+      });
+      
       if (!cartItems || cartItems.length === 0) {
-        console.log('[CART-CHECKOUT] EMPTY CART - userId:', userId, 'sessionId:', sessionId, 'cartId:', cart.id);
+        console.log('[CART-CHECKOUT] EMPTY CART AFTER ALL STRATEGIES - userId:', userId, 'sessionId:', sessionId, 'cartId:', cart.id);
         return res.status(400).json({ error: "Cart is empty" });
       }
       
