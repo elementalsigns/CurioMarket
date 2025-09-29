@@ -278,7 +278,7 @@ const requireSellerAccess: RequestHandler = async (req: any, res, next) => {
         console.log(`[CAPABILITY] Normalized req.user from passport session for user: ${userId}`);
       }
     }
-    // Method 4: Bearer token using authService (ESM-compatible)
+    // Method 4: Bearer token using authService (now initialized)
     else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       try {
         const token = req.headers.authorization.slice(7);
@@ -944,7 +944,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-
+  // CRITICAL: Initialize authService for production authentication
+  try {
+    console.log('[AUTH] Initializing authService for production...');
+    await authService.initialize();
+    console.log('[AUTH] ✅ AuthService initialized successfully');
+  } catch (error) {
+    console.error('[AUTH] ❌ CRITICAL: Failed to initialize authService:', error);
+    // Continue startup but log the failure
+  }
 
   // Compatibility redirect: /api/image-proxy/* -> /objects/*
   app.get("/api/image-proxy/*", async (req: any, res) => {
@@ -1417,7 +1425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
           console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
         }
-        // Method 4: Bearer token using authService (ESM-compatible)
+        // Method 4: Bearer token using authService (now initialized)
         else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
           console.log(`[CART-CHECKOUT] Processing Bearer token...`);
           try {
