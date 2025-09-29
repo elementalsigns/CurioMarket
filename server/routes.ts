@@ -1486,7 +1486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // ✅ ENHANCED FEE LOGGING for verification
-        console.log(`[CART-CHECKOUT] 💰 Fee Calculation for ${seller.shopName}:`);
+        console.log(`[CART-CHECKOUT] 💰 Fee Calculation for ${seller?.shopName || sellerId}:`);
         console.log(`[CART-CHECKOUT]   • Item Subtotal: $${sellerSubtotal.toFixed(2)}`);
         console.log(`[CART-CHECKOUT]   • Shipping Cost: $${sellerShipping.toFixed(2)}`);
         console.log(`[CART-CHECKOUT]   • Total Charge: $${sellerTotal.toFixed(2)}`);
