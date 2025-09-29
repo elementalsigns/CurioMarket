@@ -128,7 +128,7 @@ async function hasSellerAccess(user: User): Promise<boolean> {
   return false;
 }
 
-// FIXED AUTH MIDDLEWARE - Uses working session pattern
+// FIXED AUTH MIDDLEWARE - Uses the EXACT working pattern from lines 282-290
 const requireAuth = async (req: any, res: any, next: any) => {
   // Development bypass
   if (process.env.NODE_ENV === 'development') {
@@ -141,10 +141,29 @@ const requireAuth = async (req: any, res: any, next: any) => {
     return next();
   }
 
-  // Production: Use req.isAuthenticated() - the WORKING pattern
-  if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
-    console.log('[AUTH] Session auth success for user:', req.user.claims.sub);
-    return next();
+  // Production: Use the WORKING authentication pattern that handles both formats
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    let userId = null;
+    
+    // Standard format: req.user.claims.sub
+    if (req.user.claims && req.user.claims.sub) {
+      userId = req.user.claims.sub;
+      console.log('[AUTH] Standard auth success for user:', userId);
+      return next();
+    }
+    // Production format: req.user.id (like mobile/session auth)
+    else if (req.user.id) {
+      // Transform to claims format for consistency
+      req.user = {
+        claims: {
+          sub: req.user.id,
+          email: req.user.email || req.user.claims?.email
+        },
+        ...req.user
+      };
+      console.log('[AUTH] Production session auth success for user:', req.user.id);
+      return next();
+    }
   }
   
   console.log('[AUTH] Authentication failed - no valid session');
