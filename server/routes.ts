@@ -1429,31 +1429,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId = typeof passportUser === 'string' ? passportUser : (passportUser.id || passportUser.claims?.sub);
           console.log(`[CART-CHECKOUT] Passport session auth success for user: ${userId}`);
         }
-        // Method 4: JWT Bearer token (MISSING FROM ORIGINAL FIX!)
+        // Method 4: JWT Bearer token with detailed debugging
         else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+          console.log(`[CART-CHECKOUT] Processing Bearer token...`);
           try {
             const token = req.headers.authorization.slice(7);
             const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
+            console.log(`[CART-CHECKOUT] Using secret:`, secret ? 'SECRET_PRESENT' : 'NO_SECRET');
+            
             const jwt = require('jsonwebtoken');
             const payload = jwt.verify(token, secret) as any;
+            console.log(`[CART-CHECKOUT] Token payload:`, { scope: payload.scope, aud: payload.aud, sub: payload.sub });
             
             if (payload.scope === 'seller' && payload.aud === 'curio-market') {
               // Resolve user by sub (can be userId or email)
               if (payload.sub.includes('@')) {
-                // Email-based lookup
+                console.log(`[CART-CHECKOUT] Looking up user by email:`, payload.sub);
                 const user = await storage.getUserByEmail(payload.sub);
                 if (user) {
                   userId = user.id;
                   console.log(`[CART-CHECKOUT] Bearer token auth success for email: ${payload.sub}, user: ${userId}`);
+                } else {
+                  console.log(`[CART-CHECKOUT] No user found for email:`, payload.sub);
                 }
               } else {
                 // Direct user ID
                 userId = payload.sub;
                 console.log(`[CART-CHECKOUT] Bearer token auth success for user: ${userId}`);
               }
+            } else {
+              console.log(`[CART-CHECKOUT] Token scope/aud mismatch. Expected: scope='seller', aud='curio-market'. Got:`, { scope: payload.scope, aud: payload.aud });
             }
           } catch (error) {
-            console.log(`[CART-CHECKOUT] Bearer token verification failed:`, error);
+            console.log(`[CART-CHECKOUT] Bearer token verification failed:`, error.message);
           }
         }
         
@@ -1461,6 +1469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const sessionId = req.sessionID;
+      console.log('[CART-CHECKOUT] Session debug:', { sessionId: sessionId, hasSession: !!req.session });
       
       // SURGICAL FIX: Multi-strategy cart lookup for production reliability
       let cart, cartItems;
