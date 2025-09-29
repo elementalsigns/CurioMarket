@@ -1503,7 +1503,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Create Direct Charge PaymentIntent on connected account (manual confirmation)
         console.log(`[STRIPE-FIX] NODE_ENV: "${process.env.NODE_ENV}", isProduction: ${process.env.NODE_ENV === 'production'}`);
-        const paymentIntent = await stripe.paymentIntents.create({
+        
+        const paymentIntentConfig = {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
           payment_method_types: ['card'], // Fix for Stripe payment method types
@@ -1519,9 +1520,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cartGroupId: Date.now().toString(), // For order reconciliation
             setupIntentId: setupIntent.id // Link to SetupIntent
           },
-        }, process.env.NODE_ENV === 'production' ? {
-          stripeAccount: seller.stripeConnectAccountId || undefined // Direct Charge to connected account
-        } : {});
+        };
+        
+        const paymentIntent = process.env.NODE_ENV === 'production' 
+          ? await stripe.paymentIntents.create(paymentIntentConfig, {
+              stripeAccount: seller.stripeConnectAccountId || undefined // Direct Charge to connected account
+            })
+          : await stripe.paymentIntents.create(paymentIntentConfig);
         
         paymentIntents.push({
           sellerId: sellerId,
