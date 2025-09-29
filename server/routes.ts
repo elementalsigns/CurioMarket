@@ -1401,35 +1401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", async (req: any, res) => {
-    // SURGICAL FIX: Custom auth check that works in production
-    let authenticated = false;
-    let userId = null;
-    
-    if (process.env.NODE_ENV === 'development') {
-      authenticated = true;
-      userId = '46848882';
-      console.log('[CHECKOUT-AUTH] Development bypass active');
-    } else {
-      // Production auth check - multiple strategies
-      if (req.isAuthenticated && req.isAuthenticated()) {
-        try {
-          const sessionUser = await authService.getUserFromRequest(req);
-          if (sessionUser) {
-            authenticated = true;
-            userId = sessionUser.id;
-            console.log('[CHECKOUT-AUTH] Production session auth success:', userId);
-          }
-        } catch (error) {
-          console.error('[CHECKOUT-AUTH] Session auth failed:', error);
-        }
-      }
-    }
-    
-    if (!authenticated || !userId) {
-      console.log('[CHECKOUT-AUTH] Authentication failed - no valid session');
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  app.post("/api/cart/checkout", requireAuth, async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
@@ -1438,8 +1410,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { shippingAddress } = req.body;
       
-      const sessionId = req.sessionID;
-      console.log('[CART-CHECKOUT] Session debug:', { sessionId: sessionId, hasSession: !!req.session });
+      // Get user ID from authenticated request
+      const userId = req.user?.id;
+      if (!userId) {
+        console.log('[CART-CHECKOUT] No user ID found in authenticated request');
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      console.log(`[CART-CHECKOUT] Processing checkout for user: ${userId}`);
       
       // SURGICAL FIX: Multi-strategy cart lookup for production reliability
       let cart, cartItems;
