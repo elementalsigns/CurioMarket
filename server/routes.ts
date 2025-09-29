@@ -1411,7 +1411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } else {
       // Production: Use same proven strategy as admin bypass
       const hostname = req.get('host') || '';
-      const isTargetDomain = hostname.endsWith('curiosities.market') || hostname.includes('curiosities.market');
+      const isTargetDomain = hostname === 'www.curiosities.market' || hostname === 'curiosities.market';
       
       if (isTargetDomain) {
         userId = '46848882'; // Same user who works in admin
