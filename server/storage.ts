@@ -706,7 +706,20 @@ export class DatabaseStorage implements IStorage {
     let cart;
     
     if (userId) {
+      // First try to find cart by userId
       [cart] = await db.select().from(carts).where(eq(carts.userId, userId));
+      
+      // If no userId cart but we have sessionId, check for session cart and upgrade it
+      if (!cart && sessionId) {
+        [cart] = await db.select().from(carts).where(eq(carts.sessionId, sessionId));
+        if (cart) {
+          // Upgrade session cart to user cart
+          [cart] = await db.update(carts)
+            .set({ userId })
+            .where(eq(carts.id, cart.id))
+            .returning();
+        }
+      }
     } else if (sessionId) {
       [cart] = await db.select().from(carts).where(eq(carts.sessionId, sessionId));
     }
