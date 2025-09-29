@@ -46,11 +46,13 @@ export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
   // Configure session cookie settings for custom domain support
-  const isProduction = process.env.NODE_ENV === 'production';
+  // In Replit, published apps have REPLIT_ENVIRONMENT=production even with NODE_ENV=development
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                       process.env.REPLIT_ENVIRONMENT === 'production';
   
   const cookieConfig = {
     httpOnly: true,
-    secure: isProduction, // Only HTTPS in production
+    secure: isProduction, // HTTPS required for production domains
     maxAge: sessionTtl,
     sameSite: 'none' as const, // Allow cross-site cookies for authentication
     domain: isProduction ? '.curiosities.market' : undefined, // Production domain scope
