@@ -1504,11 +1504,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create Direct Charge PaymentIntent on connected account (manual confirmation)
         console.log(`[STRIPE-FIX] NODE_ENV: "${process.env.NODE_ENV}", isProduction: ${process.env.NODE_ENV === 'production'}`);
         
-        const paymentIntentConfig = {
+        const paymentIntentConfig = process.env.NODE_ENV === 'production' ? {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
           payment_method_types: ['card'], // Fix for Stripe payment method types
-          ...(process.env.NODE_ENV === 'production' ? { application_fee_amount: applicationFeeAmount } : {}),
+          application_fee_amount: applicationFeeAmount,
+          confirmation_method: 'manual', // We'll confirm manually with saved payment method
+          metadata: {
+            userId: userId || 'guest',
+            sellerId: sellerId,
+            sellerSubtotal: sellerSubtotal.toString(),
+            sellerShipping: sellerShipping.toString(),
+            platformFeeAmount: (applicationFeeAmount / 100).toString(),
+            itemsCount: items.length.toString(),
+            cartGroupId: Date.now().toString(), // For order reconciliation
+            setupIntentId: setupIntent.id // Link to SetupIntent
+          },
+        } : {
+          amount: Math.round(sellerTotal * 100), // Convert to cents
+          currency: "usd",
+          payment_method_types: ['card'], // Fix for Stripe payment method types
           confirmation_method: 'manual', // We'll confirm manually with saved payment method
           metadata: {
             userId: userId || 'guest',
