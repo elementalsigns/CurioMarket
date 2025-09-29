@@ -7,40 +7,27 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Get auth token from URL params (for incognito mode) or localStorage
-function getAuthToken(): string | null {
-  // First check URL params for token (after OAuth redirect)
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenFromUrl = urlParams.get('access_token');
-  if (tokenFromUrl) {
-    // Store in localStorage and remove from URL
-    localStorage.setItem('curio_auth_token', tokenFromUrl);
-    window.history.replaceState({}, document.title, window.location.pathname);
-    console.log('[AUTH] Token found in URL and stored');
-    return tokenFromUrl;
+// Clear any legacy auth tokens from localStorage to prevent conflicts
+function clearLegacyTokens() {
+  const hadTokens = localStorage.getItem('curio_auth_token') || localStorage.getItem('replit_access_token');
+  if (hadTokens) {
+    console.log('[AUTH] Clearing legacy tokens from localStorage');
+    localStorage.removeItem('curio_auth_token');
+    localStorage.removeItem('replit_access_token');
   }
-  
-  // Fall back to localStorage - check both possible keys for compatibility
-  const storedToken = localStorage.getItem('curio_auth_token') || localStorage.getItem('replit_access_token');
-  console.log('[AUTH] Getting token from localStorage:', storedToken ? 'Found' : 'Not found');
-  return storedToken;
 }
+
+// Clear tokens on page load to prevent auth conflicts
+clearLegacyTokens();
 
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<any> {
-  const token = getAuthToken();
   const headers: HeadersInit = data ? { "Content-Type": "application/json" } : {};
   
-  // Add Authorization header if token exists
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-    console.log('[AUTH] Adding Bearer token to request');
-  } else {
-    console.log('[AUTH] No token available for request');
-  }
+  console.log('[AUTH] Using session-based authentication only');
 
   const res = await fetch(url, {
     method,
@@ -95,16 +82,9 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const token = getAuthToken();
     const headers: HeadersInit = {};
     
-    // Add Authorization header if token exists
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-      console.log('[AUTH] Using Bearer token for API call');
-    } else {
-      console.log('[AUTH] No token, relying on session cookies');
-    }
+    console.log('[AUTH] Using session cookies for authentication');
 
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
