@@ -1493,15 +1493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // ✅ ENHANCED FEE LOGGING for verification
-        console.log(`[CART-CHECKOUT] 💰 Fee Calculation for ${seller?.shopName || sellerId}:`);
-        console.log(`[CART-CHECKOUT]   • Item Subtotal: $${sellerSubtotal.toFixed(2)}`);
-        console.log(`[CART-CHECKOUT]   • Shipping Cost: $${sellerShipping.toFixed(2)}`);
-        console.log(`[CART-CHECKOUT]   • Total Charge: $${sellerTotal.toFixed(2)}`);
-        console.log(`[CART-CHECKOUT]   • Platform Fee: $${(applicationFeeAmount/100).toFixed(2)} (${PLATFORM_FEE_PERCENT}% of subtotal)`);
-        console.log(`[CART-CHECKOUT]   • Seller Receives: $${(sellerTotal - (applicationFeeAmount/100)).toFixed(2)}`);
-        
-        // 🚀 DEVELOPMENT BYPASS: Skip Stripe entirely for testing
+        // Create PaymentIntent (development uses mock, production uses real Stripe)
         let paymentIntent;
         
         if (process.env.NODE_ENV === 'production') {
@@ -1527,7 +1519,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         } else {
           // Development: Mock successful PaymentIntent response
-          console.log(`[DEV-BYPASS] Creating mock PaymentIntent for testing`);
           paymentIntent = {
             id: `pi_mock_${Date.now()}`,
             client_secret: `pi_mock_${Date.now()}_secret_mock`,
