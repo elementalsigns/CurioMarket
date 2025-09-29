@@ -4027,43 +4027,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== CART MANAGEMENT ====================
   
   // Get cart
-  app.get('/api/cart', async (req: any, res) => {
+  app.get('/api/cart', requireAuth, async (req: any, res) => {
     try {
-      // SURGICAL FIX: Use same auth pattern as other authenticated routes
-      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
-      
-      // Bearer token support (using exact same pattern as requireSellerAccess)
-      if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        try {
-          const token = req.headers.authorization.slice(7);
-          const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
-          const payload = jwt.verify(token, secret) as any;
-          
-          if ((payload.scope === 'seller' || payload.scope === 'buyer') && payload.aud === 'curio-market') {
-            // Resolve user by sub (can be userId or email)
-            if (payload.sub.includes('@')) {
-              // Email-based lookup
-              const user = await storage.getUserByEmail(payload.sub);
-              if (user) {
-                userId = user.id;
-              }
-            } else {
-              // Direct user ID
-              userId = payload.sub;
-            }
-          }
-        } catch (error) {
-          // Silent fail - fallback to session authentication
-        }
-      }
-      
+      // SURGICAL FIX: requireAuth middleware automatically sets up authenticated user
+      const userId = req.user.claims.sub;
       const sessionId = req.sessionID;
       console.log('[CART-DEBUG] GET /api/cart - userId:', userId, 'sessionId:', sessionId);
-      
-      // Ensure session is saved for guest users
-      if (!userId) {
-        req.session.save();
-      }
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const items = await storage.getCartItems(cart.id);
@@ -4076,44 +4045,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add to cart
-  app.post('/api/cart/add', async (req: any, res) => {
+  app.post('/api/cart/add', requireAuth, async (req: any, res) => {
     try {
-      // SURGICAL FIX: Use same auth pattern as other authenticated routes
-      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
-      
-      // Bearer token support (using exact same pattern as requireSellerAccess)
-      if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        try {
-          const token = req.headers.authorization.slice(7);
-          const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
-          const payload = jwt.verify(token, secret) as any;
-          
-          if ((payload.scope === 'seller' || payload.scope === 'buyer') && payload.aud === 'curio-market') {
-            // Resolve user by sub (can be userId or email)
-            if (payload.sub.includes('@')) {
-              // Email-based lookup
-              const user = await storage.getUserByEmail(payload.sub);
-              if (user) {
-                userId = user.id;
-              }
-            } else {
-              // Direct user ID
-              userId = payload.sub;
-            }
-          }
-        } catch (error) {
-          // Silent fail - fallback to session authentication
-        }
-      }
-      
+      // SURGICAL FIX: requireAuth middleware automatically sets up authenticated user
+      const userId = req.user.claims.sub;
       const sessionId = req.sessionID;
       const { listingId, quantity = 1 } = req.body;
       console.log('[CART-DEBUG] POST /api/cart/add - userId:', userId, 'sessionId:', sessionId);
-      
-      // Ensure session is saved for guest users
-      if (!userId) {
-        req.session.save();
-      }
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
       const cartItem = await storage.addToCart(cart.id, listingId, quantity);
