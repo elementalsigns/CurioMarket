@@ -1437,7 +1437,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const secret = process.env.JWT_SECRET || process.env.REPLIT_DB_URL || 'fallback-secret';
             console.log(`[CART-CHECKOUT] Using secret:`, secret ? 'SECRET_PRESENT' : 'NO_SECRET');
             
-            const jwt = require('jsonwebtoken');
             const payload = jwt.verify(token, secret) as any;
             console.log(`[CART-CHECKOUT] Token payload:`, { scope: payload.scope, aud: payload.aud, sub: payload.sub });
             
