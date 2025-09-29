@@ -1331,7 +1331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (sellerTotal < STRIPE_MINIMUM_USD) {
           return res.status(400).json({ 
             error: `Order total for seller must be at least $${STRIPE_MINIMUM_USD} USD. Current: $${sellerTotal.toFixed(2)}`,
-            sellerId: seller.shopName
+            sellerId: seller?.shopName || sellerId
           });
         }
         
@@ -1358,7 +1358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         paymentIntents.push({
           sellerId: sellerId,
-          sellerName: seller.shopName,
+          sellerName: seller?.shopName || sellerId,
           clientSecret: paymentIntent.client_secret,
           amount: sellerTotal,
           subtotal: sellerSubtotal,
@@ -1481,7 +1481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (sellerTotal < STRIPE_MINIMUM_USD) {
           return res.status(400).json({ 
             error: `Order total for seller must be at least $${STRIPE_MINIMUM_USD} USD. Current: $${sellerTotal.toFixed(2)}`,
-            sellerId: seller.shopName
+            sellerId: seller?.shopName || sellerId
           });
         }
         
@@ -1515,7 +1515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         paymentIntents.push({
           sellerId: sellerId,
-          sellerName: seller.shopName,
+          sellerName: seller?.shopName || sellerId,
           clientSecret: paymentIntent.client_secret,
           paymentIntentId: paymentIntent.id,
           amount: Math.round(sellerTotal * 100), // Convert to cents for frontend consistency
