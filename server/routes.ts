@@ -4057,6 +4057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const sessionId = req.sessionID;
+      console.log('[CART-DEBUG] GET /api/cart - userId:', userId, 'sessionId:', sessionId);
       
       // Ensure session is saved for guest users
       if (!userId) {
@@ -4105,6 +4106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const sessionId = req.sessionID;
       const { listingId, quantity = 1 } = req.body;
+      console.log('[CART-DEBUG] POST /api/cart/add - userId:', userId, 'sessionId:', sessionId);
       
       // Ensure session is saved for guest users
       if (!userId) {
