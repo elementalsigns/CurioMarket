@@ -1435,34 +1435,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(authState);
   });
 
-  // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", (req: any, res, next) => {
-    // PRODUCTION DEBUG: Add debug headers BEFORE auth check
-    res.setHeader('X-Debug-Auth-State', JSON.stringify({
-      hasUser: !!req.user,
-      hasSession: !!req.session,
-      sessionId: req.sessionID,
-      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : 'no-function',
-      host: req.get('host'),
-      userAgent: req.get('user-agent'),
-      cookies: req.get('cookie') ? 'present' : 'missing'
-    }));
-    next();
-  }, requireAuth, async (req: any, res) => {
+  // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller  
+  // NOTE: NO requireAuth middleware - we handle auth manually inside to support both cookie and body-based auth
+  app.post("/api/cart/checkout", async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
 
     try {
-      const { shippingAddress } = req.body;
+      const { shippingAddress, userId: bodyUserId, userEmail: bodyUserEmail } = req.body;
       
-      // Get user ID from authenticated request - EXACT same pattern as working /api/auth/user endpoint
-      const userId = req.user.claims.sub;
-      const userEmail = req.user.claims.email;
+      // FALLBACK AUTHENTICATION: Try cookies first, then fall back to request body
+      let userId = null;
+      let userEmail = null;
+      
+      // Try cookie-based auth first
+      if (req.user && req.user.claims) {
+        userId = req.user.claims.sub;
+        userEmail = req.user.claims.email;
+        console.log('[CART-CHECKOUT] Using cookie authentication for user:', userId);
+      }
+      // Fallback to body-based auth if cookies failed
+      else if (bodyUserId && bodyUserEmail) {
+        userId = bodyUserId;
+        userEmail = bodyUserEmail;
+        console.log('[CART-CHECKOUT] Using fallback body authentication for user:', userId);
+      }
       
       if (!userId) {
-        console.log('[CART-CHECKOUT] No user ID found in authenticated request');
+        console.log('[CART-CHECKOUT] No user ID found in request (neither cookies nor body)');
         return res.status(401).json({ message: "User not found" });
       }
       

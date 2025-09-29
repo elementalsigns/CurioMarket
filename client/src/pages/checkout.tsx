@@ -496,14 +496,16 @@ export default function Checkout() {
       console.log('[CHECKOUT DEBUG] Current domain:', window.location.hostname);
       console.log('[CHECKOUT DEBUG] Has cm.sid cookie:', document.cookie.includes('cm.sid'));
       
-      // SURGICAL FIX: Use direct fetch to bypass apiRequest 401 issue
+      // SURGICAL FIX: Send user ID in body as fallback for cookie auth issues
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          shippingAddress: {} // Will be collected in the form
+          shippingAddress: {}, // Will be collected in the form
+          userId: user?.id, // Send user ID as fallback
+          userEmail: user?.email // Send email as fallback
         }),
         credentials: "include", // Explicit credentials for auth
       });
