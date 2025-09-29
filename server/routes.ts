@@ -1451,6 +1451,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get sessionId from request
       const sessionId = req.sessionID || req.session?.id;
+      const hostname = req.get('host') || '';
+      
+      console.log('[CART-CHECKOUT] DIAGNOSTIC INFO:', {
+        userId,
+        sessionId,
+        hostname,
+        isProduction: process.env.NODE_ENV === 'production',
+        isDev: process.env.NODE_ENV === 'development'
+      });
       
       // SURGICAL FIX: Multi-strategy cart lookup for production reliability
       let cart, cartItems;
@@ -1493,19 +1502,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Strategy 4: Production rescue - find ANY cart with items for this domain
-      const hostname = req.get('host') || '';
       const isProductionDomain = hostname === 'www.curiosities.market' || hostname === 'curiosities.market';
       
+      console.log('[CART-CHECKOUT] Strategy 4 EVALUATION:', {
+        hasItems: !!(cartItems && cartItems.length > 0),
+        itemCount: cartItems?.length || 0,
+        hostname,
+        isProductionDomain,
+        willTryRescue: (!cartItems || cartItems.length === 0) && isProductionDomain
+      });
+      
       if ((!cartItems || cartItems.length === 0) && isProductionDomain) {
-        console.log('[CART-CHECKOUT] Strategy 4 - Production rescue: finding any cart with items');
+        console.log('[CART-CHECKOUT] Strategy 4 EXECUTING - Production rescue: finding any cart with items');
         try {
           // Look for any cart that has items (production rescue)
           const allCarts = await storage.getAllCartsWithItems();
+          console.log('[CART-CHECKOUT] Strategy 4 - getAllCartsWithItems returned:', allCarts?.length || 0, 'carts');
+          
           if (allCarts && allCarts.length > 0) {
             // Use the most recent cart with items
             cart = allCarts[0];
             cartItems = await storage.getCartItems(cart.id);
             console.log('[CART-CHECKOUT] Strategy 4 SUCCESS - Production rescue found', cartItems?.length || 0, 'items in cart', cart.id);
+          } else {
+            console.log('[CART-CHECKOUT] Strategy 4 - No carts with items found in database');
           }
         } catch (error) {
           console.log('[CART-CHECKOUT] Strategy 4 FAILED - Production rescue error:', error);
