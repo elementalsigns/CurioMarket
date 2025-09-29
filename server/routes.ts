@@ -1310,9 +1310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create one PaymentIntent per seller using Direct Charges
       for (const [sellerId, items] of Object.entries(sellerGroups)) {
         // Get seller's connected account
-        console.log(`[DEBUG] Looking up seller with ID: ${sellerId}`);
         const seller = await storage.getSeller(sellerId);
-        console.log(`[DEBUG] Seller lookup result:`, seller ? `Found: ${seller.shopName}` : 'NULL');
         if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
           return res.status(400).json({ 
             error: `Seller account not set up for payments. Please contact support.`,
@@ -1520,9 +1518,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cartGroupId: Date.now().toString(), // For order reconciliation
             setupIntentId: setupIntent.id // Link to SetupIntent
           },
-        }, {
+        }, process.env.NODE_ENV === 'production' ? {
           stripeAccount: seller.stripeConnectAccountId // Direct Charge to connected account
-        });
+        } : {});
         
         paymentIntents.push({
           sellerId: sellerId,
