@@ -1,0 +1,66 @@
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:577 [HOME DEBUG] Object
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [SELLER DEBUG] Object
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [SELLER DEBUG] Object
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [SELLER DEBUG] Object
+index-Bf2KK_NV.js:577 [PRODUCTION REDIRECT] User loaded: Object
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: Object
+index-Bf2KK_NV.js:533 [SELLER DEBUG] Object
+index-Bf2KK_NV.js:893 [PRODUCTION REDIRECT] User loaded: Object
+index-Bf2KK_NV.js:577 [HOME DEBUG] Object
+index-Bf2KK_NV.js:577 [HOME DEBUG] Object
+index-Bf2KK_NV.js:577 [HOME DEBUG] Object
+index-Bf2KK_NV.js:577 [HOME DEBUG] Object
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: true, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: true, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: true, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-Bf2KK_NV.js:597 [CHECKOUT] Initializing multi-seller checkout for items: 1
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [PRODUCTION AUTH] User loaded: {id: '47345443', role: 'buyer', email: 'marisolmora29@yahoo.com', stripeCustomerId: 'cus_T0x6ueVSYy1oPb', capabilities: {…}, …}
+index-Bf2KK_NV.js:533 [SELLER DEBUG] {hasCapabilitiesIsSeller: true, isAdmin: false, isSeller: false, hasStripeSubId: true, hasSellerId: false, …}
+index-Bf2KK_NV.js:597  POST https://www.curiosities.market/api/cart/checkout 400 (Bad Request)
+h @ index-Bf2KK_NV.js:597
+(anonymous) @ index-Bf2KK_NV.js:597
+Rv @ index-Bf2KK_NV.js:40
+Gc @ index-Bf2KK_NV.js:40
+gU @ index-Bf2KK_NV.js:40
+hl @ index-Bf2KK_NV.js:40
+Uk @ index-Bf2KK_NV.js:40
+tl @ index-Bf2KK_NV.js:38
+(anonymous) @ index-Bf2KK_NV.js:40
+index-Bf2KK_NV.js:597 [CHECKOUT] Failed to initialize checkout: Error: 400: {"error":"Cart is empty"}
+    at h (index-Bf2KK_NV.js:597:19421)
+h @ index-Bf2KK_NV.js:597
+await in h
+(anonymous) @ index-Bf2KK_NV.js:597
+Rv @ index-Bf2KK_NV.js:40
+Gc @ index-Bf2KK_NV.js:40
+gU @ index-Bf2KK_NV.js:40
+hl @ index-Bf2KK_NV.js:40
+Uk @ index-Bf2KK_NV.js:40
+tl @ index-Bf2KK_NV.js:38
+(anonymous) @ index-Bf2KK_NV.js:40
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
+index-Bf2KK_NV.js:48 [AUTH] Using session cookies for authentication
