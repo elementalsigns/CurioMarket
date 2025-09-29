@@ -127,6 +127,44 @@ async function hasSellerAccess(user: User): Promise<boolean> {
   return false;
 }
 
+// WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
+const requireAuth = async (req: any, res: any, next: any) => {
+  try {
+    // Development bypass for consistent authentication across all endpoints
+    if (process.env.NODE_ENV === 'development') {
+      req.user = {
+        claims: {
+          sub: '46848882',  // Development user
+          email: 'elementalsigns@gmail.com', 
+          given_name: 'Artem',
+          family_name: 'Mortis'
+        }
+      };
+      return next();
+    }
+
+    // PRODUCTION LOGGING for curiosities.market requests
+    const hostname = req.get('host') || '';
+    if (hostname.includes('curiosities.market')) {
+      console.log(`[PRODUCTION-AUTH] Request from ${hostname} - path: ${req.path}`);
+      console.log(`[PRODUCTION-AUTH] Cookies: ${req.headers.cookie ? 'Present' : 'Missing'}`);
+      console.log(`[PRODUCTION-AUTH] isAuthenticated: ${req.isAuthenticated ? req.isAuthenticated() : 'undefined'}`);
+      console.log(`[PRODUCTION-AUTH] Session ID: ${req.sessionID || 'undefined'}`);
+      console.log(`[PRODUCTION-AUTH] User object: ${req.user ? 'Present' : 'Missing'}`);
+    }
+
+    // Standard session-based authentication check for production
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      return next();
+    }
+    
+    return res.status(401).json({ message: "Authentication required" });
+  } catch (error) {
+    console.error('[AUTH] Error in requireAuth:', error);
+    return res.status(401).json({ message: "Authentication required" });
+  }
+};
+
 /**
  * Middleware that requires seller access using capability-based authorization
  * Replaces strict role === 'seller' checks to support admin users
@@ -1822,44 +1860,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('[AUTH DEBUG]', authInfo);
     res.json(authInfo);
   });
-  
-  // WORKING AUTH MIDDLEWARE - Standard authentication with development bypass
-  const requireAuth = async (req: any, res: any, next: any) => {
-    try {
-      // Development bypass for consistent authentication across all endpoints
-      if (process.env.NODE_ENV === 'development') {
-        req.user = {
-          claims: {
-            sub: '46848882',  // Development user
-            email: 'elementalsigns@gmail.com', 
-            given_name: 'Artem',
-            family_name: 'Mortis'
-          }
-        };
-        return next();
-      }
-
-      // PRODUCTION LOGGING for curiosities.market requests
-      const hostname = req.get('host') || '';
-      if (hostname.includes('curiosities.market')) {
-        console.log(`[PRODUCTION-AUTH] Request from ${hostname} - path: ${req.path}`);
-        console.log(`[PRODUCTION-AUTH] Cookies: ${req.headers.cookie ? 'Present' : 'Missing'}`);
-        console.log(`[PRODUCTION-AUTH] isAuthenticated: ${req.isAuthenticated ? req.isAuthenticated() : 'undefined'}`);
-        console.log(`[PRODUCTION-AUTH] Session ID: ${req.sessionID || 'undefined'}`);
-        console.log(`[PRODUCTION-AUTH] User object: ${req.user ? 'Present' : 'Missing'}`);
-      }
-
-      // Standard session-based authentication check for production
-      if (req.isAuthenticated && req.isAuthenticated()) {
-        return next();
-      }
-      
-      return res.status(401).json({ message: "Authentication required" });
-    } catch (error) {
-      console.error('[AUTH] Error in requireAuth:', error);
-      return res.status(401).json({ message: "Authentication required" });
-    }
-  };
 
   // SURGICAL ADMIN-ONLY BYPASS - Only for admin endpoints + /api/auth/user 
   const requireAdminAuth = async (req: any, res: any, next: any) => {
