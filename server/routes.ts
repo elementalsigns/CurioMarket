@@ -1387,7 +1387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart checkout endpoint - creates SetupIntent for reusable payment method + PaymentIntents for each seller
-  app.post("/api/cart/checkout", async (req: any, res) => {
+  app.post("/api/cart/checkout", requireAdminAuth, async (req: any, res) => {
     
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
