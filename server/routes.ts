@@ -5763,18 +5763,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[MESSAGES] Sent initial message: ${message.id}`);
       }
       
-      // Send email notification to recipient (SELLERS ONLY)
+      // Send email notification to recipient (BOTH BUYERS AND SELLERS)
       try {
         const recipient = await storage.getUser(recipientId);
         const sender = await storage.getUser(userId);
         
         if (recipient?.email && sender) {
+          const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+          
           // Check if recipient is a seller
           const recipientSeller = await storage.getSeller(recipientId);
           
           if (recipientSeller) {
-            // Recipient is a seller - send notification
-            const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+            // Recipient is a seller - send seller notification
             console.log(`[MESSAGES] Sending email notification to seller ${recipient.email}`);
             
             emailService.sendSellerMessageNotification({
@@ -5787,6 +5788,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }).catch(error => {
               console.error(`[MESSAGES] Failed to send seller message notification:`, error);
             });
+          } else {
+            // Recipient is a buyer - send buyer notification
+            // Get sender's shop name (sender must be the seller)
+            const senderSeller = await storage.getSeller(userId);
+            
+            if (senderSeller) {
+              console.log(`[MESSAGES] Sending email notification to buyer ${recipient.email}`);
+              
+              emailService.sendBuyerMessageNotification({
+                buyerEmail: recipient.email,
+                buyerName: recipient.firstName && recipient.lastName 
+                  ? `${recipient.firstName} ${recipient.lastName}` 
+                  : 'Customer',
+                shopName: senderSeller.shopName || 'Seller',
+                messagePreview: messagePreview
+              }).catch(error => {
+                console.error(`[MESSAGES] Failed to send buyer message notification:`, error);
+              });
+            }
           }
         }
       } catch (emailError: any) {
@@ -5832,7 +5852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await storage.sendMessage(conversationId, userId, content.trim());
       console.log(`[MESSAGES] Message sent successfully: ${message.id}`);
       
-      // Send email notification to the recipient (SELLERS ONLY)
+      // Send email notification to the recipient (BOTH BUYERS AND SELLERS)
       try {
         const thread = threads.find(t => t.id === conversationId);
         if (thread?.otherUser?.id) {
@@ -5840,12 +5860,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const sender = await storage.getUser(userId);
           
           if (recipient?.email && sender) {
+            const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+            
             // Check if recipient is a seller
             const recipientSeller = await storage.getSeller(thread.otherUser.id);
             
             if (recipientSeller) {
-              // Recipient is a seller - send notification
-              const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+              // Recipient is a seller - send seller notification
               console.log(`[MESSAGES] Sending email notification to seller ${recipient.email}`);
               
               emailService.sendSellerMessageNotification({
@@ -5858,6 +5879,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }).catch(error => {
                 console.error(`[MESSAGES] Failed to send seller message notification:`, error);
               });
+            } else {
+              // Recipient is a buyer - send buyer notification
+              // Get sender's shop name (sender must be the seller)
+              const senderSeller = await storage.getSeller(userId);
+              
+              if (senderSeller) {
+                console.log(`[MESSAGES] Sending email notification to buyer ${recipient.email}`);
+                
+                emailService.sendBuyerMessageNotification({
+                  buyerEmail: recipient.email,
+                  buyerName: recipient.firstName && recipient.lastName 
+                    ? `${recipient.firstName} ${recipient.lastName}` 
+                    : 'Customer',
+                  shopName: senderSeller.shopName || 'Seller',
+                  messagePreview: messagePreview
+                }).catch(error => {
+                  console.error(`[MESSAGES] Failed to send buyer message notification:`, error);
+                });
+              }
             }
           }
         }
