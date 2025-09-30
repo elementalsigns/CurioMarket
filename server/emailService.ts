@@ -428,6 +428,75 @@ Thank you for being part of the Curio Market community!`;
     });
   }
 
+  async sendSellerMessageNotification(data: { sellerEmail: string; sellerName: string; customerName: string; orderId?: string; messagePreview: string }): Promise<boolean> {
+    const subject = `New Message from ${data.customerName}`;
+    
+    const text = `New Message from ${data.customerName}
+
+Dear ${data.sellerName},
+
+You have a new message waiting in your dashboard from ${data.customerName}.
+
+Message Preview:
+"${data.messagePreview}"
+
+Please log into your seller dashboard to view and respond to this message: https://curiosities.market/seller/messages
+
+Thank you for being part of the Curio Market community!`;
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 95%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+          .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+          .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+          .message-preview { background: hsl(0, 0%, 16%); padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid hsl(0, 77%, 26%); font-style: italic; color: hsl(0, 0%, 90%); }
+          .action-button { display: inline-block; background: hsl(0, 77%, 26%); color: hsl(0, 0%, 100%); padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
+          .footer a { color: hsl(0, 77%, 26%); text-decoration: none; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">Curio Market</div>
+            <h1 style="margin: 0; color: hsl(0, 0%, 100%);">💬 New Message</h1>
+          </div>
+          
+          <p>Dear ${data.sellerName},</p>
+          
+          <p>You have a new message waiting in your dashboard from <strong>${data.customerName}</strong>.</p>
+          
+          <div class="message-preview">
+            "${data.messagePreview}"
+          </div>
+          
+          <div style="text-align: center;">
+            <a href="https://curiosities.market/seller/messages" class="action-button">View Messages</a>
+          </div>
+          
+          <p>Responding promptly helps maintain excellent customer service and builds trust with buyers.</p>
+          
+          <div class="footer">
+            <p>Thank you for being part of the Curio Market community</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: data.sellerEmail,
+      from: this.fromEmail,
+      subject,
+      text,
+      html
+    });
+  }
+
   private getTrackingUrl(carrier?: string, trackingNumber?: string): string | null {
     if (!carrier || !trackingNumber) return null;
     
