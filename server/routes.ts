@@ -4711,33 +4711,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[ORDER CREATE] Validating payment intent: ${paymentIntentId}`);
         
         try {
-          // Get seller info to determine which Stripe account to query
-          const sellerId = cartItems.find((item: any) => 
-            item.listing?.sellerId && paymentIntentId.includes(item.listing.sellerId.slice(-8))
-          )?.listing?.sellerId;
-          
-          if (!sellerId) {
-            console.error(`[ORDER CREATE] Could not determine seller for payment ${paymentIntentId}`);
-            return res.status(400).json({ error: `Invalid payment intent: ${paymentIntentId}` });
+          // ✅ Step 1: Determine sellerId from cart items (improved matching)
+          // Match payment intents to sellers by checking which cart items belong to each seller
+          const sellerCartGroups = new Map<string, any[]>();
+          for (const item of cartItems) {
+            const sellerId = item.listing?.sellerId;
+            if (sellerId) {
+              if (!sellerCartGroups.has(sellerId)) {
+                sellerCartGroups.set(sellerId, []);
+              }
+              sellerCartGroups.get(sellerId)!.push(item);
+            }
           }
           
-          const seller = await storage.getSeller(sellerId);
-          if (!seller) {
-            console.error(`[ORDER CREATE] Seller ${sellerId} not found`);
-            return res.status(400).json({ error: `Seller not found` });
+          // Since we have 1 payment per seller, match by index or try all sellers
+          const sellerIds = Array.from(sellerCartGroups.keys());
+          let sellerId: string | null = null;
+          let paymentIntent: Stripe.PaymentIntent | null = null;
+          let seller: any = null;
+          
+          // Try each seller to find which account has this payment
+          for (const candidateSellerId of sellerIds) {
+            const candidateSeller = await storage.getSeller(candidateSellerId);
+            if (!candidateSeller) continue;
+            
+            // Check if admin seller - they use platform account
+            const sellerUser = await storage.getUser(candidateSeller.userId);
+            const isAdminSeller = sellerUser?.role === 'admin';
+            const usesPlatformAccount = isAdminSeller || !candidateSeller.stripeConnectAccountId;
+            
+            try {
+              const retrieveOptions = usesPlatformAccount 
+                ? undefined 
+                : { stripeAccount: candidateSeller.stripeConnectAccountId! };
+              
+              const pi = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
+              
+              // ✅ Validate this payment belongs to this seller via metadata
+              if (pi.metadata?.sellerId === candidateSellerId) {
+                paymentIntent = pi;
+                sellerId = candidateSellerId;
+                seller = candidateSeller;
+                console.log(`[ORDER CREATE] Found payment for seller ${seller.shopName} (Admin: ${isAdminSeller})`);
+                break;
+              }
+            } catch (err) {
+              // Payment not in this seller's account, try next
+              continue;
+            }
           }
           
-          // Check if seller is admin - they use platform account
-          const sellerUser = await storage.getUser(seller.userId);
-          const isAdminSeller = sellerUser?.role === 'admin';
-          const usesPlatformAccount = isAdminSeller || !seller.stripeConnectAccountId;
-          
-          // Retrieve PaymentIntent from correct Stripe account
-          const retrieveOptions = usesPlatformAccount 
-            ? undefined // Platform account
-            : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
-          
-          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
+          if (!paymentIntent || !sellerId || !seller) {
+            console.error(`[ORDER CREATE] Could not find seller for payment ${paymentIntentId}`);
+            return res.status(400).json({ error: `Invalid payment: ${paymentIntentId}` });
+          }
           
           console.log(`[ORDER CREATE] Payment ${paymentIntentId} status: ${paymentIntent.status}`);
           
