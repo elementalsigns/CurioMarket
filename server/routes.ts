@@ -1718,12 +1718,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Create with or without Connect account - admin sellers ALWAYS use platform
-          const stripeOptions = useConnect 
-            ? { stripeAccount: seller.stripeConnectAccountId }
-            : {}; // Use platform account for admins or sellers without Connect
-          
           console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
-          paymentIntent = await stripe.paymentIntents.create(createOptions, stripeOptions);
+          
+          if (useConnect) {
+            paymentIntent = await stripe.paymentIntents.create(createOptions, { 
+              stripeAccount: seller.stripeConnectAccountId! 
+            });
+          } else {
+            // Platform account - pass no options (undefined)
+            paymentIntent = await stripe.paymentIntents.create(createOptions);
+          }
         } else {
           // Development: Mock successful PaymentIntent response
           paymentIntent = {
