@@ -1772,11 +1772,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('[PAYMENT-CONFIRM] Using fallback body authentication for user:', userId);
         
         // ADDITIONAL SECURITY: Verify this user exists and the request came from their session
-        const user = await storage.getUser(userId);
-        if (!user || user.email !== userEmail) {
+        const userRecord = await storage.getUser(userId);
+        if (!userRecord || userRecord.email !== userEmail) {
           console.log('[PAYMENT-CONFIRM] SECURITY WARNING: Invalid user data in request body');
           return res.status(401).json({ message: "Invalid authentication" });
         }
+      }
+      
+      // SECURITY: Ensure we have authentication
+      if (!userId || !userEmail) {
+        console.log('[PAYMENT-CONFIRM] SECURITY ERROR: No authentication found (neither cookies nor body)');
+        return res.status(401).json({ message: "Authentication required" });
       }
       
       const sessionId = req.sessionID;
