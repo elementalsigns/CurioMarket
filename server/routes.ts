@@ -1657,12 +1657,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
+        // Check if seller is admin/platform owner - they use platform account, not Connect
+        const sellerUser = await storage.getUser(seller.userId);
+        const isAdminSeller = sellerUser?.role === 'admin';
+        
         // SURGICAL FIX: Allow purchases even if seller hasn't completed Stripe Connect setup
         // The platform will hold funds until seller completes onboarding
-        if (!seller?.stripeConnectAccountId) {
+        if (!seller?.stripeConnectAccountId && !isAdminSeller) {
           console.log(`[CART-CHECKOUT] WARNING: Seller ${sellerId} doesn't have Stripe Connect set up. Proceeding with platform account (funds will be held until seller completes setup).`);
           // Continue with payment on platform account - don't block the buyer
         }
+        
+        console.log(`[CART-CHECKOUT] Seller ${seller?.shopName}: Admin=${isAdminSeller}, HasConnect=${!!seller?.stripeConnectAccountId}`);
         
         // Calculate seller totals
         const sellerSubtotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
@@ -1705,15 +1711,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           // Only add application_fee_amount if seller has Connect (otherwise goes to platform)
-          if (seller.stripeConnectAccountId) {
+          // Admin sellers always use platform account (no Connect)
+          const useConnect = !isAdminSeller && !!seller.stripeConnectAccountId;
+          if (useConnect) {
             createOptions.application_fee_amount = applicationFeeAmount;
           }
           
-          // Create with or without Connect account
-          const stripeOptions = seller.stripeConnectAccountId 
+          // Create with or without Connect account - admin sellers ALWAYS use platform
+          const stripeOptions = useConnect 
             ? { stripeAccount: seller.stripeConnectAccountId }
-            : {}; // Use platform account if no Connect
+            : {}; // Use platform account for admins or sellers without Connect
           
+          console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
           paymentIntent = await stripe.paymentIntents.create(createOptions, stripeOptions);
         } else {
           // Development: Mock successful PaymentIntent response
