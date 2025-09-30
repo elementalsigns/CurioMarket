@@ -1797,13 +1797,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get seller's connected account
       const seller = await storage.getSellerByUserId(sellerId);
+      console.log(`[PAYMENT-CONFIRM] Seller lookup result:`, {
+        sellerId,
+        sellerFound: !!seller,
+        sellerShopName: seller?.shopName,
+        hasStripeConnect: !!seller?.stripeConnectAccountId,
+        stripeConnectId: seller?.stripeConnectAccountId
+      });
       
-      // SURGICAL FIX: Allow purchases even if seller hasn't completed Stripe Connect setup
-      // The platform will hold funds until seller completes onboarding
-      // Sellers can still buy from other sellers regardless of their own payout setup
-      if (!seller?.stripeConnectAccountId) {
-        console.log(`[PAYMENT-CONFIRM] WARNING: Seller ${sellerId} doesn't have Stripe Connect set up yet. Proceeding with standard payment (funds will be held until seller completes setup).`);
-        // Continue with payment - don't block the buyer
+      // CRITICAL: Payment intent MUST be retrieved from the same Stripe account it was created on
+      // If seller doesn't have Stripe Connect, we have a problem - the payment intent was created there
+      if (!seller) {
+        console.error(`[PAYMENT-CONFIRM] CRITICAL ERROR: Seller ${sellerId} not found! Cannot retrieve payment intent.`);
+        return res.status(500).json({ 
+          error: "Seller not found. Please contact support." 
+        });
+      }
+      
+      if (!seller.stripeConnectAccountId) {
+        console.error(`[PAYMENT-CONFIRM] CRITICAL ERROR: Seller ${sellerId} (${seller.shopName}) has no Stripe Connect account! Payment intent was created on their Connect account but we can't retrieve it.`);
+        return res.status(500).json({ 
+          error: "Payment processing error. Please contact support." 
+        });
       }
       
       // SECURITY: First retrieve the PaymentIntent to validate metadata and authorization
