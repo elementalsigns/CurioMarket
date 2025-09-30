@@ -44,12 +44,14 @@ const MultiSellerCheckoutForm = ({
   setupIntentClientSecret,
   paymentIntents, 
   onSuccess, 
-  cartItems 
+  cartItems,
+  user
 }: { 
   setupIntentClientSecret: string;
   paymentIntents: PaymentIntent[]; 
   onSuccess: () => void; 
-  cartItems: any[] 
+  cartItems: any[];
+  user: any;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -741,6 +743,7 @@ export default function Checkout() {
                     paymentIntents={checkoutData.paymentIntents}
                     onSuccess={handleSuccess}
                     cartItems={items}
+                    user={user}
                   />
                 </Elements>
               )}
