@@ -4901,9 +4901,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 sellerEmail: seller.businessEmail || 'seller@curiosities.market'
               };
               
-              // Send emails asynchronously (don't block order creation)
+              // ✅ Send BOTH buyer and seller emails asynchronously (don't block order creation)
               emailService.sendOrderConfirmation(emailData).catch(error => {
-                console.error(`[ORDER CREATE] Email sending failed for order ${order.id}:`, error);
+                console.error(`[ORDER CREATE] Buyer email failed for order ${order.id}:`, error);
+              });
+              
+              emailService.sendSellerOrderNotification(emailData).catch(error => {
+                console.error(`[ORDER CREATE] Seller email failed for order ${order.id}:`, error);
               });
             }
           } catch (emailError) {
