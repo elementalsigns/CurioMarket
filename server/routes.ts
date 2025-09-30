@@ -1795,8 +1795,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[PAYMENT-CONFIRM] Confirming payment ${paymentIntentId} with method ${paymentMethodId} for seller ${sellerId}`);
       
-      // Get seller's connected account
-      const seller = await storage.getSellerByUserId(sellerId);
+      // Get seller's connected account (sellerId is the seller profile ID, not user ID)
+      const seller = await storage.getSeller(sellerId);
       console.log(`[PAYMENT-CONFIRM] Seller lookup result:`, {
         sellerId,
         sellerFound: !!seller,
