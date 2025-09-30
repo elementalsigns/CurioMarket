@@ -1897,6 +1897,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // CRITICAL: For platform accounts, attach payment method to customer first
+      if (usesPlatformAccount && userId) {
+        const buyer = await storage.getUser(userId);
+        let customerId = buyer?.stripeCustomerId;
+        
+        // Create customer if doesn't exist
+        if (!customerId) {
+          console.log(`[PAYMENT-CONFIRM] Creating Stripe customer for user ${userId}`);
+          const customer = await stripe.customers.create({
+            email: userEmail || undefined,
+            metadata: { userId }
+          });
+          customerId = customer.id;
+          
+          // Save customer ID to database
+          await storage.updateUser(userId, { stripeCustomerId: customerId });
+        }
+        
+        // Attach payment method to customer
+        console.log(`[PAYMENT-CONFIRM] Attaching payment method ${paymentMethodId} to customer ${customerId}`);
+        await stripe.paymentMethods.attach(paymentMethodId, {
+          customer: customerId
+        });
+      }
+      
       // Confirm the PaymentIntent with the saved payment method
       // Use same account as retrieval (platform for admin sellers, Connect for others)
       const confirmOptions = usesPlatformAccount 
