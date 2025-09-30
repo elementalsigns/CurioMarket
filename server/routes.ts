@@ -1342,12 +1342,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const [sellerId, items] of Object.entries(sellerGroups)) {
         // Get seller's connected account
         const seller = await storage.getSeller(sellerId);
-        if (!seller?.stripeConnectAccountId && process.env.NODE_ENV === 'production') {
+        
+        // Check if seller is admin/platform owner - they use platform account, not Connect
+        const sellerUser = await storage.getUser(seller?.userId || '');
+        const isAdminSeller = sellerUser?.role === 'admin';
+        
+        if (!seller?.stripeConnectAccountId && !isAdminSeller && process.env.NODE_ENV === 'production') {
           return res.status(400).json({ 
             error: `Seller account not set up for payments. Please contact support.`,
             sellerId 
           });
         }
+        
+        console.log(`[PAYMENT-INTENT] Seller ${seller?.shopName}: Admin=${isAdminSeller}, HasConnect=${!!seller?.stripeConnectAccountId}`);
         
         // Calculate seller totals
         const sellerSubtotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
@@ -1368,11 +1375,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`[PAYMENT-INTENT] Seller ${seller?.shopName || sellerId}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
         
-        // Create Direct Charge PaymentIntent on connected account
-        const paymentIntent = await stripe.paymentIntents.create({
+        // Create payment intent - use Connect account if seller has one, otherwise use platform account
+        const useConnect = seller?.stripeConnectAccountId && !isAdminSeller;
+        const paymentConfig: any = {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
-          application_fee_amount: applicationFeeAmount,
           automatic_payment_methods: { enabled: true },
           metadata: {
             userId: userId || 'guest',
@@ -1381,11 +1388,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sellerShipping: sellerShipping.toString(),
             platformFeeAmount: (applicationFeeAmount / 100).toString(),
             itemsCount: items.length.toString(),
-            cartGroupId: Date.now().toString() // For order reconciliation
+            cartGroupId: Date.now().toString(), // For order reconciliation
+            usesPlatformAccount: !useConnect ? 'true' : 'false'
           },
-        }, {
-          stripeAccount: seller.stripeConnectAccountId // Direct Charge to connected account
-        });
+        };
+        
+        // Only add application fee if using Connect account
+        if (useConnect) {
+          paymentConfig.application_fee_amount = applicationFeeAmount;
+        }
+        
+        const stripeOptions = useConnect ? { stripeAccount: seller.stripeConnectAccountId } : {};
+        const paymentIntent = await stripe.paymentIntents.create(paymentConfig, stripeOptions);
         
         paymentIntents.push({
           sellerId: sellerId,
@@ -1797,35 +1811,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get seller's connected account (sellerId is the seller profile ID, not user ID)
       const seller = await storage.getSeller(sellerId);
-      console.log(`[PAYMENT-CONFIRM] Seller lookup result:`, {
-        sellerId,
-        sellerFound: !!seller,
-        sellerShopName: seller?.shopName,
-        hasStripeConnect: !!seller?.stripeConnectAccountId,
-        stripeConnectId: seller?.stripeConnectAccountId
-      });
       
-      // CRITICAL: Payment intent MUST be retrieved from the same Stripe account it was created on
-      // If seller doesn't have Stripe Connect, we have a problem - the payment intent was created there
       if (!seller) {
-        console.error(`[PAYMENT-CONFIRM] CRITICAL ERROR: Seller ${sellerId} not found! Cannot retrieve payment intent.`);
+        console.error(`[PAYMENT-CONFIRM] CRITICAL ERROR: Seller ${sellerId} not found!`);
         return res.status(500).json({ 
           error: "Seller not found. Please contact support." 
         });
       }
       
-      if (!seller.stripeConnectAccountId) {
-        console.error(`[PAYMENT-CONFIRM] CRITICAL ERROR: Seller ${sellerId} (${seller.shopName}) has no Stripe Connect account! Payment intent was created on their Connect account but we can't retrieve it.`);
-        return res.status(500).json({ 
-          error: "Payment processing error. Please contact support." 
-        });
-      }
+      // Check if seller is admin/platform owner - they use platform account
+      const sellerUser = await storage.getUser(seller.userId);
+      const isAdminSeller = sellerUser?.role === 'admin';
       
-      // SECURITY: First retrieve the PaymentIntent to validate metadata and authorization
-      // Only use stripeAccount if seller has Connect set up, otherwise use platform account
-      const retrieveOptions = seller?.stripeConnectAccountId 
-        ? { stripeAccount: seller.stripeConnectAccountId }
-        : {}; // Use platform's main account if seller hasn't set up Connect
+      console.log(`[PAYMENT-CONFIRM] Seller lookup result:`, {
+        sellerId,
+        sellerShopName: seller.shopName,
+        isAdmin: isAdminSeller,
+        hasStripeConnect: !!seller.stripeConnectAccountId,
+        stripeConnectId: seller.stripeConnectAccountId
+      });
+      
+      // Determine which Stripe account to use based on metadata or seller type
+      const usesPlatformAccount = isAdminSeller || !seller.stripeConnectAccountId;
+      
+      // SECURITY: Retrieve PaymentIntent from the correct Stripe account
+      const retrieveOptions = usesPlatformAccount 
+        ? {} // Platform account
+        : { stripeAccount: seller.stripeConnectAccountId }; // Connect account
       
       const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
       
@@ -1860,10 +1872,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Confirm the PaymentIntent with the saved payment method
-      // Only use connected account if seller has Stripe Connect set up
-      const confirmOptions = seller?.stripeConnectAccountId 
-        ? { stripeAccount: seller.stripeConnectAccountId }
-        : {}; // Use platform account if seller hasn't set up Connect
+      // Use same account as retrieval (platform for admin sellers, Connect for others)
+      const confirmOptions = usesPlatformAccount 
+        ? {} // Platform account
+        : { stripeAccount: seller.stripeConnectAccountId }; // Connect account
       
       const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
         payment_method: paymentMethodId,
