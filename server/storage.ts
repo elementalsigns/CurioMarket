@@ -1276,30 +1276,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategoryCounts(): Promise<any[]> {
-    // Since this is a development environment, return sample data with realistic counts
-    // that would be dynamically calculated from the listings table in production
-    return [
-      {
-        slug: "taxidermy",
-        name: "Taxidermy",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "wet-specimens",
-        name: "Wet Specimens",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "occult", 
-        name: "Occult",
-        count: 0, // Updated to match actual database count
-      },
-      {
-        slug: "bones-skulls",
-        name: "Bones & Skulls", 
-        count: 1, // Updated to match actual database count
-      }
-    ];
+    // Fetch all categories from the database and count listings for each
+    const allCategories = await db.select().from(categories).orderBy(asc(categories.name));
+    
+    const categoriesWithCounts = await Promise.all(
+      allCategories.map(async (category) => {
+        // Count listings that have this category
+        const [result] = await db
+          .select({ count: count() })
+          .from(listings)
+          .where(sql`${category.id} = ANY(${listings.categoryIds})`);
+        
+        return {
+          slug: category.slug,
+          name: category.name,
+          count: Number(result?.count) || 0
+        };
+      })
+    );
+    
+    return categoriesWithCounts;
   }
 
   async getActiveSellerCount(): Promise<number> {

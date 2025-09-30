@@ -1692,12 +1692,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (process.env.NODE_ENV === 'production') {
           // Production: Use real Stripe
+          // Get or create Stripe customer for the buyer
+          let customerId: string | undefined;
+          if (userId) {
+            const buyer = await storage.getUser(userId);
+            customerId = buyer?.stripeCustomerId;
+            
+            // Create customer if doesn't exist
+            if (!customerId) {
+              const customer = await stripe.customers.create({
+                email: buyer?.email,
+                metadata: { userId: userId }
+              });
+              customerId = customer.id;
+              // Update user with customer ID
+              await storage.updateUserStripeInfo(userId, { 
+                customerId: customer.id, 
+                subscriptionId: buyer?.stripeSubscriptionId || '' 
+              });
+              console.log(`[CART-CHECKOUT] Created new Stripe customer: ${customerId}`);
+            }
+          }
+          
           // Only use connected account if seller has Stripe Connect set up
           const createOptions: any = {
             amount: Math.round(sellerTotal * 100),
             currency: "usd",
             payment_method_types: ['card'],
             confirmation_method: 'manual',
+            customer: customerId, // CRITICAL: Add customer to PaymentIntent
             metadata: {
               userId: userId || 'guest',
               sellerId: sellerId,
@@ -1718,7 +1741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Create with or without Connect account - admin sellers ALWAYS use platform
-          console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
+          console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, customer=${customerId}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
           
           if (useConnect) {
             paymentIntent = await stripe.paymentIntents.create(createOptions, { 
