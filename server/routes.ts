@@ -1376,8 +1376,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[PAYMENT-INTENT] Seller ${seller?.shopName || sellerId}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
         
         // CRITICAL: Admin sellers MUST use platform account, ignoring any database Connect ID
-        const useConnect = !isAdminSeller && !!seller?.stripeConnectAccountId;
-        console.log(`[PAYMENT-INTENT] Admin=${isAdminSeller}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
+        // HARDCODED FIX: Artem Mortis (3bdbe216-aa11-447a-8fde-88cd4955d9b6) ALWAYS uses platform account
+        const isArtemMortis = sellerId === '3bdbe216-aa11-447a-8fde-88cd4955d9b6';
+        const useConnect = !isAdminSeller && !isArtemMortis && !!seller?.stripeConnectAccountId;
+        console.log(`[PAYMENT-INTENT] Admin=${isAdminSeller}, isArtemMortis=${isArtemMortis}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
         const paymentConfig: any = {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
