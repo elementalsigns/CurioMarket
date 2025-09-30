@@ -1821,7 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if seller is admin/platform owner - they use platform account
+      // CRITICAL: Check if seller is admin/platform owner - they MUST use platform account
       const sellerUser = await storage.getUser(seller.userId);
       const isAdminSeller = sellerUser?.role === 'admin';
       
