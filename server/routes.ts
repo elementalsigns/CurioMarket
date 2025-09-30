@@ -1398,7 +1398,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentConfig.application_fee_amount = applicationFeeAmount;
         }
         
-        const stripeOptions = useConnect ? { stripeAccount: seller.stripeConnectAccountId } : {};
+        const stripeOptions = useConnect && seller?.stripeConnectAccountId 
+          ? { stripeAccount: seller.stripeConnectAccountId } 
+          : undefined;
         const paymentIntent = await stripe.paymentIntents.create(paymentConfig, stripeOptions);
         
         paymentIntents.push({
@@ -1836,8 +1838,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // SECURITY: Retrieve PaymentIntent from the correct Stripe account
       const retrieveOptions = usesPlatformAccount 
-        ? {} // Platform account
-        : { stripeAccount: seller.stripeConnectAccountId }; // Connect account
+        ? undefined // Platform account
+        : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
       
       const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
       
@@ -1874,8 +1876,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Confirm the PaymentIntent with the saved payment method
       // Use same account as retrieval (platform for admin sellers, Connect for others)
       const confirmOptions = usesPlatformAccount 
-        ? {} // Platform account
-        : { stripeAccount: seller.stripeConnectAccountId }; // Connect account
+        ? undefined // Platform account
+        : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
       
       const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
         payment_method: paymentMethodId,
@@ -4647,16 +4649,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(400).json({ error: `Invalid payment intent: ${paymentIntentId}` });
           }
           
-          const seller = await storage.getSellerByUserId(sellerId);
-          if (!seller?.stripeConnectAccountId) {
-            console.error(`[ORDER CREATE] Seller ${sellerId} missing Stripe account`);
-            return res.status(400).json({ error: `Seller payment account not configured` });
+          const seller = await storage.getSeller(sellerId);
+          if (!seller) {
+            console.error(`[ORDER CREATE] Seller ${sellerId} not found`);
+            return res.status(400).json({ error: `Seller not found` });
           }
           
-          // Retrieve PaymentIntent from seller's connected account
-          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
-            stripeAccount: seller.stripeConnectAccountId
-          });
+          // Check if seller is admin - they use platform account
+          const sellerUser = await storage.getUser(seller.userId);
+          const isAdminSeller = sellerUser?.role === 'admin';
+          const usesPlatformAccount = isAdminSeller || !seller.stripeConnectAccountId;
+          
+          // Retrieve PaymentIntent from correct Stripe account
+          const retrieveOptions = usesPlatformAccount 
+            ? undefined // Platform account
+            : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
+          
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
           
           console.log(`[ORDER CREATE] Payment ${paymentIntentId} status: ${paymentIntent.status}`);
           
