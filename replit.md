@@ -1,7 +1,10 @@
 # Overview
 Curio Market is a full-stack multi-vendor marketplace for oddities, curios, and specimens, serving as a gothic-themed alternative to Etsy. It enables sellers to establish shops and list unique items like taxidermy, wet specimens, bones, and occult art. Buyers can browse, purchase, and manage orders. The platform operates on a subscription-based seller model ($10/month + 2.6% platform fee), aiming to be an independent, ungated marketplace for collectors and enthusiasts.
 
-## Recent Enhancement (September 20, 2025)
+## Recent Enhancement (September 30, 2025)
+- **Complete Email Notification System**: Implemented comprehensive gothic-themed email notifications for all user interactions. System includes: (1) Order confirmations for buyers with order details and review prompts, (2) New order notifications for sellers with earnings breakdown and shipping addresses, (3) Shipping notifications for buyers with tracking links, (4) Message notifications for both buyers and sellers when they receive messages. All emails feature dark gothic styling (hsl(212, 5%, 5%) background, hsl(0, 77%, 26%) accent) matching site design with professional HTML and plain text versions. Smart recipient detection ensures sellers get seller-themed emails and buyers get buyer-themed emails. Non-blocking delivery ensures messaging/ordering continues even if email fails.
+
+## Previous Enhancement (September 20, 2025)
 - **Production Admin Dashboard Access Fix**: Successfully resolved critical admin dashboard authentication issue affecting user 46848882 (elementalsigns@gmail.com) on production domain `https://www.curiosities.market/admin`. Root cause identified as user role being set to "buyer" instead of "admin" in production database, causing authentication redirects despite successful login. Implemented surgical database update to correct user role to "admin" with targeted access controls that only affect the specified user account. Admin dashboard now accessible on production with full functionality while maintaining zero impact on other users or system operations.
 
 ## Previous Enhancement (September 16, 2025)
