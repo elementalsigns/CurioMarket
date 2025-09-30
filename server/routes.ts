@@ -1400,10 +1400,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // CRITICAL: For admins, ALWAYS use platform account regardless of database Connect ID
-        const stripeOptions = useConnect 
-          ? { stripeAccount: seller.stripeConnectAccountId! } 
-          : undefined;
-        const paymentIntent = await stripe.paymentIntents.create(paymentConfig, stripeOptions);
+        const paymentIntent = useConnect 
+          ? await stripe.paymentIntents.create(paymentConfig, { stripeAccount: seller.stripeConnectAccountId! })
+          : await stripe.paymentIntents.create(paymentConfig);
         
         paymentIntents.push({
           sellerId: sellerId,
