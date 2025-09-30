@@ -168,7 +168,9 @@ const MultiSellerCheckoutForm = ({
           paymentIntentId: paymentIntent.paymentIntentId,
           paymentMethodId: paymentMethodId,
           sellerId: paymentIntent.sellerId,
-          shippingAddress: shippingAddress
+          shippingAddress: shippingAddress,
+          userId: user?.id,
+          userEmail: user?.email
         });
 
         if (result.success && result.paymentIntentId) {

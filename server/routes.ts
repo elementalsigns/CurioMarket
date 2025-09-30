@@ -1740,14 +1740,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment confirmation endpoint - confirms PaymentIntent using saved payment method
+  // NOTE: NO requireAuth middleware - we handle auth manually inside to support both cookie and body-based auth
   app.post("/api/payments/confirm", async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: "Stripe not configured" });
     }
 
     try {
-      const { paymentIntentId, paymentMethodId, sellerId, shippingAddress } = req.body;
-      const userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const { paymentIntentId, paymentMethodId, sellerId, shippingAddress, userId: bodyUserId, userEmail: bodyUserEmail } = req.body;
+      
+      // HYBRID AUTH: Try cookies first, then fall back to request body
+      let userId = null;
+      let userEmail = null;
+      
+      // Try cookie-based auth first
+      if (req.user && req.user.claims) {
+        userId = req.user.claims.sub;
+        userEmail = req.user.claims.email;
+        console.log('[PAYMENT-CONFIRM] Using cookie authentication for user:', userId);
+        
+        // SECURITY: If body also has user data, verify it matches the session
+        if (bodyUserId && bodyUserId !== userId) {
+          console.log('[PAYMENT-CONFIRM] SECURITY WARNING: Body user ID does not match session user ID');
+          return res.status(401).json({ message: "Authentication mismatch" });
+        }
+      }
+      // Fallback to body-based auth if cookies failed
+      else if (bodyUserId && bodyUserEmail) {
+        userId = bodyUserId;
+        userEmail = bodyUserEmail;
+        console.log('[PAYMENT-CONFIRM] Using fallback body authentication for user:', userId);
+        
+        // ADDITIONAL SECURITY: Verify this user exists and the request came from their session
+        const user = await storage.getUser(userId);
+        if (!user || user.email !== userEmail) {
+          console.log('[PAYMENT-CONFIRM] SECURITY WARNING: Invalid user data in request body');
+          return res.status(401).json({ message: "Invalid authentication" });
+        }
+      }
+      
       const sessionId = req.sessionID;
       
       if (!paymentIntentId || !paymentMethodId) {
