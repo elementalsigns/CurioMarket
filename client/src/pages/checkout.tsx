@@ -510,8 +510,8 @@ export default function Checkout() {
         },
         body: JSON.stringify({ 
           shippingAddress: {}, // Will be collected in the form
-          userId: user?.id, // Send user ID as fallback
-          userEmail: user?.email // Send email as fallback
+          userId: (user as any)?.id, // Send user ID as fallback
+          userEmail: (user as any)?.email // Send email as fallback
         }),
         credentials: "include", // Explicit credentials for auth
       });
