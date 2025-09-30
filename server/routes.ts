@@ -1375,8 +1375,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`[PAYMENT-INTENT] Seller ${seller?.shopName || sellerId}: $${sellerTotal} (platform fee: $${applicationFeeAmount/100})`);
         
-        // Create payment intent - use Connect account if seller has one, otherwise use platform account
-        const useConnect = seller?.stripeConnectAccountId && !isAdminSeller;
+        // CRITICAL: Admin sellers MUST use platform account, ignoring any database Connect ID
+        const useConnect = !isAdminSeller && !!seller?.stripeConnectAccountId;
+        console.log(`[PAYMENT-INTENT] Admin=${isAdminSeller}, useConnect=${useConnect}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
         const paymentConfig: any = {
           amount: Math.round(sellerTotal * 100), // Convert to cents
           currency: "usd",
@@ -1398,8 +1399,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentConfig.application_fee_amount = applicationFeeAmount;
         }
         
-        const stripeOptions = useConnect && seller?.stripeConnectAccountId 
-          ? { stripeAccount: seller.stripeConnectAccountId } 
+        // CRITICAL: For admins, ALWAYS use platform account regardless of database Connect ID
+        const stripeOptions = useConnect 
+          ? { stripeAccount: seller.stripeConnectAccountId! } 
           : undefined;
         const paymentIntent = await stripe.paymentIntents.create(paymentConfig, stripeOptions);
         
@@ -1833,8 +1835,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stripeConnectId: seller.stripeConnectAccountId
       });
       
-      // Determine which Stripe account to use based on metadata or seller type
+      // CRITICAL: Admin sellers MUST use platform account, period!
       const usesPlatformAccount = isAdminSeller || !seller.stripeConnectAccountId;
+      console.log(`[PAYMENT-CONFIRM] DECISION: isAdmin=${isAdminSeller}, usesPlatformAccount=${usesPlatformAccount}`);
       
       // SECURITY: Retrieve PaymentIntent from the correct Stripe account
       const retrieveOptions = usesPlatformAccount 
