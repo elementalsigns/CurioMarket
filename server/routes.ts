@@ -1696,12 +1696,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let customerId: string | undefined;
           if (userId) {
             const buyer = await storage.getUser(userId);
-            customerId = buyer?.stripeCustomerId;
+            customerId = buyer?.stripeCustomerId || undefined;
             
             // Create customer if doesn't exist
             if (!customerId) {
               const customer = await stripe.customers.create({
-                email: buyer?.email,
+                email: buyer?.email || undefined,
                 metadata: { userId: userId }
               });
               customerId = customer.id;
@@ -1935,7 +1935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerId = customer.id;
           
           // Save customer ID to database
-          await storage.updateUser(userId, { stripeCustomerId: customerId });
+          await storage.updateUserStripeInfo(userId, { customerId: customerId, subscriptionId: buyer?.stripeSubscriptionId || '' });
         }
         
         // Attach payment method to customer
