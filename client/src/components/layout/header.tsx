@@ -105,6 +105,11 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
+                  <Link to="/browse?category=divination" className="flex items-center">
+                    Divination
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/browse?category=fine-art" className="flex items-center">
                     Fine Art
                   </Link>
