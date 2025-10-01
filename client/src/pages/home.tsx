@@ -247,10 +247,10 @@ export default function Home() {
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                Fresh oddities
+                Fresh oddities and Curiosities
               </h2>
               <p className="text-foreground/70" data-testid="featured-subtitle">
-                from our community of collectors
+                Brought to you by our community of collectors
               </p>
             </div>
             <Link to="/browse">
