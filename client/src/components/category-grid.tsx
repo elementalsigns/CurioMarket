@@ -61,9 +61,11 @@ export default function CategoryGrid() {
     count: categoryCount.count
   })) || [];
 
-  // Only show these 4 specific categories
+  // Only show these 4 specific categories in this exact order
   const featuredSlugs = ['taxidermy', 'wet-specimens', 'occult', 'bones-skulls'];
-  const categories = allCategories.filter((cat: any) => featuredSlugs.includes(cat.slug));
+  const categories = allCategories
+    .filter((cat: any) => featuredSlugs.includes(cat.slug))
+    .sort((a: any, b: any) => featuredSlugs.indexOf(a.slug) - featuredSlugs.indexOf(b.slug));
 
   if (isLoading) {
     return (
