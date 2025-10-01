@@ -144,7 +144,7 @@ export default function EditListing() {
     mutationFn: async (data: EditListingForm) => {
       const payload = {
         ...data,
-        quantity: parseInt(data.quantity),
+        stockQuantity: parseInt(data.quantity),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
         images: images, // Include the uploaded images
       };
