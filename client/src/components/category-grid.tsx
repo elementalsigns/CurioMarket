@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import wetSpecimenImage from "@assets/generated_images/Gothic_snake_specimen_jar_51bc9d48.png";
 import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
@@ -51,7 +52,7 @@ export default function CategoryGrid() {
   });
 
   // Combine static category data with dynamic counts
-  const categories = (categoryCounts as any[])?.map((categoryCount: any) => ({
+  const allCategories = (categoryCounts as any[])?.map((categoryCount: any) => ({
     id: categoryCount.slug,
     name: categoryCount.name,
     slug: categoryCount.slug,
@@ -59,6 +60,10 @@ export default function CategoryGrid() {
     image: (categoryImages as any)[categoryCount.slug]?.image,
     count: categoryCount.count
   })) || [];
+
+  // Only show these 4 specific categories
+  const featuredSlugs = ['taxidermy', 'wet-specimens', 'occult', 'bones-skulls'];
+  const categories = allCategories.filter((cat: any) => featuredSlugs.includes(cat.slug));
 
   if (isLoading) {
     return (
@@ -72,26 +77,40 @@ export default function CategoryGrid() {
     );
   }
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-      {categories.map((category: any) => (
-        <Link key={category.id} to={`/browse?category=${category.slug}`}>
-          <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
-            <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
-              <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
-                    {category.icon}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
+        {categories.map((category: any) => (
+          <Link key={category.id} to={`/browse?category=${category.slug}`}>
+            <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
+              <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
+                <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
+                      {category.icon}
+                    </div>
+                    <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
+                      {category.name}
+                    </h3>
                   </div>
-                  <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
-                    {category.name}
-                  </h3>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </Link>
+        ))}
+      </div>
+      
+      <div className="flex justify-center">
+        <Link to="/browse">
+          <Button 
+            variant="outline" 
+            className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
+            data-testid="button-see-more-categories"
+          >
+            See More Categories
+          </Button>
         </Link>
-      ))}
+      </div>
     </div>
   );
 }
