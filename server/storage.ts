@@ -1273,7 +1273,7 @@ export class DatabaseStorage implements IStorage {
         totalSales: sum(orders.total),
       })
       .from(orders)
-      .where(and(eq(orders.sellerId, sellerId), inArray(orders.status, ['fulfilled', 'delivered', 'shipped'])));
+      .where(and(eq(orders.sellerId, sellerId), inArray(orders.status, ['paid', 'shipped', 'delivered', 'fulfilled'])));
 
     const [reviewsResult] = await db
       .select({ 
