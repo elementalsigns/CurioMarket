@@ -75,6 +75,7 @@ export default function EditListing() {
             { id: 'bones-skulls', name: 'Bones & Skulls', slug: 'bones-skulls' },
             { id: 'candles', name: 'Candles', slug: 'candles' },
             { id: 'crystals', name: 'Crystals', slug: 'crystals' },
+            { id: 'divination', name: 'Divination', slug: 'divination' },
             { id: 'funeral', name: 'Funeral', slug: 'funeral' },
             { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
             { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
