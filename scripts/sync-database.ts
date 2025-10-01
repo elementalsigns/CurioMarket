@@ -40,7 +40,8 @@ async function syncDatabase() {
       { name: 'Funeral', slug: 'funeral', description: 'Funeral and mortuary-related items and memorabilia' },
       { name: 'Antique', slug: 'antique', description: 'Authentic antique pieces and historical artifacts' },
       { name: 'Vintage', slug: 'vintage', description: 'Vintage items from past eras and decades' },
-      { name: 'Wholesale', slug: 'wholesale', description: 'Bulk orders and wholesale quantities for resellers', icon: '📦' }
+      { name: 'Wholesale', slug: 'wholesale', description: 'Bulk orders and wholesale quantities for resellers', icon: '📦' },
+      { name: 'Divination', slug: 'divination', description: 'Divination tools, tarot cards, runes, and mystical instruments' }
     ];
 
     console.log('🔧 Ensuring all required categories exist...');
