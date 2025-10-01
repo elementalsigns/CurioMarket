@@ -247,8 +247,11 @@ export default function Home() {
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                <span className="font-bold">Fresh oddities</span> from our community of collectors
+                Fresh oddities
               </h2>
+              <p className="text-foreground/70" data-testid="featured-subtitle">
+                from our community of collectors
+              </p>
             </div>
             <Link to="/browse">
               <Button 
