@@ -67,7 +67,7 @@ export default function CategoryGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8" data-testid="category-grid">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="glass-effect rounded-2xl overflow-hidden">
             <div className="aspect-square bg-zinc-800/50 animate-pulse" />
@@ -77,40 +77,26 @@ export default function CategoryGrid() {
     );
   }
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="category-grid">
-        {categories.map((category: any) => (
-          <Link key={category.id} to={`/browse?category=${category.slug}`}>
-            <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
-              <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
-                <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
-                      {category.icon}
-                    </div>
-                    <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
-                      {category.name}
-                    </h3>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8" data-testid="category-grid">
+      {categories.map((category: any) => (
+        <Link key={category.id} to={`/browse?category=${category.slug}`}>
+          <Card className="glass-effect rounded-2xl overflow-hidden hover-lift cursor-pointer group" data-testid={`category-${category.id}`}>
+            <div className="aspect-square bg-cover bg-center relative" style={{backgroundImage: `url(${category.image})`}}>
+              <div className="absolute inset-0 bg-background/40 group-hover:bg-primary/40 transition-colors"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="text-4xl mb-2" data-testid={`category-icon-${category.id}`}>
+                    {category.icon}
                   </div>
+                  <h3 className="text-xl font-serif font-bold" data-testid={`category-name-${category.id}`}>
+                    {category.name}
+                  </h3>
                 </div>
               </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
-      
-      <div className="flex justify-center">
-        <Link to="/browse">
-          <Button 
-            variant="outline" 
-            className="text-foreground border-border hover:text-red-600 hover:border-red-600 hover:bg-transparent font-medium transition-colors"
-            data-testid="button-see-more-categories"
-          >
-            See More Categories
-          </Button>
+            </div>
+          </Card>
         </Link>
-      </div>
+      ))}
     </div>
   );
 }
