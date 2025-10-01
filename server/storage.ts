@@ -2165,7 +2165,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(orders.sellerId, sellerId),
-          eq(orders.status, 'fulfilled'),
+          sql`${orders.status} IN ('paid', 'shipped', 'delivered', 'fulfilled')`,
           sql`${orders.createdAt} >= NOW() - INTERVAL '${sql.raw(periodInterval)}'`
         )
       );
