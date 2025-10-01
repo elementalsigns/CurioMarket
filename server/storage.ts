@@ -133,6 +133,7 @@ export interface IStorage {
   searchListings(query: string, filters?: any): Promise<{ listings: Listing[]; total: number }>;
   searchShops(query: string, filters?: any): Promise<{ shops: Seller[]; total: number }>;
   getFeaturedListings(limit?: number): Promise<Listing[]>;
+  getRandomListings(limit?: number): Promise<Listing[]>;
   getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number; activeListings: number; totalFavorites: number; totalViews: number }>;
   
   // Category counts
@@ -1185,6 +1186,48 @@ export class DatabaseStorage implements IStorage {
     // Add images and seller information to each listing with URL conversion
     const listingsWithImagesAndSeller = await Promise.all(
       result.listings.map(async (listing) => {
+        const images = await this.getListingImages(listing.id);
+        // Convert Google Cloud Storage URLs to /objects/ format
+        const convertedImages = images.map(image => {
+          let convertedUrl = image.url;
+          if (image.url.startsWith('https://storage.googleapis.com/')) {
+            // Extract the upload ID from the Google Cloud Storage URL
+            const parts = image.url.split('/');
+            const uploadId = parts[parts.length - 1];
+            convertedUrl = `/objects/uploads/${uploadId}`;
+          }
+          return { ...image, url: convertedUrl };
+        });
+        
+        // Get seller information
+        const seller = await db.query.sellers.findFirst({
+          where: eq(sellers.id, listing.sellerId)
+        });
+        
+        return { 
+          ...listing, 
+          images: convertedImages,
+          seller: seller ? { shopName: seller.shopName } : null
+        };
+      })
+    );
+    
+    // Filter out listings without images to avoid "No image" placeholders
+    return listingsWithImagesAndSeller.filter(listing => listing.images && listing.images.length > 0);
+  }
+
+  async getRandomListings(limit: number = 12): Promise<any[]> {
+    // Get random published listings using PostgreSQL RANDOM()
+    const randomListings = await db
+      .select()
+      .from(listings)
+      .where(eq(listings.state, 'published'))
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
+    
+    // Add images and seller information to each listing with URL conversion
+    const listingsWithImagesAndSeller = await Promise.all(
+      randomListings.map(async (listing) => {
         const images = await this.getListingImages(listing.id);
         // Convert Google Cloud Storage URLs to /objects/ format
         const convertedImages = images.map(image => {

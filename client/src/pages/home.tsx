@@ -52,6 +52,10 @@ export default function Home() {
     queryKey: ["/api/listings/featured"],
   });
 
+  const { data: randomListings } = useQuery({
+    queryKey: ["/api/listings/random"],
+  });
+
   const { data: wishlists } = useQuery({
     queryKey: ["/api/wishlists"],
     enabled: !!user,
@@ -243,11 +247,8 @@ export default function Home() {
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-4xl font-serif font-bold mb-2" data-testid="featured-title">
-                Recently Added
+                <span className="font-bold">Fresh oddities</span> from our community of collectors
               </h2>
-              <p className="text-foreground/70" data-testid="featured-subtitle">
-                Fresh oddities from our community of collectors
-              </p>
             </div>
             <Link to="/browse">
               <Button 
@@ -261,7 +262,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch" data-testid="featured-grid">
-            {(featuredListings as any)?.map((listing: any) => (
+            {(randomListings as any)?.map((listing: any) => (
               <ProductCard key={listing.id} listing={listing} />
             ))}
           </div>

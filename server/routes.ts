@@ -4077,6 +4077,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get random listings - MUST be before /:id route
+  app.get('/api/listings/random', async (req, res) => {
+    try {
+      const { limit = 12 } = req.query;
+      const listings = await storage.getRandomListings(parseInt(limit as string));
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching random listings:", error);
+      res.status(500).json({ error: "Failed to fetch random listings" });
+    }
+  });
+
   // Get single listing (public)
   app.get('/api/listings/:id', async (req, res) => {
     try {
