@@ -1309,6 +1309,7 @@ export class DatabaseStorage implements IStorage {
     const totalViews = sellerListings.reduce((sum, listing) => sum + (listing.views || 0), 0);
 
     return {
+      totalRevenue: Number(salesResult?.totalSales) || 0,
       totalSales: Number(salesResult?.totalSales) || 0,
       averageRating: Number(reviewsResult?.averageRating) || 0,
       totalReviews: Number(reviewsResult?.totalReviews) || 0,
