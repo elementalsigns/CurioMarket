@@ -201,7 +201,7 @@ export default function Landing() {
                 { name: 'Medical Art', slug: 'medical-art' }, 
                 { name: 'Wet Specimens', slug: 'wet-specimens' },
                 { name: 'Antique', slug: 'antique' },
-                { name: 'Vintage', slug: 'vintage' },
+                { name: 'Divination', slug: 'divination' },
                 { name: 'Jewelry', slug: 'jewelry' },
                 { name: 'Occult', slug: 'occult' },
                 { name: 'Wall Art', slug: 'wall-art' },
