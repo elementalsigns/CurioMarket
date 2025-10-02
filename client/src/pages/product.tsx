@@ -387,10 +387,9 @@ export default function Product() {
                           )}
                         </div>
                         <Button
-                          variant="outline"
                           size="sm"
                           onClick={() => setLocation(`/shop/${listing.seller.id}`)}
-                          className="ml-4 whitespace-nowrap"
+                          className="ml-4 whitespace-nowrap bg-gothic-red hover:bg-gothic-red/80 text-white"
                           data-testid="button-visit-shop"
                         >
                           Visit Shop
