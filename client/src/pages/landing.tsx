@@ -36,7 +36,7 @@ export default function Landing() {
   const queryClient = useQueryClient();
   
   const { data: featuredListings = [] } = useQuery({
-    queryKey: ["/api/listings/featured"],
+    queryKey: ["/api/listings/random"],
   });
 
   // Fetch user favorites (silently fail if not authenticated)
