@@ -658,7 +658,7 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Total Sales</span>
-                  <span className="font-semibold">156</span>
+                  <span className="font-semibold">{seller?.totalSales || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Active Listings</span>
@@ -666,7 +666,12 @@ export default function ShopPage({ previewData, isPreview = false }: ShopPagePro
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Member Since</span>
-                  <span className="font-semibold">Oct 2023</span>
+                  <span className="font-semibold">
+                    {seller?.memberSince 
+                      ? new Date(seller.memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                      : 'N/A'
+                    }
+                  </span>
                 </div>
               </CardContent>
             </Card>

@@ -49,7 +49,7 @@ import {
   sellerReviewQueue
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, or, sql } from "drizzle-orm";
+import { eq, or, sql, count, and, inArray } from "drizzle-orm";
 import { verificationService } from "./verificationService";
 import { emailService } from "./emailService";
 import { ObjectStorageService } from "./objectStorage";
@@ -2793,11 +2793,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
+      // Get total completed orders count for shop stats
+      const [ordersCountResult] = await db
+        .select({ count: count(orders.id) })
+        .from(orders)
+        .where(and(eq(orders.sellerId, seller.id), inArray(orders.status, ['paid', 'shipped', 'delivered', 'fulfilled'])));
+      
+      const totalOrdersCount = Number(ordersCountResult?.count) || 0;
+      
       // Map database fields to frontend expectations
       const sellerWithMappedFields = {
         ...seller,
         bannerImageUrl: seller.banner,
-        avatarImageUrl: seller.avatar
+        avatarImageUrl: seller.avatar,
+        totalSales: totalOrdersCount,
+        memberSince: seller.createdAt
       };
 
       res.json({
