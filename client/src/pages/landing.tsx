@@ -240,10 +240,10 @@ export default function Landing() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-3xl font-serif font-bold mb-2" data-testid="featured-title">
-                Recently viewed & more like this
+                Fresh Oddities and Curiosities
               </h2>
               <p className="text-foreground/70" data-testid="featured-subtitle">
-                Handpicked oddities & curiosities
+                Brought to you by our community of collectors
               </p>
             </div>
             <Button 
