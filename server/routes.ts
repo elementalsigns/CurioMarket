@@ -5790,7 +5790,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const recipient = await storage.getUser(recipientId);
         const sender = await storage.getUser(userId);
         
-        if (recipient?.email && sender) {
+        console.log(`[MESSAGES-EMAIL] Checking email conditions - recipient email: ${recipient?.email ? 'exists' : 'missing'}, sender: ${sender ? 'exists' : 'missing'}, content: ${content ? 'exists' : 'missing'}`);
+        
+        if (recipient?.email && sender && content) {
           const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
           
           // Check if recipient is a seller
@@ -5880,6 +5882,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (thread?.otherUser?.id) {
           const recipient = await storage.getUser(thread.otherUser.id);
           const sender = await storage.getUser(userId);
+          
+          console.log(`[MESSAGES-EMAIL] Checking email conditions - recipient email: ${recipient?.email ? 'exists' : 'missing'}, sender: ${sender ? 'exists' : 'missing'}, content: ${content ? 'exists' : 'missing'}`);
           
           if (recipient?.email && sender) {
             const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
