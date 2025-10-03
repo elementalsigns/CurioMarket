@@ -1919,19 +1919,14 @@ export class DatabaseStorage implements IStorage {
     // Fetch additional data for each thread
     const threadsWithDetails = await Promise.all(
       threads.map(async (thread) => {
-        // Check if the user has any messages left in this conversation
-        const [userMessageCount] = await db
+        // Check if there are any messages in this conversation
+        const [totalMessageCount] = await db
           .select({ count: count(messages.id) })
           .from(messages)
-          .where(
-            and(
-              eq(messages.threadId, thread.id),
-              eq(messages.senderId, userId)
-            )
-          );
+          .where(eq(messages.threadId, thread.id));
         
-        // If user has no messages left, skip this conversation (they "deleted" it)
-        if (userMessageCount.count === 0) {
+        // If no messages exist in thread, skip it (empty conversation)
+        if (totalMessageCount.count === 0) {
           return null;
         }
         
