@@ -51,7 +51,7 @@ import {
 import { db } from "./db";
 import { eq, or, sql, count, and, inArray } from "drizzle-orm";
 import { verificationService } from "./verificationService";
-import { emailService, shouldSendEmail } from "./emailService";
+import { emailService } from "./emailService";
 import { ObjectStorageService } from "./objectStorage";
 import * as XLSX from 'xlsx';
 
@@ -905,23 +905,13 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
         console.log(`[WEBHOOK] Sending confirmation emails for order ${emailData.orderNumber}`);
         
         // Send buyer confirmation email
-        const shouldSendBuyer = await shouldSendEmail(storage, userId, 'orderConfirmations');
-        if (shouldSendBuyer) {
-          const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
-          console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
-        } else {
-          console.log(`[WEBHOOK] ⚙️ Buyer has disabled order confirmation emails - email skipped`);
-        }
+        const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
+        console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
 
         // Send seller notification email
         if (sellerUser?.email && sellerUser.email !== 'seller@curiosities.market') {
-          const shouldSendSeller = await shouldSendEmail(storage, sellerId, 'newOrders');
-          if (shouldSendSeller) {
-            const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
-            console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
-          } else {
-            console.log(`[WEBHOOK] ⚙️ Seller has disabled order notification emails - email skipped`);
-          }
+          const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
+          console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
         }
 
       } catch (orderError: any) {
@@ -4934,38 +4924,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
               
               // ✅ Send BOTH buyer and seller emails asynchronously (don't block order creation)
-              console.log(`[ORDER-EMAIL] Checking buyer notification preferences...`);
-              shouldSendEmail(storage, userId, 'orderConfirmations').then(shouldSendBuyer => {
-                if (shouldSendBuyer) {
-                  console.log(`[ORDER-EMAIL] ✉️ Sending order confirmation to buyer: ${emailData.customerEmail}`);
-                  emailService.sendOrderConfirmation(emailData).then(result => {
-                    console.log(`[ORDER-EMAIL] Buyer email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
-                  }).catch(error => {
-                    console.error(`[ORDER-EMAIL] ❌ Buyer email failed for order ${order.id}:`, error);
-                  });
-                } else {
-                  console.log(`[ORDER-EMAIL] ⚙️ Buyer has disabled order confirmation emails - email skipped`);
-                }
+              console.log(`[ORDER-EMAIL] ✉️ Sending order confirmation to buyer: ${emailData.customerEmail}`);
+              emailService.sendOrderConfirmation(emailData).then(result => {
+                console.log(`[ORDER-EMAIL] Buyer email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
               }).catch(error => {
-                console.error(`[ORDER-EMAIL] ❌ Preference check failed for buyer, sending email anyway:`, error);
-                emailService.sendOrderConfirmation(emailData);
+                console.error(`[ORDER-EMAIL] ❌ Buyer email failed for order ${order.id}:`, error);
               });
               
-              console.log(`[ORDER-EMAIL] Checking seller notification preferences...`);
-              shouldSendEmail(storage, sellerId, 'newOrders').then(shouldSendSeller => {
-                if (shouldSendSeller) {
-                  console.log(`[ORDER-EMAIL] ✉️ Sending order notification to seller: ${emailData.sellerEmail}`);
-                  emailService.sendSellerOrderNotification(emailData).then(result => {
-                    console.log(`[ORDER-EMAIL] Seller email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
-                  }).catch(error => {
-                    console.error(`[ORDER-EMAIL] ❌ Seller email failed for order ${order.id}:`, error);
-                  });
-                } else {
-                  console.log(`[ORDER-EMAIL] ⚙️ Seller has disabled order notification emails - email skipped`);
-                }
+              console.log(`[ORDER-EMAIL] ✉️ Sending order notification to seller: ${emailData.sellerEmail}`);
+              emailService.sendSellerOrderNotification(emailData).then(result => {
+                console.log(`[ORDER-EMAIL] Seller email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
               }).catch(error => {
-                console.error(`[ORDER-EMAIL] ❌ Preference check failed for seller, sending email anyway:`, error);
-                emailService.sendSellerOrderNotification(emailData);
+                console.error(`[ORDER-EMAIL] ❌ Seller email failed for order ${order.id}:`, error);
               });
             }
           } catch (emailError) {
@@ -5525,18 +5495,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
             };
             
-            console.log('[TRACKING UPDATE] Checking buyer shipping notification preferences...');
-            const shouldSendShipping = await shouldSendEmail(storage, orderDetails.buyerId, 'shippingUpdates');
-            if (shouldSendShipping) {
-              console.log('[TRACKING UPDATE] Sending shipping notification to buyer:', orderDetails.buyerEmail);
-              const emailResult = await emailService.sendShippingNotification(emailData);
-              if (emailResult) {
-                console.log('[TRACKING UPDATE] ✅ Shipping notification email sent successfully');
-              } else {
-                console.error('[TRACKING UPDATE] ❌ Shipping notification email failed to send');
-              }
+            console.log('[TRACKING UPDATE] Sending shipping notification to buyer:', orderDetails.buyerEmail);
+            const emailResult = await emailService.sendShippingNotification(emailData);
+            if (emailResult) {
+              console.log('[TRACKING UPDATE] ✅ Shipping notification email sent successfully');
             } else {
-              console.log('[TRACKING UPDATE] ⚙️ Buyer has disabled shipping update emails - email skipped');
+              console.error('[TRACKING UPDATE] ❌ Shipping notification email failed to send');
             }
           } else {
             console.log('[TRACKING UPDATE] ⚠️ No buyer email found for shipping notification');
@@ -5593,21 +5557,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sellerEmail: orderDetails.sellerEmail || 'seller@curiosities.market'
           };
           
-          console.log('[SHIP ORDER] Step 3: Checking buyer shipping notification preferences...');
-          const shouldSendShipping = await shouldSendEmail(storage, orderDetails.buyerId, 'shippingUpdates');
-          
-          let emailResult = true; // Default to success if email is skipped
-          if (shouldSendShipping) {
-            console.log('[SHIP ORDER] Sending shipping notification to buyer:', orderDetails.buyerEmail);
-            emailResult = await emailService.sendShippingNotification(emailData);
-            if (emailResult) {
-              console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
-            } else {
-              console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
-              throw new Error('Email notification failed to send');
-            }
+          console.log('[SHIP ORDER] Step 3: Sending shipping notification to buyer:', orderDetails.buyerEmail);
+          const emailResult = await emailService.sendShippingNotification(emailData);
+          if (emailResult) {
+            console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
           } else {
-            console.log('[SHIP ORDER] ⚙️ Buyer has disabled shipping update emails - email skipped');
+            console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
+            throw new Error('Email notification failed to send');
           }
           
           console.log('[SHIP ORDER] Step 4: Updating order status to completed...');
