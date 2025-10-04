@@ -1987,18 +1987,6 @@ export class DatabaseStorage implements IStorage {
           .orderBy(desc(messages.createdAt))
           .limit(1);
         
-        // Check if user has sent ANY messages in this thread (for "Sent" tab logic)
-        const [userSentCount] = await db
-          .select({ count: count(messages.id) })
-          .from(messages)
-          .where(
-            and(
-              eq(messages.threadId, thread.id),
-              eq(messages.senderId, userId)
-            )
-          );
-        const userHasSentMessages = Number(userSentCount?.count || 0) > 0;
-        
         // Get unread count for this thread - only count if this conversation would appear in "Received" tab
         // This means the latest message was sent TO the user (not BY the user)
         const shouldCountUnread = latestMessage?.senderId !== userId;
@@ -2051,8 +2039,7 @@ export class DatabaseStorage implements IStorage {
           latestMessage,
           unreadCount: Number(unreadResult.count),
           listing,
-          listingImage,
-          userHasSentMessages  // Flag for Sent tab filtering
+          listingImage
         };
       })
     );
