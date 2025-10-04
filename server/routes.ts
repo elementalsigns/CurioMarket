@@ -5912,8 +5912,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[MESSAGES-DEBUG] Message ID: ${message.id}`);
       console.log(`[MESSAGES-DEBUG] ===== END MESSAGE SEND SUCCESS =====`);
       
-      // Send response immediately
+      // ✅ CRITICAL: Send response FIRST to commit the message transaction
       res.json(message);
+      
+      // ✅ SAFE: Handle email notifications AFTER response (completely isolated from message save)
+      setImmediate(async () => {
+        try {
+          const thread = threads.find(t => t.id === conversationId);
+          if (!thread?.otherUser?.id) {
+            console.log(`[MESSAGES-EMAIL] No recipient found for email notification`);
+            return;
+          }
+          
+          const recipient = await storage.getUser(thread.otherUser.id);
+          const sender = await storage.getUser(userId);
+          
+          if (!recipient?.email || !sender) {
+            console.log(`[MESSAGES-EMAIL] Missing recipient email or sender`);
+            return;
+          }
+          
+          const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+          const recipientSeller = await storage.getSeller(thread.otherUser.id);
+          
+          if (recipientSeller) {
+            // Send seller notification
+            console.log(`[MESSAGES-EMAIL] Sending seller notification to:`, recipient.email);
+            await emailService.sendSellerMessageNotification({
+              sellerEmail: recipient.email,
+              sellerName: recipientSeller.shopName || 'Seller',
+              customerName: sender.firstName && sender.lastName 
+                ? `${sender.firstName} ${sender.lastName}` 
+                : sender.email || 'Customer',
+              messagePreview: messagePreview
+            });
+          } else {
+            // Send buyer notification
+            const senderSeller = await storage.getSeller(userId);
+            if (senderSeller) {
+              console.log(`[MESSAGES-EMAIL] Sending buyer notification to:`, recipient.email);
+              await emailService.sendBuyerMessageNotification({
+                buyerEmail: recipient.email,
+                buyerName: recipient.firstName && recipient.lastName 
+                  ? `${recipient.firstName} ${recipient.lastName}` 
+                  : 'Customer',
+                shopName: senderSeller.shopName || 'Seller',
+                messagePreview: messagePreview
+              });
+            }
+          }
+        } catch (emailError) {
+          console.error("[MESSAGES-EMAIL] Email notification failed (message already saved):", emailError);
+        }
+      });
       
     } catch (error) {
       console.error("[MESSAGES-DEBUG] ❌❌❌ EXCEPTION CAUGHT:", error);
