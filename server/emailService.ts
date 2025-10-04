@@ -1,4 +1,5 @@
 import { MailService } from '@sendgrid/mail';
+import { storage } from './storage';
 
 if (!process.env.SENDGRID_API_KEY) {
   console.error('[EMAIL SERVICE] ❌ SENDGRID_API_KEY environment variable must be set');
@@ -8,6 +9,37 @@ if (!process.env.SENDGRID_API_KEY) {
 const mailService = new MailService();
 mailService.setApiKey(process.env.SENDGRID_API_KEY);
 console.log('[EMAIL SERVICE] ✅ SendGrid API key set successfully');
+
+/**
+ * CRITICAL: Fail-safe preference checker
+ * This function MUST NEVER throw errors - it returns true (send email) on any error
+ * This ensures that if preferences can't be checked, emails still get sent (fail-open)
+ */
+async function shouldSendEmail(userId: string, preferenceKey: string): Promise<boolean> {
+  try {
+    // IMPORTANT: This is wrapped in try-catch to prevent ANY errors from breaking email sending
+    const prefs = await storage.getUserNotificationPreferences(userId);
+    
+    if (!prefs) {
+      // No preferences found = user wants all emails (opt-out model)
+      console.log(`[EMAIL-PREFS] No preferences found for user ${userId}, defaulting to SEND`);
+      return true;
+    }
+    
+    // Check the specific preference
+    // @ts-ignore - dynamic key access is safe here
+    const prefValue = prefs[preferenceKey];
+    const shouldSend = prefValue !== false; // Send unless explicitly set to false
+    
+    console.log(`[EMAIL-PREFS] User ${userId}, ${preferenceKey}: ${shouldSend ? 'SEND' : 'SKIP'}`);
+    return shouldSend;
+  } catch (error) {
+    // CRITICAL: On any error, default to sending (fail-open for emails)
+    console.error(`[EMAIL-PREFS] ❌ Error checking preference ${preferenceKey} for user ${userId}:`, error);
+    console.error(`[EMAIL-PREFS] Defaulting to SEND to ensure user gets notifications`);
+    return true; // Fail-open: send email if we can't check
+  }
+}
 
 interface EmailParams {
   to: string;
