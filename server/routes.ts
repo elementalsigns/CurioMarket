@@ -5688,9 +5688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all conversations and filter properly for sent vs received
       const allConversations = await storage.getUserMessageThreads(userId);
       
-      // For sent conversations, show ALL conversations (participant-based, not message-based)
-      // A conversation appears in "Sent" if the user is a participant
-      const sentConversations = allConversations;
+      // For sent conversations, show where the LATEST MESSAGE was sent BY the user
+      // This works for both buyers and sellers - anyone can send messages
+      const sentConversations = allConversations.filter(conversation => {
+        return conversation.latestMessage?.senderId === userId; // Latest message was sent BY the user
+      });
       
       // Transform data for frontend compatibility
       const transformedSentConversations = sentConversations.map(conv => ({
