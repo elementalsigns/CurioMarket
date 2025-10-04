@@ -63,7 +63,7 @@ import {
   type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, like, or, sql, count, avg, sum, inArray, ne } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, like, or, sql, count, avg, sum, inArray, ne, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -1829,34 +1829,51 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
     
-    // For now, keep current behavior to preserve functionality
-    // TODO: Implement per-user conversation deletion with participant states
-    // Delete only messages where user is the sender
+    // Per-user deletion: Archive the conversation for this user only
+    // First ensure participant record exists
+    await this.ensureParticipantRecords(conversationId, thread.buyerId, thread.sellerId);
+    
+    // Update the participant record to mark as archived
     await db
-      .delete(messages)
+      .update(messageThreadParticipants)
+      .set({ archivedAt: new Date() })
       .where(
         and(
-          eq(messages.threadId, conversationId),
-          eq(messages.senderId, userId)
+          eq(messageThreadParticipants.threadId, conversationId),
+          eq(messageThreadParticipants.userId, userId)
         )
       );
-    
-    // Check if any messages remain from either participant
-    const remainingMessages = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(messages)
-      .where(eq(messages.threadId, conversationId));
-    
-    // Only delete the thread if no messages remain from either participant
-    if (remainingMessages[0]?.count === 0) {
-      await db
-        .delete(messageThreads)
-        .where(eq(messageThreads.id, conversationId));
-    }
   }
 
   async bulkDeleteConversations(conversationIds: string[], userId: string): Promise<void> {
-    // Delete all messages in the conversations where user is sender
+    // Per-user deletion: Archive all conversations for this user
+    for (const conversationId of conversationIds) {
+      // Get conversation to ensure participant records
+      const [thread] = await db
+        .select()
+        .from(messageThreads)
+        .where(eq(messageThreads.id, conversationId));
+      
+      if (thread) {
+        // Ensure participant record exists
+        await this.ensureParticipantRecords(conversationId, thread.buyerId, thread.sellerId);
+        
+        // Archive for this user
+        await db
+          .update(messageThreadParticipants)
+          .set({ archivedAt: new Date() })
+          .where(
+            and(
+              eq(messageThreadParticipants.threadId, conversationId),
+              eq(messageThreadParticipants.userId, userId)
+            )
+          );
+      }
+    }
+  }
+
+  async oldBulkDeleteConversations_DEPRECATED(conversationIds: string[], userId: string): Promise<void> {
+    // Old implementation - kept for reference
     await db
       .delete(messages)
       .where(
@@ -1866,7 +1883,6 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    // Check each conversation and delete thread if no messages remain
     for (const conversationId of conversationIds) {
       const remainingMessages = await db
         .select({ count: sql<number>`count(*)` })
@@ -1910,10 +1926,23 @@ export class DatabaseStorage implements IStorage {
         listingId: messageThreads.listingId,
         subject: messageThreads.subject,
         createdAt: messageThreads.createdAt,
-        updatedAt: messageThreads.updatedAt
+        updatedAt: messageThreads.updatedAt,
+        participantArchived: messageThreadParticipants.archivedAt
       })
       .from(messageThreads)
-      .where(or(eq(messageThreads.buyerId, userId), eq(messageThreads.sellerId, userId)))
+      .leftJoin(
+        messageThreadParticipants,
+        and(
+          eq(messageThreadParticipants.threadId, messageThreads.id),
+          eq(messageThreadParticipants.userId, userId)
+        )
+      )
+      .where(
+        and(
+          or(eq(messageThreads.buyerId, userId), eq(messageThreads.sellerId, userId)),
+          isNull(messageThreadParticipants.archivedAt) // Filter out archived threads
+        )
+      )
       .orderBy(desc(messageThreads.updatedAt));
     
     // Fetch additional data for each thread
