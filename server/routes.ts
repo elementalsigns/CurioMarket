@@ -8596,6 +8596,57 @@ This message was sent via the Curio Market contact form.
     }
   });
 
+  // =================== NOTIFICATION PREFERENCES ===================
+  
+  // Get user's notification preferences
+  app.get('/api/user/notification-preferences', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = await storage.getUserNotificationPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error('[NOTIFICATION-PREFS] Error fetching preferences:', error);
+      res.status(500).json({ error: 'Failed to fetch notification preferences' });
+    }
+  });
+  
+  // Update user's notification preferences
+  app.put('/api/user/notification-preferences', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updates = req.body;
+      
+      // Validate that only allowed fields are being updated
+      const allowedFields = [
+        'orderConfirmations',
+        'shippingUpdates',
+        'messagesFromSellers',
+        'newOrders',
+        'messageNotifications',
+        'promotionalEmails',
+        'productUpdates'
+      ];
+      
+      const invalidFields = Object.keys(updates).filter(
+        key => !allowedFields.includes(key) && key !== 'userId'
+      );
+      
+      if (invalidFields.length > 0) {
+        return res.status(400).json({ 
+          error: `Invalid fields: ${invalidFields.join(', ')}` 
+        });
+      }
+      
+      const updatedPreferences = await storage.updateUserNotificationPreferences(userId, updates);
+      
+      console.log(`[NOTIFICATION-PREFS] Updated preferences for user ${userId}:`, updates);
+      res.json(updatedPreferences);
+    } catch (error) {
+      console.error('[NOTIFICATION-PREFS] Error updating preferences:', error);
+      res.status(500).json({ error: 'Failed to update notification preferences' });
+    }
+  });
+
   // Test email endpoint (development only)
   app.post('/api/test-email', async (req, res) => {
     try {
