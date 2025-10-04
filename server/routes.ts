@@ -5688,10 +5688,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all conversations and filter properly for sent vs received
       const allConversations = await storage.getUserMessageThreads(userId);
       
-      // For sent conversations, show where the LATEST MESSAGE was sent BY the user
-      // This works for both buyers and sellers - anyone can send messages
+      // For sent conversations, show where the user has sent AT LEAST ONE message
+      // This ensures conversations stay in "Sent" even if the other person replied
       const sentConversations = allConversations.filter(conversation => {
-        return conversation.latestMessage?.senderId === userId; // Latest message was sent BY the user
+        return conversation.userHasSentMessages === true;
       });
       
       // Transform data for frontend compatibility
