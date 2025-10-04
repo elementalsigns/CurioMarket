@@ -288,6 +288,26 @@ export const messages = pgTable("messages", {
   readAt: timestamp("read_at"),
 });
 
+// User notification preferences - Controls which emails users receive
+export const userNotificationPreferences = pgTable("user_notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  
+  // Marketplace activity (buyer notifications)
+  newItemsFromFavoriteSellers: boolean("new_items_favorite_sellers").default(true),
+  priceDropsWishlisted: boolean("price_drops_wishlisted").default(true),
+  messagesFromSellers: boolean("messages_from_sellers").default(true),
+  
+  // Seller notifications
+  newOrders: boolean("new_orders").default(true),
+  messageNotifications: boolean("message_notifications").default(true),
+  lowInventoryAlerts: boolean("low_inventory_alerts").default(true),
+  paymentNotifications: boolean("payment_notifications").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Reviews - Enhanced with photo upload support
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -836,6 +856,10 @@ export type ListingImage = typeof listingImages.$inferSelect;
 export type MessageThread = typeof messageThreads.$inferSelect;
 export type MessageThreadParticipant = typeof messageThreadParticipants.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+
+export const insertUserNotificationPreferencesSchema = createInsertSchema(userNotificationPreferences).omit({ id: true, createdAt: true, updatedAt: true });
+export type UserNotificationPreferences = typeof userNotificationPreferences.$inferSelect;
+export type InsertUserNotificationPreferences = z.infer<typeof insertUserNotificationPreferencesSchema>;
 export type Flag = typeof flags.$inferSelect;
 export type SavedSearch = typeof savedSearches.$inferSelect;
 export type InsertSavedSearch = z.infer<typeof insertSavedSearchSchema>;
