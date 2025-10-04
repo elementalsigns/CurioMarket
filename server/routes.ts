@@ -905,7 +905,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
         console.log(`[WEBHOOK] Sending confirmation emails for order ${emailData.orderNumber}`);
         
         // Send buyer confirmation email
-        const shouldSendBuyer = await shouldSendEmail(userId, 'orderConfirmations');
+        const shouldSendBuyer = await shouldSendEmail(storage, userId, 'orderConfirmations');
         if (shouldSendBuyer) {
           const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
           console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
@@ -915,7 +915,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
 
         // Send seller notification email
         if (sellerUser?.email && sellerUser.email !== 'seller@curiosities.market') {
-          const shouldSendSeller = await shouldSendEmail(sellerId, 'newOrders');
+          const shouldSendSeller = await shouldSendEmail(storage, sellerId, 'newOrders');
           if (shouldSendSeller) {
             const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
             console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
@@ -4935,7 +4935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // ✅ Send BOTH buyer and seller emails asynchronously (don't block order creation)
               console.log(`[ORDER-EMAIL] Checking buyer notification preferences...`);
-              shouldSendEmail(userId, 'orderConfirmations').then(shouldSendBuyer => {
+              shouldSendEmail(storage, userId, 'orderConfirmations').then(shouldSendBuyer => {
                 if (shouldSendBuyer) {
                   console.log(`[ORDER-EMAIL] ✉️ Sending order confirmation to buyer: ${emailData.customerEmail}`);
                   emailService.sendOrderConfirmation(emailData).then(result => {
@@ -4952,7 +4952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
               
               console.log(`[ORDER-EMAIL] Checking seller notification preferences...`);
-              shouldSendEmail(sellerId, 'newOrders').then(shouldSendSeller => {
+              shouldSendEmail(storage, sellerId, 'newOrders').then(shouldSendSeller => {
                 if (shouldSendSeller) {
                   console.log(`[ORDER-EMAIL] ✉️ Sending order notification to seller: ${emailData.sellerEmail}`);
                   emailService.sendSellerOrderNotification(emailData).then(result => {
@@ -5526,7 +5526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
             
             console.log('[TRACKING UPDATE] Checking buyer shipping notification preferences...');
-            const shouldSendShipping = await shouldSendEmail(orderDetails.buyerId, 'shippingUpdates');
+            const shouldSendShipping = await shouldSendEmail(storage, orderDetails.buyerId, 'shippingUpdates');
             if (shouldSendShipping) {
               console.log('[TRACKING UPDATE] Sending shipping notification to buyer:', orderDetails.buyerEmail);
               const emailResult = await emailService.sendShippingNotification(emailData);
@@ -5594,7 +5594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           console.log('[SHIP ORDER] Step 3: Checking buyer shipping notification preferences...');
-          const shouldSendShipping = await shouldSendEmail(orderDetails.buyerId, 'shippingUpdates');
+          const shouldSendShipping = await shouldSendEmail(storage, orderDetails.buyerId, 'shippingUpdates');
           
           let emailResult = true; // Default to success if email is skipped
           if (shouldSendShipping) {
@@ -5970,7 +5970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               try {
                 // SURGICAL FIX: Check preference before sending email (fail-safe, won't break messages)
-                const shouldSend = await shouldSendEmail(recipient.id, 'messageNotifications');
+                const shouldSend = await shouldSendEmail(storage, recipient.id, 'messageNotifications');
                 
                 if (shouldSend) {
                   console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
@@ -6000,7 +6000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 try {
                   // SURGICAL FIX: Check preference before sending email (fail-safe, won't break messages)
-                  const shouldSend = await shouldSendEmail(recipient.id, 'messagesFromSellers');
+                  const shouldSend = await shouldSendEmail(storage, recipient.id, 'messagesFromSellers');
                   
                   if (shouldSend) {
                     console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);

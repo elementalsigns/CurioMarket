@@ -1,5 +1,4 @@
 import { MailService } from '@sendgrid/mail';
-import { storage } from './storage';
 
 if (!process.env.SENDGRID_API_KEY) {
   console.error('[EMAIL SERVICE] ❌ SENDGRID_API_KEY environment variable must be set');
@@ -14,8 +13,10 @@ console.log('[EMAIL SERVICE] ✅ SendGrid API key set successfully');
  * CRITICAL: Fail-safe preference checker
  * This function MUST NEVER throw errors - it returns true (send email) on any error
  * This ensures that if preferences can't be checked, emails still get sent (fail-open)
+ * 
+ * @param storage - Storage instance passed from routes to avoid circular dependency
  */
-async function shouldSendEmail(userId: string, preferenceKey: string): Promise<boolean> {
+async function shouldSendEmail(storage: any, userId: string, preferenceKey: string): Promise<boolean> {
   try {
     // IMPORTANT: This is wrapped in try-catch to prevent ANY errors from breaking email sending
     const prefs = await storage.getUserNotificationPreferences(userId);
