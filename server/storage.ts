@@ -12,6 +12,7 @@ import {
   messageThreads,
   messageThreadParticipants,
   messages,
+  userNotificationPreferences,
   favorites,
   shopFollows,
   flags,
@@ -39,6 +40,8 @@ import {
   type MessageThread,
   type MessageThreadParticipant,
   type Message,
+  type UserNotificationPreferences,
+  type InsertUserNotificationPreferences,
   type SavedSearch,
   type InsertSavedSearch,
   type Wishlist,
@@ -183,6 +186,10 @@ export interface IStorage {
   getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
   markNotificationAsRead(id: string): Promise<Notification>;
   getUnreadNotificationCount(userId: string): Promise<number>;
+  
+  // Notification Preferences (Email Settings)
+  getUserNotificationPreferences(userId: string): Promise<UserNotificationPreferences | undefined>;
+  updateUserNotificationPreferences(userId: string, prefs: Partial<InsertUserNotificationPreferences>): Promise<UserNotificationPreferences>;
   
   // Seller Dashboard Enhancement
   recordAnalytics(sellerId: string, date: Date, data: Partial<SellerAnalytic>): Promise<void>;
@@ -2127,6 +2134,33 @@ export class DatabaseStorage implements IStorage {
       .from(notifications)
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
     return Number(result.count);
+  }
+
+  // Notification Preferences (Email Settings)
+  async getUserNotificationPreferences(userId: string): Promise<UserNotificationPreferences | undefined> {
+    const [prefs] = await db
+      .select()
+      .from(userNotificationPreferences)
+      .where(eq(userNotificationPreferences.userId, userId));
+    return prefs;
+  }
+
+  async updateUserNotificationPreferences(userId: string, prefs: Partial<InsertUserNotificationPreferences>): Promise<UserNotificationPreferences> {
+    const [updated] = await db
+      .insert(userNotificationPreferences)
+      .values({
+        userId,
+        ...prefs,
+      })
+      .onConflictDoUpdate({
+        target: userNotificationPreferences.userId,
+        set: {
+          ...prefs,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return updated;
   }
 
   // Seller Dashboard Enhancement
