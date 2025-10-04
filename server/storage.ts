@@ -2089,6 +2089,26 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     if (existingThread) {
+      // Ensure both participants exist in the thread
+      const existingParticipants = await db
+        .select()
+        .from(messageThreadParticipants)
+        .where(eq(messageThreadParticipants.threadId, existingThread.id));
+      
+      const participantUserIds = existingParticipants.map(p => p.userId);
+      const missingParticipants = [];
+      
+      if (!participantUserIds.includes(buyerId)) {
+        missingParticipants.push({ threadId: existingThread.id, userId: buyerId });
+      }
+      if (!participantUserIds.includes(sellerId)) {
+        missingParticipants.push({ threadId: existingThread.id, userId: sellerId });
+      }
+      
+      if (missingParticipants.length > 0) {
+        await db.insert(messageThreadParticipants).values(missingParticipants);
+      }
+      
       return existingThread;
     }
     
