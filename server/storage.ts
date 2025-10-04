@@ -1997,7 +1997,7 @@ export class DatabaseStorage implements IStorage {
               eq(messages.senderId, userId)
             )
           );
-        const userHasSentMessages = (userSentCount?.count || 0) > 0;
+        const userHasSentMessages = Number(userSentCount?.count || 0) > 0;
         
         // Get unread count for this thread - only count if this conversation would appear in "Received" tab
         // This means the latest message was sent TO the user (not BY the user)
