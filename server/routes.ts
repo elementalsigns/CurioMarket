@@ -8515,6 +8515,82 @@ This message was sent via the Curio Market contact form.
     }
   });
 
+  // Test email endpoint (development only)
+  app.post('/api/test-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email address required" });
+      }
+      
+      console.log(`[TEST-EMAIL] Sending test email to: ${email}`);
+      
+      const result = await emailService.sendEmail({
+        to: email,
+        from: 'Info@curiosities.market',
+        subject: 'Test Email from Curio Market',
+        text: `This is a test email from Curio Market to verify email delivery is working correctly.
+
+Sent at: ${new Date().toISOString()}
+
+If you received this email, the email notification system is functioning properly!`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: 'EB Garamond', 'Georgia', serif; color: hsl(0, 0%, 95%); background: hsl(212, 5%, 5%); margin: 0; padding: 20px; }
+              .container { max-width: 600px; margin: 0 auto; background: hsl(0, 0%, 11%); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid hsl(0, 0%, 16%); }
+              .header { text-align: center; border-bottom: 2px solid hsl(0, 77%, 26%); padding-bottom: 20px; margin-bottom: 30px; }
+              .logo { font-size: 24px; font-weight: 600; color: hsl(0, 77%, 26%); margin-bottom: 10px; font-variant: small-caps; letter-spacing: 0.05em; }
+              .success { background: hsl(142, 76%, 36%, 0.2); border-left: 4px solid hsl(142, 76%, 36%); padding: 15px; margin: 20px 0; border-radius: 4px; }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid hsl(0, 0%, 20%); text-align: center; color: hsl(0, 0%, 80%); font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="logo">Curio Market</div>
+                <h1 style="margin: 0; color: hsl(0, 0%, 100%);">✅ Test Email</h1>
+              </div>
+              
+              <div class="success">
+                <strong>Success!</strong> Email delivery is working correctly.
+              </div>
+              
+              <p>This is a test email from Curio Market to verify email notifications are functioning properly.</p>
+              
+              <p><strong>Sent at:</strong> ${new Date().toLocaleString()}</p>
+              
+              <p>If you received this email, the email notification system is working as expected!</p>
+              
+              <div class="footer">
+                <p>Curio Market - Gothic Marketplace for Oddities & Specimens</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      });
+      
+      console.log(`[TEST-EMAIL] Result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
+      
+      res.json({ 
+        success: result,
+        message: result ? 'Test email sent successfully!' : 'Failed to send test email',
+        recipient: email
+      });
+      
+    } catch (error: any) {
+      console.error('[TEST-EMAIL] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send test email',
+        details: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
