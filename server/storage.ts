@@ -2104,6 +2104,12 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     
+    // Add both participants to the thread
+    await db.insert(messageThreadParticipants).values([
+      { threadId: newThread.id, userId: buyerId },
+      { threadId: newThread.id, userId: sellerId }
+    ]);
+    
     return newThread;
   }
 
