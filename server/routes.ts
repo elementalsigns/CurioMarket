@@ -5983,7 +5983,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete conversation
+  // Bulk delete conversations - MUST come BEFORE the /:id route
+  app.delete('/api/messages/conversations/bulk', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { conversationIds } = req.body;
+      
+      console.log(`[BULK-DELETE] User ${userId} attempting to delete ${conversationIds?.length || 0} conversations`);
+      
+      if (!Array.isArray(conversationIds) || conversationIds.length === 0) {
+        return res.status(400).json({ error: "conversationIds must be a non-empty array" });
+      }
+      
+      await storage.bulkDeleteConversations(conversationIds, userId);
+      console.log(`[BULK-DELETE] Successfully deleted ${conversationIds.length} conversations for user ${userId}`);
+      res.json({ message: "Conversations deleted successfully" });
+    } catch (error) {
+      console.error("[BULK-DELETE] Error bulk deleting conversations:", error);
+      res.status(500).json({ error: "Failed to delete conversations" });
+    }
+  });
+
+  // Delete conversation - MUST come AFTER /bulk route
   app.delete('/api/messages/conversations/:id', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -6008,24 +6029,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generic server error
       res.status(500).json({ error: "Failed to delete conversation" });
-    }
-  });
-
-  // Bulk delete conversations
-  app.delete('/api/messages/conversations/bulk', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { conversationIds } = req.body;
-      
-      if (!Array.isArray(conversationIds) || conversationIds.length === 0) {
-        return res.status(400).json({ error: "conversationIds must be a non-empty array" });
-      }
-      
-      await storage.bulkDeleteConversations(conversationIds, userId);
-      res.json({ message: "Conversations deleted successfully" });
-    } catch (error) {
-      console.error("Error bulk deleting conversations:", error);
-      res.status(500).json({ error: "Failed to delete conversations" });
     }
   });
 
