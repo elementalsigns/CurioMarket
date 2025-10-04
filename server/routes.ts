@@ -4924,12 +4924,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               };
               
               // ✅ Send BOTH buyer and seller emails asynchronously (don't block order creation)
-              emailService.sendOrderConfirmation(emailData).catch(error => {
-                console.error(`[ORDER CREATE] Buyer email failed for order ${order.id}:`, error);
+              console.log(`[ORDER-EMAIL] ✉️ Sending order confirmation to buyer: ${emailData.customerEmail}`);
+              emailService.sendOrderConfirmation(emailData).then(result => {
+                console.log(`[ORDER-EMAIL] Buyer email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
+              }).catch(error => {
+                console.error(`[ORDER-EMAIL] ❌ Buyer email failed for order ${order.id}:`, error);
               });
               
-              emailService.sendSellerOrderNotification(emailData).catch(error => {
-                console.error(`[ORDER CREATE] Seller email failed for order ${order.id}:`, error);
+              console.log(`[ORDER-EMAIL] ✉️ Sending order notification to seller: ${emailData.sellerEmail}`);
+              emailService.sendSellerOrderNotification(emailData).then(result => {
+                console.log(`[ORDER-EMAIL] Seller email result:`, result ? 'SUCCESS ✅' : 'FAILED ❌');
+              }).catch(error => {
+                console.error(`[ORDER-EMAIL] ❌ Seller email failed for order ${order.id}:`, error);
               });
             }
           } catch (emailError) {
@@ -5790,51 +5796,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const recipient = await storage.getUser(recipientId);
         const sender = await storage.getUser(userId);
         
-        console.log(`[MESSAGES-EMAIL] Checking email conditions - recipient email: ${recipient?.email ? 'exists' : 'missing'}, sender: ${sender ? 'exists' : 'missing'}, content: ${content ? 'exists' : 'missing'}`);
+        console.log(`[MESSAGES-EMAIL-START] Recipient found:`, recipient ? 'yes' : 'no');
+        console.log(`[MESSAGES-EMAIL-START] Recipient email:`, recipient?.email || 'missing');
+        console.log(`[MESSAGES-EMAIL-START] Sender found:`, sender ? 'yes' : 'no');
+        console.log(`[MESSAGES-EMAIL-START] Content exists:`, content ? 'yes' : 'no');
         
         if (recipient?.email && sender && content) {
           const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
           
           // Check if recipient is a seller
           const recipientSeller = await storage.getSeller(recipientId);
+          console.log(`[MESSAGES-EMAIL-START] Recipient is seller:`, recipientSeller ? 'yes' : 'no');
           
           if (recipientSeller) {
             // Recipient is a seller - send seller notification
-            console.log(`[MESSAGES] Sending email notification to seller ${recipient.email}`);
+            console.log(`[MESSAGES-EMAIL-START] ✉️ SENDING seller notification to:`, recipient.email);
             
-            emailService.sendSellerMessageNotification({
-              sellerEmail: recipient.email,
-              sellerName: recipientSeller.shopName || 'Seller',
-              customerName: sender.firstName && sender.lastName 
-                ? `${sender.firstName} ${sender.lastName}` 
-                : sender.email || 'Customer',
-              messagePreview: messagePreview
-            }).catch(error => {
-              console.error(`[MESSAGES] Failed to send seller message notification:`, error);
-            });
+            try {
+              const emailResult = await emailService.sendSellerMessageNotification({
+                sellerEmail: recipient.email,
+                sellerName: recipientSeller.shopName || 'Seller',
+                customerName: sender.firstName && sender.lastName 
+                  ? `${sender.firstName} ${sender.lastName}` 
+                  : sender.email || 'Customer',
+                messagePreview: messagePreview
+              });
+              console.log(`[MESSAGES-EMAIL-START] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+            } catch (error) {
+              console.error(`[MESSAGES-EMAIL-START] ❌ FAILED to send seller notification:`, error);
+            }
           } else {
             // Recipient is a buyer - send buyer notification
             // Get sender's shop name (sender must be the seller)
             const senderSeller = await storage.getSeller(userId);
+            console.log(`[MESSAGES-EMAIL-START] Sender is seller:`, senderSeller ? 'yes' : 'no');
             
             if (senderSeller) {
-              console.log(`[MESSAGES] Sending email notification to buyer ${recipient.email}`);
+              console.log(`[MESSAGES-EMAIL-START] ✉️ SENDING buyer notification to:`, recipient.email);
               
-              emailService.sendBuyerMessageNotification({
-                buyerEmail: recipient.email,
-                buyerName: recipient.firstName && recipient.lastName 
-                  ? `${recipient.firstName} ${recipient.lastName}` 
-                  : 'Customer',
-                shopName: senderSeller.shopName || 'Seller',
-                messagePreview: messagePreview
-              }).catch(error => {
-                console.error(`[MESSAGES] Failed to send buyer message notification:`, error);
-              });
+              try {
+                const emailResult = await emailService.sendBuyerMessageNotification({
+                  buyerEmail: recipient.email,
+                  buyerName: recipient.firstName && recipient.lastName 
+                    ? `${recipient.firstName} ${recipient.lastName}` 
+                    : 'Customer',
+                  shopName: senderSeller.shopName || 'Seller',
+                  messagePreview: messagePreview
+                });
+                console.log(`[MESSAGES-EMAIL-START] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+              } catch (error) {
+                console.error(`[MESSAGES-EMAIL-START] ❌ FAILED to send buyer notification:`, error);
+              }
+            } else {
+              console.log(`[MESSAGES-EMAIL-START] ⚠️ Sender is not a seller - skipping buyer notification`);
             }
           }
+        } else {
+          console.log(`[MESSAGES-EMAIL-START] ⚠️ Missing required data - cannot send email`);
         }
       } catch (emailError: any) {
-        console.warn("Failed to send email notification:", emailError);
+        console.error("[MESSAGES-EMAIL-START] ❌ Email notification error:", emailError);
         // Don't fail the message send if email fails
       }
       
@@ -5879,54 +5900,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send email notification to the recipient (BOTH BUYERS AND SELLERS)
       try {
         const thread = threads.find(t => t.id === conversationId);
+        console.log(`[MESSAGES-EMAIL] Thread found:`, thread ? 'yes' : 'no');
+        console.log(`[MESSAGES-EMAIL] Thread.otherUser:`, thread?.otherUser ? 'exists' : 'missing');
+        console.log(`[MESSAGES-EMAIL] Thread.otherUser.id:`, thread?.otherUser?.id || 'missing');
+        
         if (thread?.otherUser?.id) {
           const recipient = await storage.getUser(thread.otherUser.id);
           const sender = await storage.getUser(userId);
+          
+          console.log(`[MESSAGES-EMAIL] Recipient found:`, recipient ? 'yes' : 'no');
+          console.log(`[MESSAGES-EMAIL] Recipient email:`, recipient?.email || 'missing');
+          console.log(`[MESSAGES-EMAIL] Sender found:`, sender ? 'yes' : 'no');
+          console.log(`[MESSAGES-EMAIL] Sender email:`, sender?.email || 'missing');
           
           if (recipient?.email && sender) {
             const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
             
             // Check if recipient is a seller
             const recipientSeller = await storage.getSeller(thread.otherUser.id);
+            console.log(`[MESSAGES-EMAIL] Recipient is seller:`, recipientSeller ? 'yes' : 'no');
             
             if (recipientSeller) {
               // Recipient is a seller - send seller notification
-              console.log(`[MESSAGES] Sending email notification to seller ${recipient.email}`);
+              console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
               
-              emailService.sendSellerMessageNotification({
-                sellerEmail: recipient.email,
-                sellerName: recipientSeller.shopName || 'Seller',
-                customerName: sender.firstName && sender.lastName 
-                  ? `${sender.firstName} ${sender.lastName}` 
-                  : sender.email || 'Customer',
-                messagePreview: messagePreview
-              }).catch(error => {
-                console.error(`[MESSAGES] Failed to send seller message notification:`, error);
-              });
+              try {
+                const emailResult = await emailService.sendSellerMessageNotification({
+                  sellerEmail: recipient.email,
+                  sellerName: recipientSeller.shopName || 'Seller',
+                  customerName: sender.firstName && sender.lastName 
+                    ? `${sender.firstName} ${sender.lastName}` 
+                    : sender.email || 'Customer',
+                  messagePreview: messagePreview
+                });
+                console.log(`[MESSAGES-EMAIL] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+              } catch (error) {
+                console.error(`[MESSAGES-EMAIL] ❌ FAILED to send seller notification:`, error);
+              }
             } else {
               // Recipient is a buyer - send buyer notification
               // Get sender's shop name (sender must be the seller)
               const senderSeller = await storage.getSeller(userId);
+              console.log(`[MESSAGES-EMAIL] Sender is seller:`, senderSeller ? 'yes' : 'no');
               
               if (senderSeller) {
-                console.log(`[MESSAGES] Sending email notification to buyer ${recipient.email}`);
+                console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);
                 
-                emailService.sendBuyerMessageNotification({
-                  buyerEmail: recipient.email,
-                  buyerName: recipient.firstName && recipient.lastName 
-                    ? `${recipient.firstName} ${recipient.lastName}` 
-                    : 'Customer',
-                  shopName: senderSeller.shopName || 'Seller',
-                  messagePreview: messagePreview
-                }).catch(error => {
-                  console.error(`[MESSAGES] Failed to send buyer message notification:`, error);
-                });
+                try {
+                  const emailResult = await emailService.sendBuyerMessageNotification({
+                    buyerEmail: recipient.email,
+                    buyerName: recipient.firstName && recipient.lastName 
+                      ? `${recipient.firstName} ${recipient.lastName}` 
+                      : 'Customer',
+                    shopName: senderSeller.shopName || 'Seller',
+                    messagePreview: messagePreview
+                  });
+                  console.log(`[MESSAGES-EMAIL] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                } catch (error) {
+                  console.error(`[MESSAGES-EMAIL] ❌ FAILED to send buyer notification:`, error);
+                }
+              } else {
+                console.log(`[MESSAGES-EMAIL] ⚠️ Sender is not a seller - skipping buyer notification`);
               }
             }
+          } else {
+            console.log(`[MESSAGES-EMAIL] ⚠️ Missing required data - recipient email or sender not found`);
           }
+        } else {
+          console.log(`[MESSAGES-EMAIL] ⚠️ Thread or otherUser not found - cannot send email`);
         }
       } catch (emailError: any) {
-        console.warn("Failed to send email notification:", emailError);
+        console.error("[MESSAGES-EMAIL] ❌ Email notification error:", emailError);
         // Don't fail the message send if email fails
       }
       
