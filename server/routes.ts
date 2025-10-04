@@ -5941,104 +5941,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await storage.sendMessage(conversationId, userId, content.trim());
       console.log(`[MESSAGES] Message sent successfully: ${message.id}`);
       
-      // ✅ CRITICAL: Send response FIRST, then handle emails asynchronously
-      // This ensures message save is committed before any email logic runs
+      // ✅ CRITICAL: Send response immediately (email notifications temporarily disabled)
       res.json(message);
       
-      // ✅ Handle email notifications AFTER response (async, non-blocking, can't break message save)
-      setImmediate(async () => {
-        try {
-          const thread = threads.find(t => t.id === conversationId);
-          console.log(`[MESSAGES-EMAIL] Thread found:`, thread ? 'yes' : 'no');
-          console.log(`[MESSAGES-EMAIL] Thread.otherUser:`, thread?.otherUser ? 'exists' : 'missing');
-          console.log(`[MESSAGES-EMAIL] Thread.otherUser.id:`, thread?.otherUser?.id || 'missing');
-          
-          if (thread?.otherUser?.id) {
-            const recipient = await storage.getUser(thread.otherUser.id);
-            const sender = await storage.getUser(userId);
-            
-            console.log(`[MESSAGES-EMAIL] Recipient found:`, recipient ? 'yes' : 'no');
-            console.log(`[MESSAGES-EMAIL] Recipient email:`, recipient?.email || 'missing');
-            console.log(`[MESSAGES-EMAIL] Sender found:`, sender ? 'yes' : 'no');
-            console.log(`[MESSAGES-EMAIL] Sender email:`, sender?.email || 'missing');
-            
-            if (recipient?.email && sender) {
-              const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
-              
-              // Check if recipient is a seller
-              const recipientSeller = await storage.getSeller(thread.otherUser.id);
-              console.log(`[MESSAGES-EMAIL] Recipient is seller:`, recipientSeller ? 'yes' : 'no');
-              
-              if (recipientSeller) {
-                // Recipient is a seller - send seller notification
-                console.log(`[MESSAGES-EMAIL] Checking if seller wants message notifications...`);
-                
-                try {
-                  // Check preference before sending email (fail-safe, won't break messages)
-                  const shouldSend = await shouldSendEmail(storage, recipient.id, 'messageNotifications');
-                  
-                  if (shouldSend) {
-                    console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
-                    const emailResult = await emailService.sendSellerMessageNotification({
-                      sellerEmail: recipient.email,
-                      sellerName: recipientSeller.shopName || 'Seller',
-                      customerName: sender.firstName && sender.lastName 
-                        ? `${sender.firstName} ${sender.lastName}` 
-                        : sender.email || 'Customer',
-                      messagePreview: messagePreview
-                    });
-                    console.log(`[MESSAGES-EMAIL] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
-                  } else {
-                    console.log(`[MESSAGES-EMAIL] ⚙️ Seller has disabled message notifications - email skipped`);
-                  }
-                } catch (error) {
-                  console.error(`[MESSAGES-EMAIL] ❌ FAILED to send seller notification:`, error);
-                }
-              } else {
-                // Recipient is a buyer - send buyer notification
-                // Get sender's shop name (sender must be the seller)
-                const senderSeller = await storage.getSeller(userId);
-                console.log(`[MESSAGES-EMAIL] Sender is seller:`, senderSeller ? 'yes' : 'no');
-                
-                if (senderSeller) {
-                  console.log(`[MESSAGES-EMAIL] Checking if buyer wants message notifications...`);
-                  
-                  try {
-                    // Check preference before sending email (fail-safe, won't break messages)
-                    const shouldSend = await shouldSendEmail(storage, recipient.id, 'messagesFromSellers');
-                    
-                    if (shouldSend) {
-                      console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);
-                      const emailResult = await emailService.sendBuyerMessageNotification({
-                        buyerEmail: recipient.email,
-                        buyerName: recipient.firstName && recipient.lastName 
-                          ? `${recipient.firstName} ${recipient.lastName}` 
-                          : 'Customer',
-                        shopName: senderSeller.shopName || 'Seller',
-                        messagePreview: messagePreview
-                      });
-                      console.log(`[MESSAGES-EMAIL] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
-                    } else {
-                      console.log(`[MESSAGES-EMAIL] ⚙️ Buyer has disabled message notifications - email skipped`);
-                    }
-                  } catch (error) {
-                    console.error(`[MESSAGES-EMAIL] ❌ FAILED to send buyer notification:`, error);
-                  }
-                } else {
-                  console.log(`[MESSAGES-EMAIL] ⚠️ Sender is not a seller - skipping buyer notification`);
-                }
-              }
-            } else {
-              console.log(`[MESSAGES-EMAIL] ⚠️ Missing required data - recipient email or sender not found`);
-            }
-          } else {
-            console.log(`[MESSAGES-EMAIL] ⚠️ Thread or otherUser not found - cannot send email`);
-          }
-        } catch (emailError: any) {
-          console.error("[MESSAGES-EMAIL] ❌ Email notification error:", emailError);
-          // Errors here won't affect the message save (already committed)
-        }
-      });
+      // TODO: Re-enable email notifications after fixing the transaction issue
+      // Email logic has been temporarily disabled to restore core messaging functionality
       
     } catch (error) {
       console.error("Error sending message:", error);
