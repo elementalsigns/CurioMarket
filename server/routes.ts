@@ -51,7 +51,7 @@ import {
 import { db } from "./db";
 import { eq, or, sql, count, and, inArray } from "drizzle-orm";
 import { verificationService } from "./verificationService";
-import { emailService } from "./emailService";
+import { emailService, shouldSendEmail } from "./emailService";
 import { ObjectStorageService } from "./objectStorage";
 import * as XLSX from 'xlsx';
 
@@ -5922,18 +5922,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (recipientSeller) {
               // Recipient is a seller - send seller notification
-              console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
+              console.log(`[MESSAGES-EMAIL] Checking if seller wants message notifications...`);
               
               try {
-                const emailResult = await emailService.sendSellerMessageNotification({
-                  sellerEmail: recipient.email,
-                  sellerName: recipientSeller.shopName || 'Seller',
-                  customerName: sender.firstName && sender.lastName 
-                    ? `${sender.firstName} ${sender.lastName}` 
-                    : sender.email || 'Customer',
-                  messagePreview: messagePreview
-                });
-                console.log(`[MESSAGES-EMAIL] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                // SURGICAL FIX: Check preference before sending email (fail-safe, won't break messages)
+                const shouldSend = await shouldSendEmail(recipient.id, 'messageNotifications');
+                
+                if (shouldSend) {
+                  console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
+                  const emailResult = await emailService.sendSellerMessageNotification({
+                    sellerEmail: recipient.email,
+                    sellerName: recipientSeller.shopName || 'Seller',
+                    customerName: sender.firstName && sender.lastName 
+                      ? `${sender.firstName} ${sender.lastName}` 
+                      : sender.email || 'Customer',
+                    messagePreview: messagePreview
+                  });
+                  console.log(`[MESSAGES-EMAIL] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                } else {
+                  console.log(`[MESSAGES-EMAIL] ⚙️ Seller has disabled message notifications - email skipped`);
+                }
               } catch (error) {
                 console.error(`[MESSAGES-EMAIL] ❌ FAILED to send seller notification:`, error);
               }
@@ -5944,18 +5952,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[MESSAGES-EMAIL] Sender is seller:`, senderSeller ? 'yes' : 'no');
               
               if (senderSeller) {
-                console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);
+                console.log(`[MESSAGES-EMAIL] Checking if buyer wants message notifications...`);
                 
                 try {
-                  const emailResult = await emailService.sendBuyerMessageNotification({
-                    buyerEmail: recipient.email,
-                    buyerName: recipient.firstName && recipient.lastName 
-                      ? `${recipient.firstName} ${recipient.lastName}` 
-                      : 'Customer',
-                    shopName: senderSeller.shopName || 'Seller',
-                    messagePreview: messagePreview
-                  });
-                  console.log(`[MESSAGES-EMAIL] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                  // SURGICAL FIX: Check preference before sending email (fail-safe, won't break messages)
+                  const shouldSend = await shouldSendEmail(recipient.id, 'messagesFromSellers');
+                  
+                  if (shouldSend) {
+                    console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);
+                    const emailResult = await emailService.sendBuyerMessageNotification({
+                      buyerEmail: recipient.email,
+                      buyerName: recipient.firstName && recipient.lastName 
+                        ? `${recipient.firstName} ${recipient.lastName}` 
+                        : 'Customer',
+                      shopName: senderSeller.shopName || 'Seller',
+                      messagePreview: messagePreview
+                    });
+                    console.log(`[MESSAGES-EMAIL] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                  } else {
+                    console.log(`[MESSAGES-EMAIL] ⚙️ Buyer has disabled message notifications - email skipped`);
+                  }
                 } catch (error) {
                   console.error(`[MESSAGES-EMAIL] ❌ FAILED to send buyer notification:`, error);
                 }
