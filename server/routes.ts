@@ -5921,34 +5921,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { conversationId, content } = req.body;
       
-      console.log(`[MESSAGES] User ${userId} sending message to conversation ${conversationId}`);
+      console.log(`[MESSAGES-DEBUG] ===== START MESSAGE SEND =====`);
+      console.log(`[MESSAGES-DEBUG] User: ${userId}`);
+      console.log(`[MESSAGES-DEBUG] ConversationId: ${conversationId}`);
+      console.log(`[MESSAGES-DEBUG] Content length: ${content?.length || 0}`);
       
       // Validate inputs
       if (!conversationId || !content?.trim()) {
+        console.log(`[MESSAGES-DEBUG] ❌ Validation failed: missing conversationId or content`);
         return res.status(400).json({ error: "conversationId and content are required" });
       }
       
+      console.log(`[MESSAGES-DEBUG] ✅ Input validation passed`);
+      console.log(`[MESSAGES-DEBUG] Fetching user threads...`);
+      
       // Verify user has access to this conversation
       const threads = await storage.getUserMessageThreads(userId);
+      console.log(`[MESSAGES-DEBUG] Found ${threads.length} threads for user`);
+      
       const hasAccess = threads.some(thread => thread.id === conversationId);
+      console.log(`[MESSAGES-DEBUG] Has access to conversation: ${hasAccess}`);
       
       if (!hasAccess) {
-        console.log(`[MESSAGES] User ${userId} does not have access to conversation ${conversationId}`);
+        console.log(`[MESSAGES-DEBUG] ❌ ACCESS DENIED - User ${userId} cannot access conversation ${conversationId}`);
         return res.status(403).json({ error: "Access denied to this conversation" });
       }
       
+      console.log(`[MESSAGES-DEBUG] ✅ Access check passed, calling storage.sendMessage...`);
+      
       // Send the message using storage
       const message = await storage.sendMessage(conversationId, userId, content.trim());
-      console.log(`[MESSAGES] Message sent successfully: ${message.id}`);
       
-      // ✅ CRITICAL: Send response immediately (email notifications temporarily disabled)
+      console.log(`[MESSAGES-DEBUG] ✅ storage.sendMessage returned:`, JSON.stringify(message));
+      console.log(`[MESSAGES-DEBUG] Message ID: ${message.id}`);
+      console.log(`[MESSAGES-DEBUG] ===== END MESSAGE SEND SUCCESS =====`);
+      
+      // Send response immediately
       res.json(message);
       
-      // TODO: Re-enable email notifications after fixing the transaction issue
-      // Email logic has been temporarily disabled to restore core messaging functionality
-      
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("[MESSAGES-DEBUG] ❌❌❌ EXCEPTION CAUGHT:", error);
+      console.error("[MESSAGES-DEBUG] Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
       res.status(500).json({ error: "Failed to send message" });
     }
   });
