@@ -5561,14 +5561,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const emailResult = await emailService.sendShippingNotification(emailData);
           if (emailResult) {
             console.log('[SHIP ORDER] ✅ Shipping notification email sent successfully');
+            
+            console.log('[SHIP ORDER] Step 4: Updating order status to completed...');
+            await storage.updateOrderStatusToCompleted(req.params.id);
+            console.log('[SHIP ORDER] ✅ Order status updated to completed');
           } else {
             console.error('[SHIP ORDER] ❌ Shipping notification email failed to send');
             throw new Error('Email notification failed to send');
           }
-          
-          console.log('[SHIP ORDER] Step 4: Updating order status to completed...');
-          await storage.updateOrderStatusToCompleted(req.params.id);
-          console.log('[SHIP ORDER] ✅ Order status updated to completed');
         } else {
           console.log('[SHIP ORDER] ⚠️ No buyer email found for shipping notification');
         }
@@ -5877,47 +5877,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { conversationId, content } = req.body;
       
-      console.log(`[MESSAGES-DEBUG] ===== START MESSAGE SEND =====`);
-      console.log(`[MESSAGES-DEBUG] User: ${userId}`);
-      console.log(`[MESSAGES-DEBUG] ConversationId: ${conversationId}`);
-      console.log(`[MESSAGES-DEBUG] Content length: ${content?.length || 0}`);
+      console.log(`[MESSAGES] User ${userId} sending message to conversation ${conversationId}`);
       
       // Validate inputs
       if (!conversationId || !content?.trim()) {
-        console.log(`[MESSAGES-DEBUG] ❌ Validation failed: missing conversationId or content`);
         return res.status(400).json({ error: "conversationId and content are required" });
       }
       
-      console.log(`[MESSAGES-DEBUG] ✅ Input validation passed`);
-      console.log(`[MESSAGES-DEBUG] Fetching user threads...`);
-      
       // Verify user has access to this conversation
       const threads = await storage.getUserMessageThreads(userId);
-      console.log(`[MESSAGES-DEBUG] Found ${threads.length} threads for user`);
-      
       const hasAccess = threads.some(thread => thread.id === conversationId);
-      console.log(`[MESSAGES-DEBUG] Has access to conversation: ${hasAccess}`);
       
       if (!hasAccess) {
-        console.log(`[MESSAGES-DEBUG] ❌ ACCESS DENIED - User ${userId} cannot access conversation ${conversationId}`);
+        console.log(`[MESSAGES] User ${userId} does not have access to conversation ${conversationId}`);
         return res.status(403).json({ error: "Access denied to this conversation" });
       }
       
-      console.log(`[MESSAGES-DEBUG] ✅ Access check passed, calling storage.sendMessage...`);
-      
       // Send the message using storage
       const message = await storage.sendMessage(conversationId, userId, content.trim());
+      console.log(`[MESSAGES] Message sent successfully: ${message.id}`);
       
-      console.log(`[MESSAGES-DEBUG] ✅ storage.sendMessage returned:`, JSON.stringify(message));
-      console.log(`[MESSAGES-DEBUG] Message ID: ${message.id}`);
-      console.log(`[MESSAGES-DEBUG] ===== END MESSAGE SEND SUCCESS =====`);
+      // Send email notification to the recipient (BOTH BUYERS AND SELLERS)
+      try {
+        const thread = threads.find(t => t.id === conversationId);
+        console.log(`[MESSAGES-EMAIL] Thread found:`, thread ? 'yes' : 'no');
+        console.log(`[MESSAGES-EMAIL] Thread.otherUser:`, thread?.otherUser ? 'exists' : 'missing');
+        console.log(`[MESSAGES-EMAIL] Thread.otherUser.id:`, thread?.otherUser?.id || 'missing');
+        
+        if (thread?.otherUser?.id) {
+          const recipient = await storage.getUser(thread.otherUser.id);
+          const sender = await storage.getUser(userId);
+          
+          console.log(`[MESSAGES-EMAIL] Recipient found:`, recipient ? 'yes' : 'no');
+          console.log(`[MESSAGES-EMAIL] Recipient email:`, recipient?.email || 'missing');
+          console.log(`[MESSAGES-EMAIL] Sender found:`, sender ? 'yes' : 'no');
+          console.log(`[MESSAGES-EMAIL] Sender email:`, sender?.email || 'missing');
+          
+          if (recipient?.email && sender) {
+            const messagePreview = content.substring(0, 100) + (content.length > 100 ? '...' : '');
+            
+            // Check if recipient is a seller
+            const recipientSeller = await storage.getSeller(thread.otherUser.id);
+            console.log(`[MESSAGES-EMAIL] Recipient is seller:`, recipientSeller ? 'yes' : 'no');
+            
+            if (recipientSeller) {
+              // Recipient is a seller - send seller notification
+              console.log(`[MESSAGES-EMAIL] ✉️ SENDING seller notification to:`, recipient.email);
+              
+              try {
+                const emailResult = await emailService.sendSellerMessageNotification({
+                  sellerEmail: recipient.email,
+                  sellerName: recipientSeller.shopName || 'Seller',
+                  customerName: sender.firstName && sender.lastName 
+                    ? `${sender.firstName} ${sender.lastName}` 
+                    : sender.email || 'Customer',
+                  messagePreview: messagePreview
+                });
+                console.log(`[MESSAGES-EMAIL] Seller email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+              } catch (error) {
+                console.error(`[MESSAGES-EMAIL] ❌ FAILED to send seller notification:`, error);
+              }
+            } else {
+              // Recipient is a buyer - send buyer notification
+              // Get sender's shop name (sender must be the seller)
+              const senderSeller = await storage.getSeller(userId);
+              console.log(`[MESSAGES-EMAIL] Sender is seller:`, senderSeller ? 'yes' : 'no');
+              
+              if (senderSeller) {
+                console.log(`[MESSAGES-EMAIL] ✉️ SENDING buyer notification to:`, recipient.email);
+                
+                try {
+                  const emailResult = await emailService.sendBuyerMessageNotification({
+                    buyerEmail: recipient.email,
+                    buyerName: recipient.firstName && recipient.lastName 
+                      ? `${recipient.firstName} ${recipient.lastName}` 
+                      : 'Customer',
+                    shopName: senderSeller.shopName || 'Seller',
+                    messagePreview: messagePreview
+                  });
+                  console.log(`[MESSAGES-EMAIL] Buyer email result:`, emailResult ? 'SUCCESS ✅' : 'FAILED ❌');
+                } catch (error) {
+                  console.error(`[MESSAGES-EMAIL] ❌ FAILED to send buyer notification:`, error);
+                }
+              } else {
+                console.log(`[MESSAGES-EMAIL] ⚠️ Sender is not a seller - skipping buyer notification`);
+              }
+            }
+          } else {
+            console.log(`[MESSAGES-EMAIL] ⚠️ Missing required data - recipient email or sender not found`);
+          }
+        } else {
+          console.log(`[MESSAGES-EMAIL] ⚠️ Thread or otherUser not found - cannot send email`);
+        }
+      } catch (emailError: any) {
+        console.error("[MESSAGES-EMAIL] ❌ Email notification error:", emailError);
+        // Don't fail the message send if email fails
+      }
       
-      // Send response immediately
       res.json(message);
       
     } catch (error) {
-      console.error("[MESSAGES-DEBUG] ❌❌❌ EXCEPTION CAUGHT:", error);
-      console.error("[MESSAGES-DEBUG] Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      console.error("Error sending message:", error);
       res.status(500).json({ error: "Failed to send message" });
     }
   });
@@ -8473,57 +8533,6 @@ This message was sent via the Curio Market contact form.
         error: error.message,
         message: 'Failed to repair orphaned subscription'
       });
-    }
-  });
-
-  // =================== NOTIFICATION PREFERENCES ===================
-  
-  // Get user's notification preferences
-  app.get('/api/user/notification-preferences', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const preferences = await storage.getUserNotificationPreferences(userId);
-      res.json(preferences);
-    } catch (error) {
-      console.error('[NOTIFICATION-PREFS] Error fetching preferences:', error);
-      res.status(500).json({ error: 'Failed to fetch notification preferences' });
-    }
-  });
-  
-  // Update user's notification preferences
-  app.put('/api/user/notification-preferences', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const updates = req.body;
-      
-      // Validate that only allowed fields are being updated
-      const allowedFields = [
-        'orderConfirmations',
-        'shippingUpdates',
-        'messagesFromSellers',
-        'newOrders',
-        'messageNotifications',
-        'promotionalEmails',
-        'productUpdates'
-      ];
-      
-      const invalidFields = Object.keys(updates).filter(
-        key => !allowedFields.includes(key) && key !== 'userId'
-      );
-      
-      if (invalidFields.length > 0) {
-        return res.status(400).json({ 
-          error: `Invalid fields: ${invalidFields.join(', ')}` 
-        });
-      }
-      
-      const updatedPreferences = await storage.updateUserNotificationPreferences(userId, updates);
-      
-      console.log(`[NOTIFICATION-PREFS] Updated preferences for user ${userId}:`, updates);
-      res.json(updatedPreferences);
-    } catch (error) {
-      console.error('[NOTIFICATION-PREFS] Error updating preferences:', error);
-      res.status(500).json({ error: 'Failed to update notification preferences' });
     }
   });
 

@@ -581,6 +581,3 @@ Thank you for shopping at Curio Market!`;
 }
 
 export const emailService = new EmailService();
-
-// Export the preference checker for use in routes
-export { shouldSendEmail };
