@@ -1663,6 +1663,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create SetupIntent for capturing reusable payment method
+      console.log('[CART-CHECKOUT-SETUP] About to create SetupIntent with customer ID:', validCustomerId);
+      console.log('[CART-CHECKOUT-SETUP] Customer ID type:', typeof validCustomerId);
+      console.log('[CART-CHECKOUT-SETUP] Customer ID length:', validCustomerId?.length);
+      console.log('[CART-CHECKOUT-SETUP] Customer ID char codes:', validCustomerId?.split('').map((c, i) => `${i}:${c}(${c.charCodeAt(0)})`).join(' '));
+      
       const setupIntent = await stripe.setupIntents.create({
         usage: 'off_session', // Allow saving for future use
         customer: validCustomerId, // CRITICAL: Attach validated customer to SetupIntent
