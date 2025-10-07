@@ -1698,7 +1698,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const buyer = await storage.getUser(userId);
             customerId = buyer?.stripeCustomerId || undefined;
             
-            // Create customer if doesn't exist
+            // Verify stored customer ID exists in Stripe, create new if invalid
+            if (customerId) {
+              try {
+                await stripe.customers.retrieve(customerId);
+                console.log(`[CART-CHECKOUT] Verified existing Stripe customer: ${customerId}`);
+              } catch (error: any) {
+                console.log(`[CART-CHECKOUT] Stored customer ID invalid (${customerId}), creating new one`);
+                customerId = undefined; // Clear invalid ID so we create a new one
+              }
+            }
+            
+            // Create customer if doesn't exist or was invalid
             if (!customerId) {
               const customer = await stripe.customers.create({
                 email: buyer?.email || undefined,
@@ -1925,7 +1936,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const buyer = await storage.getUser(userId);
         let customerId = buyer?.stripeCustomerId;
         
-        // Create customer if doesn't exist
+        // Verify stored customer ID exists in Stripe, create new if invalid
+        if (customerId) {
+          try {
+            await stripe.customers.retrieve(customerId);
+            console.log(`[PAYMENT-CONFIRM] Verified existing Stripe customer: ${customerId}`);
+          } catch (error: any) {
+            console.log(`[PAYMENT-CONFIRM] Stored customer ID invalid (${customerId}), creating new one`);
+            customerId = undefined; // Clear invalid ID so we create a new one
+          }
+        }
+        
+        // Create customer if doesn't exist or was invalid
         if (!customerId) {
           console.log(`[PAYMENT-CONFIRM] Creating Stripe customer for user ${userId}`);
           const customer = await stripe.customers.create({
