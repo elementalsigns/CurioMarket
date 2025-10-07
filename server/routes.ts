@@ -1663,13 +1663,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create SetupIntent for capturing reusable payment method
-      console.log('[CART-CHECKOUT-SETUP] About to create SetupIntent with customer ID:', validCustomerId);
-      console.log('[CART-CHECKOUT-SETUP] Customer ID type:', typeof validCustomerId);
-      console.log('[CART-CHECKOUT-SETUP] Customer ID length:', validCustomerId?.length);
-      console.log('[CART-CHECKOUT-SETUP] Customer ID char codes:', validCustomerId?.split('').map((c, i) => `${i}:${c}(${c.charCodeAt(0)})`).join(' '));
-      console.log('[CART-CHECKOUT-SETUP] JSON.stringify customer ID:', JSON.stringify(validCustomerId));
-      console.log('[CART-CHECKOUT-SETUP] Buffer from customer ID:', validCustomerId ? Buffer.from(validCustomerId).toString('hex') : 'null');
-      
       const setupIntent = await stripe.setupIntents.create({
         usage: 'off_session', // Allow saving for future use
         customer: validCustomerId, // CRITICAL: Attach validated customer to SetupIntent
@@ -1755,24 +1748,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
           };
           
-          // Only add application_fee_amount if seller has Connect (otherwise goes to platform)
-          // Admin sellers always use platform account (no Connect)
+          // DESTINATION CHARGES: All PaymentIntents on platform account
+          // For Connect sellers: use transfer_data to send funds to their account
+          // For admin sellers: no transfer, funds stay on platform
           const useConnect = !isAdminSeller && !!seller.stripeConnectAccountId;
+          
           if (useConnect) {
-            createOptions.application_fee_amount = applicationFeeAmount;
+            // Destination Charge: Create on platform, transfer to connected account
+            createOptions.transfer_data = {
+              destination: seller.stripeConnectAccountId!,
+              amount: Math.round(sellerTotal * 100) - applicationFeeAmount // Transfer minus platform fee
+            };
           }
           
-          // Create with or without Connect account - admin sellers ALWAYS use platform
           console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, customer=${validCustomerId}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
           
-          if (useConnect) {
-            paymentIntent = await stripe.paymentIntents.create(createOptions, { 
-              stripeAccount: seller.stripeConnectAccountId! 
-            });
-          } else {
-            // Platform account - pass no options (undefined)
-            paymentIntent = await stripe.paymentIntents.create(createOptions);
-          }
+          // ALWAYS create on platform account (works with platform customer)
+          paymentIntent = await stripe.paymentIntents.create(createOptions);
         } else {
           // Development: Mock successful PaymentIntent response
           paymentIntent = {
