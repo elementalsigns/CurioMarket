@@ -1756,7 +1756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Create with or without Connect account - admin sellers ALWAYS use platform
-          console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, customer=${customerId}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
+          console.log(`[CART-CHECKOUT] Creating payment intent: Admin=${isAdminSeller}, useConnect=${useConnect}, customer=${validCustomerId}, ConnectID=${seller?.stripeConnectAccountId || 'none'}`);
           
           if (useConnect) {
             paymentIntent = await stripe.paymentIntents.create(createOptions, { 
