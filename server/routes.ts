@@ -1667,6 +1667,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[CART-CHECKOUT-SETUP] Customer ID type:', typeof validCustomerId);
       console.log('[CART-CHECKOUT-SETUP] Customer ID length:', validCustomerId?.length);
       console.log('[CART-CHECKOUT-SETUP] Customer ID char codes:', validCustomerId?.split('').map((c, i) => `${i}:${c}(${c.charCodeAt(0)})`).join(' '));
+      console.log('[CART-CHECKOUT-SETUP] JSON.stringify customer ID:', JSON.stringify(validCustomerId));
+      console.log('[CART-CHECKOUT-SETUP] Buffer from customer ID:', validCustomerId ? Buffer.from(validCustomerId).toString('hex') : 'null');
       
       const setupIntent = await stripe.setupIntents.create({
         usage: 'off_session', // Allow saving for future use
