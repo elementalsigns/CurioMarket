@@ -1628,9 +1628,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('[CART-CHECKOUT] Grouped into', Object.keys(sellerGroups).length, 'seller groups');
       
+      // Get or create valid Stripe customer for the buyer BEFORE SetupIntent
+      let validCustomerId: string | undefined;
+      if (userId) {
+        const buyer = await storage.getUser(userId);
+        let customerId = buyer?.stripeCustomerId;
+        
+        // Verify stored customer ID exists in Stripe, create new if invalid
+        if (customerId) {
+          try {
+            await stripe.customers.retrieve(customerId);
+            validCustomerId = customerId;
+            console.log(`[CART-CHECKOUT-SETUP] Verified existing Stripe customer: ${customerId}`);
+          } catch (error: any) {
+            console.log(`[CART-CHECKOUT-SETUP] Stored customer ID invalid (${customerId}), creating new one`);
+            customerId = undefined; // Clear invalid ID
+          }
+        }
+        
+        // Create customer if doesn't exist or was invalid
+        if (!customerId) {
+          const customer = await stripe.customers.create({
+            email: buyer?.email || undefined,
+            metadata: { userId: userId }
+          });
+          validCustomerId = customer.id;
+          // Update user with customer ID
+          await storage.updateUserStripeInfo(userId, { 
+            customerId: customer.id, 
+            subscriptionId: buyer?.stripeSubscriptionId || '' 
+          });
+          console.log(`[CART-CHECKOUT-SETUP] Created new Stripe customer: ${validCustomerId}`);
+        }
+      }
+      
       // Create SetupIntent for capturing reusable payment method
       const setupIntent = await stripe.setupIntents.create({
         usage: 'off_session', // Allow saving for future use
+        customer: validCustomerId, // CRITICAL: Attach validated customer to SetupIntent
         metadata: {
           userId: userId || 'guest',
           cartId: cart.id,
@@ -1638,7 +1673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      console.log('[CART-CHECKOUT] Created SetupIntent:', setupIntent.id);
+      console.log('[CART-CHECKOUT] Created SetupIntent:', setupIntent.id, 'with customer:', validCustomerId || 'none');
       
       const paymentIntents = [];
       let totalAmount = 0;
@@ -1692,38 +1727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (process.env.NODE_ENV === 'production') {
           // Production: Use real Stripe
-          // Get or create Stripe customer for the buyer
-          let customerId: string | undefined;
-          if (userId) {
-            const buyer = await storage.getUser(userId);
-            customerId = buyer?.stripeCustomerId || undefined;
-            
-            // Verify stored customer ID exists in Stripe, create new if invalid
-            if (customerId) {
-              try {
-                await stripe.customers.retrieve(customerId);
-                console.log(`[CART-CHECKOUT] Verified existing Stripe customer: ${customerId}`);
-              } catch (error: any) {
-                console.log(`[CART-CHECKOUT] Stored customer ID invalid (${customerId}), creating new one`);
-                customerId = undefined; // Clear invalid ID so we create a new one
-              }
-            }
-            
-            // Create customer if doesn't exist or was invalid
-            if (!customerId) {
-              const customer = await stripe.customers.create({
-                email: buyer?.email || undefined,
-                metadata: { userId: userId }
-              });
-              customerId = customer.id;
-              // Update user with customer ID
-              await storage.updateUserStripeInfo(userId, { 
-                customerId: customer.id, 
-                subscriptionId: buyer?.stripeSubscriptionId || '' 
-              });
-              console.log(`[CART-CHECKOUT] Created new Stripe customer: ${customerId}`);
-            }
-          }
+          // Use the validated customer ID from SetupIntent (already verified above)
           
           // Only use connected account if seller has Stripe Connect set up
           const createOptions: any = {
@@ -1731,7 +1735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: "usd",
             payment_method_types: ['card'],
             confirmation_method: 'manual',
-            customer: customerId, // CRITICAL: Add customer to PaymentIntent
+            customer: validCustomerId, // CRITICAL: Use validated customer from SetupIntent
             metadata: {
               userId: userId || 'guest',
               sellerId: sellerId,
