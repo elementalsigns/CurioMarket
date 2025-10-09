@@ -1,26 +1,0 @@
-* Platform-specific Configuration Errors: 
-    * Incomplete Setup: Discount codes or subscription products may not be fully configured in both the e-commerce platform (e.g., Shopify) and any integrated subscription management platform (e.g., Recharge, Bold Subscriptions).
-    * Incorrect Settings: This includes issues like applying discount codes outside their valid date range, exceeding usage limits, or attempting to use codes in unsupported channels (e.g., customer portal instead of checkout).
-    * Payment Gateway Issues: Problems with the payment gateway integration or the customer's payment method (e.g., expired card, insufficient funds) can prevent subscription creation.
-*    
-* Subscription Logic and Rules: 
-    * Minimum Purchase Requirements: The cart total may not meet the minimum purchase amount required for the discount code to apply.
-    * Multi-Currency Restrictions: Fixed-amount discount codes might not function correctly across different currencies in multi-currency setups, requiring the use of percentage-based discounts instead.
-    * Customer-Specific Restrictions: The discount code may be limited to first-time customers or have a one-time use restriction that the current customer has already met.
-*    
-* Data and API-Related Issues: 
-    * Missing or Invalid Customer Data: Required customer information, such as a phone number in the shipping address, might be missing or incorrectly formatted, leading to errors during subscription creation.
-    * API Management Issues: If using an API-driven system, rate limits or incorrect API configurations can hinder subscription creation.
-    * Unexpected Errors: Generic "UNEXPECTED\_ERROR" messages can occur due to various underlying issues, sometimes related to how the platform handles specific order or subscription data.
-*    
-* App Store Connect (for iOS Apps): 
-    * Incomplete App Store Connect Setup: Ensuring the correct group IDs, accepted agreements (paid and free app agreements), and no alerts on the "Agreements" page are crucial for in-app subscription functionality.
-    * Delayed Availability: Sometimes, there can be a delay between app approval and subscription availability, requiring a waiting period before release.
-*    
-Troubleshooting Steps: 
-
-* Review Platform Settings:  Verify the configuration of discount codes, subscription products, and any associated rules in both your e-commerce platform and subscription management system.    
-* Check Customer Data:  Ensure all required customer information is accurate and complete, especially contact and shipping details.    
-* Examine Error Messages:  Pay close attention to any specific error messages provided by the system, as they often indicate the root cause of the failure.    
-* Test in Different Scenarios:  Attempt to create subscriptions with different discount codes, customer profiles, and payment methods to isolate the issue.    
-* Consult Documentation and Support:  Refer to the documentation of your e-commerce platform and subscription provider, and contact their support channels if the issue persists.
