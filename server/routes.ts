@@ -1897,12 +1897,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usesPlatformAccount = isAdminSeller || !seller.stripeConnectAccountId;
       console.log(`[PAYMENT-CONFIRM] DECISION: isAdmin=${isAdminSeller}, usesPlatformAccount=${usesPlatformAccount}`);
       
-      // SECURITY: Retrieve PaymentIntent from the correct Stripe account
-      const retrieveOptions = usesPlatformAccount 
-        ? undefined // Platform account
-        : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
-      
-      const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
+      // DESTINATION CHARGES: All PaymentIntents are on platform account
+      // (Transfers to Connect accounts happen automatically via transfer_data)
+      const existingPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       
       // SECURITY: Validate that this PaymentIntent belongs to the current user/session
       const paymentUserId = existingPaymentIntent.metadata?.userId;
@@ -1970,12 +1967,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Confirm the PaymentIntent with the saved payment method
-      // Use same account as retrieval (platform for admin sellers, Connect for others)
-      const confirmOptions = usesPlatformAccount 
-        ? undefined // Platform account
-        : { stripeAccount: seller.stripeConnectAccountId! }; // Connect account (non-null asserted)
-      
+      // DESTINATION CHARGES: Confirm on platform account
+      // (Transfers to Connect accounts happen automatically via transfer_data)
       const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
         payment_method: paymentMethodId,
         return_url: `${req.protocol}://${req.get('host')}/order-confirmation`,
@@ -1991,7 +1984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         })
-      }, confirmOptions);
+      });
       
       console.log(`[PAYMENT-CONFIRM] Payment confirmed: ${paymentIntent.id}, status: ${paymentIntent.status}`);
       
