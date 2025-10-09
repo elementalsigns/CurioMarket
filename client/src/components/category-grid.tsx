@@ -2,40 +2,46 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import wetSpecimenImage from "@assets/generated_images/Gothic_snake_specimen_jar_51bc9d48.png";
+import bonesSkullsImage from "@assets/generated_images/Gothic_bone_collection_display_37b4e445.png";
+import taxidermyImage from "@assets/generated_images/Victorian_bird_taxidermy_display_34e4d9b1.png";
+import vintageMedicalImage from "@assets/generated_images/Vintage_medical_laboratory_setup_8123eab0.png";
+import jewelryImage from "@assets/generated_images/Gothic_vintage_jewelry_display_86ce4b33.png";
+import occultImage from "@assets/generated_images/Occult_magical_artifacts_display_e0cd536b.png";
 
-// Static category data - counts will be fetched dynamically
+// Static category data with images - counts will be fetched dynamically
 const categoryImages = {
   "wet-specimens": {
     icon: "🫙",
-    image: undefined,
+    image: wetSpecimenImage,
   },
   "bones-skulls": {
     icon: "🦴", 
-    image: undefined,
+    image: bonesSkullsImage,
   },
   "taxidermy": {
     icon: "🦅",
-    image: undefined,
+    image: taxidermyImage,
   },
   "vintage-medical": {
     icon: "⚗️",
-    image: undefined,
+    image: vintageMedicalImage,
   },
   "jewelry": {
     icon: "💍",
-    image: undefined,
+    image: jewelryImage,
   },
   "occult": {
     icon: "🔮",
-    image: undefined,
+    image: occultImage,
   },
   "wholesale": {
     icon: "📦",
-    image: undefined,
+    image: undefined, // Can add specific image later if needed
   },
   "fine-art": {
     icon: "🎨",
-    image: undefined,
+    image: undefined, // Can add specific image later if needed
   }
 };
 
