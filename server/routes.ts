@@ -8453,6 +8453,53 @@ This message was sent via the Curio Market contact form.
     res.send(svg);
   });
 
+  // ==================== ADMIN SELLER EMAIL UPDATE ====================
+  
+  // Update seller business email (admin only, for fixing email delivery issues)
+  app.post('/api/admin/update-seller-email', async (req, res) => {
+    try {
+      const { shopName, businessEmail } = req.body;
+      
+      if (!shopName || !businessEmail) {
+        return res.status(400).json({ error: 'Shop name and business email are required' });
+      }
+      
+      console.log(`[ADMIN] Updating business email for shop: ${shopName}`);
+      
+      // Find seller by shop name (case insensitive, direct DB query)
+      const sellerResult = await db
+        .select()
+        .from(sellers)
+        .where(sql`LOWER(${sellers.shopName}) = LOWER(${shopName})`)
+        .limit(1);
+      
+      if (sellerResult.length === 0) {
+        return res.status(404).json({ error: `Seller not found: ${shopName}` });
+      }
+      
+      const seller = sellerResult[0];
+      
+      // Update business email
+      await storage.updateSeller(seller.id, {
+        businessEmail: businessEmail
+      });
+      
+      console.log(`[ADMIN] ✅ Updated business email for ${shopName}: ${businessEmail}`);
+      
+      res.json({
+        success: true,
+        message: `Updated business email for ${shopName}`,
+        shopName: seller.shopName,
+        oldEmail: seller.businessEmail,
+        newEmail: businessEmail
+      });
+      
+    } catch (error: any) {
+      console.error('[ADMIN] Error updating seller email:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // ==================== ORPHANED SUBSCRIPTION REPAIR ====================
   
   // CRITICAL FIX: Repair orphaned subscriptions (active Stripe subscription but no database user)
