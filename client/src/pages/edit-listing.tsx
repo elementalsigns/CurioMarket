@@ -485,8 +485,8 @@ export default function EditListing() {
                                   {variation.name}
                                 </td>
                                 <td className="px-4 py-3 text-sm">
-                                  <span className={variation.priceAdjustment >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                    {variation.priceAdjustment >= 0 ? '+' : ''}${variation.priceAdjustment.toFixed(2)}
+                                  <span className={parseFloat(variation.priceAdjustment) >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                    {parseFloat(variation.priceAdjustment) >= 0 ? '+' : ''}${parseFloat(variation.priceAdjustment).toFixed(2)}
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 text-sm">

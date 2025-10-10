@@ -795,7 +795,7 @@ export default function CreateListing() {
                                   <div>
                                     <Label className="text-xs text-foreground/60">Price Adj.</Label>
                                     <p className={`font-medium ${parseFloat(variant.priceAdjustment) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                      {parseFloat(variant.priceAdjustment) >= 0 ? '+' : ''}${variant.priceAdjustment}
+                                      {parseFloat(variant.priceAdjustment) >= 0 ? '+' : ''}${parseFloat(variant.priceAdjustment).toFixed(2)}
                                     </p>
                                   </div>
                                   <div>
