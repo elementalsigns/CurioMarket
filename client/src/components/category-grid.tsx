@@ -2,20 +2,24 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import wetSpecimenImage from "@assets/wet specimen_1760056813803.png";
+import bonesSkullsImage from "@assets/skull_1760056813802.png";
+import taxidermyImage from "@assets/taxidermy-mouse_1760056813803.jpg";
+import occultImage from "@assets/occult_1760056813802.png";
 
-// Static category data - counts will be fetched dynamically
+// Static category data with images - counts will be fetched dynamically
 const categoryImages = {
   "wet-specimens": {
     icon: "🫙",
-    image: undefined,
+    image: wetSpecimenImage,
   },
   "bones-skulls": {
     icon: "🦴", 
-    image: undefined,
+    image: bonesSkullsImage,
   },
   "taxidermy": {
     icon: "🦅",
-    image: undefined,
+    image: taxidermyImage,
   },
   "vintage-medical": {
     icon: "⚗️",
@@ -27,7 +31,7 @@ const categoryImages = {
   },
   "occult": {
     icon: "🔮",
-    image: undefined,
+    image: occultImage,
   },
   "wholesale": {
     icon: "📦",
