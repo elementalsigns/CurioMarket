@@ -899,7 +899,7 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
           orderItems: orderGroup.items,
           shippingAddress: paymentIntent.shipping,
           shopName: seller?.shopName || 'Curio Market Seller',
-          sellerEmail: sellerUser?.email || 'seller@curiosities.market'
+          sellerEmail: seller?.businessEmail || sellerUser?.email || 'seller@curiosities.market'
         };
 
         console.log(`[WEBHOOK] Sending confirmation emails for order ${emailData.orderNumber}`);
@@ -908,8 +908,9 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
         const buyerEmailResult = await emailService.sendOrderConfirmation(emailData);
         console.log(`[WEBHOOK] Buyer email result: ${buyerEmailResult ? 'SUCCESS' : 'FAILED'}`);
 
-        // Send seller notification email
-        if (sellerUser?.email && sellerUser.email !== 'seller@curiosities.market') {
+        // Send seller notification email (use businessEmail if available)
+        const sellerEmailAddress = seller?.businessEmail || sellerUser?.email;
+        if (sellerEmailAddress && sellerEmailAddress !== 'seller@curiosities.market') {
           const sellerEmailResult = await emailService.sendSellerOrderNotification(emailData);
           console.log(`[WEBHOOK] Seller email result: ${sellerEmailResult ? 'SUCCESS' : 'FAILED'}`);
         }
@@ -5875,7 +5876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             try {
               const emailResult = await emailService.sendSellerMessageNotification({
-                sellerEmail: recipient.email,
+                sellerEmail: recipientSeller.businessEmail || recipient.email,
                 sellerName: recipientSeller.shopName || 'Seller',
                 customerName: sender.firstName && sender.lastName 
                   ? `${sender.firstName} ${sender.lastName}` 
