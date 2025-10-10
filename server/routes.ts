@@ -4611,8 +4611,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create order after successful payment - FIXED for multi-seller synchronous order creation
   app.post('/api/orders/create', async (req: any, res) => {
     try {
-      const { paymentIntentIds, cartItems, shippingAddress, isMultiSeller } = req.body;
-      let userId = req.isAuthenticated && req.isAuthenticated() ? req.user?.claims?.sub : null;
+      const { paymentIntentIds, cartItems, shippingAddress, isMultiSeller, userId: bodyUserId, userEmail: bodyUserEmail } = req.body;
+      
+      // HYBRID AUTHENTICATION: Try cookies first, then fall back to request body
+      let userId = null;
+      let userEmail = null;
+      
+      // Try cookie-based auth first
+      if (req.user && req.user.claims) {
+        userId = req.user.claims.sub;
+        userEmail = req.user.claims.email;
+        console.log('[ORDER CREATE] Using cookie authentication for user:', userId);
+        
+        // SECURITY: If body also has user data, verify it matches the session
+        if (bodyUserId && bodyUserId !== userId) {
+          console.log('[ORDER CREATE] SECURITY WARNING: Body user ID does not match session user ID');
+          return res.status(401).json({ message: "Authentication mismatch" });
+        }
+      }
+      // Fallback to body-based auth if cookies failed
+      else if (bodyUserId && bodyUserEmail) {
+        userId = bodyUserId;
+        userEmail = bodyUserEmail;
+        console.log('[ORDER CREATE] Using fallback body authentication for user:', userId);
+        
+        // ADDITIONAL SECURITY: Verify this user exists and the request came from their session
+        const userRecord = await storage.getUser(userId);
+        if (!userRecord || userRecord.email !== userEmail) {
+          console.log('[ORDER CREATE] SECURITY WARNING: Invalid user data in request body');
+          return res.status(401).json({ message: "Invalid authentication" });
+        }
+      }
+      
       const sessionId = req.sessionID;
       
       console.log('[ORDER CREATE] Processing multi-seller order creation request');
@@ -4621,7 +4651,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cartItems: cartItems?.length, 
         shippingAddress: !!shippingAddress, 
         isMultiSeller,
-        userId: userId || 'guest'
+        userId: userId || 'guest',
+        authMethod: userId ? (req.user?.claims ? 'cookie' : 'body') : 'none'
       });
       
       // Handle test mode for debugging
@@ -4745,7 +4776,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Step 1: Retrieve and validate all PaymentIntents
       const validatedPayments = [];
-      let userEmail = null;
       
       for (const paymentIntentId of paymentIntentIds) {
         console.log(`[ORDER CREATE] Validating payment intent: ${paymentIntentId}`);

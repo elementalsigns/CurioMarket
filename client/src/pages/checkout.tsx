@@ -249,7 +249,9 @@ const MultiSellerCheckoutForm = ({
         paymentIntentIds: completedPaymentIds,
         cartItems: cartItems,
         shippingAddress: shippingAddress,
-        isMultiSeller: true
+        isMultiSeller: true,
+        userId: user?.id,
+        userEmail: user?.email
       });
       
       console.log('[CHECKOUT] Orders created successfully:', orderResponse);
