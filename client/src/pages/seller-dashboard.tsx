@@ -1570,6 +1570,7 @@ function ShopProfileManager({ seller }: { seller: any }) {
       bio: seller?.bio || "",
       announcement: seller?.announcement || "",
       location: seller?.location || "",
+      businessEmail: seller?.businessEmail || "",
       policies: seller?.policies || "",
       shippingInfo: seller?.shippingInfo || "",
       returnPolicy: seller?.returnPolicy || "",
@@ -1859,6 +1860,23 @@ function ShopProfileManager({ seller }: { seller: any }) {
                       <FormControl>
                         <Input {...field} placeholder="City, State" data-testid="input-location" />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={profileForm.control}
+                  name="businessEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Business Email *</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" placeholder="your-email@example.com" data-testid="input-business-email" />
+                      </FormControl>
+                      <p className="text-xs text-foreground/60">
+                        This email will receive order notifications and customer inquiries
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
