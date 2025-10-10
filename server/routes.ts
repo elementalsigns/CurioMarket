@@ -837,13 +837,21 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
       }
 
       const orderGroup = ordersBySeller.get(sellerId);
-      const itemTotal = parseFloat(listing.price) * (cartItem.quantity || 1);
+      
+      // Calculate price with variation adjustment if applicable
+      let itemPrice = parseFloat(listing.price);
+      if (cartItem.variation && cartItem.variation.priceAdjustment) {
+        itemPrice += parseFloat(cartItem.variation.priceAdjustment);
+      }
+      const itemTotal = itemPrice * (cartItem.quantity || 1);
       
       orderGroup.items.push({
         listingId: cartItem.listingId,
         quantity: cartItem.quantity || 1,
-        price: listing.price,
-        title: listing.title
+        price: itemPrice.toFixed(2),
+        title: listing.title,
+        variationId: cartItem.variationId || null,
+        variationName: cartItem.variation?.name || null
       });
       orderGroup.subtotal += itemTotal;
     }
@@ -876,7 +884,10 @@ async function handleOrderCompletion(paymentIntent: Stripe.PaymentIntent) {
             orderId: order.id,
             listingId: item.listingId,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            title: item.title,
+            variationId: item.variationId || null,
+            variationName: item.variationName || null
           });
         }
 
@@ -1615,13 +1626,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const item of cartItems) {
         const listing = await storage.getListing(item.listingId);
         if (listing) {
+          // Calculate price with variation adjustment if applicable
+          let itemPrice = parseFloat(listing.price);
+          if (item.variation && item.variation.priceAdjustment) {
+            itemPrice += parseFloat(item.variation.priceAdjustment);
+          }
+          
           if (!sellerGroups[listing.sellerId]) {
             sellerGroups[listing.sellerId] = [];
           }
           sellerGroups[listing.sellerId].push({
             ...item,
             listing,
-            itemTotal: parseFloat(listing.price) * (item.quantity || 1),
+            itemTotal: itemPrice * (item.quantity || 1),
             shipping: parseFloat(listing.shippingCost || '0')
           });
         }
@@ -4479,10 +4496,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // SURGICAL FIX: requireAuth middleware automatically sets up authenticated user
       const userId = req.user.claims.sub;
       const sessionId = req.sessionID;
-      const { listingId, quantity = 1 } = req.body;
+      const { listingId, quantity = 1, variationId = null } = req.body;
       
       const cart = await storage.getOrCreateCart(userId, sessionId);
-      const cartItem = await storage.addToCart(cart.id, listingId, quantity);
+      const cartItem = await storage.addToCart(cart.id, listingId, quantity, variationId);
       
       res.json(cartItem);
     } catch (error) {

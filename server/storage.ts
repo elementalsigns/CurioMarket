@@ -99,7 +99,7 @@ export interface IStorage {
   
   // Cart operations
   getOrCreateCart(userId?: string, sessionId?: string): Promise<Cart>;
-  addToCart(cartId: string, listingId: string, quantity: number): Promise<CartItem>;
+  addToCart(cartId: string, listingId: string, quantity: number, variationId?: string | null): Promise<CartItem>;
   getCartItems(cartId: string): Promise<CartItem[]>;
   getAllCartsWithItems(): Promise<Cart[]>;
   updateCartItem(id: string, quantity: number): Promise<CartItem>;
@@ -736,12 +736,24 @@ export class DatabaseStorage implements IStorage {
     return cart;
   }
 
-  async addToCart(cartId: string, listingId: string, quantity: number): Promise<CartItem> {
-    // Check if item already exists in cart
+  async addToCart(cartId: string, listingId: string, quantity: number, variationId?: string | null): Promise<CartItem> {
+    // Check if item with same listing AND variation already exists in cart
+    const conditions = [
+      eq(cartItems.cartId, cartId), 
+      eq(cartItems.listingId, listingId)
+    ];
+    
+    // Match variation: both null, or both equal
+    if (variationId) {
+      conditions.push(eq(cartItems.variationId, variationId));
+    } else {
+      conditions.push(isNull(cartItems.variationId));
+    }
+    
     const [existingItem] = await db
       .select()
       .from(cartItems)
-      .where(and(eq(cartItems.cartId, cartId), eq(cartItems.listingId, listingId)));
+      .where(and(...conditions));
 
     if (existingItem) {
       // Update quantity
@@ -756,7 +768,8 @@ export class DatabaseStorage implements IStorage {
       const [newItem] = await db.insert(cartItems).values({
         cartId,
         listingId,
-        quantity
+        quantity,
+        variationId: variationId || null
       }).returning();
       return newItem;
     }
@@ -765,12 +778,13 @@ export class DatabaseStorage implements IStorage {
   async getCartItems(cartId: string): Promise<any[]> {
     const items = await db.select().from(cartItems).where(eq(cartItems.cartId, cartId));
     
-    // Manually join the data with images
+    // Manually join the data with images and variations
     const enrichedItems = [];
     for (const item of items) {
       const [listing] = await db.select().from(listings).where(eq(listings.id, item.listingId));
       let seller = null;
       let images: any[] = [];
+      let variation = null;
       
       if (listing) {
         [seller] = await db.select().from(sellers).where(eq(sellers.id, listing.sellerId));
@@ -789,10 +803,16 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
+      // Load variation if specified
+      if (item.variationId) {
+        [variation] = await db.select().from(listingVariations).where(eq(listingVariations.id, item.variationId));
+      }
+      
       enrichedItems.push({
         ...item,
         listing: listing ? { ...listing, images } : null,
-        seller: seller || null
+        seller: seller || null,
+        variation: variation || null
       });
     }
     

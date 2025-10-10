@@ -670,11 +670,21 @@ export default function Checkout() {
                               <h5 className="text-sm font-medium line-clamp-1" data-testid={`item-title-${item.id}`}>
                                 {item.listing?.title}
                               </h5>
+                              {item.variation && (
+                                <p className="text-xs text-foreground/60">
+                                  Option: {item.variation.name}
+                                </p>
+                              )}
                               <p className="text-xs text-foreground/60">
                                 Qty: {item.quantity}
                               </p>
                               <p className="text-sm text-gothic-red font-bold" data-testid={`item-price-${item.id}`}>
-                                ${(parseFloat(item.listing?.price || '0') * item.quantity).toFixed(2)}
+                                ${(() => {
+                                  const basePrice = parseFloat(item.listing?.price || '0');
+                                  const priceAdjustment = item.variation ? parseFloat(item.variation.priceAdjustment || '0') : 0;
+                                  const itemPrice = basePrice + priceAdjustment;
+                                  return (itemPrice * item.quantity).toFixed(2);
+                                })()}
                               </p>
                             </div>
                           </div>
@@ -693,9 +703,12 @@ export default function Checkout() {
                   <div className="space-y-2" data-testid="order-totals">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${items.reduce((sum: number, item: any) => 
-                        sum + (parseFloat(item.listing?.price || '0') * item.quantity), 0
-                      ).toFixed(2)}</span>
+                      <span>${items.reduce((sum: number, item: any) => {
+                        const basePrice = parseFloat(item.listing?.price || '0');
+                        const priceAdjustment = item.variation ? parseFloat(item.variation.priceAdjustment || '0') : 0;
+                        const itemPrice = basePrice + priceAdjustment;
+                        return sum + (itemPrice * item.quantity);
+                      }, 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
