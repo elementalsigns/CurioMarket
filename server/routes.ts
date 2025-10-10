@@ -4219,6 +4219,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.addListingImage(req.params.id, req.body.images[i], undefined, i);
         }
       }
+
+      // Handle variations if provided
+      if (req.body.variations !== undefined && Array.isArray(req.body.variations)) {
+        // Validate variations array
+        const variationSchema = z.object({
+          id: z.string().optional(),
+          name: z.string().min(1, "Variation name required"),
+          priceAdjustment: z.number().or(z.string()).transform(val => {
+            const num = typeof val === 'string' ? parseFloat(val) : val;
+            return isNaN(num) ? 0 : num;
+          }),
+          stockQuantity: z.number().int().min(0).or(z.string()).transform(val => {
+            const num = typeof val === 'string' ? parseInt(val) : val;
+            return isNaN(num) ? 0 : Math.max(0, num);
+          }),
+          sku: z.string().optional().nullable(),
+          isActive: z.boolean().optional(),
+          sortOrder: z.number().int().or(z.string()).transform(val => {
+            const num = typeof val === 'string' ? parseInt(val) : val;
+            return isNaN(num) ? 0 : num;
+          }),
+        });
+
+        const variationsArraySchema = z.array(variationSchema);
+        
+        let validatedVariations;
+        try {
+          validatedVariations = variationsArraySchema.parse(req.body.variations);
+        } catch (error) {
+          return res.status(400).json({ 
+            error: "Invalid variation data",
+            details: error instanceof z.ZodError ? error.errors : "Validation failed"
+          });
+        }
+
+        // Delete all existing variations
+        await db.delete(listingVariations).where(eq(listingVariations.listingId, req.params.id));
+        
+        // Add new validated variations
+        for (const variation of validatedVariations) {
+          await db.insert(listingVariations).values({
+            listingId: req.params.id,
+            name: variation.name,
+            priceAdjustment: variation.priceAdjustment.toString(),
+            stockQuantity: variation.stockQuantity,
+            sku: variation.sku || null,
+            isActive: variation.isActive !== false,
+            sortOrder: variation.sortOrder || 0,
+          });
+        }
+        console.log(`[EDIT-DEBUG] Updated ${validatedVariations.length} variations for listing ${req.params.id}`);
+      }
       
       // Ensure slug exists - if not, generate one from title
       let responseSlug = updatedListing.slug;
@@ -4234,6 +4286,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating listing:", error);
       res.status(500).json({ error: "Failed to update listing" });
+    }
+  });
+
+  // Get variations for a listing (public endpoint for buyers to see options)
+  app.get('/api/listings/:id/variations', async (req: any, res) => {
+    try {
+      // Only return active variations to public
+      const variations = await db
+        .select()
+        .from(listingVariations)
+        .where(and(
+          eq(listingVariations.listingId, req.params.id),
+          eq(listingVariations.isActive, true)
+        ))
+        .orderBy(listingVariations.sortOrder);
+      
+      res.json(variations);
+    } catch (error) {
+      console.error("Error fetching variations:", error);
+      res.status(500).json({ error: "Failed to fetch variations" });
+    }
+  });
+
+  // Get all variations for a listing (seller-only endpoint)
+  app.get('/api/listings/:id/variations/manage', requireSellerAccess, async (req: any, res) => {
+    try {
+      const listing = await storage.getListing(req.params.id);
+      if (!listing) {
+        return res.status(404).json({ error: "Listing not found" });
+      }
+
+      // Check ownership
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (user.role !== 'admin' && listing.sellerId !== req.sellerId) {
+        return res.status(403).json({ error: "You can only manage your own listings" });
+      }
+
+      // Return all variations (including inactive) for seller management
+      const variations = await db
+        .select()
+        .from(listingVariations)
+        .where(eq(listingVariations.listingId, req.params.id))
+        .orderBy(listingVariations.sortOrder);
+      
+      res.json(variations);
+    } catch (error) {
+      console.error("Error fetching variations:", error);
+      res.status(500).json({ error: "Failed to fetch variations" });
     }
   });
 

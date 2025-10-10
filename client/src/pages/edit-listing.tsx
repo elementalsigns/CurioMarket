@@ -15,10 +15,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { ImageUploadGrid } from "@/components/ImageUploadGrid";
 import type { Category } from "@shared/schema";
+
+interface ListingVariation {
+  id?: string;
+  name: string;
+  priceAdjustment: number;
+  stockQuantity: number;
+  sku?: string;
+  isActive: boolean;
+  sortOrder: number;
+}
 
 const editListingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -45,6 +55,15 @@ export default function EditListing() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [images, setImages] = useState<string[]>([]);
+  const [variations, setVariations] = useState<ListingVariation[]>([]);
+  const [newVariation, setNewVariation] = useState<ListingVariation>({
+    name: "",
+    priceAdjustment: 0,
+    stockQuantity: 0,
+    sku: "",
+    isActive: true,
+    sortOrder: 0,
+  });
 
   // Fetch listing data
   const { data: listing, isLoading: listingLoading } = useQuery({
@@ -115,6 +134,19 @@ export default function EditListing() {
     },
   });
 
+  // Fetch variations for this listing (seller management endpoint)
+  const { data: existingVariations } = useQuery({
+    queryKey: ["/api/listings", id, "variations", "manage"],
+    queryFn: async () => {
+      const response = await fetch(`/api/listings/${id}/variations/manage`, {
+        credentials: 'include'
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!id,
+  });
+
   // Update form when listing data loads
   useEffect(() => {
     if (listing) {
@@ -140,6 +172,39 @@ export default function EditListing() {
     }
   }, [listing, form]);
 
+  // Load existing variations
+  useEffect(() => {
+    if (existingVariations && Array.isArray(existingVariations)) {
+      setVariations(existingVariations);
+    }
+  }, [existingVariations]);
+
+  // Variation management functions
+  const addVariation = () => {
+    if (!newVariation.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a variation name",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setVariations([...variations, { ...newVariation, sortOrder: variations.length }]);
+    setNewVariation({
+      name: "",
+      priceAdjustment: 0,
+      stockQuantity: 0,
+      sku: "",
+      isActive: true,
+      sortOrder: 0,
+    });
+  };
+
+  const deleteVariation = (index: number) => {
+    setVariations(variations.filter((_, i) => i !== index));
+  };
+
   const updateListingMutation = useMutation({
     mutationFn: async (data: EditListingForm) => {
       const payload = {
@@ -147,6 +212,7 @@ export default function EditListing() {
         stockQuantity: parseInt(data.quantity),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
         images: images, // Include the uploaded images
+        variations: variations, // Include variations
       };
       const response = await apiRequest("PUT", `/api/listings/${id}`, payload);
       return response;
@@ -377,6 +443,141 @@ export default function EditListing() {
                     className="bg-zinc-900 border-zinc-700"
                     placeholder="gothic, vintage, rare"
                   />
+                </div>
+
+                {/* Product Variations */}
+                <div className="space-y-4 pt-6 border-t border-zinc-700">
+                  <div className="space-y-2">
+                    <Label className="text-lg font-semibold">Product Variations (Optional)</Label>
+                    <p className="text-sm text-zinc-400">
+                      Add options like sizes, colors, or types with different prices and stock levels
+                    </p>
+                  </div>
+
+                  {/* Existing Variations Table */}
+                  {variations.length > 0 && (
+                    <div className="bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-zinc-800 border-b border-zinc-700">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">
+                                Name
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">
+                                Price Adjustment
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">
+                                Stock
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">
+                                SKU
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-zinc-400 uppercase">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-700">
+                            {variations.map((variation, index) => (
+                              <tr key={index} className="hover:bg-zinc-800/50">
+                                <td className="px-4 py-3 text-sm">
+                                  {variation.name}
+                                </td>
+                                <td className="px-4 py-3 text-sm">
+                                  <span className={variation.priceAdjustment >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                    {variation.priceAdjustment >= 0 ? '+' : ''}${variation.priceAdjustment.toFixed(2)}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-sm">
+                                  {variation.stockQuantity}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-zinc-400">
+                                  {variation.sku || '—'}
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteVariation(index)}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-950/20"
+                                    data-testid={`button-delete-variation-${index}`}
+                                  >
+                                    <Trash2 size={16} />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add New Variation Form */}
+                  <div className="space-y-4 bg-zinc-900 p-4 rounded-lg border border-zinc-700">
+                    <Label className="font-semibold">Add New Variation</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="variation-name" className="text-sm">Name *</Label>
+                        <Input
+                          id="variation-name"
+                          value={newVariation.name}
+                          onChange={(e) => setNewVariation({ ...newVariation, name: e.target.value })}
+                          className="bg-zinc-800 border-zinc-700"
+                          placeholder="e.g., Small, Large"
+                          data-testid="input-variation-name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="variation-price" className="text-sm">Price Adjustment ($)</Label>
+                        <Input
+                          id="variation-price"
+                          type="number"
+                          step="0.01"
+                          value={newVariation.priceAdjustment}
+                          onChange={(e) => setNewVariation({ ...newVariation, priceAdjustment: parseFloat(e.target.value) || 0 })}
+                          className="bg-zinc-800 border-zinc-700"
+                          placeholder="0.00"
+                          data-testid="input-variation-price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="variation-stock" className="text-sm">Stock Quantity</Label>
+                        <Input
+                          id="variation-stock"
+                          type="number"
+                          value={newVariation.stockQuantity}
+                          onChange={(e) => setNewVariation({ ...newVariation, stockQuantity: parseInt(e.target.value) || 0 })}
+                          className="bg-zinc-800 border-zinc-700"
+                          placeholder="0"
+                          data-testid="input-variation-stock"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="variation-sku" className="text-sm">SKU (Optional)</Label>
+                        <Input
+                          id="variation-sku"
+                          value={newVariation.sku}
+                          onChange={(e) => setNewVariation({ ...newVariation, sku: e.target.value })}
+                          className="bg-zinc-800 border-zinc-700"
+                          placeholder="VAR-001"
+                          data-testid="input-variation-sku"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={addVariation}
+                      variant="outline"
+                      className="w-full md:w-auto"
+                      data-testid="button-add-variation"
+                    >
+                      <Plus className="mr-2" size={16} />
+                      Add Variation
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Image Upload */}
