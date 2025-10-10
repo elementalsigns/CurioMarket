@@ -221,6 +221,7 @@ export const cartItems = pgTable("cart_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   cartId: varchar("cart_id").references(() => carts.id).notNull(),
   listingId: varchar("listing_id").references(() => listings.id).notNull(),
+  variationId: varchar("variation_id").references(() => listingVariations.id), // Selected variation (optional)
   quantity: integer("quantity").default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -246,6 +247,8 @@ export const orderItems = pgTable("order_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").references(() => orders.id).notNull(),
   listingId: varchar("listing_id").references(() => listings.id).notNull(),
+  variationId: varchar("variation_id").references(() => listingVariations.id), // Selected variation (optional)
+  variationName: varchar("variation_name"), // Snapshot: "Large" or "Blue"
   quantity: integer("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   title: varchar("title").notNull(), // Snapshot at time of purchase
