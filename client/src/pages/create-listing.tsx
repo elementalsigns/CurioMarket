@@ -51,6 +51,16 @@ export default function CreateListing() {
   const [, setLocation] = useLocation();
   const [previewMode, setPreviewMode] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  
+  // Product Variants state
+  const [variations, setVariations] = useState<any[]>([]);
+  const [newVariant, setNewVariant] = useState({
+    name: '',
+    priceAdjustment: '',
+    stockQuantity: '',
+    sku: '',
+    isActive: true
+  });
 
   // Direct category loading without React Query complications
   const [categories, setCategories] = useState<Category[]>([]);
@@ -175,6 +185,7 @@ export default function CreateListing() {
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
         images: images, // Include the uploaded images
         state: 'published',
+        variations: variations, // Include product variants
       };
       const response = await apiRequest("POST", "/api/listings", payload);
       return response;
@@ -208,6 +219,71 @@ export default function CreateListing() {
       });
     },
   });
+
+  // Variant management handlers
+  const handleAddVariation = () => {
+    // Validate inputs
+    if (!newVariant.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Variant name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const priceAdj = parseFloat(newVariant.priceAdjustment || '0');
+    const stock = parseInt(newVariant.stockQuantity || '0');
+
+    if (isNaN(priceAdj) || isNaN(stock)) {
+      toast({
+        title: "Error",
+        description: "Invalid price adjustment or stock quantity",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add new variant to local state
+    const variant = {
+      id: `temp-${Date.now()}`,
+      name: newVariant.name.trim(),
+      priceAdjustment: priceAdj.toFixed(2),
+      stockQuantity: stock,
+      sku: newVariant.sku.trim() || null,
+      isActive: newVariant.isActive
+    };
+
+    setVariations([...variations, variant]);
+
+    // Reset form
+    setNewVariant({
+      name: '',
+      priceAdjustment: '',
+      stockQuantity: '',
+      sku: '',
+      isActive: true
+    });
+
+    toast({
+      title: "Variant Added",
+      description: `Added variant: ${variant.name}`,
+    });
+  };
+
+  const handleUpdateVariation = (id: string, field: string, value: any) => {
+    setVariations(variations.map(v => 
+      v.id === id ? { ...v, [field]: value } : v
+    ));
+  };
+
+  const handleRemoveVariation = (id: string) => {
+    setVariations(variations.filter(v => v.id !== id));
+    toast({
+      title: "Variant Removed",
+      description: "The variant has been removed",
+    });
+  };
 
   const onSubmit = (data: CreateListingForm) => {
     createListingMutation.mutate(data);
@@ -625,6 +701,129 @@ export default function CreateListing() {
                         </DialogContent>
                       </Dialog>
                     </div>
+                  </div>
+
+                  {/* Product Variants */}
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-serif font-bold mb-2">Product Variants (Optional)</h3>
+                      <p className="text-sm text-foreground/60 mb-4">
+                        Add variations like sizes, colors, or conditions with individual pricing and stock
+                      </p>
+                    </div>
+
+                    {/* Add New Variant Form */}
+                    <Card className="bg-zinc-900 border-zinc-700">
+                      <CardContent className="p-4 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="variantName">Variant Name *</Label>
+                            <Input
+                              id="variantName"
+                              value={newVariant.name}
+                              onChange={(e) => setNewVariant({ ...newVariant, name: e.target.value })}
+                              placeholder="e.g., Small, Red, Excellent Condition"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="variantPriceAdj">Price Adjustment ($)</Label>
+                            <Input
+                              id="variantPriceAdj"
+                              type="number"
+                              step="0.01"
+                              value={newVariant.priceAdjustment}
+                              onChange={(e) => setNewVariant({ ...newVariant, priceAdjustment: e.target.value })}
+                              placeholder="0.00 (use negative for discount)"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-foreground/60 mt-1">
+                              Positive for upcharge, negative for discount
+                            </p>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="variantStock">Stock Quantity *</Label>
+                            <Input
+                              id="variantStock"
+                              type="number"
+                              min="0"
+                              value={newVariant.stockQuantity}
+                              onChange={(e) => setNewVariant({ ...newVariant, stockQuantity: e.target.value })}
+                              placeholder="0"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="variantSku">SKU (Optional)</Label>
+                            <Input
+                              id="variantSku"
+                              value={newVariant.sku}
+                              onChange={(e) => setNewVariant({ ...newVariant, sku: e.target.value })}
+                              placeholder="Variant SKU"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+
+                        <Button
+                          type="button"
+                          onClick={handleAddVariation}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          Add Variant
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Existing Variants List */}
+                    {variations.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Added Variants ({variations.length})</h4>
+                        {variations.map((variant) => (
+                          <Card key={variant.id} className="bg-zinc-900 border-zinc-700">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+                                  <div>
+                                    <Label className="text-xs text-foreground/60">Name</Label>
+                                    <p className="font-medium">{variant.name}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-foreground/60">Price Adj.</Label>
+                                    <p className={`font-medium ${parseFloat(variant.priceAdjustment) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                      {parseFloat(variant.priceAdjustment) >= 0 ? '+' : ''}${variant.priceAdjustment}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-foreground/60">Stock</Label>
+                                    <p className="font-medium">{variant.stockQuantity}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-foreground/60">Status</Label>
+                                    <p className={`font-medium ${variant.isActive ? 'text-green-400' : 'text-foreground/40'}`}>
+                                      {variant.isActive ? 'Active' : 'Inactive'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveVariation(variant.id)}
+                                  className="text-destructive hover:text-destructive/80 ml-4"
+                                >
+                                  <XIcon size={16} />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Image Upload */}
