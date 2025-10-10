@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Heart, Share2, ShoppingCart, Star, MapPin, Shield, MessageCircle, Plus, List } from "lucide-react";
@@ -24,6 +26,7 @@ export default function Product() {
   const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
 
   // Parse URL parameters for review mode
   const urlParams = new URLSearchParams(window.location.search);
@@ -34,6 +37,13 @@ export default function Product() {
     queryKey: ["/api/listings/by-slug", slug],
     enabled: !!slug,
     queryFn: () => fetch(`/api/listings/by-slug/${slug}`).then(res => res.json()),
+  });
+
+  // Fetch variations for this listing (public endpoint)
+  const { data: variations = [] } = useQuery({
+    queryKey: ["/api/listings", listing?.id, "variations"],
+    enabled: !!listing?.id,
+    queryFn: () => fetch(`/api/listings/${listing.id}/variations`).then(res => res.json()),
   });
 
   const { data: favorites = [] } = useQuery({
@@ -50,7 +60,7 @@ export default function Product() {
   const isFavorite = Array.isArray(favorites) && favorites.includes(listing?.id);
 
   const addToCartMutation = useMutation({
-    mutationFn: async (data: { listingId: string; quantity: number }) => {
+    mutationFn: async (data: { listingId: string; quantity: number; variationId?: string | null }) => {
       return apiRequest("POST", "/api/cart/add", data);
     },
     onSuccess: () => {
@@ -118,9 +128,42 @@ export default function Product() {
     },
   });
 
+  // Calculate final price based on selected variation
+  const selectedVariation = variations.find((v: any) => v.id === selectedVariationId);
+  const basePrice = parseFloat(listing?.price || '0');
+  const priceAdjustment = selectedVariation ? parseFloat(selectedVariation.priceAdjustment || '0') : 0;
+  const finalPrice = basePrice + priceAdjustment;
+
+  // Determine available stock
+  const availableStock = selectedVariation 
+    ? selectedVariation.stockQuantity 
+    : (listing?.stockQuantity || 0);
+
+  // Clamp quantity when available stock changes (e.g., when switching variations)
+  useEffect(() => {
+    if (quantity > availableStock && availableStock > 0) {
+      setQuantity(Math.min(quantity, availableStock));
+    }
+  }, [availableStock]);
+
   const handleAddToCart = () => {
     if (!listing) return;
-    addToCartMutation.mutate({ listingId: listing.id, quantity });
+    
+    // If variations exist and none selected, show error
+    if (variations.length > 0 && !selectedVariationId) {
+      toast({
+        title: "Please Select an Option",
+        description: "Please select a product variation before adding to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addToCartMutation.mutate({ 
+      listingId: listing.id, 
+      quantity,
+      variationId: selectedVariationId 
+    });
   };
 
   const handleToggleFavorite = () => {
@@ -313,7 +356,12 @@ export default function Product() {
               </div>
 
               <div className="text-4xl font-bold text-gothic-red mb-4" data-testid="product-price">
-                ${listing.price}
+                ${finalPrice.toFixed(2)}
+                {selectedVariation && priceAdjustment !== 0 && (
+                  <span className="text-sm font-normal text-foreground/60 ml-2">
+                    (Base: ${basePrice.toFixed(2)} {priceAdjustment > 0 ? '+' : ''}{priceAdjustment.toFixed(2)})
+                  </span>
+                )}
               </div>
 
               {listing.tags && listing.tags.length > 0 && (
@@ -356,6 +404,50 @@ export default function Product() {
                   <p className="text-foreground/80" data-testid="product-provenance">
                     {listing.provenance}
                   </p>
+                </div>
+              </>
+            )}
+
+            {/* Product Variations */}
+            {variations.length > 0 && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-serif font-bold mb-3">Select Option</h3>
+                  <RadioGroup 
+                    value={selectedVariationId || ""}
+                    onValueChange={(value) => setSelectedVariationId(value)}
+                    className="space-y-2"
+                    data-testid="variation-selector"
+                  >
+                    {variations.map((variation: any) => (
+                      <div key={variation.id} className="flex items-center space-x-3 p-3 bg-zinc-900 rounded-lg border border-zinc-700 hover:border-gothic-red/50 transition-colors">
+                        <RadioGroupItem 
+                          value={variation.id} 
+                          id={`variation-${variation.id}`}
+                          data-testid={`radio-variation-${variation.id}`}
+                        />
+                        <Label 
+                          htmlFor={`variation-${variation.id}`}
+                          className="flex-1 cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{variation.name}</span>
+                            <div className="flex items-center gap-3">
+                              {variation.priceAdjustment && parseFloat(variation.priceAdjustment) !== 0 && (
+                                <span className={`text-sm ${parseFloat(variation.priceAdjustment) > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                  {parseFloat(variation.priceAdjustment) > 0 ? '+' : ''}${parseFloat(variation.priceAdjustment).toFixed(2)}
+                                </span>
+                              )}
+                              <span className="text-sm text-foreground/60">
+                                {variation.stockQuantity > 0 ? `${variation.stockQuantity} available` : 'Out of stock'}
+                              </span>
+                            </div>
+                          </div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
               </>
             )}
@@ -424,7 +516,7 @@ export default function Product() {
                         className="bg-input border border-border rounded-lg px-3 py-2 w-20"
                         data-testid="select-quantity"
                       >
-                        {[...Array(Math.min(listing.stockQuantity || 0, 10))].map((_, i) => (
+                        {[...Array(Math.min(availableStock, 10))].map((_, i) => (
                           <option key={i + 1} value={i + 1}>
                             {i + 1}
                           </option>
@@ -433,19 +525,19 @@ export default function Product() {
                     </div>
 
                     <div className="text-sm text-foreground/70">
-                      {listing.stockQuantity || 0} available
+                      {availableStock} available
                     </div>
                   </div>
 
                   <div className="flex gap-3">
                     <Button
                       onClick={handleAddToCart}
-                      disabled={addToCartMutation.isPending || (listing.stockQuantity || 0) < 1}
+                      disabled={addToCartMutation.isPending || availableStock < 1}
                       className="flex-1 bg-gothic-red hover:bg-gothic-red/80 text-white rounded-2xl disabled:bg-muted disabled:text-muted-foreground"
                       data-testid="button-add-to-cart"
                     >
                       <ShoppingCart size={16} className="mr-2" />
-                      {(listing.stockQuantity || 0) < 1 ? 'Sold Out' : 'Add to Cart'}
+                      {availableStock < 1 ? 'Sold Out' : 'Add to Cart'}
                     </Button>
                     <SocialSharing 
                       listing={{
