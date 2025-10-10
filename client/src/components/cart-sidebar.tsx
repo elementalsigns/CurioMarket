@@ -67,7 +67,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const items = (cartData as any)?.items || [];
   
   const subtotal = items.reduce((sum: number, item: any) => {
-    return sum + (parseFloat(item.listing?.price || 0) * item.quantity);
+    const basePrice = parseFloat(item.listing?.price || 0);
+    const variantAdjustment = parseFloat(item.variation?.priceAdjustment || 0);
+    const finalPrice = basePrice + variantAdjustment;
+    return sum + (finalPrice * item.quantity);
   }, 0);
 
   // Buyer only pays the item price - platform fee is deducted from seller payout  
@@ -169,6 +172,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           <h4 className="font-semibold text-sm mb-1" data-testid={`cart-item-title-${item.id}`}>
                             {item.listing?.title}
                           </h4>
+                          {item.variation && (
+                            <p className="text-xs text-gothic-red mb-1" data-testid={`cart-item-variant-${item.id}`}>
+                              {item.variation.name}
+                            </p>
+                          )}
                           <p className="text-sm text-muted-foreground mb-2">
                             by {item.listing?.seller?.shopName}
                           </p>
@@ -235,7 +243,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             {/* Price and Remove */}
                             <div className="flex items-center gap-2">
                               <span className="font-semibold text-sm" data-testid={`price-${item.id}`}>
-                                ${(parseFloat(item.listing?.price || 0) * item.quantity).toFixed(2)}
+                                ${((parseFloat(item.listing?.price || 0) + parseFloat(item.variation?.priceAdjustment || 0)) * item.quantity).toFixed(2)}
                               </span>
                               <Button
                                 size="icon"
