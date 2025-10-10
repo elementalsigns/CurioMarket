@@ -4781,58 +4781,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[ORDER CREATE] Validating payment intent: ${paymentIntentId}`);
         
         try {
-          // ✅ Step 1: Determine sellerId from cart items (improved matching)
-          // Match payment intents to sellers by checking which cart items belong to each seller
-          const sellerCartGroups = new Map<string, any[]>();
-          for (const item of cartItems) {
-            const sellerId = item.listing?.sellerId;
-            if (sellerId) {
-              if (!sellerCartGroups.has(sellerId)) {
-                sellerCartGroups.set(sellerId, []);
-              }
-              sellerCartGroups.get(sellerId)!.push(item);
-            }
-          }
-          
-          // Since we have 1 payment per seller, match by index or try all sellers
-          const sellerIds = Array.from(sellerCartGroups.keys());
-          let sellerId: string | null = null;
+          // ✅ IMPROVED: Try platform account FIRST (works for all admin sellers)
+          // Then try metadata-based seller lookup (works even if cart is empty)
           let paymentIntent: Stripe.PaymentIntent | null = null;
+          let sellerId: string | null = null;
           let seller: any = null;
           
-          // Try each seller to find which account has this payment
-          for (const candidateSellerId of sellerIds) {
-            const candidateSeller = await storage.getSeller(candidateSellerId);
-            if (!candidateSeller) continue;
+          // STEP 1: Try to retrieve from platform account (for admin sellers and fallback)
+          try {
+            console.log(`[ORDER CREATE] Attempting platform account retrieval for ${paymentIntentId}`);
+            paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+            sellerId = paymentIntent.metadata?.sellerId;
             
-            // Check if admin seller - they use platform account
-            const sellerUser = await storage.getUser(candidateSeller.userId);
-            const isAdminSeller = sellerUser?.role === 'admin';
-            const usesPlatformAccount = isAdminSeller || !candidateSeller.stripeConnectAccountId;
-            
-            try {
-              const retrieveOptions = usesPlatformAccount 
-                ? undefined 
-                : { stripeAccount: candidateSeller.stripeConnectAccountId! };
-              
-              const pi = await stripe.paymentIntents.retrieve(paymentIntentId, retrieveOptions);
-              
-              // ✅ Validate this payment belongs to this seller via metadata
-              if (pi.metadata?.sellerId === candidateSellerId) {
-                paymentIntent = pi;
-                sellerId = candidateSellerId;
-                seller = candidateSeller;
-                console.log(`[ORDER CREATE] Found payment for seller ${seller.shopName} (Admin: ${isAdminSeller})`);
-                break;
+            if (sellerId) {
+              seller = await storage.getSeller(sellerId);
+              if (seller) {
+                console.log(`[ORDER CREATE] ✅ Found payment in platform account for seller ${seller.shopName}`);
               }
-            } catch (err) {
-              // Payment not in this seller's account, try next
-              continue;
+            }
+          } catch (platformError) {
+            console.log(`[ORDER CREATE] Not in platform account, will try Connect accounts...`);
+          }
+          
+          // STEP 2: If not found in platform, try Connect accounts from cart items
+          if (!paymentIntent || !sellerId || !seller) {
+            console.log(`[ORDER CREATE] Searching Connect accounts using cart items...`);
+            
+            const sellerCartGroups = new Map<string, any[]>();
+            for (const item of cartItems) {
+              const itemSellerId = item.listing?.sellerId;
+              if (itemSellerId) {
+                if (!sellerCartGroups.has(itemSellerId)) {
+                  sellerCartGroups.set(itemSellerId, []);
+                }
+                sellerCartGroups.get(itemSellerId)!.push(item);
+              }
+            }
+            
+            const sellerIds = Array.from(sellerCartGroups.keys());
+            
+            for (const candidateSellerId of sellerIds) {
+              const candidateSeller = await storage.getSeller(candidateSellerId);
+              if (!candidateSeller || !candidateSeller.stripeConnectAccountId) continue;
+              
+              try {
+                const pi = await stripe.paymentIntents.retrieve(
+                  paymentIntentId,
+                  { stripeAccount: candidateSeller.stripeConnectAccountId }
+                );
+                
+                if (pi.metadata?.sellerId === candidateSellerId) {
+                  paymentIntent = pi;
+                  sellerId = candidateSellerId;
+                  seller = candidateSeller;
+                  console.log(`[ORDER CREATE] ✅ Found payment in Connect account for seller ${seller.shopName}`);
+                  break;
+                }
+              } catch (err) {
+                continue;
+              }
             }
           }
           
           if (!paymentIntent || !sellerId || !seller) {
             console.error(`[ORDER CREATE] Could not find seller for payment ${paymentIntentId}`);
+            console.error(`[ORDER CREATE] Payment metadata:`, paymentIntent?.metadata);
             return res.status(400).json({ error: `Invalid payment: ${paymentIntentId}` });
           }
           
