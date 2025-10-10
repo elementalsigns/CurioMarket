@@ -149,16 +149,6 @@ export default function Product() {
   const handleAddToCart = () => {
     if (!listing) return;
     
-    // If variations exist and none selected, show error
-    if (variations.length > 0 && !selectedVariationId) {
-      toast({
-        title: "Please Select an Option",
-        description: "Please select a product variation before adding to cart",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     addToCartMutation.mutate({ 
       listingId: listing.id, 
       quantity,
@@ -416,10 +406,35 @@ export default function Product() {
                   <h3 className="text-lg font-serif font-bold mb-3">Select Option</h3>
                   <RadioGroup 
                     value={selectedVariationId || ""}
-                    onValueChange={(value) => setSelectedVariationId(value)}
+                    onValueChange={(value) => setSelectedVariationId(value === "none" ? "" : value)}
                     className="space-y-2"
                     data-testid="variation-selector"
                   >
+                    {/* Base Product Option - No Add-on */}
+                    <div className="flex items-center space-x-3 p-3 bg-zinc-900 rounded-lg border border-zinc-700 hover:border-gothic-red/50 transition-colors">
+                      <RadioGroupItem 
+                        value="none" 
+                        id="variation-none"
+                        data-testid="radio-variation-none"
+                      />
+                      <Label 
+                        htmlFor="variation-none"
+                        className="flex-1 cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Base Product (No Add-on)</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-foreground/60">
+                              ${basePrice.toFixed(2)}
+                            </span>
+                            <span className="text-sm text-foreground/60">
+                              {listing.quantity > 0 ? `${listing.quantity} available` : 'Out of stock'}
+                            </span>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
                     {variations.map((variation: any) => (
                       <div key={variation.id} className="flex items-center space-x-3 p-3 bg-zinc-900 rounded-lg border border-zinc-700 hover:border-gothic-red/50 transition-colors">
                         <RadioGroupItem 
