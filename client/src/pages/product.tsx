@@ -405,8 +405,8 @@ export default function Product() {
                 <div>
                   <h3 className="text-lg font-serif font-bold mb-3">Select Option</h3>
                   <RadioGroup 
-                    value={selectedVariationId || ""}
-                    onValueChange={(value) => setSelectedVariationId(value === "none" ? "" : value)}
+                    value={selectedVariationId || "none"}
+                    onValueChange={(value) => setSelectedVariationId(value === "none" ? null : value)}
                     className="space-y-2"
                     data-testid="variation-selector"
                   >
