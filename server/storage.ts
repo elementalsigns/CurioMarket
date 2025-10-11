@@ -2389,10 +2389,10 @@ export class DatabaseStorage implements IStorage {
       count: sql<string>`CAST(COUNT(*) AS TEXT)` 
     }).from(orders);
     
-    // Calculate total revenue from all completed orders (shipped, fulfilled, delivered)
+    // Calculate total revenue from all completed orders (paid, shipped, fulfilled, delivered)
     const [revenueResult] = await db.select({ 
       total: sql<string>`CAST(COALESCE(SUM(CAST(${orders.total} AS DECIMAL)), 0) AS TEXT)` 
-    }).from(orders).where(inArray(orders.status, ['shipped', 'fulfilled', 'delivered']));
+    }).from(orders).where(inArray(orders.status, ['paid', 'shipped', 'fulfilled', 'delivered']));
     
     return {
       totalUsers: parseInt(totalUsers.count) || 0,
