@@ -2442,6 +2442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bio: req.body.bio || seller.bio,
         announcement: req.body.announcement || seller.announcement,
         location: req.body.location || seller.location,
+        businessEmail: req.body.businessEmail || seller.businessEmail,
         policies: req.body.policies || seller.policies,
         banner: req.body.banner || req.body.bannerImageUrl || seller.banner,
         avatar: req.body.avatar || req.body.avatarImageUrl || seller.avatar,
