@@ -206,11 +206,11 @@ export default function Landing() {
                     </Button>
                   </div>
                   {/* Right Half - Heart Image */}
-                  <div className="relative overflow-hidden flex items-center justify-center">
+                  <div className="relative overflow-hidden">
                     <img 
                       src={heartImage} 
                       alt="Holiday Collection"
-                      className="w-[85%] h-auto object-contain group-hover:opacity-90 transition-opacity brightness-125"
+                      className="w-full h-full object-cover group-hover:opacity-90 transition-opacity brightness-125"
                     />
                   </div>
                 </div>
