@@ -191,10 +191,10 @@ export default function Landing() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Box - Holidays Keep it Creepy */}
             <Link to="/browse">
-              <div className="relative overflow-hidden rounded-lg cursor-pointer group h-80 bg-black border border-primary/20 hover:border-primary transition-all">
+              <div className="relative overflow-hidden rounded-lg cursor-pointer group h-80 border border-primary/20 hover:border-primary transition-all">
                 <div className="grid grid-cols-2 h-full">
                   {/* Left Half - Text */}
-                  <div className="bg-black flex flex-col justify-center px-8">
+                  <div className="flex flex-col justify-center px-8">
                     <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-4">
                       Holidays<br />Keep it Creepy
                     </h3>
@@ -211,6 +211,7 @@ export default function Landing() {
                       src={skullImage} 
                       alt="Holiday Collection"
                       className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                      style={{ objectPosition: 'center top', height: '100%', maxHeight: '85%' }}
                     />
                   </div>
                 </div>
@@ -237,7 +238,7 @@ export default function Landing() {
                 <img 
                   src={specimenImage} 
                   alt="Featured Seller"
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
+                  className="w-full h-full object-cover group-hover:opacity-75 transition-opacity brightness-125"
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/50 to-transparent"></div>
               </div>
