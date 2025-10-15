@@ -47,6 +47,133 @@ interface AdminStats {
   totalRevenue: number;
 }
 
+function FeaturedListingsManagement({ allListings }: { allListings: any[] }) {
+  const { toast } = useToast();
+  const { data: featuredIds = [], refetch } = useQuery<string[]>({
+    queryKey: ['/api/admin/featured/ids'],
+    retry: false,
+  });
+
+  const addToFeaturedMutation = useMutation({
+    mutationFn: (listingId: string) => 
+      apiRequest('POST', `/api/admin/featured/${listingId}`, {}),
+    onSuccess: () => {
+      toast({ title: "Listing added to featured section" });
+      refetch();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const removeFromFeaturedMutation = useMutation({
+    mutationFn: (listingId: string) => 
+      apiRequest('DELETE', `/api/admin/featured/${listingId}`, {}),
+    onSuccess: () => {
+      toast({ title: "Listing removed from featured section" });
+      refetch();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const publishedListings = allListings?.filter((l: any) => l.status === 'published') || [];
+
+  return (
+    <Card className="bg-zinc-900 border-zinc-700">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Package className="w-5 h-5" />
+          Featured Listings (Curiosities Market Selection)
+        </CardTitle>
+        <CardDescription>
+          Select listings to feature in the "Holiday Must Haves" section on the landing page
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {publishedListings.length === 0 ? (
+            <p className="text-sm text-zinc-400">No published listings available</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-zinc-700">
+                  <tr className="text-left">
+                    <th className="pb-2">Listing</th>
+                    <th className="pb-2">Price</th>
+                    <th className="pb-2">Seller</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {publishedListings.map((listing: any) => {
+                    const isFeatured = Array.isArray(featuredIds) && featuredIds.includes(listing.id);
+                    return (
+                      <tr key={listing.id}>
+                        <td className="py-3">
+                          <div className="flex items-center gap-3">
+                            {listing.imageUrl && (
+                              <img 
+                                src={listing.imageUrl} 
+                                alt={listing.title} 
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{listing.title}</p>
+                              <p className="text-xs text-zinc-400">{listing.categoryName}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3">${listing.price}</td>
+                        <td className="py-3 text-zinc-400">{listing.sellerName}</td>
+                        <td className="py-3">
+                          {isFeatured ? (
+                            <Badge className="bg-primary text-primary-foreground">Featured</Badge>
+                          ) : (
+                            <Badge variant="outline">Not Featured</Badge>
+                          )}
+                        </td>
+                        <td className="py-3">
+                          {isFeatured ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white"
+                              onClick={() => removeFromFeaturedMutation.mutate(listing.id)}
+                              disabled={removeFromFeaturedMutation.isPending}
+                              data-testid={`button-remove-featured-${listing.id}`}
+                            >
+                              Remove
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                              onClick={() => addToFeaturedMutation.mutate(listing.id)}
+                              disabled={addToFeaturedMutation.isPending}
+                              data-testid={`button-add-featured-${listing.id}`}
+                            >
+                              Add to Featured
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -266,11 +393,12 @@ export default function AdminDashboard() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="verification" className="space-y-6">
-          <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-4 lg:grid-cols-8 bg-zinc-900">
+          <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-4 lg:grid-cols-9 bg-zinc-900">
             <TabsTrigger value="verification" data-testid="tab-verification">Verifications</TabsTrigger>
             <TabsTrigger value="disputes" data-testid="tab-disputes">Disputes</TabsTrigger>
             <TabsTrigger value="moderation" data-testid="tab-moderation">Moderation</TabsTrigger>
             <TabsTrigger value="listings" data-testid="tab-listings">Listings</TabsTrigger>
+            <TabsTrigger value="featured" data-testid="tab-featured">Featured</TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
             <TabsTrigger value="shops" data-testid="tab-shops">Shops</TabsTrigger>
             <TabsTrigger value="events" data-testid="tab-events">
@@ -694,6 +822,11 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Featured Listings Management */}
+          <TabsContent value="featured">
+            <FeaturedListingsManagement allListings={allListings} />
           </TabsContent>
 
           {/* User Management */}

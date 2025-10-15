@@ -30,7 +30,7 @@ function ActiveSellersDisplay() {
 }
 
 function HolidayMustHaves() {
-  const { data: featuredListings = [], isLoading } = useQuery({
+  const { data: featuredListings, isLoading } = useQuery<any[]>({
     queryKey: ["/api/featured/listings"],
   });
 
@@ -79,7 +79,7 @@ function HolidayMustHaves() {
 }
 
 function FeaturedSeller() {
-  const { data: sellerShowcase, isLoading } = useQuery({
+  const { data: sellerShowcase, isLoading } = useQuery<any>({
     queryKey: ["/api/featured/seller"],
     refetchInterval: 60000, // Refresh every minute for rotation
   });
@@ -92,7 +92,7 @@ function FeaturedSeller() {
     );
   }
 
-  if (!sellerShowcase || sellerShowcase.listings.length === 0) {
+  if (!sellerShowcase || !sellerShowcase.listings || sellerShowcase.listings.length === 0) {
     return null;
   }
 
