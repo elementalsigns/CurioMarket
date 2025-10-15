@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import skullsImage from "@assets/IMG_6763_1760568060257.jpg";
+import skullDomeImage from "@assets/IMG_6766_1760568343546.jpg";
 import skullCandleImage from "@assets/IMG_6757_1760567194789.jpg";
 
 function ActiveSellersDisplay() {
@@ -205,13 +205,12 @@ export default function Landing() {
                       Shop
                     </Button>
                   </div>
-                  {/* Right Half - Skulls Image */}
+                  {/* Right Half - Skull Dome Image */}
                   <div className="relative overflow-hidden">
                     <img 
-                      src={skullsImage} 
+                      src={skullDomeImage} 
                       alt="Holiday Collection"
-                      className="w-full h-full object-cover group-hover:opacity-90 transition-opacity brightness-125 contrast-110"
-                      style={{ filter: 'brightness(1.25) contrast(1.1)' }}
+                      className="w-full h-full object-cover group-hover:opacity-90 transition-opacity brightness-125"
                     />
                   </div>
                 </div>
