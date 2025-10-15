@@ -30,8 +30,9 @@ function ActiveSellersDisplay() {
 }
 
 function HolidayMustHaves() {
-  const { data: featuredListings, isLoading } = useQuery<any[]>({
-    queryKey: ["/api/featured/listings"],
+  const { data: randomListings, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/listings/random"],
+    queryFn: () => fetch("/api/listings/random?limit=4").then(res => res.json()),
   });
 
   if (isLoading) {
@@ -42,7 +43,7 @@ function HolidayMustHaves() {
     );
   }
 
-  if (!featuredListings || featuredListings.length === 0) {
+  if (!randomListings || randomListings.length === 0) {
     return null;
   }
 
@@ -50,7 +51,7 @@ function HolidayMustHaves() {
     <Link to="/browse">
       <div className="relative bg-gradient-to-br from-black to-zinc-900 rounded-lg overflow-hidden h-[400px] group cursor-pointer" data-testid="box-holiday-must-haves">
         <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-4">
-          {featuredListings.slice(0, 4).map((listing: any) => (
+          {randomListings.slice(0, 4).map((listing: any) => (
             <div key={listing.id} className="relative overflow-hidden rounded">
               {listing.images?.[0] && (
                 <img
