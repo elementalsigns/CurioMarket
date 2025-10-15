@@ -24,6 +24,7 @@ import {
   listingVariations,
   searchAnalytics,
   payouts,
+  featuredListings,
   type User,
   type UpsertUser,
   type Seller,
@@ -135,6 +136,12 @@ export interface IStorage {
   getFeaturedListings(limit?: number): Promise<Listing[]>;
   getRandomListings(limit?: number): Promise<Listing[]>;
   getSellerStats(sellerId: string): Promise<{ totalSales: number; averageRating: number; totalReviews: number; activeListings: number; totalFavorites: number; totalViews: number }>;
+  
+  // Admin featured listings operations
+  addToFeatured(listingId: string): Promise<void>;
+  removeFromFeatured(listingId: string): Promise<void>;
+  getFeaturedListingIds(): Promise<string[]>;
+  getRandomSellerShowcase(limit?: number): Promise<{ listings: Listing[]; sellerName: string; sellerId: string }>;
   
   // Category counts
   getCategoryCounts(): Promise<any[]>;
@@ -1198,14 +1205,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFeaturedListings(limit: number = 8): Promise<any[]> {
-    const result = await this.getListings({ 
-      limit, 
-      state: 'published'
-    });
+    // Get admin-curated featured listings
+    const featured = await db
+      .select({
+        listing: listings,
+      })
+      .from(featuredListings)
+      .innerJoin(listings, eq(featuredListings.listingId, listings.id))
+      .where(eq(listings.state, 'published'))
+      .orderBy(desc(featuredListings.addedAt))
+      .limit(limit);
     
     // Add images and seller information to each listing with URL conversion
     const listingsWithImagesAndSeller = await Promise.all(
-      result.listings.map(async (listing) => {
+      featured.map(async ({ listing }) => {
         const images = await this.getListingImages(listing.id);
         // Convert Google Cloud Storage URLs to /objects/ format
         const convertedImages = images.map(image => {
@@ -3178,6 +3191,81 @@ export class DatabaseStorage implements IStorage {
     );
 
     return performanceData.sort((a, b) => b.revenue - a.revenue);
+  }
+
+  // Admin featured listings operations
+  async addToFeatured(listingId: string): Promise<void> {
+    await db.insert(featuredListings).values({ listingId });
+  }
+
+  async removeFromFeatured(listingId: string): Promise<void> {
+    await db.delete(featuredListings).where(eq(featuredListings.listingId, listingId));
+  }
+
+  async getFeaturedListingIds(): Promise<string[]> {
+    const result = await db
+      .select({ listingId: featuredListings.listingId })
+      .from(featuredListings);
+    return result.map(r => r.listingId);
+  }
+
+  async getRandomSellerShowcase(limit: number = 6): Promise<{ listings: Listing[]; sellerName: string; sellerId: string }> {
+    // Get a random active seller who has published listings
+    const randomSeller = await db
+      .select({
+        seller: sellers,
+        listingCount: count(listings.id).as('listingCount')
+      })
+      .from(sellers)
+      .innerJoin(listings, eq(sellers.id, listings.sellerId))
+      .where(and(
+        eq(sellers.isActive, true),
+        eq(listings.state, 'published')
+      ))
+      .groupBy(sellers.id)
+      .having(sql`count(${listings.id}) > 0`)
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+
+    if (!randomSeller || randomSeller.length === 0) {
+      return { listings: [], sellerName: '', sellerId: '' };
+    }
+
+    const seller = randomSeller[0].seller;
+
+    // Get random listings from this seller
+    const sellerListings = await db
+      .select()
+      .from(listings)
+      .where(and(
+        eq(listings.sellerId, seller.id),
+        eq(listings.state, 'published')
+      ))
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
+
+    // Add images to listings
+    const listingsWithImages = await Promise.all(
+      sellerListings.map(async (listing) => {
+        const images = await this.getListingImages(listing.id);
+        const convertedImages = images.map(image => {
+          let convertedUrl = image.url;
+          if (image.url.startsWith('https://storage.googleapis.com/')) {
+            const parts = image.url.split('/');
+            const uploadId = parts[parts.length - 1];
+            convertedUrl = `/objects/uploads/${uploadId}`;
+          }
+          return { ...image, url: convertedUrl };
+        });
+        return { ...listing, images: convertedImages };
+      })
+    );
+
+    return {
+      listings: listingsWithImages.filter(l => l.images && l.images.length > 0),
+      sellerName: seller.shopName,
+      sellerId: seller.id
+    };
   }
 
   // Health check method
