@@ -11,8 +11,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import skullsImage from "@assets/IMG_6763_1760566751273.jpg";
 import heartImage from "@assets/IMG_6765_1760566751274.jpg";
+import skullCandleImage from "@assets/IMG_6757_1760567194789.jpg";
 
 function ActiveSellersDisplay() {
   const { data: activeSellerCount, isLoading } = useQuery({
@@ -205,12 +205,12 @@ export default function Landing() {
                       Shop
                     </Button>
                   </div>
-                  {/* Right Half - Skulls Image */}
-                  <div className="relative overflow-hidden">
+                  {/* Right Half - Heart Image */}
+                  <div className="relative overflow-hidden flex items-center justify-center">
                     <img 
-                      src={skullsImage} 
+                      src={heartImage} 
                       alt="Holiday Collection"
-                      className="w-full h-full object-cover group-hover:opacity-90 transition-opacity brightness-125"
+                      className="w-[85%] h-auto object-contain group-hover:opacity-90 transition-opacity brightness-125"
                     />
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default function Landing() {
             >
               <div className="absolute inset-0">
                 <img 
-                  src={heartImage} 
+                  src={skullCandleImage} 
                   alt="Featured Seller"
                   className="w-full h-full object-cover group-hover:opacity-75 transition-opacity brightness-125"
                 />
