@@ -148,7 +148,11 @@ export default function Landing() {
                   { name: 'Taxidermy', slug: 'taxidermy' },
                   { name: 'Vintage', slug: 'vintage' },
                   { name: 'Wet Specimens', slug: 'wet-specimens' },
-                  { name: 'Bones & Skulls', slug: 'bones-skulls' }
+                  { name: 'Bones & Skulls', slug: 'bones-skulls' },
+                  { name: 'Antique', slug: 'antique' },
+                  { name: 'Occult', slug: 'occult' },
+                  { name: 'Funeral', slug: 'funeral' },
+                  { name: 'Oddities', slug: 'oddities' }
                 ].map((tag) => (
                   <Link key={tag.slug} to={`/browse?category=${tag.slug}`}>
                     <Button 
