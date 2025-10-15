@@ -29,6 +29,103 @@ function ActiveSellersDisplay() {
   return <div className="text-2xl font-bold text-primary">{formattedCount}</div>;
 }
 
+function HolidayMustHaves() {
+  const { data: featuredListings = [], isLoading } = useQuery({
+    queryKey: ["/api/featured/listings"],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-black to-zinc-900 rounded-lg h-[400px] flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!featuredListings || featuredListings.length === 0) {
+    return null;
+  }
+
+  return (
+    <Link to="/browse">
+      <div className="relative bg-gradient-to-br from-black to-zinc-900 rounded-lg overflow-hidden h-[400px] group cursor-pointer" data-testid="box-holiday-must-haves">
+        <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-4">
+          {featuredListings.slice(0, 4).map((listing: any) => (
+            <div key={listing.id} className="relative overflow-hidden rounded">
+              {listing.images?.[0] && (
+                <img
+                  src={listing.images[0].url}
+                  alt={listing.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-6">
+          <h3 className="text-2xl font-serif font-bold text-white mb-2">Holiday Must Haves</h3>
+          <p className="text-zinc-300 text-sm mb-3">Curiosities Market Selection</p>
+          <Button 
+            variant="outline" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
+            data-testid="button-view-featured"
+          >
+            See our picks
+          </Button>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function FeaturedSeller() {
+  const { data: sellerShowcase, isLoading } = useQuery({
+    queryKey: ["/api/featured/seller"],
+    refetchInterval: 60000, // Refresh every minute for rotation
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-black to-zinc-900 rounded-lg h-[400px] flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!sellerShowcase || sellerShowcase.listings.length === 0) {
+    return null;
+  }
+
+  const mainListing = sellerShowcase.listings[0];
+
+  return (
+    <Link to={`/shop/${sellerShowcase.sellerId}`}>
+      <div className="relative bg-gradient-to-br from-zinc-900 to-black rounded-lg overflow-hidden h-[400px] group cursor-pointer" data-testid="box-featured-seller">
+        {mainListing?.images?.[0] && (
+          <img
+            src={mainListing.images[0].url}
+            alt={mainListing.title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <p className="text-primary text-sm font-medium mb-1">Featured Seller</p>
+          <h3 className="text-2xl font-serif font-bold text-white mb-2">{sellerShowcase.sellerName}</h3>
+          <p className="text-zinc-300 text-sm mb-3">Explore their unique collection</p>
+          <Button 
+            variant="outline" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
+            data-testid="button-shop-seller"
+          >
+            Shop now
+          </Button>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,6 +275,20 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Featured Boxes - Etsy Style (Holiday Must Haves + Featured Seller) */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-black" data-testid="section-featured-boxes">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Left Box: Holiday Must Haves (Admin Curated) */}
+            <HolidayMustHaves />
+            
+            {/* Right Box: Featured Seller (Random Rotation) */}
+            <FeaturedSeller />
+          </div>
+        </div>
+      </section>
+
       {/* Shop by Category - Etsy Style */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">
