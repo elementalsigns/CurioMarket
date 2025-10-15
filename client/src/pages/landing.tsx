@@ -11,6 +11,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import skullImage from "@assets/IMG_6757_1760564288675.jpg";
+import specimenImage from "@assets/IMG_6762_1760564363019.jpg";
 
 function ActiveSellersDisplay() {
   const { data: activeSellerCount, isLoading } = useQuery({
@@ -182,6 +184,71 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      
+      {/* Promotional Boxes */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-zinc-900">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Box - Holidays Keep it Creepy */}
+            <Link to="/browse">
+              <div className="relative overflow-hidden rounded-lg cursor-pointer group h-80 bg-black border border-primary/20 hover:border-primary transition-all">
+                <div className="absolute inset-0">
+                  <img 
+                    src={skullImage} 
+                    alt="Holiday Collection"
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                </div>
+                <div className="relative h-full flex flex-col justify-center px-8 sm:px-12">
+                  <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-4">
+                    Holidays<br />Keep it Creepy
+                  </h3>
+                  <Button 
+                    className="w-fit bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3 rounded-full font-medium"
+                    data-testid="button-holiday-shop"
+                  >
+                    Shop
+                  </Button>
+                </div>
+              </div>
+            </Link>
+            
+            {/* Right Box - Featured Seller Shop */}
+            <div 
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/sellers/random');
+                  const data = await response.json();
+                  if (data.shopSlug) {
+                    setLocation(`/shop/${data.shopSlug}`);
+                  }
+                } catch (error) {
+                  console.error('Error fetching random seller:', error);
+                }
+              }}
+              className="relative overflow-hidden rounded-lg cursor-pointer group h-80 bg-black border border-primary/20 hover:border-primary transition-all"
+              data-testid="featured-seller-box"
+            >
+              <div className="absolute inset-0">
+                <img 
+                  src={specimenImage} 
+                  alt="Featured Seller"
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/50 to-transparent"></div>
+              </div>
+              <div className="relative h-full flex flex-col justify-center items-end px-8 sm:px-12 text-right">
+                <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-2">
+                  Featured Seller<br />Shop
+                </h3>
+                <p className="text-white/80 text-sm">Discover unique collections</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Shop by Category - Etsy Style */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" data-testid="section-categories">
         <div className="container mx-auto max-w-7xl">

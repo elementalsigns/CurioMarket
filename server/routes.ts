@@ -4136,6 +4136,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get random seller shop
+  app.get('/api/sellers/random', async (req, res) => {
+    try {
+      const activeSellers = await db.select().from(sellers).where(eq(sellers.isActive, true));
+      if (activeSellers.length === 0) {
+        return res.status(404).json({ error: "No active sellers found" });
+      }
+      const randomSeller = activeSellers[Math.floor(Math.random() * activeSellers.length)];
+      res.json({ shopSlug: randomSeller.shopSlug });
+    } catch (error) {
+      console.error("Error fetching random seller:", error);
+      res.status(500).json({ error: "Failed to fetch random seller" });
+    }
+  });
+
   // Get single listing (public)
   app.get('/api/listings/:id', async (req, res) => {
     try {
