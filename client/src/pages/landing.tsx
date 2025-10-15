@@ -64,7 +64,7 @@ function HolidayMustHaves() {
           ))}
         </div>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-6">
-          <h3 className="text-2xl font-serif font-bold text-white mb-2">Holiday Must Haves</h3>
+          <h3 className="text-2xl font-serif font-bold text-white mb-2">Holidays Keep them Creepy</h3>
           <p className="text-zinc-300 text-sm mb-3">Curiosities Market Selection</p>
           <Button 
             variant="outline" 
