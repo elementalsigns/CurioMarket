@@ -943,23 +943,3 @@ export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type EventAttendee = typeof eventAttendees.$inferSelect;
 export type InsertEventAttendee = z.infer<typeof insertEventAttendeeSchema>;
-
-// Featured Listings table (Admin-curated)
-export const featuredListings = pgTable("featured_listings", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  listingId: varchar("listing_id").notNull().references(() => listings.id, { onDelete: 'cascade' }),
-  addedAt: timestamp("added_at").defaultNow(),
-});
-
-// Featured Listings relations
-export const featuredListingsRelations = relations(featuredListings, ({ one }) => ({
-  listing: one(listings, {
-    fields: [featuredListings.listingId],
-    references: [listings.id],
-  }),
-}));
-
-// Featured Listings schemas
-export const insertFeaturedListingSchema = createInsertSchema(featuredListings).omit({ id: true, addedAt: true });
-export type FeaturedListing = typeof featuredListings.$inferSelect;
-export type InsertFeaturedListing = z.infer<typeof insertFeaturedListingSchema>;

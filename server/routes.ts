@@ -8064,67 +8064,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // =================== ADMIN FEATURED LISTINGS MANAGEMENT ===================
-  
-  // Add listing to featured section
-  app.post('/api/admin/featured/:listingId', requireAdminAuth, requireAdmin, async (req: any, res) => {
-    try {
-      const { listingId } = req.params;
-      await storage.addToFeatured(listingId);
-      res.json({ success: true, message: "Listing added to featured section" });
-    } catch (error) {
-      console.error("Error adding listing to featured:", error);
-      res.status(500).json({ error: "Failed to add listing to featured" });
-    }
-  });
-
-  // Remove listing from featured section
-  app.delete('/api/admin/featured/:listingId', requireAdminAuth, requireAdmin, async (req: any, res) => {
-    try {
-      const { listingId } = req.params;
-      await storage.removeFromFeatured(listingId);
-      res.json({ success: true, message: "Listing removed from featured section" });
-    } catch (error) {
-      console.error("Error removing listing from featured:", error);
-      res.status(500).json({ error: "Failed to remove listing from featured" });
-    }
-  });
-
-  // Get currently featured listing IDs
-  app.get('/api/admin/featured/ids', requireAdminAuth, requireAdmin, async (req: any, res) => {
-    try {
-      const featuredIds = await storage.getFeaturedListingIds();
-      res.json(featuredIds);
-    } catch (error) {
-      console.error("Error getting featured listing IDs:", error);
-      res.status(500).json({ error: "Failed to get featured listing IDs" });
-    }
-  });
-
-  // Public endpoint: Get featured listings (for landing page)
-  app.get('/api/featured/listings', async (req: any, res) => {
-    try {
-      const limit = parseInt(req.query.limit || '6');
-      const featured = await storage.getFeaturedListings(limit);
-      res.json(featured);
-    } catch (error) {
-      console.error("Error getting featured listings:", error);
-      res.status(500).json({ error: "Failed to get featured listings" });
-    }
-  });
-
-  // Public endpoint: Get random seller showcase (for landing page)
-  app.get('/api/featured/seller', async (req: any, res) => {
-    try {
-      const limit = parseInt(req.query.limit || '6');
-      const showcase = await storage.getRandomSellerShowcase(limit);
-      res.json(showcase);
-    } catch (error) {
-      console.error("Error getting seller showcase:", error);
-      res.status(500).json({ error: "Failed to get seller showcase" });
-    }
-  });
-
   // Demo route for testing admin export functionality (development only)
   if (process.env.NODE_ENV === 'development') {
     app.get('/api/demo/admin/export/stats', async (req: any, res) => {

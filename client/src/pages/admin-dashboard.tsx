@@ -266,7 +266,7 @@ export default function AdminDashboard() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="verification" className="space-y-6">
-          <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-4 lg:grid-cols-9 bg-zinc-900">
+          <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-4 lg:grid-cols-8 bg-zinc-900">
             <TabsTrigger value="verification" data-testid="tab-verification">Verifications</TabsTrigger>
             <TabsTrigger value="disputes" data-testid="tab-disputes">Disputes</TabsTrigger>
             <TabsTrigger value="moderation" data-testid="tab-moderation">Moderation</TabsTrigger>
