@@ -192,24 +192,27 @@ export default function Landing() {
             {/* Left Box - Holidays Keep it Creepy */}
             <Link to="/browse">
               <div className="relative overflow-hidden rounded-lg cursor-pointer group h-80 bg-black border border-primary/20 hover:border-primary transition-all">
-                <div className="absolute inset-0">
-                  <img 
-                    src={skullImage} 
-                    alt="Holiday Collection"
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-75 transition-opacity"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
-                </div>
-                <div className="relative h-full flex flex-col justify-center px-8 sm:px-12">
-                  <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-4">
-                    Holidays<br />Keep it Creepy
-                  </h3>
-                  <Button 
-                    className="w-fit bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3 rounded-full font-medium"
-                    data-testid="button-holiday-shop"
-                  >
-                    Shop
-                  </Button>
+                <div className="grid grid-cols-2 h-full">
+                  {/* Left Half - Text */}
+                  <div className="bg-black flex flex-col justify-center px-8">
+                    <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white mb-4">
+                      Holidays<br />Keep it Creepy
+                    </h3>
+                    <Button 
+                      className="w-fit bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3 rounded-full font-medium"
+                      data-testid="button-holiday-shop"
+                    >
+                      Shop
+                    </Button>
+                  </div>
+                  {/* Right Half - Skull Image */}
+                  <div className="relative overflow-hidden">
+                    <img 
+                      src={skullImage} 
+                      alt="Holiday Collection"
+                      className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                    />
+                  </div>
                 </div>
               </div>
             </Link>
