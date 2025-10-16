@@ -41,7 +41,8 @@ async function syncDatabase() {
       { name: 'Antique', slug: 'antique', description: 'Authentic antique pieces and historical artifacts' },
       { name: 'Vintage', slug: 'vintage', description: 'Vintage items from past eras and decades' },
       { name: 'Wholesale', slug: 'wholesale', description: 'Bulk orders and wholesale quantities for resellers', icon: '📦' },
-      { name: 'Divination', slug: 'divination', description: 'Divination tools, tarot cards, runes, and mystical instruments' }
+      { name: 'Divination', slug: 'divination', description: 'Divination tools, tarot cards, runes, and mystical instruments' },
+      { name: 'Holidays', slug: 'holidays', description: 'Seasonal and holiday gothic items' }
     ];
 
     console.log('🔧 Ensuring all required categories exist...');
