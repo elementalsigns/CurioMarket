@@ -96,6 +96,7 @@ export default function EditListing() {
             { id: 'crystals', name: 'Crystals', slug: 'crystals' },
             { id: 'divination', name: 'Divination', slug: 'divination' },
             { id: 'funeral', name: 'Funeral', slug: 'funeral' },
+            { id: 'holidays', name: 'Holidays', slug: 'holidays' },
             { id: 'jewelry', name: 'Jewelry', slug: 'jewelry' },
             { id: 'medical-art', name: 'Medical Art', slug: 'medical-art' },
             { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia' },

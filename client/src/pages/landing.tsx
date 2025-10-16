@@ -190,7 +190,7 @@ export default function Landing() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Box - Holidays Keep it Creepy */}
-            <Link to="/browse">
+            <Link to="/browse?category=holidays">
               <div className="relative overflow-hidden rounded-lg cursor-pointer group h-80 border border-primary/20 hover:border-primary transition-all">
                 <div className="grid grid-cols-2 h-full">
                   {/* Left Half - Text */}

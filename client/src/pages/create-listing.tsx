@@ -81,6 +81,7 @@ export default function CreateListing() {
             { id: 'crystals', name: 'Crystals', slug: 'crystals', description: 'Natural crystals and gemstones', icon: null, parentId: null, createdAt: new Date() },
             { id: 'divination', name: 'Divination', slug: 'divination', description: 'Divination tools and mystical instruments', icon: null, parentId: null, createdAt: new Date() },
             { id: 'funeral', name: 'Funeral', slug: 'funeral', description: 'Funeral and mortuary items', icon: null, parentId: null, createdAt: new Date() },
+            { id: 'holidays', name: 'Holidays', slug: 'holidays', description: 'Seasonal and holiday gothic items', icon: null, parentId: null, createdAt: new Date() },
             { id: 'jewelry', name: 'Jewelry', slug: 'jewelry', description: 'Gothic and occult jewelry', icon: null, parentId: null, createdAt: new Date() },
             { id: 'medical-art', name: 'Medical Art', slug: 'medical-art', description: 'Medical instruments and art', icon: null, parentId: null, createdAt: new Date() },
             { id: 'murderabilia', name: 'Murderabilia', slug: 'murderabilia', description: 'Crime-related collectibles', icon: null, parentId: null, createdAt: new Date() },
