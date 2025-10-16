@@ -1,5 +1,17 @@
+import { useState, useEffect } from 'react';
+
 // Ultra-simple standalone seller guide - no external dependencies
 function SellerGuideStandalone() {
+  const [activeSellerCount, setActiveSellerCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Fetch real active seller count from database
+    fetch('/api/stats/active-sellers')
+      .then(res => res.json())
+      .then(data => setActiveSellerCount(data.count))
+      .catch(err => console.error('Failed to fetch active seller count:', err));
+  }, []);
+
   return (
     <div>
       <style>{`
@@ -194,7 +206,7 @@ function SellerGuideStandalone() {
 
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-number">1,200+</div>
+                <div className="stat-number">{activeSellerCount !== null ? `${activeSellerCount.toLocaleString()}+` : '...'}</div>
                 <div className="stat-label">Active Sellers</div>
               </div>
               <div className="stat-card">
