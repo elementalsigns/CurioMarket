@@ -210,7 +210,7 @@ function SellerGuideStandalone() {
                 <div className="stat-label">Active Sellers</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">$850</div>
+                <div className="stat-number">$1,120</div>
                 <div className="stat-label">Average Monthly Revenue</div>
               </div>
               <div className="stat-card">
